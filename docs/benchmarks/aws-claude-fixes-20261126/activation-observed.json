@@ -1,0 +1,263 @@
+[
+  {
+    "monitor": "https://10.77.10.164:19100",
+    "ready": 0.014847072,
+    "pressure": 0.014847072,
+    "taken": 0.014847072,
+    "items": 28.001292435,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 27.986445363
+  },
+  {
+    "monitor": "https://10.77.8.11:19100",
+    "ready": 0.015609416,
+    "pressure": 0.015609416,
+    "taken": 0.015609416,
+    "items": 28.001740288,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 27.986130872
+  },
+  {
+    "monitor": "https://10.77.8.224:19100",
+    "ready": 0.015258816,
+    "pressure": 0.015258816,
+    "taken": 0.015258816,
+    "items": 28.002539082,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 27.987280266
+  },
+  {
+    "monitor": "https://10.77.6.216:19101",
+    "ready": 24.003648121,
+    "pressure": 24.003648121,
+    "items": 24.003648121,
+    "taken": 24.003648121,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.10.164:19101",
+    "ready": 24.008322197,
+    "pressure": 26.001708144,
+    "items": 26.001708144,
+    "taken": 26.001708144,
+    "pressure_minus_ready": 1.9933859470000002,
+    "items_minus_ready": 1.9933859470000002
+  },
+  {
+    "monitor": "https://10.77.8.11:19101",
+    "ready": 34.005075032,
+    "pressure": 34.005075032,
+    "items": 34.005075032,
+    "taken": 34.005075032,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.8.224:19101",
+    "ready": 38.004789584,
+    "pressure": 38.004789584,
+    "items": 38.004789584,
+    "taken": 38.004789584,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.10.164:19102",
+    "ready": 250.004697584,
+    "pressure": 250.004697584,
+    "items": 250.004697584,
+    "taken": 250.004697584,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.0.28:19100",
+    "ready": 250.005643992,
+    "pressure": 250.005643992,
+    "taken": 250.005643992,
+    "items": 252.004043864,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 1.9983998720000216
+  },
+  {
+    "monitor": "https://10.77.8.224:19102",
+    "ready": 256.005763043,
+    "pressure": 256.005763043,
+    "items": 256.005763043,
+    "taken": 256.005763043,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.8.11:19102",
+    "ready": 256.007613814,
+    "pressure": 256.007613814,
+    "items": 256.007613814,
+    "taken": 256.007613814,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.11.64:19100",
+    "ready": 258.004250937,
+    "pressure": 258.004250937,
+    "items": 258.004250937,
+    "taken": 258.004250937,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.8.201:19100",
+    "ready": 290.0055219,
+    "pressure": 290.0055219,
+    "items": 290.0055219,
+    "taken": 290.0055219,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.15.51:19100",
+    "ready": 304.004460697,
+    "pressure": 304.004460697,
+    "items": 304.004460697,
+    "taken": 304.004460697,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.11.143:19100",
+    "ready": 312.003219276,
+    "pressure": 312.003219276,
+    "items": 312.003219276,
+    "taken": 312.003219276,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.0.16:19100",
+    "ready": 412.005821797,
+    "pressure": 414.005301112,
+    "items": 414.005301112,
+    "taken": 414.005301112,
+    "pressure_minus_ready": 1.9994793149999737,
+    "items_minus_ready": 1.9994793149999737
+  },
+  {
+    "monitor": "https://10.77.10.68:19100",
+    "ready": 414.006789785,
+    "pressure": 416.004691547,
+    "items": 416.004691547,
+    "taken": 416.004691547,
+    "pressure_minus_ready": 1.9979017619999695,
+    "items_minus_ready": 1.9979017619999695
+  },
+  {
+    "monitor": "https://10.77.10.251:19100",
+    "ready": 436.001685065,
+    "taken": 436.001685065,
+    "pressure": 438.003789953,
+    "items": 438.003789953,
+    "pressure_minus_ready": 2.0021048880000194,
+    "items_minus_ready": 2.0021048880000194
+  },
+  {
+    "monitor": "https://10.77.11.64:19101",
+    "ready": 434.007019591,
+    "pressure": 436.00165111,
+    "items": 436.00165111,
+    "taken": 436.00165111,
+    "pressure_minus_ready": 1.994631518999995,
+    "items_minus_ready": 1.994631518999995
+  },
+  {
+    "monitor": "https://10.77.0.28:19101",
+    "ready": 468.001184814,
+    "pressure": 468.001184814,
+    "items": 468.001184814,
+    "taken": 468.001184814,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.2.24:19100",
+    "ready": 468.001628664,
+    "pressure": 468.001628664,
+    "items": 468.001628664,
+    "taken": 468.001628664,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.5.75:19100",
+    "ready": 484.005213944,
+    "pressure": 484.005213944,
+    "items": 484.005213944,
+    "taken": 484.005213944,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.15.96:19100",
+    "ready": 536.001544003,
+    "pressure": 536.001544003,
+    "items": 536.001544003,
+    "taken": 536.001544003,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.9.252:19100",
+    "ready": 522.002222853,
+    "pressure": 522.002222853,
+    "items": 522.002222853,
+    "taken": 522.002222853,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.8.183:19100",
+    "ready": 528.010313893,
+    "pressure": 528.010313893,
+    "items": 528.010313893,
+    "taken": 528.010313893,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.8.105:19100",
+    "ready": 546.007763252,
+    "taken": 546.007763252,
+    "pressure": 548.006221879,
+    "items": 548.006221879,
+    "pressure_minus_ready": 1.9984586269999909,
+    "items_minus_ready": 1.9984586269999909
+  },
+  {
+    "monitor": "https://10.77.6.221:19100",
+    "ready": 590.005427706,
+    "pressure": 590.005427706,
+    "taken": 590.005427706,
+    "items": 592.0065072,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 2.0010794940000096
+  },
+  {
+    "monitor": "https://10.77.7.234:19100",
+    "ready": 548.00833279,
+    "pressure": 548.00833279,
+    "items": 548.00833279,
+    "taken": 548.00833279,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  },
+  {
+    "monitor": "https://10.77.7.50:19100",
+    "ready": 570.004804029,
+    "pressure": 570.004804029,
+    "items": 570.004804029,
+    "taken": 570.004804029,
+    "pressure_minus_ready": 0.0,
+    "items_minus_ready": 0.0
+  }
+]

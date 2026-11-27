@@ -1,0 +1,20 @@
+{
+  "checked_at": "2026-11-26T17:31:25.121305+00:00",
+  "run": "aws-claude-fixes-16k-20261126",
+  "instances_active": [],
+  "vpcs": [],
+  "security_groups": [],
+  "launch_templates": [],
+  "role": {
+    "exit_code": 254,
+    "error": "An error occurred (NoSuchEntity) when calling the GetRole operation: The role with name aws-claude-fixes-16k-20261126 cannot be found."
+  },
+  "instance_profile": {
+    "exit_code": 254,
+    "error": "An error occurred (NoSuchEntity) when calling the GetInstanceProfile operation: Instance Profile aws-claude-fixes-16k-20261126 cannot be found."
+  },
+  "bucket": {
+    "exit_code": 254,
+    "error": "An error occurred (404) when calling the HeadBucket operation: Not Found"
+  }
+}

@@ -1,0 +1,36 @@
+=== RUN   TestCollectionWorkAcrossLiveSessionsAndReceipts
+=== RUN   TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=1/receipts=1
+    collection_work_axes_test.go:65: sessions=1 receipts=1 reads=10 scanned=11 commits=1 elapsed=48.667µs
+=== RUN   TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=1/receipts=16
+    collection_work_axes_test.go:65: sessions=1 receipts=16 reads=40 scanned=71 commits=1 elapsed=216.5µs
+=== RUN   TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=1/receipts=64
+    collection_work_axes_test.go:65: sessions=1 receipts=64 reads=136 scanned=263 commits=1 elapsed=681.083µs
+=== RUN   TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=8/receipts=1
+    collection_work_axes_test.go:65: sessions=8 receipts=1 reads=17 scanned=11 commits=1 elapsed=38.042µs
+=== RUN   TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=8/receipts=16
+    collection_work_axes_test.go:65: sessions=8 receipts=16 reads=152 scanned=71 commits=1 elapsed=220.375µs
+=== RUN   TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=8/receipts=64
+    collection_work_axes_test.go:65: sessions=8 receipts=64 reads=584 scanned=263 commits=1 elapsed=707.75µs
+=== RUN   TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=32/receipts=1
+    collection_work_axes_test.go:65: sessions=32 receipts=1 reads=41 scanned=11 commits=1 elapsed=184.917µs
+=== RUN   TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=32/receipts=16
+    collection_work_axes_test.go:65: sessions=32 receipts=16 reads=536 scanned=71 commits=1 elapsed=402.292µs
+=== RUN   TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=32/receipts=64
+    collection_work_axes_test.go:65: sessions=32 receipts=64 reads=2120 scanned=263 commits=1 elapsed=1.698542ms
+--- PASS: TestCollectionWorkAcrossLiveSessionsAndReceipts (0.12s)
+    --- PASS: TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=1/receipts=1 (0.00s)
+    --- PASS: TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=1/receipts=16 (0.01s)
+    --- PASS: TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=1/receipts=64 (0.01s)
+    --- PASS: TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=8/receipts=1 (0.00s)
+    --- PASS: TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=8/receipts=16 (0.01s)
+    --- PASS: TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=8/receipts=64 (0.01s)
+    --- PASS: TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=32/receipts=1 (0.01s)
+    --- PASS: TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=32/receipts=16 (0.02s)
+    --- PASS: TestCollectionWorkAcrossLiveSessionsAndReceipts/sessions=32/receipts=64 (0.06s)
+=== RUN   TestCollectionCostIsIndependentOfWaitingSessions
+    receiver_history_test.go:285:  0 waiting sessions: collect read 71 rows, examined 326 keys, 1 commits
+    receiver_history_test.go:285:  8 waiting sessions: collect read 71 rows, examined 326 keys, 1 commits
+    receiver_history_test.go:285: 32 waiting sessions: collect read 71 rows, examined 326 keys, 1 commits
+--- PASS: TestCollectionCostIsIndependentOfWaitingSessions (0.07s)
+PASS
+ok  	github.com/indexus/go-indexus-core/internal/storage	0.545s

@@ -1,0 +1,46 @@
+audit 5s: 16439/17999 sent, missing 0, read errors 0
+audit reads done in 5s, 0 attempts repeated after a 503
+audit ownership http://donor:19104: 8ms <nil>
+audit ownership http://donor:19103: 13ms <nil>
+audit ownership http://reserve:19100: 13ms <nil>
+audit ownership http://donor:19102: 20ms <nil>
+audit ownership http://reserve:19101: 19ms <nil>
+audit ownership http://donor:19100: 21ms <nil>
+audit ownership http://donor:19101: 30ms <nil>
+audit ownership http://reserve:19102: 322ms <nil>
+audit total Placeh0000000000: status 503: cluster transaction is not ready: inventory changed during paginated read
+audit totals done: 17 collections in 1.083s, mismatches 0, unavailable 1
+audit failed
+{
+  "acked_keys": 17999,
+  "checked_keys": 17999,
+  "missing": 0,
+  "read_errors": 0,
+  "oversized_locations": 0,
+  "items_match_acked": false,
+  "collections_checked": 17,
+  "total_errors": {
+    "Placeh0000000000": "status 503: cluster transaction is not ready: inventory changed during paginated read"
+  },
+  "settlement_polls": 21,
+  "settlement_wait_ms": 5075,
+  "zones": 17999,
+  "double_owned_zones": 0,
+  "ownership_retries": 0,
+  "moving_at_ownership": 0,
+  "items_held": 24049,
+  "items_before_run": 0,
+  "nodes_answering": 8,
+  "nodes_gone": 0,
+  "per_node_items": {
+    "http://donor:19100": 1140,
+    "http://donor:19101": 2267,
+    "http://donor:19102": 2359,
+    "http://donor:19103": 1021,
+    "http://donor:19104": 1103,
+    "http://reserve:19100": 563,
+    "http://reserve:19101": 8049,
+    "http://reserve:19102": 7547
+  },
+  "pass": false
+}

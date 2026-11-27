@@ -1,0 +1,562 @@
+{
+  "manifest": {
+    "harness_sha256": "b1c57b0679df6e0897b0249c722fdd8671c7234e1cf9b715ee61782ed64685cd",
+    "order": [
+      {
+        "slot": 1,
+        "label": "before",
+        "repo": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/work/transfer-progress/percentile-before-core",
+        "commit": "6c1f58eeae5e0cd39c96f8474e833961757fed56",
+        "go_version": "go version go1.26.0 darwin/arm64",
+        "run": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/work/transfer-progress/latency-abba-20261125/1-before",
+        "command": [
+          "go",
+          "test",
+          "./indexus",
+          "-run",
+          "^TestLocalLatencyProfile$",
+          "-count=1",
+          "-v",
+          "-timeout=4m"
+        ],
+        "exit_code": 0,
+        "elapsed_s": 31.442
+      },
+      {
+        "slot": 2,
+        "label": "after",
+        "repo": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/work/transfer-progress/frontier-core",
+        "commit": "a15284dc00320f31d0e2a2001e74f1803e79cbe4",
+        "go_version": "go version go1.26.0 darwin/arm64",
+        "run": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/work/transfer-progress/latency-abba-20261125/2-after",
+        "command": [
+          "go",
+          "test",
+          "./indexus",
+          "-run",
+          "^TestLocalLatencyProfile$",
+          "-count=1",
+          "-v",
+          "-timeout=4m"
+        ],
+        "exit_code": 0,
+        "elapsed_s": 29.952
+      },
+      {
+        "slot": 3,
+        "label": "after",
+        "repo": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/work/transfer-progress/frontier-core",
+        "commit": "a15284dc00320f31d0e2a2001e74f1803e79cbe4",
+        "go_version": "go version go1.26.0 darwin/arm64",
+        "run": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/work/transfer-progress/latency-abba-20261125/3-after",
+        "command": [
+          "go",
+          "test",
+          "./indexus",
+          "-run",
+          "^TestLocalLatencyProfile$",
+          "-count=1",
+          "-v",
+          "-timeout=4m"
+        ],
+        "exit_code": 0,
+        "elapsed_s": 29.448
+      },
+      {
+        "slot": 4,
+        "label": "before",
+        "repo": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/work/transfer-progress/percentile-before-core",
+        "commit": "6c1f58eeae5e0cd39c96f8474e833961757fed56",
+        "go_version": "go version go1.26.0 darwin/arm64",
+        "run": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/work/transfer-progress/latency-abba-20261125/4-before",
+        "command": [
+          "go",
+          "test",
+          "./indexus",
+          "-run",
+          "^TestLocalLatencyProfile$",
+          "-count=1",
+          "-v",
+          "-timeout=4m"
+        ],
+        "exit_code": 0,
+        "elapsed_s": 29.324
+      }
+    ],
+    "gomaxprocs": 4,
+    "note": "real fsync; in-process JSON peer RPC with synthetic RTT; not AWS throughput"
+  },
+  "quantile_method": "nearest-rank on pooled successful raw samples; never averages of percentiles",
+  "notes": [
+    "Two runs per revision, A/B/B/A; no confidence interval",
+    "Phases use dispatch time; compare write/all for an equal offered workload",
+    "During-join phase sample sizes differ when completion times differ",
+    "Intended latency includes scheduling/queue wait and retries",
+    "Peer RPC is in-process JSON with configured synthetic 1ms RTT; not TCP/QUIC",
+    "Post-join readers check total seed+write count; not an exhaustive per-ID audit",
+    "Small join: 1024 seeded zones with 1024-byte text payload, two nodes"
+  ],
+  "errors": {
+    "before": 0,
+    "after": 0
+  },
+  "incomplete": [],
+  "milestones": {
+    "before": [
+      {
+        "join_ms": 1233.697,
+        "first_point_reply_ms": 159.896,
+        "first_native_reply_ms": 1217.733,
+        "first_receiver_ack_ms": 430.109,
+        "peer_calls": 698,
+        "peer_request_bytes": 3720221,
+        "peer_reply_bytes": 953747,
+        "retries": 0
+      },
+      {
+        "join_ms": 1231.954,
+        "first_point_reply_ms": 163.041,
+        "first_native_reply_ms": 1214.243,
+        "first_receiver_ack_ms": 201.046,
+        "peer_calls": 727,
+        "peer_request_bytes": 3549393,
+        "peer_reply_bytes": 992517,
+        "retries": 0
+      }
+    ],
+    "after": [
+      {
+        "join_ms": 1841.96,
+        "first_point_reply_ms": 184.031,
+        "first_native_reply_ms": 481.04,
+        "first_receiver_ack_ms": 389.02,
+        "peer_calls": 685,
+        "peer_request_bytes": 3583460,
+        "peer_reply_bytes": 886301,
+        "retries": 0
+      },
+      {
+        "join_ms": 1771.63,
+        "first_point_reply_ms": 180.92,
+        "first_native_reply_ms": 507.952,
+        "first_receiver_ack_ms": 412.911,
+        "peer_calls": 685,
+        "peer_request_bytes": 3581967,
+        "peer_reply_bytes": 889024,
+        "retries": 0
+      }
+    ]
+  },
+  "rows": [
+    {
+      "scenario": "distinct-zones",
+      "operation": "read-fresh",
+      "phase": "after",
+      "before": {
+        "n": 2000,
+        "p50_ms": 1.432,
+        "p95_ms": 1.592,
+        "p99_ms": 1.673,
+        "max_ms": 1.784
+      },
+      "after": {
+        "n": 2000,
+        "p50_ms": 1.375,
+        "p95_ms": 1.57,
+        "p99_ms": 1.678,
+        "max_ms": 2.139
+      }
+    },
+    {
+      "scenario": "distinct-zones",
+      "operation": "read-ordinary",
+      "phase": "after",
+      "before": {
+        "n": 2000,
+        "p50_ms": 0.047,
+        "p95_ms": 0.131,
+        "p99_ms": 0.23,
+        "max_ms": 0.756
+      },
+      "after": {
+        "n": 2000,
+        "p50_ms": 0.049,
+        "p95_ms": 0.125,
+        "p99_ms": 0.197,
+        "max_ms": 0.48
+      }
+    },
+    {
+      "scenario": "distinct-zones",
+      "operation": "write",
+      "phase": "all",
+      "before": {
+        "n": 800,
+        "p50_ms": 6.066,
+        "p95_ms": 10.09,
+        "p99_ms": 13.572,
+        "max_ms": 19.142,
+        "intended": {
+          "n": 800,
+          "p50_ms": 6.67,
+          "p95_ms": 10.535,
+          "p99_ms": 14.05,
+          "max_ms": 19.762
+        }
+      },
+      "after": {
+        "n": 800,
+        "p50_ms": 5.969,
+        "p95_ms": 10.087,
+        "p99_ms": 13.534,
+        "max_ms": 19.423,
+        "intended": {
+          "n": 800,
+          "p50_ms": 6.383,
+          "p95_ms": 10.39,
+          "p99_ms": 14.12,
+          "max_ms": 20.639
+        }
+      }
+    },
+    {
+      "scenario": "distinct-zones",
+      "operation": "write",
+      "phase": "steady",
+      "before": {
+        "n": 800,
+        "p50_ms": 6.066,
+        "p95_ms": 10.09,
+        "p99_ms": 13.572,
+        "max_ms": 19.142,
+        "intended": {
+          "n": 800,
+          "p50_ms": 6.67,
+          "p95_ms": 10.535,
+          "p99_ms": 14.05,
+          "max_ms": 19.762
+        }
+      },
+      "after": {
+        "n": 800,
+        "p50_ms": 5.969,
+        "p95_ms": 10.087,
+        "p99_ms": 13.534,
+        "max_ms": 19.423,
+        "intended": {
+          "n": 800,
+          "p50_ms": 6.383,
+          "p95_ms": 10.39,
+          "p99_ms": 14.12,
+          "max_ms": 20.639
+        }
+      }
+    },
+    {
+      "scenario": "join",
+      "operation": "read-fresh",
+      "phase": "after",
+      "before": {
+        "n": 600,
+        "p50_ms": 11.167,
+        "p95_ms": 12.469,
+        "p99_ms": 12.857,
+        "max_ms": 13.307
+      },
+      "after": {
+        "n": 600,
+        "p50_ms": 11.096,
+        "p95_ms": 12.407,
+        "p99_ms": 12.899,
+        "max_ms": 13.494
+      }
+    },
+    {
+      "scenario": "join",
+      "operation": "read-ordinary",
+      "phase": "after",
+      "before": {
+        "n": 600,
+        "p50_ms": 11.173,
+        "p95_ms": 12.457,
+        "p99_ms": 12.655,
+        "max_ms": 12.864
+      },
+      "after": {
+        "n": 600,
+        "p50_ms": 11.109,
+        "p95_ms": 12.424,
+        "p99_ms": 12.608,
+        "max_ms": 12.999
+      }
+    },
+    {
+      "scenario": "join",
+      "operation": "write",
+      "phase": "after",
+      "before": {
+        "n": 1172,
+        "p50_ms": 7.079,
+        "p95_ms": 10.157,
+        "p99_ms": 13.265,
+        "max_ms": 19.869,
+        "intended": {
+          "n": 1172,
+          "p50_ms": 7.587,
+          "p95_ms": 10.875,
+          "p99_ms": 13.989,
+          "max_ms": 19.935
+        }
+      },
+      "after": {
+        "n": 1057,
+        "p50_ms": 7.023,
+        "p95_ms": 10.144,
+        "p99_ms": 12.056,
+        "max_ms": 18.49,
+        "intended": {
+          "n": 1057,
+          "p50_ms": 7.458,
+          "p95_ms": 10.966,
+          "p99_ms": 12.77,
+          "max_ms": 18.943
+        }
+      }
+    },
+    {
+      "scenario": "join",
+      "operation": "write",
+      "phase": "all",
+      "before": {
+        "n": 1500,
+        "p50_ms": 7.047,
+        "p95_ms": 15.66,
+        "p99_ms": 27.704,
+        "max_ms": 105.371,
+        "intended": {
+          "n": 1500,
+          "p50_ms": 7.587,
+          "p95_ms": 16.058,
+          "p99_ms": 29.592,
+          "max_ms": 105.376
+        }
+      },
+      "after": {
+        "n": 1500,
+        "p50_ms": 7.037,
+        "p95_ms": 15.458,
+        "p99_ms": 27.766,
+        "max_ms": 104.393,
+        "intended": {
+          "n": 1500,
+          "p50_ms": 7.496,
+          "p95_ms": 16.386,
+          "p99_ms": 28.394,
+          "max_ms": 104.416
+        }
+      }
+    },
+    {
+      "scenario": "join",
+      "operation": "write",
+      "phase": "before",
+      "before": {
+        "n": 82,
+        "p50_ms": 5.98,
+        "p95_ms": 7.284,
+        "p99_ms": 17.243,
+        "max_ms": 17.243,
+        "intended": {
+          "n": 82,
+          "p50_ms": 7.002,
+          "p95_ms": 9.11,
+          "p99_ms": 18.246,
+          "max_ms": 18.246
+        }
+      },
+      "after": {
+        "n": 81,
+        "p50_ms": 5.885,
+        "p95_ms": 7.583,
+        "p99_ms": 9.603,
+        "max_ms": 9.603,
+        "intended": {
+          "n": 81,
+          "p50_ms": 6.839,
+          "p95_ms": 9.18,
+          "p99_ms": 10.353,
+          "max_ms": 10.353
+        }
+      }
+    },
+    {
+      "scenario": "join",
+      "operation": "write",
+      "phase": "during",
+      "before": {
+        "n": 246,
+        "p50_ms": 8.962,
+        "p95_ms": 31.435,
+        "p99_ms": 97.486,
+        "max_ms": 105.371,
+        "intended": {
+          "n": 246,
+          "p50_ms": 9.557,
+          "p95_ms": 32.117,
+          "p99_ms": 97.616,
+          "max_ms": 105.376
+        }
+      },
+      "after": {
+        "n": 362,
+        "p50_ms": 7.97,
+        "p95_ms": 26.357,
+        "p99_ms": 62.303,
+        "max_ms": 104.393,
+        "intended": {
+          "n": 362,
+          "p50_ms": 8.779,
+          "p95_ms": 26.766,
+          "p99_ms": 62.756,
+          "max_ms": 104.416
+        }
+      }
+    },
+    {
+      "scenario": "same-zone",
+      "operation": "read-fresh",
+      "phase": "after",
+      "before": {
+        "n": 2000,
+        "p50_ms": 0.352,
+        "p95_ms": 0.671,
+        "p99_ms": 0.748,
+        "max_ms": 0.825
+      },
+      "after": {
+        "n": 2000,
+        "p50_ms": 0.354,
+        "p95_ms": 0.679,
+        "p99_ms": 0.761,
+        "max_ms": 0.835
+      }
+    },
+    {
+      "scenario": "same-zone",
+      "operation": "read-ordinary",
+      "phase": "after",
+      "before": {
+        "n": 2000,
+        "p50_ms": 0.023,
+        "p95_ms": 0.052,
+        "p99_ms": 0.112,
+        "max_ms": 1.023
+      },
+      "after": {
+        "n": 2000,
+        "p50_ms": 0.03,
+        "p95_ms": 0.067,
+        "p99_ms": 0.177,
+        "max_ms": 1.376
+      }
+    },
+    {
+      "scenario": "same-zone",
+      "operation": "write",
+      "phase": "all",
+      "before": {
+        "n": 800,
+        "p50_ms": 6.298,
+        "p95_ms": 10.327,
+        "p99_ms": 15.268,
+        "max_ms": 19.315,
+        "intended": {
+          "n": 800,
+          "p50_ms": 6.909,
+          "p95_ms": 11.28,
+          "p99_ms": 16.164,
+          "max_ms": 19.689
+        }
+      },
+      "after": {
+        "n": 800,
+        "p50_ms": 6.533,
+        "p95_ms": 11.559,
+        "p99_ms": 14.594,
+        "max_ms": 19.378,
+        "intended": {
+          "n": 800,
+          "p50_ms": 7.081,
+          "p95_ms": 12.579,
+          "p99_ms": 17.344,
+          "max_ms": 20.666
+        }
+      }
+    },
+    {
+      "scenario": "same-zone",
+      "operation": "write",
+      "phase": "steady",
+      "before": {
+        "n": 800,
+        "p50_ms": 6.298,
+        "p95_ms": 10.327,
+        "p99_ms": 15.268,
+        "max_ms": 19.315,
+        "intended": {
+          "n": 800,
+          "p50_ms": 6.909,
+          "p95_ms": 11.28,
+          "p99_ms": 16.164,
+          "max_ms": 19.689
+        }
+      },
+      "after": {
+        "n": 800,
+        "p50_ms": 6.533,
+        "p95_ms": 11.559,
+        "p99_ms": 14.594,
+        "max_ms": 19.378,
+        "intended": {
+          "n": 800,
+          "p50_ms": 7.081,
+          "p95_ms": 12.579,
+          "p99_ms": 17.344,
+          "max_ms": 20.666
+        }
+      }
+    }
+  ],
+  "measurement_harness_note": "The archived harness matches the measured SHA. After measurement, only testkit.RaceScale for the -race deadline and deferred cleanup on aborted runs were added to the repository harness; normal measurement path unchanged.",
+  "current_harness_sha256": "7a328ca13f7a609bd5de42acac9bb0db9b02ad6183bf37131fa06142ba99c09a",
+  "evidence_sha256": {
+    "1-before/distinct-zones.json": "d6c0381e4290aaa8562b7a26beff72df63cbdefc1cd3168a31131a868d5104cb",
+    "1-before/go-test.log": "aaff859352e4de6666b9f80f15741ae74554a9829a8a1154302b292ec6478e14",
+    "1-before/join.jsonl": "08c24ab1d34531e0fc678c5f7b635b6b65aaef5e809d926320a83bdc126066a0",
+    "1-before/same-zone.json": "716eea8dfb68eff172c1ab0160fd9e2ef7dd776988bfa3e959f4dd7329e60255",
+    "1-before/distinct-zones.jsonl": "dc15cb056bc1f3d9b5d3431e4a68cc7437e29ca010f9c6e9826e4185122cfe0b",
+    "1-before/same-zone.jsonl": "b00c189b0781b11a4c705f985f0d38ce5d2adfe17951d29eedeabda8a9d35b2b",
+    "1-before/join.json": "ab744356a02172405dfd76174239f5b4ed007eb8d7228e25efd7d5666cb07705",
+    "2-after/distinct-zones.json": "62cc4bd0520a7e2490defcd8181b7ef1847cabaa3eafd889df489f4f26c433d2",
+    "2-after/go-test.log": "9d98dbe59a2956d56fed03c7b40c79ea973d4b88e2b5ecc42f5b9407ea9fb925",
+    "2-after/join.jsonl": "ee037487b0afd9650566c5c957d6ef49ebb74b9e792191c6e75973735e08e604",
+    "2-after/same-zone.json": "6c5506267ecb94b9a19d1b50f57647bee5e5ba4f52dc8091f9a96e33344c98a8",
+    "2-after/distinct-zones.jsonl": "443093d37f3cfab816f6cfb6d7138cfb3e44d6923602b32d7ba77f1fef93d32c",
+    "2-after/same-zone.jsonl": "113e53ed7ac4f1c2415c9418f474533ea83e9a028c45476ca60f5090d6416bd2",
+    "2-after/join.json": "a3a54faae7da1d4080b3763960e6e134497a19fff178b4ccf85595dccb8493ee",
+    "4-before/distinct-zones.json": "8002e2751a04da35f39285902b67f44cd1033d38448590c30a26744810f0fe37",
+    "4-before/go-test.log": "215bc5d31d4cb601e2cd14acfdfdb550a83a5215e3859695075fcd419ab863a5",
+    "4-before/join.jsonl": "be54a198bdd149250ba2206bbcf38aa2bfa50e39463ef93a3640e0631f653d6f",
+    "4-before/same-zone.json": "1670802c5952b9cdaf6e0f9c3370ee81c52c7b1834835cec5e3bbab67e7bae24",
+    "4-before/distinct-zones.jsonl": "7f03cbd01e3adc8bfc314f6219e6435eade79bd97101c0ca32dea8c2cd74a736",
+    "4-before/same-zone.jsonl": "c547aaffd137d9fa1cf295ec7c88873823272ceb2ecb75b88ab40c1a90ff9b0f",
+    "4-before/join.json": "32e6fb9c08ea324cd06081826fb8d190b3cbe916927dfb9cab88f52c60cf538c",
+    "3-after/distinct-zones.json": "4f95e8769b116e05a62dffb759cdbf7f880b4d78634c358651c76e84d35bfe90",
+    "3-after/go-test.log": "28c55bcb180c8b1b5adf66a9a11c9dc354198ff6e857c0a2e77c5cbd05302670",
+    "3-after/join.jsonl": "4ead70f9adfd28006ed95d55ab750ae07c29473a8c24fe2a7a2f089c3b5b6848",
+    "3-after/same-zone.json": "a42e8f846524e7a040c9d46944f02af18f632fc439d835742b9e469676c1b5fc",
+    "3-after/distinct-zones.jsonl": "c3501d8d42fc1af4fb5bcf18b902ec922a41e222410620dfbabf176d99a12ba0",
+    "3-after/same-zone.jsonl": "9ca8156fb885e7e2143e0be88276b2f538030c2d4fc0992173470a229f71e465",
+    "3-after/join.json": "f63dec0c4cf5c9432bbb992b51c2caf1b8207a3c68648ac686fef9941cf4ed26"
+  }
+}

@@ -1,0 +1,29 @@
+# editors and OS
+.vscode
+.DS_Store
+
+# local state: node data, keys, TLS material, builds (see docs/getting-started.md)
+.local/
+.data
+.data-*
+.data-node-*
+.ssl
+.keys
+bin/
+
+# Terraform state and real values stay on the operator's disk
+ops/deploy/terraform/.terraform/
+ops/deploy/terraform/*.tfstate*
+ops/deploy/terraform/.terraform.lock.hcl
+ops/deploy/terraform/terraform.tfvars
+ops/deploy/terraform/ami.auto.tfvars
+
+# debugger binaries, drafts, Python caches
+*/__debug*
+z_draft/*
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Generated quickstart datasets are release assets, not source.
+quickstart/sample/*.tar.xz

@@ -1,0 +1,8 @@
+--- FAIL: TestLedgerOnlyReservationLoadsSessionInventoryAtMostOnce (0.01s)
+    --- FAIL: TestLedgerOnlyReservationLoadsSessionInventoryAtMostOnce/16 (0.00s)
+        reservation_inventory_work_test.go:37: 16 requests loaded an empty session inventory 16 times
+    --- FAIL: TestLedgerOnlyReservationLoadsSessionInventoryAtMostOnce/64 (0.00s)
+        reservation_inventory_work_test.go:37: 64 requests loaded an empty session inventory 64 times
+FAIL
+FAIL	github.com/indexus/go-indexus-core/internal/storage	0.435s
+FAIL

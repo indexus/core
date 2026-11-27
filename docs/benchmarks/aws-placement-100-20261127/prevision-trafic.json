@@ -1,0 +1,47 @@
+{
+  "phases": {
+    "80_115": {
+      "n": 7,
+      "top1_pct": 18.9,
+      "top4_pct": 62.2
+    },
+    "255_295": {
+      "n": 8,
+      "top1_pct": 11.1,
+      "top4_pct": 38.9
+    },
+    "425_470": {
+      "n": 9,
+      "top1_pct": 10.8,
+      "top4_pct": 35.6
+    },
+    "580_650": {
+      "n": 14,
+      "top1_pct": 10.9,
+      "top4_pct": 34.0
+    }
+  },
+  "prediction_horizon_s": [
+    18,
+    22
+  ],
+  "filtre": "charge appliquée fraîche à ±10 % des ACK, aux deux extrémités",
+  "erreur_part_trafic_mediane_pct": {
+    "vnode_rate": {
+      "n": 122,
+      "tv_pct": 3.12
+    },
+    "vnode_items": {
+      "n": 122,
+      "tv_pct": 4.22
+    },
+    "machine_rate": {
+      "n": 122,
+      "tv_pct": 2.16
+    },
+    "machine_items": {
+      "n": 122,
+      "tv_pct": 3.24
+    }
+  }
+}

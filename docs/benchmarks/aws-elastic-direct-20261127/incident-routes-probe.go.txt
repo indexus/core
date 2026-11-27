@@ -1,0 +1,45 @@
+package main
+
+import (
+	"fmt"
+	"math/rand/v2"
+	"testing"
+
+	"github.com/indexus/go-indexus-core/indexus"
+	"github.com/indexus/go-indexus-core/internal/tree"
+)
+
+// Diagnostic only: no live code modified. Installed point hints occur while
+// a source has a transfer reserved; the exact route cache already stores them.
+func BenchmarkIncidentPointACKLearning(b *testing.B) {
+	for _, n := range []int{0, 16, 64} {
+		b.Run(fmt.Sprintf("point_hints_%d", n), func(b *testing.B) {
+			var r routes
+			r.learn("source", indexus.EncodeCell(indexus.Region{}))
+			rng := rand.New(rand.NewPCG(13, 7))
+			id := func() indexus.ID {
+				var v indexus.ID
+				for i := range v {
+					v[i] = byte(rng.Uint64())
+				}
+				return v
+			}
+			for range n {
+				v := id()
+				r.learn("receiver", indexus.EncodeCell(tree.Point(v)))
+			}
+
+			region := indexus.EncodeCell(tree.Point(id()))
+			if n == 0 {
+				region = indexus.EncodeCell(indexus.Region{})
+			}
+			b.ReportAllocs()
+			b.ResetTimer()
+			for range b.N {
+				r.learn("receiver", region)
+			}
+			b.StopTimer()
+			b.ReportMetric(float64(r.count()), "cached_cells")
+		})
+	}
+}

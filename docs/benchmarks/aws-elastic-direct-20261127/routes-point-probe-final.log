@@ -1,0 +1,9 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/indexus/go-indexus-core/cmd/experiment
+cpu: Apple M1 Pro
+BenchmarkIncidentPointACKLearning/point_hints_0-8         	    1000	       215.2 ns/op	         1.000 cached_cells	     128 B/op	       3 allocs/op
+BenchmarkIncidentPointACKLearning/point_hints_16-8        	    1000	     50928 ns/op	      1575 cached_cells	  119828 B/op	    1576 allocs/op
+BenchmarkIncidentPointACKLearning/point_hints_64-8        	    1000	    119738 ns/op	      4096 cached_cells	  303114 B/op	    4098 allocs/op
+PASS
+ok  	github.com/indexus/go-indexus-core/cmd/experiment	0.619s

@@ -1,0 +1,24 @@
+[
+  {
+    "name": "after-go",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "exit_code": 0,
+    "seconds": 92.17
+  },
+  {
+    "name": "after-race",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./internal/storage",
+      "./internal/summary"
+    ],
+    "exit_code": 0,
+    "seconds": 127.2
+  }
+]

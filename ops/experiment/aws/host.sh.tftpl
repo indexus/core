@@ -1,0 +1,107 @@
+#!/bin/bash
+# Experiment host ${index}: one agent with ${slots} node slots. Host 0 also runs
+# the issuer and the provisioner that scales into every host's free slots.
+set -euxo pipefail
+# Safety net that survives reboots: terminate at a fixed deadline, even if
+# nobody destroys the stack (instance_initiated_shutdown_behavior=terminate).
+DEADLINE=$(( $(date +%s) + ${ttl} * 60 ))
+cat >/usr/local/bin/indexus-deadline <<DEADLINE_SCRIPT
+#!/bin/bash
+left=\$(( ($DEADLINE - \$(date +%s)) / 60 ))
+if (( left < 1 )); then shutdown -h now; else shutdown -h +\$left; fi
+DEADLINE_SCRIPT
+chmod +x /usr/local/bin/indexus-deadline
+cat >/etc/systemd/system/indexus-deadline.service <<UNIT
+[Unit]
+Description=Terminate this experiment instance at its deadline
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/indexus-deadline
+[Install]
+WantedBy=multi-user.target
+UNIT
+systemctl enable --now indexus-deadline.service
+
+# QUIC carries the mesh over UDP: quic-go asks for about 7 MB socket
+# buffers, the kernel default caps them at 208 KB, and dropped datagrams
+# under load stall a stream until it is resent.
+sysctl -w net.core.rmem_max=7500000 net.core.wmem_max=7500000
+
+# Local NVMe instance storage (i4i and the like), if any, holds the node data.
+dev=$(lsblk -dpno NAME,MODEL | awk '/Instance Storage/ {print $1; exit}')
+if [[ -n "$dev" ]]; then mkfs.xfs -f "$dev"; install -d /var/lib/indexus; mount -o noatime "$dev" /var/lib/indexus; fi
+install -d -m 0755 /opt/indexus/elastic /opt/indexus/ca /var/lib/indexus
+for f in node issuer provisioner agent ca/ca.crt ca/ca.key; do
+  until aws s3 cp "s3://${bucket}/bin/$f" "/opt/indexus/$f" --region "${region}"; do sleep 5; done
+done
+# Every hook the run uploaded, not a list of names: a hook added to
+# ops/experiment/elastic (facts.sh on 2026-11-26) must not be left behind.
+until aws s3 cp --recursive "s3://${bucket}/bin/elastic/" /opt/indexus/elastic/ --region "${region}"; do sleep 5; done
+chmod +x /opt/indexus/node /opt/indexus/issuer /opt/indexus/provisioner /opt/indexus/agent /opt/indexus/elastic/*
+TOKEN=$(curl -sf -X PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 600")
+IP=$(curl -sf -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4)
+HOST0="${host0}"
+[[ -z "$HOST0" ]] && HOST0="$IP"
+
+if [[ ${index} == 0 ]]; then
+  cat >/etc/systemd/system/indexus-issuer.service <<EOF
+[Unit]
+Description=Indexus issuer
+[Service]
+ExecStart=/opt/indexus/issuer -addr :22000 -network experiment -key /var/lib/indexus/issuer.ed25519 -bootstrap $IP
+Restart=always
+[Install]
+WantedBy=multi-user.target
+EOF
+  cat >/etc/systemd/system/indexus-provisioner.service <<EOF
+[Unit]
+Description=Indexus provisioner into the agents' free slots
+[Service]
+Environment=AGENTS_S3=s3://${bucket}/agents
+Environment=AWS_DEFAULT_REGION=${region}
+Environment=LAUNCH_TEMPLATE=${launch_template}
+Environment=MACHINES_MAX=${machines_max}
+Environment=CAPACITY_S3=${capacity_s3}
+Environment=EXPERIMENT_RUN=${run}
+Environment=SLOTS=${slots}
+Environment=RESOURCE_SLOTS=${resource_slots}
+Environment=SPARE=${spare}
+ExecStart=/opt/indexus/provisioner -addr :22010 -issuer http://127.0.0.1:22000 -network experiment -bootstrap $IP -localDir /opt/indexus/elastic -spawnMax 0 -requesterCooldown 5s -readyReservePct ${ready_reserve_pct}
+Restart=always
+[Install]
+WantedBy=multi-user.target
+EOF
+  systemctl enable --now indexus-issuer.service indexus-provisioner.service
+fi
+until curl -sf "http://$HOST0:22000/health"; do sleep 2; done
+
+ulimit -n 1048576
+cat >/etc/systemd/system/indexus-agent.service <<EOF
+[Unit]
+Description=Indexus experiment agent
+After=network-online.target
+[Service]
+LimitNOFILE=1048576
+ExecStart=/opt/indexus/agent agent -listen :22100 -slots ${slots} -resource-slots=${resource_slots} -debug-base ${debug_base} -node /opt/indexus/node -dir /var/lib/indexus/slots -advertise $IP -issuer http://$HOST0:22000 -bootstrap https://$HOST0:21100 -ca /opt/indexus/ca -data-bytes ${data_bytes} -write-cap ${write_cap} -writes-per-vnode ${write_demand} -cpu-target ${cpu_target} -provisioner http://$HOST0:22010 -items-per-vnode ${items} -resource-signals=${resource_signals} -replication "${replication}" -replication-machine "${replication_machine}"
+Restart=always
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl enable --now indexus-agent.service
+# Register this machine: the provisioner hooks and the campaign list the
+# machines from these objects, so one started during the run is used at once.
+until curl -sf --max-time 2 "http://127.0.0.1:22100/count"; do sleep 2; done
+echo up | aws s3 cp - "s3://${bucket}/agents.d/$IP" --region "${region}"
+
+# Node and provisioner logs to the run's results every 30 s: a campaign that
+# does not scale says why (run.sh syncs results/ at the end).
+cat >/usr/local/bin/indexus-logs <<'LOGS'
+#!/bin/bash
+while sleep 30; do
+  journalctl -u indexus-provisioner --no-pager -o cat >/var/lib/indexus/provisioner.log 2>/dev/null || true
+  # node.log and provisioner.log only: the nodes' data segments end in .log too.
+  aws s3 sync /var/lib/indexus "s3://${bucket}/results/logs/host${index}$([[ ${index} == x ]] && echo "-$IP")/" --exclude '*' --include 'node.log' --include '*/node.log' --include 'provisioner.log' --include 'machines.log' --region "${region}" --only-show-errors || true
+done
+LOGS
+chmod +x /usr/local/bin/indexus-logs
+nohup env IP="$IP" /usr/local/bin/indexus-logs >/dev/null 2>&1 &

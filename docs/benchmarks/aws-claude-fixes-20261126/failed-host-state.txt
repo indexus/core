@@ -1,0 +1,224 @@
+Linux ip-10-77-0-167.eu-west-3.compute.internal 6.18.62-127.179.amzn2023.x86_64 #2 SMP PREEMPT_DYNAMIC Wed Nov 11 00:36:10 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+    PID    PPID %CPU   RSS     ELAPSED COMMAND
+      1       0  0.4 18116       02:52 systemd
+      2       0  0.0     0       02:52 kthreadd
+      3       2  0.0     0       02:52 pool_workqueue_release
+      4       2  0.0     0       02:52 kworker/R-rcu_gp
+      5       2  0.0     0       02:52 kworker/R-sync_wq
+      6       2  0.0     0       02:52 kworker/R-kvfree_rcu_reclaim
+      7       2  0.0     0       02:52 kworker/R-slub_flushwq
+      8       2  0.0     0       02:52 kworker/R-netns
+      9       2  0.0     0       02:52 kworker/0:0-events
+     10       2  0.0     0       02:52 kworker/0:0H-events_highpri
+     11       2  0.0     0       02:52 kworker/0:1-events
+     12       2  0.0     0       02:52 kworker/u16:0-writeback
+     13       2  0.0     0       02:52 kworker/R-mm_percpu_wq
+     14       2  0.0     0       02:52 ksoftirqd/0
+     15       2  0.0     0       02:52 rcu_preempt
+     16       2  0.0     0       02:52 rcu_exp_par_gp_kthread_worker/0
+     17       2  0.0     0       02:52 rcu_exp_gp_kthread_worker
+     18       2  0.0     0       02:52 migration/0
+     19       2  0.0     0       02:52 cpuhp/0
+     20       2  0.0     0       02:52 cpuhp/1
+     21       2  0.0     0       02:52 migration/1
+     22       2  0.0     0       02:52 ksoftirqd/1
+     23       2  0.0     0       02:52 kworker/1:0-mm_percpu_wq
+     24       2  0.0     0       02:52 kworker/1:0H-events_highpri
+     25       2  0.0     0       02:52 cpuhp/2
+     26       2  0.0     0       02:52 migration/2
+     27       2  0.0     0       02:52 ksoftirqd/2
+     28       2  0.0     0       02:52 kworker/2:0-events
+     29       2  0.0     0       02:52 kworker/2:0H-events_highpri
+     30       2  0.0     0       02:52 cpuhp/3
+     31       2  0.0     0       02:52 migration/3
+     32       2  0.0     0       02:52 ksoftirqd/3
+     33       2  0.0     0       02:52 kworker/3:0-cgroup_free
+     34       2  0.0     0       02:52 kworker/3:0H-events_highpri
+     36       2  0.0     0       02:52 kworker/u16:1-events_unbound
+     37       2  0.0     0       02:52 kworker/u16:2-events_unbound
+     38       2  0.0     0       02:52 kworker/u16:3-flush-259:0
+     39       2  0.0     0       02:52 kdevtmpfs
+     40       2  0.0     0       02:52 kworker/R-inet_frag_wq
+     41       2  0.0     0       02:52 rcu_tasks_kthread
+     42       2  0.0     0       02:52 rcu_tasks_rude_kthread
+     43       2  0.0     0       02:52 rcu_tasks_trace_kthread
+     44       2  0.0     0       02:52 kauditd
+     45       2  0.0     0       02:52 kworker/3:1-cgroup_release
+     47       2  0.0     0       02:52 kworker/1:1-cgroup_free
+     48       2  0.0     0       02:52 khungtaskd
+     49       2  0.0     0       02:52 oom_reaper
+     50       2  0.0     0       02:52 kworker/R-writeback
+     51       2  0.0     0       02:52 kcompactd0
+     52       2  0.0     0       02:52 khugepaged
+     53       2  0.0     0       02:52 kworker/R-kblockd
+     54       2  0.0     0       02:52 kworker/R-blkcg_punt_bio
+     55       2  0.0     0       02:52 kworker/R-kintegrityd
+     56       2  0.0     0       02:52 irq/9-acpi
+     57       2  0.0     0       02:52 kworker/2:1-events
+     58       2  0.0     0       02:52 kworker/R-tpm_dev_wq
+     59       2  0.0     0       02:52 kworker/R-md_bitmap
+     60       2  0.0     0       02:52 kworker/R-edac-poller
+     61       2  0.0     0       02:52 watchdogd
+     62       2  0.0     0       02:52 kworker/R-quota_events_unbound
+     64       2  0.0     0       02:52 kworker/3:1H-kblockd
+     93       2  0.0     0       02:52 kswapd0
+     96       2  0.0     0       02:52 kworker/R-xfsalloc
+     97       2  0.0     0       02:52 kworker/R-xfs_mru_cache
+     98       2  0.0     0       02:52 kworker/R-cryptd
+    100       2  0.0     0       02:52 kworker/R-kthrotld
+    162       2  0.0     0       02:52 kworker/R-nvme-wq
+    164       2  0.0     0       02:52 kworker/R-nvme-reset-wq
+    166       2  0.0     0       02:52 kworker/R-nvme-delete-wq
+    171       2  0.0     0       02:52 kworker/u16:4-flush-259:0
+    172       2  0.0     0       02:52 kworker/R-mld
+    198       2  0.0     0       02:52 kworker/R-ipv6_addrconf
+    199       2  0.0     0       02:52 kworker/2:1H-xfs-log/nvme0n1p1
+    200       2  0.0     0       02:52 kworker/R-kstrp
+    244       2  0.0     0       02:52 kworker/u16:5-events_unbound
+    250       2  0.0     0       02:52 kworker/u16:6-flush-259:0
+    259       2  0.0     0       02:52 kworker/u16:7-flush-259:0
+    611       2  0.0     0       02:52 kworker/u17:0
+    613       2  0.0     0       02:52 kworker/1:1H-kblockd
+    667       2  0.0     0       02:52 kworker/0:1H-kblockd
+    721       2  0.0     0       02:52 kworker/3:2-xfs-conv/nvme0n1p1
+   1395       2  0.0     0       02:52 kworker/R-xfs-buf/nvme0n1p1
+   1396       2  0.0     0       02:52 kworker/R-xfs-conv/nvme0n1p1
+   1397       2  0.0     0       02:52 kworker/R-xfs-reclaim/nvme0n1p1
+   1398       2  0.0     0       02:52 kworker/R-xfs-blockgc/nvme0n1p1
+   1399       2  0.0     0       02:52 kworker/R-xfs-inodegc/nvme0n1p1
+   1400       2  0.0     0       02:52 kworker/R-xfs-log/nvme0n1p1
+   1401       2  0.0     0       02:52 kworker/R-xfs-cil/nvme0n1p1
+   1402       2  0.0     0       02:52 xfsaild/nvme0n1p1
+   1408       2  0.0     0       02:51 kworker/0:2-events
+   1410       2  0.0     0       02:51 kworker/2:2-xfs-buf/nvme0n1p1
+   1450       1  0.0 15320       02:50 systemd-journal
+   2154       1  0.0 12172       02:50 systemd-udevd
+   2156       2  0.0     0       02:50 kworker/1:2-mm_percpu_wq
+   2174       1  0.0 15796       02:50 systemd-resolve
+   2193       1  0.0  2688       02:50 auditd
+   2203       2  0.0     0       02:50 kworker/R-rpciod
+   2205       2  0.0     0       02:50 kworker/R-xprtiod
+   2230       2  0.0     0       02:50 kworker/2:3-events
+   2240       2  0.0     0       02:50 kworker/R-ena
+   2328       1  0.0  7436       02:50 systemd-inhibit
+   2331       1  0.0  3144       02:50 irqbalance
+   2332       1  0.0  2032       02:50 lsmd
+   2335       1  0.0  8464       02:50 systemd-homed
+   2336       1  0.0 11800       02:50 systemd-logind
+   2340       1  0.0  4156       02:50 dbus-broker-lau
+   2342       1  0.0 10468       02:50 systemd-network
+   2361    2340  0.0  3064       02:50 dbus-broker
+   2363    2328  0.0  1872       02:50 acpid
+   2366       1  0.0  3908       02:50 gssproxy
+   2550       1  0.0 18608       02:47 amazon-ssm-agen
+   2554       1  0.0  6808       02:47 sshd
+   2561       1  0.0  2676       02:47 atd
+   2562       1  0.0  1920       02:47 agetty
+   2563       1  0.0  1940       02:47 agetty
+   2584       1  0.0  3928       02:47 chronyd
+   2643       2  0.0     0       02:44 kworker/R-xfs-buf/nvme1n1
+   2644       2  0.0     0       02:44 kworker/R-xfs-conv/nvme1n1
+   2645       2  0.0     0       02:44 kworker/R-xfs-reclaim/nvme1n1
+   2646       2  0.0     0       02:44 kworker/R-xfs-blockgc/nvme1n1
+   2647       2  0.0     0       02:44 kworker/R-xfs-inodegc/nvme1n1
+   2648       2  0.0     0       02:44 kworker/R-xfs-log/nvme1n1
+   2649       2  0.0     0       02:44 kworker/R-xfs-cil/nvme1n1
+   2650       2  0.0     0       02:44 xfsaild/nvme1n1
+   2789       1  0.0 15252       02:40 agent
+   2809       1  0.0  3628       02:39 indexus-logs
+   3010    2554  0.0 10464       00:25 sshd-session
+   3295       1  0.0  7208       00:24 systemd-userdbd
+   3296    3295  0.0  7688       00:24 systemd-userwor
+   3297    3295  0.0  8048       00:24 systemd-userwor
+   3298    3295  0.0  7664       00:24 systemd-userwor
+   3300       1  0.1 14508       00:24 systemd
+   3302    3300  0.0  8972       00:24 (sd-pam)
+   3309    3010  0.0  7088       00:24 sshd-session
+   3327    2809  0.0  1892       00:07 sleep
+   3328    3309  0.0  8444       00:00 sudo
+   3347       1  0.0  9172       00:00 (y-routes)
+   3348    3328  0.0  3352       00:00 bash
+   3350    3348  0.0  2776       00:00 ps
+               total        used        free      shared  buff/cache   available
+Mem:           31557         245       30904           0         407       30948
+Swap:              0           0           0
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/nvme1n1    873G  6.2G  867G   1% /var/lib/indexus
+Finished modprobe@fuse.service - Load Kernel Module fuse.
+nfs-convert.service: Deactivated successfully.
+Finished nfs-convert.service - Preprocess NFS configuration convertion.
+loop: module loaded
+Mounting sys-fs-fuse-connections.mount - FUSE Control File System...
+Mounting sys-kernel-config.mount - Kernel Configuration File System...
+modprobe@loop.service: Deactivated successfully.
+Finished modprobe@loop.service - Load Kernel Module loop.
+Finished systemd-network-generator.service - Generate network units from Kernel command line.
+Mounted sys-fs-fuse-connections.mount - FUSE Control File System.
+Mounted sys-kernel-config.mount - Kernel Configuration File System.
+systemd-repart.service - Repartition Root Disk was skipped because no trigger condition checks were met.
+Started systemd-journald.service - Journal Service.
+Received client request to flush runtime journal.
+RPC: Registered named UNIX socket transport module.
+RPC: Registered udp transport module.
+RPC: Registered tcp transport module.
+RPC: Registered tcp-with-tls transport module.
+RPC: Registered tcp NFSv4.1 backchannel transport module.
+input: Power Button as /devices/platform/LNXPWRBN:00/input/input0
+ACPI: button: Power Button [PWRF]
+input: Sleep Button as /devices/platform/LNXSLPBN:00/input/input1
+ACPI: button: Sleep Button [SLPF]
+ena 0000:00:05.0: Elastic Network Adapter (ENA) v2.17.4g
+ena 0000:00:05.0: ENA device version: 0.10
+ena 0000:00:05.0: ENA controller version: 0.0.1 implementation version 1
+i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
+i8042: Warning: Keylock active
+serio: i8042 KBD port at 0x60,0x64 irq 1
+serio: i8042 AUX port at 0x60,0x64 irq 12
+ena 0000:00:05.0: Forcing large headers and decreasing maximum TX queue size to 512
+ena 0000:00:05.0: ENA Large LLQ is enabled
+ena 0000:00:05.0: Elastic Network Adapter (ENA) found at mem c048c000, mac addr 06:ff:ec:51:21:73
+nvme nvme0: using unchecked data buffer
+ena 0000:00:05.0 ens5: renamed from eth0
+zram0: system has too much memory (31557MB), limit is 800MB, ignoring.
+zram0: system has too much memory (31557MB), limit is 800MB, ignoring.
+XFS (nvme1n1): Mounting V5 Filesystem 9c5e8930-e6ae-46ec-99f2-c445db310296
+XFS (nvme1n1): Ending clean mount
+zram0: system has too much memory (31557MB), limit is 800MB, ignoring.
+● indexus-agent.service - Indexus experiment agent
+     Loaded: loaded (/etc/systemd/system/indexus-agent.service; enabled; preset: disabled)
+     Active: active (running) since Thu 2026-11-26 17:26:07 UTC; 2min 39s ago
+   Main PID: 2789 (agent)
+      Tasks: 10 (limit: 37833)
+     Memory: 8.2M
+        CPU: 583ms
+     CGroup: /system.slice/indexus-agent.service
+             └─2789 /opt/indexus/agent agent -listen :22100 -slots 5 -debug-base 19200 -node /opt/indexus/node -dir /var/lib/indexus/slots -advertise 10.77.0.167 -issuer http://10.77.6.216:22000 -bootstrap https://10.77.6.216:21100 -ca /opt/indexus/ca -data-bytes 4294967296 -write-cap 0 -writes-per-vnode 500 -provisioner http://10.77.6.216:22010 -items-per-vnode 500000 -resource-signals=true -replication "" -replication-machine host
+
+Nov 26 17:26:07 ip-10-77-0-167.eu-west-3.compute.internal systemd[1]: Started indexus-agent.service - Indexus experiment agent.
+Nov 26 17:26:07 ip-10-77-0-167.eu-west-3.compute.internal agent[2789]: 2026/11/26 17:26:07 agent: 5 slots on :22100
+Nov 26 17:26:52 ip-10-77-0-167.eu-west-3.compute.internal agent[2789]: 2026/11/26 17:26:52 slot 0 started {Genesis:false PreferNear:S4Nfb6OKU6fBvcQw Compaction:true Items:500000 Provisioner:http://10.77.6.216:22010 Bootstrap:https://10.77.6.216:21100 RetiredExit:0 Replication: ReplicaMachine:host}
+Nov 26 17:27:37 ip-10-77-0-167.eu-west-3.compute.internal agent[2789]: 2026/11/26 17:27:37 slot 0 exited after 45s: <nil>
+
+NODE_LOG
+time=2026-11-26T17:26:52.505Z level=INFO msg="heap capped to host memory" component=node limit_bytes=16545114112 host_bytes=33090228224
+
+
+██╗███╗   ██╗██████╗ ███████╗██╗  ██╗██╗   ██╗███████╗
+██║████╗  ██║██╔══██╗██╔════╝╚██╗██╔╝██║   ██║██╔════╝
+██║██╔██╗ ██║██║  ██║█████╗   ╚███╔╝ ██║   ██║███████╗
+██║██║╚██╗██║██║  ██║██╔══╝   ██╔██╗ ██║   ██║╚════██║
+██║██║ ╚████║██████╔╝███████╗██╔╝ ██╗╚██████╔╝███████║
+╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+
+Indexus dev (none, go1.26.0)
+
+time=2026-11-26T17:26:52.505Z level=INFO msg="starting node" component=node name=S4Nfb6OKU6hLhYFm monitoring_port=19100 p2p_port=21100 bootstraps=10.77.6.216:21100 advertise=10.77.0.167 storage=/var/lib/indexus/slots/0/backup issuer=http://10.77.6.216:22000 require_auth=true
+time=2026-11-26T17:26:52.505Z level=INFO msg="autoscale enabled" component=node role="" pressure_hold=0s cooldown=0s window=0s
+time=2026-11-26T17:26:52.512Z level=INFO msg="p2p server listening" component=node addr=[::]:21100 tls=true auth=true
+time=2026-11-26T17:26:52.533Z level=INFO msg="monitoring server listening" component=node addr=[::]:19100 tls=true
+time=2026-11-26T17:27:22.292Z level=WARN msg="join continues in the background" component=node err="join unfinished at startup: donor no longer needs a peer"
+time=2026-11-26T17:27:22.292Z level=INFO msg="background jobs started" component=node interval=10s
+time=2026-11-26T17:27:35.137Z level=WARN msg="update failed" component=node err="Post \"https://10.77.6.216:21101/cluster/mesh\": context deadline exceeded"
+time=2026-11-26T17:27:37.297Z level=INFO msg="join not needed any more, leaving" component=node attempts=2
+
+GOROUTINES

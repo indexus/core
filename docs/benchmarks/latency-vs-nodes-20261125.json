@@ -1,0 +1,2354 @@
+{
+  "production_commit": "9d3b750bbc2eeb3e56cab0e209293766922f3a58",
+  "raw_root": "outputs/latency-vs-nodes-20261125",
+  "notes": [
+    "ACK latency is not freeze duration.",
+    "One shared Go process and physical SSD; not AWS capacity.",
+    "dynamic-constant has outgoing swap; not a healthy-host reference.",
+    "Allocation profiles include preparation and audit; raw write latency does not."
+  ],
+  "runs": [
+    {
+      "run": "static-matrix/static-04-r1",
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1600,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 40.426844458,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 4,
+        "observed_records": 3648,
+        "offered": 1600,
+        "prejoined": true,
+        "seed_zones": 2048,
+        "shed": 0,
+        "tail_offered": 0,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1600,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1600,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1600,
+          "p50": 18.386,
+          "p95": 29.399,
+          "p99": 43.75,
+          "max": 93.382
+        },
+        "IntendedUS": {
+          "n": 1600,
+          "p50": 20.813,
+          "p95": 33.594,
+          "p99": 47.622,
+          "max": 93.586
+        },
+        "RPCUS": {
+          "n": 1600,
+          "p50": 18.381,
+          "p95": 29.366,
+          "p99": 43.682,
+          "max": 93.355
+        },
+        "BackoffUS": {
+          "n": 1600,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1600,
+          "p50": 4.039,
+          "p95": 7.063,
+          "p99": 7.255,
+          "max": 12.694
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 54.8591875,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "initial_phases": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1599,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 18.387,
+          "p95": 29.422,
+          "p99": 44.154,
+          "max": 93.382
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 20.828,
+          "p95": 33.601,
+          "p99": 48.391,
+          "max": 93.586
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 18.381,
+          "p95": 29.41,
+          "p99": 44.125,
+          "max": 93.355
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 4.511,
+          "p95": 7.064,
+          "p99": 7.259,
+          "max": 12.694
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 54.8591875,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "resources": {
+        "samples": 19,
+        "host_samples": 3,
+        "rss_bytes": {
+          "n": 19,
+          "p50": 46202880.0,
+          "p95": 48201728.0,
+          "p99": 48201728.0,
+          "max": 48201728.0
+        },
+        "process_cpu_pct": {
+          "n": 19,
+          "p50": 17.411904469474987,
+          "p95": 26.94871098428459,
+          "p99": 26.94871098428459,
+          "max": 26.94871098428459
+        },
+        "probe_fullfsync_ms": {
+          "n": 19,
+          "p50": 4.776,
+          "p95": 12.263,
+          "p99": 12.263,
+          "max": 12.263
+        },
+        "min_host_idle_pct": 83.14,
+        "min_memory_free_pct": 45,
+        "process_cpu_capacity_pct": 3.368588873035574,
+        "swapout_pages_delta": 0,
+        "swapin_pages_delta": 15,
+        "max_loopback_mbps_one_direction": 1.5852356180323068
+      },
+      "sampler": {
+        "max_tick_lag_us": 2795,
+        "max_work_us": 15332,
+        "max_queued": 0,
+        "max_open": 0,
+        "max_frozen": 0
+      },
+      "gc_between_samples": {
+        "elapsed_s": 39.002327958,
+        "cycles": 154,
+        "stop_world_s": 0.146391458,
+        "stop_world_wall_pct": 0.3753403082955533,
+        "note": "shared Go runtime across all simulated vnodes; excludes first second"
+      },
+      "configuration": {
+        "base_rate": 2000,
+        "cpus": 8,
+        "direct": true,
+        "event": "configuration",
+        "faults": false,
+        "fixed_rate": 40,
+        "fsync": true,
+        "full_node_facade": true,
+        "gomaxprocs": 8,
+        "gossip_ms": 1000,
+        "hosts": 2,
+        "incremental_accounting": true,
+        "network_delay_ms": 1,
+        "nodes": 4,
+        "note": "single physical host; no claim of EC2 throughput equivalence",
+        "phase_seconds": 10,
+        "prejoined": true,
+        "production_maintenance": true,
+        "request_timeout_ms": 30000,
+        "seed_zones": 2048,
+        "slots": 2,
+        "stacks": false,
+        "sync_delay_ms": 1,
+        "tail_rate": 0,
+        "unique_zones": true,
+        "write_attempts": 5,
+        "write_trace": true
+      }
+    },
+    {
+      "run": "static-matrix/static-08-r1",
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1600,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 40.349713166,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 8,
+        "observed_records": 3648,
+        "offered": 1600,
+        "prejoined": true,
+        "seed_zones": 2048,
+        "shed": 0,
+        "tail_offered": 0,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1600,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1600,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1600,
+          "p50": 21.585,
+          "p95": 30.53,
+          "p99": 41.058,
+          "max": 70.401
+        },
+        "IntendedUS": {
+          "n": 1600,
+          "p50": 24.943,
+          "p95": 34.739,
+          "p99": 44.49,
+          "max": 76.4
+        },
+        "RPCUS": {
+          "n": 1600,
+          "p50": 21.563,
+          "p95": 30.479,
+          "p99": 41.041,
+          "max": 70.374
+        },
+        "BackoffUS": {
+          "n": 1600,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1600,
+          "p50": 4.208,
+          "p95": 7.081,
+          "p99": 8.36,
+          "max": 14.315
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 50.017,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "initial_phases": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1599,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 21.595,
+          "p95": 30.558,
+          "p99": 41.426,
+          "max": 70.401
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 24.947,
+          "p95": 34.795,
+          "p99": 44.947,
+          "max": 76.4
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 21.576,
+          "p95": 30.496,
+          "p99": 41.401,
+          "max": 70.374
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.002,
+          "p95": 7.081,
+          "p99": 8.514,
+          "max": 14.315
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 50.017,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "resources": {
+        "samples": 20,
+        "host_samples": 4,
+        "rss_bytes": {
+          "n": 20,
+          "p50": 58245120.0,
+          "p95": 80871424.0,
+          "p99": 81494016.0,
+          "max": 81494016.0
+        },
+        "process_cpu_pct": {
+          "n": 20,
+          "p50": 19.9859203284361,
+          "p95": 36.477730345914374,
+          "p99": 37.860800037250044,
+          "max": 37.860800037250044
+        },
+        "probe_fullfsync_ms": {
+          "n": 20,
+          "p50": 5.133,
+          "p95": 10.671,
+          "p99": 12.316,
+          "max": 12.316
+        },
+        "min_host_idle_pct": 80.87,
+        "min_memory_free_pct": 47,
+        "process_cpu_capacity_pct": 4.7326000046562555,
+        "swapout_pages_delta": 0,
+        "swapin_pages_delta": 16,
+        "max_loopback_mbps_one_direction": 1.8705640732827569
+      },
+      "sampler": {
+        "max_tick_lag_us": 1346,
+        "max_work_us": 18680,
+        "max_queued": 0,
+        "max_open": 0,
+        "max_frozen": 0
+      },
+      "gc_between_samples": {
+        "elapsed_s": 39.003921790999996,
+        "cycles": 128,
+        "stop_world_s": 0.155286129,
+        "stop_world_wall_pct": 0.3981295261335276,
+        "note": "shared Go runtime across all simulated vnodes; excludes first second"
+      },
+      "configuration": {
+        "base_rate": 2000,
+        "cpus": 8,
+        "direct": true,
+        "event": "configuration",
+        "faults": false,
+        "fixed_rate": 40,
+        "fsync": true,
+        "full_node_facade": true,
+        "gomaxprocs": 8,
+        "gossip_ms": 1000,
+        "hosts": 4,
+        "incremental_accounting": true,
+        "network_delay_ms": 1,
+        "nodes": 8,
+        "note": "single physical host; no claim of EC2 throughput equivalence",
+        "phase_seconds": 10,
+        "prejoined": true,
+        "production_maintenance": true,
+        "request_timeout_ms": 30000,
+        "seed_zones": 2048,
+        "slots": 2,
+        "stacks": false,
+        "sync_delay_ms": 1,
+        "tail_rate": 0,
+        "unique_zones": true,
+        "write_attempts": 5,
+        "write_trace": true
+      }
+    },
+    {
+      "run": "static-matrix/static-16-r1",
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1600,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 40.970987667,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 16,
+        "observed_records": 3648,
+        "offered": 1600,
+        "prejoined": true,
+        "seed_zones": 2048,
+        "shed": 0,
+        "tail_offered": 0,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1600,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1600,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1600,
+          "p50": 22.109,
+          "p95": 32.345,
+          "p99": 43.612,
+          "max": 119.921
+        },
+        "IntendedUS": {
+          "n": 1600,
+          "p50": 25.728,
+          "p95": 35.822,
+          "p99": 47.567,
+          "max": 127.476
+        },
+        "RPCUS": {
+          "n": 1600,
+          "p50": 22.075,
+          "p95": 32.313,
+          "p99": 43.598,
+          "max": 119.911
+        },
+        "BackoffUS": {
+          "n": 1600,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1600,
+          "p50": 5.01,
+          "p95": 7.045,
+          "p99": 8.863,
+          "max": 16.14
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 62.02925,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "initial_phases": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1599,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 22.118,
+          "p95": 32.37,
+          "p99": 44.822,
+          "max": 119.921
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 25.728,
+          "p95": 35.934,
+          "p99": 48.287,
+          "max": 127.476
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 22.077,
+          "p95": 32.324,
+          "p99": 44.801,
+          "max": 119.911
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.01,
+          "p95": 7.045,
+          "p99": 8.863,
+          "max": 14.473
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 62.02925,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "resources": {
+        "samples": 20,
+        "host_samples": 4,
+        "rss_bytes": {
+          "n": 20,
+          "p50": 73449472.0,
+          "p95": 82132992.0,
+          "p99": 82296832.0,
+          "max": 82296832.0
+        },
+        "process_cpu_pct": {
+          "n": 20,
+          "p50": 20.931969361948678,
+          "p95": 43.8474892901105,
+          "p99": 44.85797684059821,
+          "max": 44.85797684059821
+        },
+        "probe_fullfsync_ms": {
+          "n": 20,
+          "p50": 6.239,
+          "p95": 11.85,
+          "p99": 13.319,
+          "max": 13.319
+        },
+        "min_host_idle_pct": 57.56,
+        "min_memory_free_pct": 42,
+        "process_cpu_capacity_pct": 5.6072471050747765,
+        "swapout_pages_delta": 0,
+        "swapin_pages_delta": 24,
+        "max_loopback_mbps_one_direction": 1.7861796386504298
+      },
+      "sampler": {
+        "max_tick_lag_us": 13205,
+        "max_work_us": 136399,
+        "max_queued": 0,
+        "max_open": 0,
+        "max_frozen": 0
+      },
+      "gc_between_samples": {
+        "elapsed_s": 39.011561084,
+        "cycles": 84,
+        "stop_world_s": 0.156121883,
+        "stop_world_wall_pct": 0.40019388781658116,
+        "note": "shared Go runtime across all simulated vnodes; excludes first second"
+      },
+      "configuration": {
+        "base_rate": 2000,
+        "cpus": 8,
+        "direct": true,
+        "event": "configuration",
+        "faults": false,
+        "fixed_rate": 40,
+        "fsync": true,
+        "full_node_facade": true,
+        "gomaxprocs": 8,
+        "gossip_ms": 1000,
+        "hosts": 8,
+        "incremental_accounting": true,
+        "network_delay_ms": 1,
+        "nodes": 16,
+        "note": "single physical host; no claim of EC2 throughput equivalence",
+        "phase_seconds": 10,
+        "prejoined": true,
+        "production_maintenance": true,
+        "request_timeout_ms": 30000,
+        "seed_zones": 2048,
+        "slots": 2,
+        "stacks": false,
+        "sync_delay_ms": 1,
+        "tail_rate": 0,
+        "unique_zones": true,
+        "write_attempts": 5,
+        "write_trace": true
+      }
+    },
+    {
+      "run": "static-matrix/static-32-r1",
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1600,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 40.608504917,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 32,
+        "observed_records": 3648,
+        "offered": 1600,
+        "prejoined": true,
+        "seed_zones": 2048,
+        "shed": 0,
+        "tail_offered": 0,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1600,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1600,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1600,
+          "p50": 21.208,
+          "p95": 31.826,
+          "p99": 41.926,
+          "max": 57.379
+        },
+        "IntendedUS": {
+          "n": 1600,
+          "p50": 24.937,
+          "p95": 36.281,
+          "p99": 45.358,
+          "max": 60.667
+        },
+        "RPCUS": {
+          "n": 1600,
+          "p50": 21.163,
+          "p95": 31.77,
+          "p99": 41.906,
+          "max": 57.365
+        },
+        "BackoffUS": {
+          "n": 1600,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1600,
+          "p50": 5.004,
+          "p95": 7.046,
+          "p99": 7.541,
+          "max": 11.51
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 48.035375,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "initial_phases": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1599,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 21.212,
+          "p95": 31.949,
+          "p99": 42.087,
+          "max": 57.379
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 24.942,
+          "p95": 36.323,
+          "p99": 45.735,
+          "max": 60.667
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 21.166,
+          "p95": 31.923,
+          "p99": 42.069,
+          "max": 57.365
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.004,
+          "p95": 7.046,
+          "p99": 7.567,
+          "max": 11.51
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 48.035375,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "resources": {
+        "samples": 19,
+        "host_samples": 4,
+        "rss_bytes": {
+          "n": 19,
+          "p50": 126287872.0,
+          "p95": 137691136.0,
+          "p99": 137691136.0,
+          "max": 137691136.0
+        },
+        "process_cpu_pct": {
+          "n": 19,
+          "p50": 28.985107697629743,
+          "p95": 55.76485819337841,
+          "p99": 55.76485819337841,
+          "max": 55.76485819337841
+        },
+        "probe_fullfsync_ms": {
+          "n": 19,
+          "p50": 4.925,
+          "p95": 14.363,
+          "p99": 14.363,
+          "max": 14.363
+        },
+        "min_host_idle_pct": 76.2,
+        "min_memory_free_pct": 38,
+        "process_cpu_capacity_pct": 6.970607274172301,
+        "swapout_pages_delta": 0,
+        "swapin_pages_delta": 12,
+        "max_loopback_mbps_one_direction": 3.230468081340443
+      },
+      "sampler": {
+        "max_tick_lag_us": 5245,
+        "max_work_us": 22035,
+        "max_queued": 0,
+        "max_open": 0,
+        "max_frozen": 0
+      },
+      "gc_between_samples": {
+        "elapsed_s": 39.000790375,
+        "cycles": 69,
+        "stop_world_s": 0.153334703,
+        "stop_world_wall_pct": 0.39315793737936516,
+        "note": "shared Go runtime across all simulated vnodes; excludes first second"
+      },
+      "configuration": {
+        "base_rate": 2000,
+        "cpus": 8,
+        "direct": true,
+        "event": "configuration",
+        "faults": false,
+        "fixed_rate": 40,
+        "fsync": true,
+        "full_node_facade": true,
+        "gomaxprocs": 8,
+        "gossip_ms": 1000,
+        "hosts": 16,
+        "incremental_accounting": true,
+        "network_delay_ms": 1,
+        "nodes": 32,
+        "note": "single physical host; no claim of EC2 throughput equivalence",
+        "phase_seconds": 10,
+        "prejoined": true,
+        "production_maintenance": true,
+        "request_timeout_ms": 30000,
+        "seed_zones": 2048,
+        "slots": 2,
+        "stacks": false,
+        "sync_delay_ms": 1,
+        "tail_rate": 0,
+        "unique_zones": true,
+        "write_attempts": 5,
+        "write_trace": true
+      }
+    },
+    {
+      "run": "static-matrix/static-64-r1",
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1600,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 40.820884125,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 3648,
+        "offered": 1600,
+        "prejoined": true,
+        "seed_zones": 2048,
+        "shed": 0,
+        "tail_offered": 0,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1600,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1600,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1600,
+          "p50": 21.114,
+          "p95": 34.429,
+          "p99": 61.76,
+          "max": 255.592
+        },
+        "IntendedUS": {
+          "n": 1600,
+          "p50": 24.726,
+          "p95": 38.419,
+          "p99": 79.719,
+          "max": 318.69
+        },
+        "RPCUS": {
+          "n": 1600,
+          "p50": 21.08,
+          "p95": 34.364,
+          "p99": 61.75,
+          "max": 255.579
+        },
+        "BackoffUS": {
+          "n": 1600,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1600,
+          "p50": 5.014,
+          "p95": 6.069,
+          "p99": 8.871,
+          "max": 107.913
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 137.2969375,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "initial_phases": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1599,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 21.114,
+          "p95": 34.456,
+          "p99": 69.005,
+          "max": 255.592
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 24.726,
+          "p95": 38.526,
+          "p99": 80.605,
+          "max": 318.69
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 21.08,
+          "p95": 34.437,
+          "p99": 68.996,
+          "max": 255.579
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.026,
+          "p95": 6.069,
+          "p99": 9.281,
+          "max": 107.913
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 137.2969375,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "resources": {
+        "samples": 19,
+        "host_samples": 4,
+        "rss_bytes": {
+          "n": 19,
+          "p50": 234897408.0,
+          "p95": 242761728.0,
+          "p99": 242761728.0,
+          "max": 242761728.0
+        },
+        "process_cpu_pct": {
+          "n": 19,
+          "p50": 55.931294249822066,
+          "p95": 61.343208047926645,
+          "p99": 61.343208047926645,
+          "max": 61.343208047926645
+        },
+        "probe_fullfsync_ms": {
+          "n": 19,
+          "p50": 5.084,
+          "p95": 11.492,
+          "p99": 11.492,
+          "max": 11.492
+        },
+        "min_host_idle_pct": 64.8,
+        "min_memory_free_pct": 44,
+        "process_cpu_capacity_pct": 7.667901005990831,
+        "swapout_pages_delta": 0,
+        "swapin_pages_delta": 12,
+        "max_loopback_mbps_one_direction": 14.173980602532616
+      },
+      "sampler": {
+        "max_tick_lag_us": 23890,
+        "max_work_us": 155545,
+        "max_queued": 0,
+        "max_open": 0,
+        "max_frozen": 0
+      },
+      "gc_between_samples": {
+        "elapsed_s": 39.002215250000006,
+        "cycles": 89,
+        "stop_world_s": 0.168391242,
+        "stop_world_wall_pct": 0.4317478915508523,
+        "note": "shared Go runtime across all simulated vnodes; excludes first second"
+      },
+      "configuration": {
+        "base_rate": 2000,
+        "cpus": 8,
+        "direct": true,
+        "event": "configuration",
+        "faults": false,
+        "fixed_rate": 40,
+        "fsync": true,
+        "full_node_facade": true,
+        "gomaxprocs": 8,
+        "gossip_ms": 1000,
+        "hosts": 32,
+        "incremental_accounting": true,
+        "network_delay_ms": 1,
+        "nodes": 64,
+        "note": "single physical host; no claim of EC2 throughput equivalence",
+        "phase_seconds": 10,
+        "prejoined": true,
+        "production_maintenance": true,
+        "request_timeout_ms": 30000,
+        "seed_zones": 2048,
+        "slots": 2,
+        "stacks": false,
+        "sync_delay_ms": 1,
+        "tail_rate": 0,
+        "unique_zones": true,
+        "write_attempts": 5,
+        "write_trace": true
+      }
+    },
+    {
+      "run": "endpoints-repeat/static-04-r1",
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1600,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 40.450575166,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 4,
+        "observed_records": 3648,
+        "offered": 1600,
+        "prejoined": true,
+        "seed_zones": 2048,
+        "shed": 0,
+        "tail_offered": 0,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1600,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1600,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1600,
+          "p50": 17.733,
+          "p95": 32.88,
+          "p99": 49.143,
+          "max": 128.026
+        },
+        "IntendedUS": {
+          "n": 1600,
+          "p50": 19.792,
+          "p95": 36.152,
+          "p99": 54.246,
+          "max": 140.443
+        },
+        "RPCUS": {
+          "n": 1600,
+          "p50": 17.702,
+          "p95": 32.821,
+          "p99": 47.928,
+          "max": 127.919
+        },
+        "BackoffUS": {
+          "n": 1600,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1600,
+          "p50": 5.015,
+          "p95": 6.342,
+          "p99": 10.196,
+          "max": 18.889
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 64.2225,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "initial_phases": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1599,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 17.751,
+          "p95": 32.972,
+          "p99": 50.099,
+          "max": 128.026
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 19.901,
+          "p95": 36.428,
+          "p99": 55.604,
+          "max": 140.443
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 17.725,
+          "p95": 32.866,
+          "p99": 48.921,
+          "max": 127.919
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.022,
+          "p95": 6.35,
+          "p99": 10.321,
+          "max": 18.889
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 64.2225,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "resources": {
+        "samples": 19,
+        "host_samples": 3,
+        "rss_bytes": {
+          "n": 19,
+          "p50": 44679168.0,
+          "p95": 51200000.0,
+          "p99": 51200000.0,
+          "max": 51200000.0
+        },
+        "process_cpu_pct": {
+          "n": 19,
+          "p50": 12.96346140145078,
+          "p95": 21.948264735479334,
+          "p99": 21.948264735479334,
+          "max": 21.948264735479334
+        },
+        "probe_fullfsync_ms": {
+          "n": 19,
+          "p50": 6.298,
+          "p95": 11.848,
+          "p99": 11.848,
+          "max": 11.848
+        },
+        "min_host_idle_pct": 59.54,
+        "min_memory_free_pct": 33,
+        "process_cpu_capacity_pct": 2.743533091934917,
+        "swapout_pages_delta": 912,
+        "swapin_pages_delta": 12,
+        "max_loopback_mbps_one_direction": 1.5907017480676853
+      },
+      "sampler": {
+        "max_tick_lag_us": 5098,
+        "max_work_us": 55936,
+        "max_queued": 0,
+        "max_open": 0,
+        "max_frozen": 0
+      },
+      "gc_between_samples": {
+        "elapsed_s": 39.003482999999996,
+        "cycles": 147,
+        "stop_world_s": 0.117092714,
+        "stop_world_wall_pct": 0.30021091706091996,
+        "note": "shared Go runtime across all simulated vnodes; excludes first second"
+      },
+      "configuration": {
+        "base_rate": 2000,
+        "cpus": 8,
+        "direct": true,
+        "event": "configuration",
+        "faults": false,
+        "fixed_rate": 40,
+        "fsync": true,
+        "full_node_facade": true,
+        "gomaxprocs": 8,
+        "gossip_ms": 1000,
+        "hosts": 2,
+        "incremental_accounting": true,
+        "network_delay_ms": 1,
+        "nodes": 4,
+        "note": "single physical host; no claim of EC2 throughput equivalence",
+        "phase_seconds": 10,
+        "prejoined": true,
+        "production_maintenance": true,
+        "request_timeout_ms": 30000,
+        "seed_zones": 2048,
+        "slots": 2,
+        "stacks": false,
+        "sync_delay_ms": 1,
+        "tail_rate": 0,
+        "unique_zones": true,
+        "write_attempts": 5,
+        "write_trace": true
+      }
+    },
+    {
+      "run": "endpoints-repeat/static-64-r1",
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1600,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 40.809812541,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 3648,
+        "offered": 1600,
+        "prejoined": true,
+        "seed_zones": 2048,
+        "shed": 0,
+        "tail_offered": 0,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1600,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1600,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1600,
+          "p50": 20.123,
+          "p95": 36.133,
+          "p99": 63.49,
+          "max": 162.696
+        },
+        "IntendedUS": {
+          "n": 1600,
+          "p50": 24.173,
+          "p95": 40.33,
+          "p99": 68.788,
+          "max": 167.416
+        },
+        "RPCUS": {
+          "n": 1600,
+          "p50": 20.071,
+          "p95": 36.041,
+          "p99": 63.481,
+          "max": 159.818
+        },
+        "BackoffUS": {
+          "n": 1600,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1600,
+          "p50": 5.023,
+          "p95": 6.144,
+          "p99": 9.637,
+          "max": 30.591
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 87.8401875,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "initial_phases": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1599,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 20.123,
+          "p95": 36.191,
+          "p99": 64.519,
+          "max": 162.696
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 24.173,
+          "p95": 41.003,
+          "p99": 70.663,
+          "max": 167.416
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 20.071,
+          "p95": 36.085,
+          "p99": 64.496,
+          "max": 159.818
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.026,
+          "p95": 6.145,
+          "p99": 10.233,
+          "max": 30.591
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 87.8401875,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "resources": {
+        "samples": 20,
+        "host_samples": 4,
+        "rss_bytes": {
+          "n": 20,
+          "p50": 204783616.0,
+          "p95": 210665472.0,
+          "p99": 211386368.0,
+          "max": 211386368.0
+        },
+        "process_cpu_pct": {
+          "n": 20,
+          "p50": 49.42305860337363,
+          "p95": 60.90484504102671,
+          "p99": 65.9149683412507,
+          "max": 65.9149683412507
+        },
+        "probe_fullfsync_ms": {
+          "n": 20,
+          "p50": 3.965,
+          "p95": 10.626,
+          "p99": 11.422,
+          "max": 11.422
+        },
+        "min_host_idle_pct": 56.68,
+        "min_memory_free_pct": 38,
+        "process_cpu_capacity_pct": 8.239371042656337,
+        "swapout_pages_delta": 0,
+        "swapin_pages_delta": 56,
+        "max_loopback_mbps_one_direction": 14.455893774400398
+      },
+      "sampler": {
+        "max_tick_lag_us": 25935,
+        "max_work_us": 30612,
+        "max_queued": 0,
+        "max_open": 0,
+        "max_frozen": 0
+      },
+      "gc_between_samples": {
+        "elapsed_s": 38.998024917,
+        "cycles": 90,
+        "stop_world_s": 0.164277163,
+        "stop_world_wall_pct": 0.4212448280384281,
+        "note": "shared Go runtime across all simulated vnodes; excludes first second"
+      },
+      "configuration": {
+        "base_rate": 2000,
+        "cpus": 8,
+        "direct": true,
+        "event": "configuration",
+        "faults": false,
+        "fixed_rate": 40,
+        "fsync": true,
+        "full_node_facade": true,
+        "gomaxprocs": 8,
+        "gossip_ms": 1000,
+        "hosts": 32,
+        "incremental_accounting": true,
+        "network_delay_ms": 1,
+        "nodes": 64,
+        "note": "single physical host; no claim of EC2 throughput equivalence",
+        "phase_seconds": 10,
+        "prejoined": true,
+        "production_maintenance": true,
+        "request_timeout_ms": 30000,
+        "seed_zones": 2048,
+        "slots": 2,
+        "stacks": false,
+        "sync_delay_ms": 1,
+        "tail_rate": 0,
+        "unique_zones": true,
+        "write_attempts": 5,
+        "write_trace": true
+      }
+    },
+    {
+      "run": "maintenance-ablation/static-64-r1",
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1600,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 42.94576575,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 3648,
+        "offered": 1600,
+        "prejoined": true,
+        "seed_zones": 2048,
+        "shed": 0,
+        "tail_offered": 0,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1600,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1600,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1600,
+          "p50": 21.917,
+          "p95": 42.625,
+          "p99": 66.488,
+          "max": 110.947
+        },
+        "IntendedUS": {
+          "n": 1600,
+          "p50": 25.488,
+          "p95": 46.613,
+          "p99": 68.88,
+          "max": 123.444
+        },
+        "RPCUS": {
+          "n": 1600,
+          "p50": 21.89,
+          "p95": 42.117,
+          "p99": 61.871,
+          "max": 110.932
+        },
+        "BackoffUS": {
+          "n": 1600,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1600,
+          "p50": 5.043,
+          "p95": 6.121,
+          "p99": 7.897,
+          "max": 31.753
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 76.80025,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "initial_phases": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1599,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 21.919,
+          "p95": 42.64,
+          "p99": 66.82,
+          "max": 110.947
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 25.49,
+          "p95": 46.643,
+          "p99": 68.88,
+          "max": 123.444
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 21.892,
+          "p95": 42.229,
+          "p99": 66.471,
+          "max": 110.932
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.049,
+          "p95": 6.124,
+          "p99": 7.986,
+          "max": 31.753
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 76.80025,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "resources": {
+        "samples": 19,
+        "host_samples": 4,
+        "rss_bytes": {
+          "n": 19,
+          "p50": 120045568.0,
+          "p95": 137625600.0,
+          "p99": 137625600.0,
+          "max": 137625600.0
+        },
+        "process_cpu_pct": {
+          "n": 19,
+          "p50": 17.952983756814525,
+          "p95": 31.45010114220215,
+          "p99": 31.45010114220215,
+          "max": 31.45010114220215
+        },
+        "probe_fullfsync_ms": {
+          "n": 19,
+          "p50": 6.054,
+          "p95": 15.531,
+          "p99": 15.531,
+          "max": 15.531
+        },
+        "min_host_idle_pct": 58.27,
+        "min_memory_free_pct": 40,
+        "process_cpu_capacity_pct": 3.931262642775269,
+        "swapout_pages_delta": 0,
+        "swapin_pages_delta": 28,
+        "max_loopback_mbps_one_direction": 2.530683180648617
+      },
+      "sampler": {
+        "max_tick_lag_us": 4387,
+        "max_work_us": 71432,
+        "max_queued": 0,
+        "max_open": 0,
+        "max_frozen": 0
+      },
+      "gc_between_samples": {
+        "elapsed_s": 38.975097082999994,
+        "cycles": 10,
+        "stop_world_s": 0.027956667,
+        "stop_world_wall_pct": 0.07172956347091186,
+        "note": "shared Go runtime across all simulated vnodes; excludes first second"
+      },
+      "configuration": {
+        "base_rate": 2000,
+        "cpus": 8,
+        "direct": true,
+        "event": "configuration",
+        "faults": false,
+        "fixed_rate": 40,
+        "fsync": true,
+        "full_node_facade": true,
+        "gomaxprocs": 8,
+        "gossip_ms": 1000,
+        "hosts": 32,
+        "incremental_accounting": true,
+        "network_delay_ms": 1,
+        "nodes": 64,
+        "note": "single physical host; no claim of EC2 throughput equivalence",
+        "phase_seconds": 10,
+        "prejoined": true,
+        "production_maintenance": false,
+        "request_timeout_ms": 30000,
+        "seed_zones": 2048,
+        "slots": 2,
+        "stacks": false,
+        "sync_delay_ms": 1,
+        "tail_rate": 0,
+        "unique_zones": true,
+        "write_attempts": 5,
+        "write_trace": true
+      }
+    },
+    {
+      "run": "dynamic-constant/dynamic-64-r1",
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 19295,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 486.291681083,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 27487,
+        "offered": 19295,
+        "prejoined": false,
+        "seed_zones": 8192,
+        "shed": 0,
+        "tail_offered": 17695,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 19295,
+        "failed": 0,
+        "retried": 6,
+        "direct": 15917,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 19295,
+          "p50": 106.786,
+          "p95": 447.778,
+          "p99": 873.123,
+          "max": 4791.923
+        },
+        "IntendedUS": {
+          "n": 19295,
+          "p50": 112.633,
+          "p95": 457.148,
+          "p99": 876.88,
+          "max": 4793.246
+        },
+        "RPCUS": {
+          "n": 19295,
+          "p50": 87.808,
+          "p95": 419.217,
+          "p99": 843.816,
+          "max": 4685.396
+        },
+        "BackoffUS": {
+          "n": 19295,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 111.204
+        },
+        "queue_ms": {
+          "n": 19295,
+          "p50": 5.09,
+          "p95": 17.994,
+          "p99": 35.062,
+          "max": 317.168
+        },
+        "slowest_1pct": {
+          "n": 193,
+          "retried": 6,
+          "mean_rpc_ms": 1208.8450051813472,
+          "mean_backoff_ms": 3.2246787564766843
+        }
+      },
+      "initial_phases": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 2,
+        "direct": 974,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 144.178,
+          "p95": 526.737,
+          "p99": 794.576,
+          "max": 1379.482
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 147.086,
+          "p95": 528.686,
+          "p99": 800.092,
+          "max": 1379.77
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 142.6,
+          "p95": 524.591,
+          "p99": 791.166,
+          "max": 1277.998
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 105.773
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.02,
+          "p95": 9.88,
+          "p99": 15.695,
+          "max": 24.25
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 2,
+          "mean_rpc_ms": 959.5196875,
+          "mean_backoff_ms": 12.87875
+        }
+      },
+      "resources": {
+        "samples": 229,
+        "host_samples": 46,
+        "rss_bytes": {
+          "n": 229,
+          "p50": 322256896.0,
+          "p95": 446070784.0,
+          "p99": 501366784.0,
+          "max": 539443200.0
+        },
+        "process_cpu_pct": {
+          "n": 229,
+          "p50": 270.99166700588114,
+          "p95": 494.60833947641777,
+          "p99": 542.8632549279066,
+          "max": 557.9985884564168
+        },
+        "probe_fullfsync_ms": {
+          "n": 229,
+          "p50": 9.841,
+          "p95": 17.034,
+          "p99": 25.2,
+          "max": 37.666
+        },
+        "min_host_idle_pct": 9.27,
+        "min_memory_free_pct": 33,
+        "process_cpu_capacity_pct": 69.7498235570521,
+        "swapout_pages_delta": 53384,
+        "swapin_pages_delta": 3680,
+        "max_loopback_mbps_one_direction": 44.36243295897505
+      },
+      "sampler": {
+        "max_tick_lag_us": 402429,
+        "max_work_us": 1389900,
+        "max_queued": 0,
+        "max_open": 16,
+        "max_frozen": 10
+      },
+      "gc_between_samples": {
+        "elapsed_s": 480.95483879200003,
+        "cycles": 8116,
+        "stop_world_s": 67.355877148,
+        "stop_world_wall_pct": 14.004615759179336,
+        "note": "shared Go runtime across all simulated vnodes; excludes first second"
+      },
+      "configuration": {
+        "base_rate": 2000,
+        "cpus": 8,
+        "direct": true,
+        "event": "configuration",
+        "faults": false,
+        "fixed_rate": 40,
+        "fsync": true,
+        "full_node_facade": true,
+        "gomaxprocs": 8,
+        "gossip_ms": 1000,
+        "hosts": 32,
+        "incremental_accounting": true,
+        "network_delay_ms": 1,
+        "nodes": 64,
+        "note": "single physical host; no claim of EC2 throughput equivalence",
+        "phase_seconds": 10,
+        "prejoined": false,
+        "production_maintenance": true,
+        "request_timeout_ms": 30000,
+        "seed_zones": 8192,
+        "slots": 2,
+        "stacks": false,
+        "sync_delay_ms": 1,
+        "tail_rate": 40,
+        "unique_zones": true,
+        "write_attempts": 5,
+        "write_trace": true
+      }
+    },
+    {
+      "run": "dynamic16-alloc/dynamic-16-r1",
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 3863,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 99.721408708,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 16,
+        "observed_records": 12055,
+        "offered": 3863,
+        "prejoined": false,
+        "seed_zones": 8192,
+        "shed": 0,
+        "tail_offered": 2263,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 3863,
+        "failed": 0,
+        "retried": 1,
+        "direct": 2592,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 3863,
+          "p50": 99.754,
+          "p95": 498.389,
+          "p99": 811.816,
+          "max": 1680.86
+        },
+        "IntendedUS": {
+          "n": 3863,
+          "p50": 104.727,
+          "p95": 509.202,
+          "p99": 818.215,
+          "max": 1685.773
+        },
+        "RPCUS": {
+          "n": 3863,
+          "p50": 95.837,
+          "p95": 498.001,
+          "p99": 811.423,
+          "max": 1680.85
+        },
+        "BackoffUS": {
+          "n": 3863,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 100.103
+        },
+        "queue_ms": {
+          "n": 3863,
+          "p50": 5.029,
+          "p95": 11.964,
+          "p99": 19.354,
+          "max": 148.919
+        },
+        "slowest_1pct": {
+          "n": 39,
+          "retried": 1,
+          "mean_rpc_ms": 1073.4018717948718,
+          "mean_backoff_ms": 2.5667435897435897
+        }
+      },
+      "initial_phases": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 1,
+        "direct": 878,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 142.814,
+          "p95": 561.633,
+          "p99": 936.682,
+          "max": 1680.86
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 147.341,
+          "p95": 561.818,
+          "p99": 941.768,
+          "max": 1685.773
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 141.283,
+          "p95": 546.534,
+          "p99": 904.778,
+          "max": 1680.85
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 100.103
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.021,
+          "p95": 10.684,
+          "p99": 17.755,
+          "max": 113.048
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 1,
+          "mean_rpc_ms": 1225.7591875,
+          "mean_backoff_ms": 6.2564375
+        }
+      },
+      "resources": {
+        "samples": 46,
+        "host_samples": 9,
+        "rss_bytes": {
+          "n": 46,
+          "p50": 169918464.0,
+          "p95": 213696512.0,
+          "p99": 215973888.0,
+          "max": 215973888.0
+        },
+        "process_cpu_pct": {
+          "n": 46,
+          "p50": 109.75147819154274,
+          "p95": 199.97729417465297,
+          "p99": 216.99350830810644,
+          "max": 216.99350830810644
+        },
+        "probe_fullfsync_ms": {
+          "n": 46,
+          "p50": 11.891,
+          "p95": 17.745,
+          "p99": 22.52,
+          "max": 22.52
+        },
+        "min_host_idle_pct": 42.37,
+        "min_memory_free_pct": 42,
+        "process_cpu_capacity_pct": 27.124188538513305,
+        "swapout_pages_delta": 0,
+        "swapin_pages_delta": 236,
+        "max_loopback_mbps_one_direction": 19.626897262039577
+      },
+      "sampler": {
+        "max_tick_lag_us": 43532,
+        "max_work_us": 493767,
+        "max_queued": 0,
+        "max_open": 11,
+        "max_frozen": 9
+      },
+      "gc_between_samples": {
+        "elapsed_s": 94.84564466699999,
+        "cycles": 1771,
+        "stop_world_s": 17.737948823,
+        "stop_world_wall_pct": 18.701911811846887,
+        "note": "shared Go runtime across all simulated vnodes; excludes first second"
+      },
+      "configuration": {
+        "base_rate": 2000,
+        "cpus": 8,
+        "direct": true,
+        "event": "configuration",
+        "faults": false,
+        "fixed_rate": 40,
+        "fsync": true,
+        "full_node_facade": true,
+        "gomaxprocs": 8,
+        "gossip_ms": 1000,
+        "hosts": 8,
+        "incremental_accounting": true,
+        "network_delay_ms": 1,
+        "nodes": 16,
+        "note": "single physical host; no claim of EC2 throughput equivalence",
+        "phase_seconds": 10,
+        "prejoined": false,
+        "production_maintenance": true,
+        "request_timeout_ms": 30000,
+        "seed_zones": 8192,
+        "slots": 2,
+        "stacks": false,
+        "sync_delay_ms": 1,
+        "tail_rate": 40,
+        "unique_zones": true,
+        "write_attempts": 5,
+        "write_trace": true
+      }
+    },
+    {
+      "run": "dynamic16-memory32/dynamic-16-r1",
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1600,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 40.812855333,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 16,
+        "observed_records": 9792,
+        "offered": 1600,
+        "prejoined": false,
+        "seed_zones": 8192,
+        "shed": 0,
+        "tail_offered": 0,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1600,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1119,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1600,
+          "p50": 102.435,
+          "p95": 265.345,
+          "p99": 340.338,
+          "max": 514.879
+        },
+        "IntendedUS": {
+          "n": 1600,
+          "p50": 105.013,
+          "p95": 270.263,
+          "p99": 340.762,
+          "max": 514.93
+        },
+        "RPCUS": {
+          "n": 1600,
+          "p50": 102.361,
+          "p95": 265.206,
+          "p99": 340.33,
+          "max": 514.873
+        },
+        "BackoffUS": {
+          "n": 1600,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1600,
+          "p50": 5.005,
+          "p95": 8.333,
+          "p99": 15.6,
+          "max": 58.0
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 394.5005,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "initial_phases": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1118,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 102.596,
+          "p95": 266.498,
+          "p99": 340.724,
+          "max": 514.879
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 105.517,
+          "p95": 271.666,
+          "p99": 343.995,
+          "max": 514.93
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 102.363,
+          "p95": 265.336,
+          "p99": 340.715,
+          "max": 514.873
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.005,
+          "p95": 8.511,
+          "p99": 16.003,
+          "max": 58.0
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 394.5005,
+          "mean_backoff_ms": 0.0
+        }
+      },
+      "resources": {
+        "samples": 20,
+        "host_samples": 4,
+        "rss_bytes": {
+          "n": 20,
+          "p50": 181010432.0,
+          "p95": 291323904.0,
+          "p99": 333742080.0,
+          "max": 333742080.0
+        },
+        "process_cpu_pct": {
+          "n": 20,
+          "p50": 49.49533816051281,
+          "p95": 147.93122123152045,
+          "p99": 197.00120928740452,
+          "max": 197.00120928740452
+        },
+        "probe_fullfsync_ms": {
+          "n": 20,
+          "p50": 10.149,
+          "p95": 15.28,
+          "p99": 16.487,
+          "max": 16.487
+        },
+        "min_host_idle_pct": 49.94,
+        "min_memory_free_pct": 39,
+        "process_cpu_capacity_pct": 24.625151160925565,
+        "swapout_pages_delta": 0,
+        "swapin_pages_delta": 96,
+        "max_loopback_mbps_one_direction": 24.56690774034713
+      },
+      "sampler": {
+        "max_tick_lag_us": 10812,
+        "max_work_us": 318795,
+        "max_queued": 0,
+        "max_open": 11,
+        "max_frozen": 7
+      },
+      "gc_between_samples": {
+        "elapsed_s": 39.044168333,
+        "cycles": 212,
+        "stop_world_s": 3.184860051,
+        "stop_world_wall_pct": 8.157069767338768,
+        "note": "shared Go runtime across all simulated vnodes; excludes first second"
+      },
+      "configuration": {
+        "base_rate": 2000,
+        "cpus": 8,
+        "direct": true,
+        "event": "configuration",
+        "faults": false,
+        "fixed_rate": 40,
+        "fsync": true,
+        "full_node_facade": true,
+        "gomaxprocs": 8,
+        "gossip_ms": 1000,
+        "hosts": 8,
+        "incremental_accounting": true,
+        "network_delay_ms": 1,
+        "nodes": 16,
+        "note": "single physical host; no claim of EC2 throughput equivalence",
+        "phase_seconds": 10,
+        "prejoined": false,
+        "production_maintenance": true,
+        "request_timeout_ms": 30000,
+        "seed_zones": 8192,
+        "slots": 2,
+        "stacks": false,
+        "store_memory_bytes": 33554432,
+        "sync_delay_ms": 1,
+        "tail_rate": 40,
+        "unique_zones": true,
+        "write_attempts": 5,
+        "write_trace": true
+      }
+    },
+    {
+      "run": "dynamic64-memory32/dynamic-64-r1",
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 5540,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 139.958513708,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 13732,
+        "offered": 5540,
+        "prejoined": false,
+        "seed_zones": 8192,
+        "shed": 0,
+        "tail_offered": 3940,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 5540,
+        "failed": 0,
+        "retried": 2,
+        "direct": 4629,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 5540,
+          "p50": 88.946,
+          "p95": 258.866,
+          "p99": 419.365,
+          "max": 2524.561
+        },
+        "IntendedUS": {
+          "n": 5540,
+          "p50": 95.201,
+          "p95": 272.239,
+          "p99": 438.175,
+          "max": 2526.61
+        },
+        "RPCUS": {
+          "n": 5540,
+          "p50": 86.865,
+          "p95": 250.898,
+          "p99": 397.511,
+          "max": 2422.718
+        },
+        "BackoffUS": {
+          "n": 5540,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 101.326
+        },
+        "queue_ms": {
+          "n": 5540,
+          "p50": 5.119,
+          "p95": 20.565,
+          "p99": 44.69,
+          "max": 178.379
+        },
+        "slowest_1pct": {
+          "n": 56,
+          "retried": 2,
+          "mean_rpc_ms": 527.2846607142857,
+          "mean_backoff_ms": 3.5967678571428574
+        }
+      },
+      "initial_phases": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 1,
+        "direct": 1131,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 109.894,
+          "p95": 277.507,
+          "p99": 393.661,
+          "max": 615.503
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 114.242,
+          "p95": 282.299,
+          "p99": 411.871,
+          "max": 623.452
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 108.801,
+          "p95": 277.5,
+          "p99": 392.566,
+          "max": 615.496
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 100.093
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.031,
+          "p95": 13.443,
+          "p99": 21.251,
+          "max": 61.461
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 1,
+          "mean_rpc_ms": 471.0690625,
+          "mean_backoff_ms": 6.2558125
+        }
+      },
+      "resources": {
+        "samples": 66,
+        "host_samples": 13,
+        "rss_bytes": {
+          "n": 66,
+          "p50": 623345664.0,
+          "p95": 903315456.0,
+          "p99": 907689984.0,
+          "max": 907689984.0
+        },
+        "process_cpu_pct": {
+          "n": 66,
+          "p50": 336.39290272358426,
+          "p95": 460.1037808088524,
+          "p99": 511.4259520739799,
+          "max": 511.4259520739799
+        },
+        "probe_fullfsync_ms": {
+          "n": 66,
+          "p50": 9.802,
+          "p95": 20.729,
+          "p99": 46.761,
+          "max": 46.761
+        },
+        "min_host_idle_pct": 20.12,
+        "min_memory_free_pct": 42,
+        "process_cpu_capacity_pct": 63.928244009247486,
+        "swapout_pages_delta": 0,
+        "swapin_pages_delta": 425,
+        "max_loopback_mbps_one_direction": 71.50211681718868
+      },
+      "sampler": {
+        "max_tick_lag_us": 143798,
+        "max_work_us": 502174,
+        "max_queued": 0,
+        "max_open": 14,
+        "max_frozen": 8
+      },
+      "gc_between_samples": {
+        "elapsed_s": 137.01194775,
+        "cycles": 1038,
+        "stop_world_s": 13.949661578,
+        "stop_world_wall_pct": 10.181346814697772,
+        "note": "shared Go runtime across all simulated vnodes; excludes first second"
+      },
+      "configuration": {
+        "base_rate": 2000,
+        "cpus": 8,
+        "direct": true,
+        "event": "configuration",
+        "faults": false,
+        "fixed_rate": 40,
+        "fsync": true,
+        "full_node_facade": true,
+        "gomaxprocs": 8,
+        "gossip_ms": 1000,
+        "hosts": 32,
+        "incremental_accounting": true,
+        "network_delay_ms": 1,
+        "nodes": 64,
+        "note": "single physical host; no claim of EC2 throughput equivalence",
+        "phase_seconds": 10,
+        "prejoined": false,
+        "production_maintenance": true,
+        "request_timeout_ms": 30000,
+        "seed_zones": 8192,
+        "slots": 2,
+        "stacks": false,
+        "store_memory_bytes": 33554432,
+        "sync_delay_ms": 1,
+        "tail_rate": 40,
+        "unique_zones": true,
+        "write_attempts": 5,
+        "write_trace": true
+      }
+    }
+  ]
+}

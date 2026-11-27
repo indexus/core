@@ -1,0 +1,6 @@
+TIMEZONES lam1e-06_tau30.0_w2 {"prequential_acc": 0.5615, "final_acc_all_years": 0.6605, "avg_acc_seen": 0.6748, "BWT": -0.0007, "seconds": 1.5234}
+TIMEZONES lam1e-06_tau300.0_w2 {"prequential_acc": 0.5615, "final_acc_all_years": 0.6153, "avg_acc_seen": 0.6486, "BWT": 0.0019, "seconds": 1.6426}
+TIMEZONES lam1e-06_tau3000.0_w2 {"prequential_acc": 0.5615, "final_acc_all_years": 0.5815, "avg_acc_seen": 0.6193, "BWT": 0.0005, "seconds": 1.7095}
+TIMEZONES lam1e-06_tau300.0_w1 {"prequential_acc": 0.5729, "final_acc_all_years": 0.6153, "avg_acc_seen": 0.6486, "BWT": 0.0019, "seconds": 1.6716}
+TIMEZONES lam1e-06_tau300.0_w3 {"prequential_acc": 0.5312, "final_acc_all_years": 0.6153, "avg_acc_seen": 0.6486, "BWT": 0.0019, "seconds": 1.6694}
+WROTE

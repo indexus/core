@@ -1,0 +1,23 @@
+{
+  "qualification": "failed: process started but no useful receiver",
+  "controlled_requests": true,
+  "cpu_scope": "two agents share one Linux VM; no independent CPU pressure injected",
+  "spawned": 1,
+  "coalesced": 4,
+  "receiver_first_observed_s": 15.384321208111942,
+  "receiver_max_applied": 0,
+  "source_rejection": "ErrNotNeeded: Wanted() false; no existing/activated transfer",
+  "load": {
+    "acked": 9000,
+    "drain_completed": true,
+    "exhausted": 0,
+    "offered": 9000,
+    "queued_unfinished": 0,
+    "shed": 0
+  },
+  "audit_performed": false,
+  "relaunch_after_failure": false,
+  "aws_launched": false,
+  "live_binary_note": "node built with the intermediate two-clock patch; final four-clock implementation qualified by Go suites, not rerun live",
+  "prepared_mode": "demand, syntax checked only, not executed"
+}

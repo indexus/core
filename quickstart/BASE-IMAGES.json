@@ -1,0 +1,80 @@
+{
+  "format": "indexus-quickstart-base-pins-v1",
+  "checkedDate": "2026-11-17",
+  "source": "Exact digests in the successful runtime-pruned build log, verified using docker buildx imagetools inspect against the registry.",
+  "images": [
+    {
+      "role": "NODE_IMAGE",
+      "reference": "node:22-bookworm-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee",
+      "indexDigest": "sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee",
+      "platforms": [
+        {
+          "os": "linux",
+          "architecture": "amd64",
+          "digest": "sha256:47725aca53d3295ec2d3be8f62726599b3033cc262edc2c7e429909b3ac599fc"
+        },
+        {
+          "os": "linux",
+          "architecture": "arm64",
+          "digest": "sha256:1ee7b5f35129c6f4af835661a7a3cfbdd4748944c23b05567aa6ec00c6689e46"
+        }
+      ]
+    },
+    {
+      "role": "GO_IMAGE",
+      "reference": "golang:1.26-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0",
+      "indexDigest": "sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0",
+      "platforms": [
+        {
+          "os": "linux",
+          "architecture": "amd64",
+          "digest": "sha256:79ecd0a7157c7a4cf3b281ced8465350591bf54fedab540e75374a003e1fde7e"
+        },
+        {
+          "os": "linux",
+          "architecture": "arm64",
+          "digest": "sha256:34769fb0ebf77b1a0baf783278c16d20c7970c946a0eff81b9b567c060c46760"
+        }
+      ]
+    },
+    {
+      "role": "SAMPLE_IMAGE",
+      "reference": "debian:bookworm-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc",
+      "indexDigest": "sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc",
+      "platforms": [
+        {
+          "os": "linux",
+          "architecture": "amd64",
+          "digest": "sha256:c67e92c8099ba22853ab4cfda7cfb494d253d6012ca82dee98ba8976772af018"
+        },
+        {
+          "os": "linux",
+          "architecture": "arm64",
+          "digest": "sha256:ec8534cda2cb30f29f44f23e135297af7a1496f2990fd8e4e84aa36b081a757a"
+        }
+      ]
+    },
+    {
+      "role": "dockerfile frontend",
+      "reference": "docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e",
+      "indexDigest": "sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e",
+      "platforms": [
+        {
+          "os": "linux",
+          "architecture": "amd64",
+          "digest": "sha256:b5f3b260a9678e1d83d2fce86eeddf79420b79147eaba2a25986f47133d73720"
+        },
+        {
+          "os": "linux",
+          "architecture": "arm64",
+          "digest": "sha256:c8678869a83fab70232869ba24acc1c0be661f4d65135c0eeacb6a8e78420fdd"
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Default base images and frontend are pinned; build-arg overrides can select different inputs.",
+    "This does not freeze apt repositories, source checkouts, external map resources or the final published image.",
+    "Revalidate builds and notices when updating these references."
+  ]
+}

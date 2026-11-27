@@ -1,0 +1,2507 @@
+{
+  "source": "ec4b0af14412dd3d19084727e8717f09be4d19a0",
+  "baseline": "9f0f09c",
+  "loader": "2362b35",
+  "tests": {
+    "source_base": "3a53979",
+    "steps": [
+      {
+        "name": "format",
+        "command": [
+          "gofmt",
+          "-l",
+          "."
+        ],
+        "cwd": ".",
+        "exit": 0,
+        "elapsed_s": 0.12588345794938505
+      },
+      {
+        "name": "build",
+        "command": [
+          "go",
+          "build",
+          "./..."
+        ],
+        "cwd": ".",
+        "exit": 0,
+        "elapsed_s": 1.3656290409853682
+      },
+      {
+        "name": "vet",
+        "command": [
+          "go",
+          "vet",
+          "./..."
+        ],
+        "cwd": ".",
+        "exit": 0,
+        "elapsed_s": 0.5343885000329465
+      },
+      {
+        "name": "normal",
+        "command": [
+          "go",
+          "test",
+          "-p",
+          "1",
+          "./..."
+        ],
+        "cwd": ".",
+        "exit": 0,
+        "elapsed_s": 52.56479187507648
+      },
+      {
+        "name": "quic",
+        "command": [
+          "go",
+          "test",
+          "-p",
+          "1",
+          "./..."
+        ],
+        "cwd": "quic",
+        "exit": 0,
+        "elapsed_s": 8.318288458045572
+      },
+      {
+        "name": "race",
+        "command": [
+          "go",
+          "test",
+          "-race",
+          "-p",
+          "1",
+          "./internal/adapter/peer",
+          "./internal/adapter/http/p2p",
+          "./internal/app/node",
+          "./internal/storage",
+          "./indexus",
+          "./internal/mesh"
+        ],
+        "cwd": ".",
+        "exit": 0,
+        "elapsed_s": 431.159242332913
+      },
+      {
+        "name": "quic-race",
+        "command": [
+          "go",
+          "test",
+          "-race",
+          "-p",
+          "1",
+          "./..."
+        ],
+        "cwd": "quic",
+        "exit": 0,
+        "elapsed_s": 16.175426417030394
+      },
+      {
+        "name": "deployment",
+        "command": [
+          "python3",
+          "ops/experiment/aws/test_deployment.py"
+        ],
+        "cwd": ".",
+        "exit": 0,
+        "elapsed_s": 0.10547354200389236
+      },
+      {
+        "name": "spawn",
+        "command": [
+          "python3",
+          "ops/experiment/elastic/test_spawn.py"
+        ],
+        "cwd": ".",
+        "exit": 0,
+        "elapsed_s": 15.757800625055097
+      }
+    ]
+  },
+  "lab64": [
+    {
+      "run": "before-9f",
+      "ref": "9f0f09c",
+      "faults": 0,
+      "process_elapsed_s": 53.12776248200004,
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1600,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 40.831468595,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 9792,
+        "offered": 1600,
+        "prejoined": false,
+        "seed_zones": 8192,
+        "shed": 0,
+        "tail_offered": 0,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1600,
+        "failed": 0,
+        "retried": 1,
+        "direct": 1519,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1600,
+          "p50": 9.915,
+          "p95": 26.117,
+          "p99": 53.818,
+          "max": 657.809
+        },
+        "IntendedUS": {
+          "n": 1600,
+          "p50": 13.897,
+          "p95": 29.604,
+          "p99": 70.434,
+          "max": 663.416
+        },
+        "RPCUS": {
+          "n": 1600,
+          "p50": 9.903,
+          "p95": 26.108,
+          "p99": 53.794,
+          "max": 557.391
+        },
+        "BackoffUS": {
+          "n": 1600,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 100.398
+        },
+        "queue_ms": {
+          "n": 1600,
+          "p50": 5.005,
+          "p95": 5.868,
+          "p99": 7.087,
+          "max": 33.088
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 1,
+          "mean_rpc_ms": 170.42625,
+          "mean_backoff_ms": 6.274875
+        },
+        "errors": {
+          "local disk does not hold writable authority\nlocal disk does not hold writable authority\nlocal disk does not hold writable authority": 1
+        }
+      },
+      "initial_40s": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 1,
+        "direct": 1518,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 9.915,
+          "p95": 26.228,
+          "p99": 55.365,
+          "max": 657.809
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 13.897,
+          "p95": 29.662,
+          "p99": 70.798,
+          "max": 663.416
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 9.903,
+          "p95": 26.218,
+          "p99": 55.341,
+          "max": 557.391
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 100.398
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.005,
+          "p95": 5.87,
+          "p99": 7.225,
+          "max": 33.088
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 1,
+          "mean_rpc_ms": 170.42625,
+          "mean_backoff_ms": 6.274875
+        },
+        "errors": {
+          "local disk does not hold writable authority\nlocal disk does not hold writable authority\nlocal disk does not hold writable authority": 1
+        }
+      },
+      "last_join_complete_s": 38.758406402,
+      "resources": {
+        "cpu_idle_min": 71.7948717948718,
+        "cpu_iowait_max": 7.2364316905801624,
+        "mem_available_min_pct": 95.79379553459528,
+        "rss_max_bytes": 639787008,
+        "fdatasync_ms": {
+          "n": 53,
+          "p50": 0.917,
+          "p95": 1.064,
+          "p99": 2.092,
+          "max": 2.092
+        },
+        "vm_delta": {
+          "pswpin": 0,
+          "pswpout": 0,
+          "pgmajfault": 0
+        }
+      },
+      "handoff_timings": {
+        "counters": {
+          "busy": 275,
+          "cutover_call_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            118,
+            1169,
+            155,
+            13
+          ],
+          "cutover_failed_us_log2": [],
+          "folds": 0,
+          "folds_aborted": 0,
+          "freeze_return_to_install_ack_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            40,
+            804,
+            571,
+            37,
+            3
+          ],
+          "given": 173,
+          "install_to_first_write_us_log2": [],
+          "open": {
+            "count": 0,
+            "list": null,
+            "max_attempts": 0,
+            "oldest_seconds": 0
+          },
+          "taken": 173
+        },
+        "event": "handoff-timings"
+      },
+      "membership_transport": {
+        "counters": {
+          "async_sync_dropped": 1465,
+          "async_sync_failures": 0,
+          "async_syncs": 162,
+          "full_packets": 9092,
+          "known_vnodes": 64,
+          "membership_bytes": 12886,
+          "partners": 7,
+          "reference_packets": 2652,
+          "round_nanos": 58648016,
+          "rounds": 1120,
+          "version": "0a697f03a0f95b7fa53085904ccd52b808377d9dfb1147d5528bee5fbad69dac"
+        },
+        "event": "membership-transport"
+      },
+      "sampled_alloc_gib": 16.35278774332255
+    },
+    {
+      "run": "fixed-faults",
+      "ref": "candidate",
+      "faults": 1,
+      "process_elapsed_s": 54.13077766800001,
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1619,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 41.358008916,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 9811,
+        "offered": 1619,
+        "prejoined": false,
+        "seed_zones": 8192,
+        "shed": 0,
+        "tail_offered": 19,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1619,
+        "failed": 0,
+        "retried": 4,
+        "direct": 1537,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1619,
+          "p50": 9.918,
+          "p95": 24.595,
+          "p99": 64.238,
+          "max": 1023.227
+        },
+        "IntendedUS": {
+          "n": 1619,
+          "p50": 13.911,
+          "p95": 28.729,
+          "p99": 72.023,
+          "max": 1028.245
+        },
+        "RPCUS": {
+          "n": 1619,
+          "p50": 9.903,
+          "p95": 24.36,
+          "p99": 57.528,
+          "max": 204.758
+        },
+        "BackoffUS": {
+          "n": 1619,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 1001.054
+        },
+        "queue_ms": {
+          "n": 1619,
+          "p50": 5.006,
+          "p95": 5.983,
+          "p99": 9.817,
+          "max": 48.673
+        },
+        "slowest_1pct": {
+          "n": 17,
+          "retried": 4,
+          "mean_rpc_ms": 105.12394117647058,
+          "mean_backoff_ms": 117.82976470588235
+        },
+        "errors": {
+          "lab: bounded receiver partition": 10
+        }
+      },
+      "initial_40s": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 4,
+        "direct": 1517,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 9.913,
+          "p95": 24.333,
+          "p99": 64.238,
+          "max": 1023.227
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 13.885,
+          "p95": 28.551,
+          "p99": 72.023,
+          "max": 1028.245
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 9.901,
+          "p95": 23.93,
+          "p99": 57.528,
+          "max": 204.758
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 1001.054
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.005,
+          "p95": 5.982,
+          "p99": 9.817,
+          "max": 48.673
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 4,
+          "mean_rpc_ms": 107.5253125,
+          "mean_backoff_ms": 125.194125
+        },
+        "errors": {
+          "lab: bounded receiver partition": 10
+        }
+      },
+      "last_join_complete_s": 40.495643213,
+      "resources": {
+        "cpu_idle_min": 71.47315855181024,
+        "cpu_iowait_max": 7.428214731585518,
+        "mem_available_min_pct": 95.71642417036853,
+        "rss_max_bytes": 636239872,
+        "fdatasync_ms": {
+          "n": 54,
+          "p50": 0.917,
+          "p95": 1.092,
+          "p99": 1.983,
+          "max": 1.983
+        },
+        "vm_delta": {
+          "pswpin": 0,
+          "pswpout": 0,
+          "pgmajfault": 1
+        }
+      },
+      "handoff_timings": {
+        "counters": {
+          "busy": 270,
+          "cutover_call_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            116,
+            1175,
+            202,
+            21
+          ],
+          "cutover_failed_us_log2": [],
+          "folds": 0,
+          "folds_aborted": 0,
+          "freeze_return_to_install_ack_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            39,
+            788,
+            621,
+            62,
+            4
+          ],
+          "given": 170,
+          "install_to_first_write_us_log2": [],
+          "open": {
+            "count": 0,
+            "list": null,
+            "max_attempts": 0,
+            "oldest_seconds": 0
+          },
+          "taken": 170
+        },
+        "event": "handoff-timings"
+      },
+      "membership_transport": {
+        "counters": {
+          "async_sync_dropped": 1527,
+          "async_sync_failures": 0,
+          "async_syncs": 157,
+          "full_packets": 9071,
+          "known_vnodes": 63,
+          "membership_bytes": 12886,
+          "partners": 7,
+          "reference_packets": 2837,
+          "round_nanos": 497479796,
+          "rounds": 1097,
+          "version": "7a64e1b8b1c058412b2ae77463f75e4cdcf8ae1cee3785e3a8f5dac967bd6bb5"
+        },
+        "event": "membership-transport"
+      },
+      "sampled_alloc_gib": 16.656846588477492
+    },
+    {
+      "run": "fixed-r1",
+      "ref": "candidate",
+      "faults": 0,
+      "process_elapsed_s": 55.128999049000015,
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1640,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 42.463847261,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 9832,
+        "offered": 1640,
+        "prejoined": false,
+        "seed_zones": 8192,
+        "shed": 0,
+        "tail_offered": 40,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1640,
+        "failed": 0,
+        "retried": 1,
+        "direct": 1564,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1640,
+          "p50": 9.949,
+          "p95": 24.717,
+          "p99": 65.223,
+          "max": 708.71
+        },
+        "IntendedUS": {
+          "n": 1640,
+          "p50": 13.96,
+          "p95": 29.084,
+          "p99": 72.561,
+          "max": 708.788
+        },
+        "RPCUS": {
+          "n": 1640,
+          "p50": 9.933,
+          "p95": 24.708,
+          "p99": 65.214,
+          "max": 608.089
+        },
+        "BackoffUS": {
+          "n": 1640,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 100.594
+        },
+        "queue_ms": {
+          "n": 1640,
+          "p50": 5.007,
+          "p95": 5.963,
+          "p99": 8.006,
+          "max": 15.4
+        },
+        "slowest_1pct": {
+          "n": 17,
+          "retried": 1,
+          "mean_rpc_ms": 165.20658823529413,
+          "mean_backoff_ms": 5.917294117647058
+        },
+        "errors": {
+          "local disk does not hold writable authority\nlocal disk does not hold writable authority\nlocal disk does not hold writable authority": 1
+        }
+      },
+      "initial_40s": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 1,
+        "direct": 1524,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 9.947,
+          "p95": 25.102,
+          "p99": 66.267,
+          "max": 708.71
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 13.95,
+          "p95": 29.118,
+          "p99": 72.717,
+          "max": 708.788
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 9.932,
+          "p95": 25.092,
+          "p99": 66.247,
+          "max": 608.089
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 100.594
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.007,
+          "p95": 5.963,
+          "p99": 7.905,
+          "max": 15.4
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 1,
+          "mean_rpc_ms": 171.456125,
+          "mean_backoff_ms": 6.287125
+        },
+        "errors": {
+          "local disk does not hold writable authority\nlocal disk does not hold writable authority\nlocal disk does not hold writable authority": 1
+        }
+      },
+      "last_join_complete_s": 41.003684847,
+      "resources": {
+        "cpu_idle_min": 68.59452736318408,
+        "cpu_iowait_max": 8.955223880597014,
+        "mem_available_min_pct": 95.61577949978236,
+        "rss_max_bytes": 710676480,
+        "fdatasync_ms": {
+          "n": 55,
+          "p50": 0.885,
+          "p95": 1.02,
+          "p99": 1.821,
+          "max": 1.821
+        },
+        "vm_delta": {
+          "pswpin": 0,
+          "pswpout": 0,
+          "pgmajfault": 0
+        }
+      },
+      "handoff_timings": {
+        "counters": {
+          "busy": 292,
+          "cutover_call_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            121,
+            1236,
+            188,
+            11
+          ],
+          "cutover_failed_us_log2": [],
+          "folds": 0,
+          "folds_aborted": 0,
+          "freeze_return_to_install_ack_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            65,
+            843,
+            601,
+            44,
+            4
+          ],
+          "given": 177,
+          "install_to_first_write_us_log2": [],
+          "open": {
+            "count": 0,
+            "list": null,
+            "max_attempts": 0,
+            "oldest_seconds": 0
+          },
+          "taken": 177
+        },
+        "event": "handoff-timings"
+      },
+      "membership_transport": {
+        "counters": {
+          "async_sync_dropped": 1571,
+          "async_sync_failures": 0,
+          "async_syncs": 163,
+          "full_packets": 9521,
+          "known_vnodes": 63,
+          "membership_bytes": 12886,
+          "partners": 7,
+          "reference_packets": 2764,
+          "round_nanos": 112016980,
+          "rounds": 1172,
+          "version": "529e06297cf79612df7b3450f6d21703aa91dfc3497a691d96adff76db282bf0"
+        },
+        "event": "membership-transport"
+      },
+      "sampled_alloc_gib": 17.33770023472607
+    },
+    {
+      "run": "fixed-r2",
+      "ref": "candidate",
+      "faults": 0,
+      "process_elapsed_s": 54.12739461200002,
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1618,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 41.329220438,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 9810,
+        "offered": 1618,
+        "prejoined": false,
+        "seed_zones": 8192,
+        "shed": 0,
+        "tail_offered": 18,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1618,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1542,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1618,
+          "p50": 9.979,
+          "p95": 26.726,
+          "p99": 65.385,
+          "max": 322.166
+        },
+        "IntendedUS": {
+          "n": 1618,
+          "p50": 14.129,
+          "p95": 31.025,
+          "p99": 70.09,
+          "max": 322.936
+        },
+        "RPCUS": {
+          "n": 1618,
+          "p50": 9.967,
+          "p95": 26.715,
+          "p99": 64.532,
+          "max": 322.148
+        },
+        "BackoffUS": {
+          "n": 1618,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1618,
+          "p50": 5.005,
+          "p95": 5.98,
+          "p99": 8.33,
+          "max": 35.579
+        },
+        "slowest_1pct": {
+          "n": 17,
+          "retried": 0,
+          "mean_rpc_ms": 134.53658823529412,
+          "mean_backoff_ms": 0.0
+        },
+        "errors": {}
+      },
+      "initial_40s": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1524,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 9.979,
+          "p95": 26.079,
+          "p99": 64.54,
+          "max": 322.166
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 14.03,
+          "p95": 29.322,
+          "p99": 70.09,
+          "max": 322.936
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 9.965,
+          "p95": 26.048,
+          "p99": 64.532,
+          "max": 322.148
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.005,
+          "p95": 5.98,
+          "p99": 8.33,
+          "max": 35.579
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 138.32525,
+          "mean_backoff_ms": 0.0
+        },
+        "errors": {}
+      },
+      "last_join_complete_s": 40.470214318000004,
+      "resources": {
+        "cpu_idle_min": 71.29277566539923,
+        "cpu_iowait_max": 7.106598984771574,
+        "mem_available_min_pct": 95.72391371842568,
+        "rss_max_bytes": 698667008,
+        "fdatasync_ms": {
+          "n": 54,
+          "p50": 0.904,
+          "p95": 1.165,
+          "p99": 2.032,
+          "max": 2.032
+        },
+        "vm_delta": {
+          "pswpin": 0,
+          "pswpout": 0,
+          "pgmajfault": 0
+        }
+      },
+      "handoff_timings": {
+        "counters": {
+          "busy": 289,
+          "cutover_call_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            111,
+            1154,
+            175,
+            13
+          ],
+          "cutover_failed_us_log2": [],
+          "folds": 0,
+          "folds_aborted": 0,
+          "freeze_return_to_install_ack_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            47,
+            773,
+            586,
+            44,
+            4
+          ],
+          "given": 173,
+          "install_to_first_write_us_log2": [],
+          "open": {
+            "count": 0,
+            "list": null,
+            "max_attempts": 0,
+            "oldest_seconds": 0
+          },
+          "taken": 173
+        },
+        "event": "handoff-timings"
+      },
+      "membership_transport": {
+        "counters": {
+          "async_sync_dropped": 1464,
+          "async_sync_failures": 0,
+          "async_syncs": 163,
+          "full_packets": 9552,
+          "known_vnodes": 63,
+          "membership_bytes": 12886,
+          "partners": 7,
+          "reference_packets": 2798,
+          "round_nanos": 475102478,
+          "rounds": 1127,
+          "version": "4d55e2e4f44936f8d1695046f65180c533a0926ac7c583de252b2ab5ee687c74"
+        },
+        "event": "membership-transport"
+      },
+      "sampled_alloc_gib": 16.706280859187245
+    }
+  ],
+  "cluster": {
+    "status": "PASS_OBSERVED",
+    "scope": "real H3 nodes/agents/provisioner; client over TLS/TCP; public monitoring snapshots are not simultaneous authority snapshots",
+    "placements": [],
+    "profile_requests": [
+      {
+        "agent": "http://10.77.1.79:22100",
+        "slot": 1,
+        "name": "JtybsiSKCSM0dmMF",
+        "start_ns": 1795700117278061018,
+        "facts_before": {
+          "machine": "",
+          "running": 2,
+          "free": 0,
+          "receiving": 1,
+          "vnodes": [
+            "iOQ52GTLizby5cbu"
+          ],
+          "cores": 4,
+          "cpu_pct": 6.2933028213637225,
+          "cpu_ok": true,
+          "mem_free_pct": 97.75164668234912,
+          "mem_ok": true,
+          "disk_free_pct": 99.29687574657585,
+          "disk_ok": true
+        },
+        "stacks_status": 200,
+        "http_status": 200,
+        "bytes": 13137,
+        "file": "JtybsiSKCSM0dmMF-slot1.pprof",
+        "finish_ns": 1795700118287929644,
+        "facts_after": {
+          "machine": "",
+          "running": 2,
+          "free": 0,
+          "receiving": 1,
+          "vnodes": [
+            "iOQ52GTLizby5cbu"
+          ],
+          "cores": 4,
+          "cpu_pct": 6.2933028213637225,
+          "cpu_ok": true,
+          "mem_free_pct": 97.78871962556204,
+          "mem_ok": true,
+          "disk_free_pct": 99.29548190141035,
+          "disk_ok": true
+        }
+      },
+      {
+        "agent": "http://10.77.7.41:22100",
+        "slot": 0,
+        "name": "WWxuiQ9-qJfiHC00",
+        "start_ns": 1795700134901144556,
+        "facts_before": {
+          "machine": "",
+          "running": 1,
+          "free": 1,
+          "receiving": 1,
+          "vnodes": null,
+          "cores": 4,
+          "cpu_pct": 0,
+          "cpu_ok": true,
+          "mem_free_pct": 98.08285203487159,
+          "mem_ok": true,
+          "disk_free_pct": 99.29910100048299,
+          "disk_ok": true
+        },
+        "stacks_status": 200,
+        "http_status": 200,
+        "bytes": 12523,
+        "file": "WWxuiQ9-qJfiHC00-slot0.pprof",
+        "finish_ns": 1795700135910462776,
+        "facts_after": {
+          "machine": "",
+          "running": 1,
+          "free": 1,
+          "receiving": 1,
+          "vnodes": [
+            "WWxuiQ9-qJfiHC00"
+          ],
+          "cores": 4,
+          "cpu_pct": 0,
+          "cpu_ok": true,
+          "mem_free_pct": 98.04475168985181,
+          "mem_ok": true,
+          "disk_free_pct": 99.29820573815046,
+          "disk_ok": true
+        }
+      },
+      {
+        "agent": "http://10.77.7.41:22100",
+        "slot": 1,
+        "name": "aWxuiQ9-qJhAZ9Y1",
+        "start_ns": 1795700149930373978,
+        "facts_before": {
+          "machine": "",
+          "running": 2,
+          "free": 0,
+          "receiving": 1,
+          "vnodes": [
+            "WWxuiQ9-qJfiHC00"
+          ],
+          "cores": 4,
+          "cpu_pct": 2.702751841316357,
+          "cpu_ok": true,
+          "mem_free_pct": 97.9930228588454,
+          "mem_ok": true,
+          "disk_free_pct": 99.29708130265611,
+          "disk_ok": true
+        },
+        "stacks_status": 200,
+        "http_status": 200,
+        "bytes": 14018,
+        "file": "aWxuiQ9-qJhAZ9Y1-slot1.pprof",
+        "finish_ns": 1795700150940393453,
+        "facts_after": {
+          "machine": "",
+          "running": 2,
+          "free": 0,
+          "receiving": 1,
+          "vnodes": [
+            "WWxuiQ9-qJfiHC00"
+          ],
+          "cores": 4,
+          "cpu_pct": 2.702751841316357,
+          "cpu_ok": true,
+          "mem_free_pct": 97.94791640749644,
+          "mem_ok": true,
+          "disk_free_pct": 99.29534632186807,
+          "disk_ok": true
+        }
+      },
+      {
+        "agent": "http://10.77.0.168:22100",
+        "slot": 0,
+        "name": "xyMy3Duhx_hI9e_d",
+        "start_ns": 1795700158236188148,
+        "facts_before": {
+          "machine": "",
+          "running": 1,
+          "free": 1,
+          "receiving": 1,
+          "vnodes": null,
+          "cores": 4,
+          "cpu_pct": 0,
+          "cpu_ok": true,
+          "mem_free_pct": 97.82304512995333,
+          "mem_ok": true,
+          "disk_free_pct": 99.29912899109817,
+          "disk_ok": true
+        },
+        "stacks_status": 200,
+        "http_status": 200,
+        "bytes": 12564,
+        "file": "xyMy3Duhx_hI9e_d-slot0.pprof",
+        "finish_ns": 1795700159173702410,
+        "facts_after": {
+          "machine": "",
+          "running": 1,
+          "free": 1,
+          "receiving": 1,
+          "vnodes": null,
+          "cores": 4,
+          "cpu_pct": 0,
+          "cpu_ok": true,
+          "mem_free_pct": 97.77000422099182,
+          "mem_ok": true,
+          "disk_free_pct": 99.29824772407324,
+          "disk_ok": true
+        }
+      },
+      {
+        "agent": "http://10.77.0.168:22100",
+        "slot": 1,
+        "name": "eOQ52GTLizb7r8zb",
+        "start_ns": 1795700176327023716,
+        "facts_before": {
+          "machine": "",
+          "running": 2,
+          "free": 0,
+          "receiving": 1,
+          "vnodes": [
+            "xyMy3Duhx_hI9e_d"
+          ],
+          "cores": 4,
+          "cpu_pct": 3.1132391995656903,
+          "cpu_ok": true,
+          "mem_free_pct": 97.37363947283401,
+          "mem_ok": true,
+          "disk_free_pct": 99.29548627494398,
+          "disk_ok": true
+        },
+        "stacks_status": 200,
+        "http_status": 200,
+        "bytes": 14525,
+        "file": "eOQ52GTLizb7r8zb-slot1.pprof",
+        "finish_ns": 1795700177340179039,
+        "facts_after": {
+          "machine": "",
+          "running": 2,
+          "free": 0,
+          "receiving": 1,
+          "vnodes": [
+            "xyMy3Duhx_hI9e_d"
+          ],
+          "cores": 4,
+          "cpu_pct": 3.1132391995656903,
+          "cpu_ok": true,
+          "mem_free_pct": 97.38590634349465,
+          "mem_ok": true,
+          "disk_free_pct": 99.29462643823379,
+          "disk_ok": true
+        }
+      }
+    ],
+    "reads": 1093,
+    "read_unavailable": 0,
+    "initial_agents": [
+      "http://10.77.1.79:22100",
+      "http://10.77.7.41:22100"
+    ],
+    "configuration": {
+      "items_per_vnode": 2500,
+      "compaction": false,
+      "seed_rate": 400,
+      "live_rate": 200,
+      "live_seconds": 90,
+      "max_hosts": 3,
+      "slots": 2,
+      "trigger": "node autoscale from genuine stored items; no manual scale calls"
+    },
+    "placement_latest": {
+      "applied": {
+        "existing": 1,
+        "local": 2,
+        "new": 2
+      },
+      "decided": {
+        "existing": 1,
+        "local": 2,
+        "new": 2,
+        "new_wait": 7
+      },
+      "last": [
+        {
+          "at": "2026-11-26T13:35:15.709808874Z",
+          "requester_id": "iOQ52GTLizby5cbu",
+          "prefer_near": "JtybsiSKCSMnKK7w",
+          "machines": 2,
+          "kind": "local",
+          "machine": "http://10.77.1.79:22100",
+          "reason": "donor machine keeps headroom: cpu 6% + receiver 44% <= 75%",
+          "applied": "local"
+        },
+        {
+          "at": "2026-11-26T13:35:33.324112709Z",
+          "requester_id": "iOQ52GTLizby5cbu",
+          "prefer_near": "WWxuiQ9-qJfS1O6U",
+          "machines": 2,
+          "kind": "new",
+          "machine": "http://10.77.7.41:22100",
+          "reason": "empty machine: cpu 0% + receiver 44% <= 75%",
+          "applied": "new"
+        },
+        {
+          "at": "2026-11-26T13:35:38.414262152Z",
+          "requester_id": "WWxuiQ9-qJfiHC00",
+          "prefer_near": "aWxuiQ9-qJfiHC00",
+          "machines": 2,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": ""
+        },
+        {
+          "at": "2026-11-26T13:35:40.424192971Z",
+          "requester_id": "WWxuiQ9-qJfiHC00",
+          "prefer_near": "aWxuiQ9-qJfiHC00",
+          "machines": 2,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": ""
+        },
+        {
+          "at": "2026-11-26T13:35:42.441443169Z",
+          "requester_id": "WWxuiQ9-qJfiHC00",
+          "prefer_near": "aWxuiQ9-qJfiHC00",
+          "machines": 2,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": ""
+        },
+        {
+          "at": "2026-11-26T13:35:44.452488823Z",
+          "requester_id": "WWxuiQ9-qJfiHC00",
+          "prefer_near": "aWxuiQ9-qJfiHC00",
+          "machines": 2,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": ""
+        },
+        {
+          "at": "2026-11-26T13:35:46.458319939Z",
+          "requester_id": "WWxuiQ9-qJfiHC00",
+          "prefer_near": "aWxuiQ9-qJfiHC00",
+          "machines": 2,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": ""
+        },
+        {
+          "at": "2026-11-26T13:35:48.455940634Z",
+          "requester_id": "WWxuiQ9-qJfiHC00",
+          "prefer_near": "aWxuiQ9-qJfiHC00",
+          "machines": 2,
+          "kind": "local",
+          "machine": "http://10.77.7.41:22100",
+          "reason": "donor machine keeps headroom: cpu 3% + receiver 44% <= 75%",
+          "applied": "local"
+        },
+        {
+          "at": "2026-11-26T13:35:52.713012312Z",
+          "requester_id": "iOQ52GTLizby5cbu",
+          "prefer_near": "xyMy3Duhx_g4LEuE",
+          "machines": 2,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": ""
+        },
+        {
+          "at": "2026-11-26T13:35:54.701096364Z",
+          "requester_id": "iOQ52GTLizby5cbu",
+          "prefer_near": "xyMy3Duhx_g4LEuE",
+          "machines": 2,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": ""
+        },
+        {
+          "at": "2026-11-26T13:35:56.716098951Z",
+          "requester_id": "iOQ52GTLizby5cbu",
+          "prefer_near": "xyMy3Duhx_g4LEuE",
+          "machines": 3,
+          "kind": "new",
+          "machine": "http://10.77.0.168:22100",
+          "reason": "empty machine: cpu 0% + receiver 44% <= 75%",
+          "applied": "new"
+        },
+        {
+          "at": "2026-11-26T13:36:14.837432429Z",
+          "requester_id": "iOQ52GTLizby5cbu",
+          "prefer_near": "eOQ52GTLizby5cbu",
+          "machines": 3,
+          "kind": "existing",
+          "machine": "http://10.77.0.168:22100",
+          "reason": "least loaded machine with headroom: cpu 3% + receiver 44% <= 75%",
+          "applied": "existing"
+        }
+      ]
+    },
+    "genesis": "iOQ52GTLizby5cbu",
+    "seed_load": {
+      "acked": 7999,
+      "drain_completed": true,
+      "exhausted": 0,
+      "offered": 7999,
+      "queued_unfinished": 0,
+      "shed": 0
+    },
+    "live_load": {
+      "acked": 18000,
+      "drain_completed": true,
+      "exhausted": 0,
+      "offered": 18000,
+      "queued_unfinished": 0,
+      "shed": 0
+    },
+    "active_nodes_at_audit": 6,
+    "audit": {
+      "acked_keys": 25999,
+      "checked_keys": 25999,
+      "missing": 0,
+      "read_errors": 0,
+      "oversized_locations": 0,
+      "items_match_acked": true,
+      "collections_checked": 16,
+      "zones": 25999,
+      "double_owned_zones": 0,
+      "ownership_retries": 0,
+      "moving_at_ownership": 0,
+      "items_held": 25999,
+      "items_before_run": 0,
+      "nodes_answering": 6,
+      "nodes_gone": 0,
+      "per_node_items": {
+        "https://10.77.0.168:19100": 6441,
+        "https://10.77.0.168:19101": 1672,
+        "https://10.77.1.79:19100": 1531,
+        "https://10.77.1.79:19101": 13182,
+        "https://10.77.7.41:19100": 1581,
+        "https://10.77.7.41:19101": 1592
+      },
+      "pass": true
+    }
+  },
+  "cluster_analysis": {
+    "nodes": {
+      "iOQ52GTLizby5cbu": {
+        "first_monitor_ns": 1795700084636028853,
+        "first_ready_ns": 1795700084636028853,
+        "first_join_complete_observation_ns": 1795700084636028853,
+        "first_http_ack_counter_observation_ns": 1795700084743737864,
+        "first_http_ack_is_direct_to_owner": "not established by this counter alone",
+        "ready_while_joining_samples": 0,
+        "health503_samples": 0
+      },
+      "JtybsiSKCSM0dmMF": {
+        "first_monitor_ns": 1795700117267957507,
+        "first_ready_ns": 1795700117378743455,
+        "first_join_complete_observation_ns": 1795700120953846001,
+        "first_http_ack_counter_observation_ns": 1795700117708502871,
+        "first_http_ack_is_direct_to_owner": "not established by this counter alone",
+        "ready_while_joining_samples": 33,
+        "health503_samples": 1
+      },
+      "WWxuiQ9-qJfiHC00": {
+        "first_monitor_ns": 1795700134894675002,
+        "first_ready_ns": 1795700134894675002,
+        "first_join_complete_observation_ns": 1795700137019474979,
+        "first_http_ack_counter_observation_ns": 1795700135426215382,
+        "first_http_ack_is_direct_to_owner": "not established by this counter alone",
+        "ready_while_joining_samples": 20,
+        "health503_samples": 0
+      },
+      "aWxuiQ9-qJhAZ9Y1": {
+        "first_monitor_ns": 1795700149923359631,
+        "first_ready_ns": 1795700150030981287,
+        "first_join_complete_observation_ns": 1795700151314120568,
+        "first_http_ack_counter_observation_ns": 1795700150887900883,
+        "first_http_ack_is_direct_to_owner": "not established by this counter alone",
+        "ready_while_joining_samples": 12,
+        "health503_samples": 1
+      },
+      "xyMy3Duhx_hI9e_d": {
+        "first_monitor_ns": 1795700158227661285,
+        "first_ready_ns": 1795700158336774834,
+        "first_join_complete_observation_ns": 1795700161713024889,
+        "first_http_ack_counter_observation_ns": 1795700158660677985,
+        "first_http_ack_is_direct_to_owner": "not established by this counter alone",
+        "ready_while_joining_samples": 31,
+        "health503_samples": 1
+      },
+      "eOQ52GTLizb7r8zb": {
+        "first_monitor_ns": 1795700176318835245,
+        "first_ready_ns": 1795700176318835245,
+        "first_join_complete_observation_ns": 1795700177076310794,
+        "first_http_ack_counter_observation_ns": 1795700176644831112,
+        "first_http_ack_is_direct_to_owner": "not established by this counter alone",
+        "ready_while_joining_samples": 7,
+        "health503_samples": 0
+      }
+    },
+    "client": {
+      "seed": {
+        "reads": 272,
+        "read_miss": 0,
+        "read_failed": 0,
+        "totals": 104,
+        "totals_exact": 104,
+        "totals_deficit": 0,
+        "histogram_records": 7596,
+        "ack_p50_bucket_bound_ms": 4.096,
+        "ack_p95_bucket_bound_ms": 4.096,
+        "ack_p99_bucket_bound_ms": 8.192,
+        "intended_p99_bucket_bound_ms": 16.384,
+        "note": "Bucket upper bounds; final partial second may be absent. Not exact trace quantiles."
+      },
+      "live": {
+        "reads": 1273,
+        "read_miss": 0,
+        "read_failed": 0,
+        "totals": 503,
+        "totals_exact": 503,
+        "totals_deficit": 0,
+        "histogram_records": 17798,
+        "ack_p50_bucket_bound_ms": 4.096,
+        "ack_p95_bucket_bound_ms": 4.096,
+        "ack_p99_bucket_bound_ms": 16.384,
+        "intended_p99_bucket_bound_ms": 16.384,
+        "note": "Bucket upper bounds; final partial second may be absent. Not exact trace quantiles."
+      }
+    },
+    "writer_windows": [
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700080,
+        "kind": "write",
+        "attempts_delta": 520,
+        "durable_commits_delta": 520,
+        "mean_hold_per_attempt_ms": 0.7034335076923077,
+        "mean_wait_per_attempt_ms": 0.0001297673076923077
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700090,
+        "kind": "write",
+        "attempts_delta": 986,
+        "durable_commits_delta": 986,
+        "mean_hold_per_attempt_ms": 0.39455413590263694,
+        "mean_wait_per_attempt_ms": 0.00012877991886409737
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700100,
+        "kind": "write",
+        "attempts_delta": 989,
+        "durable_commits_delta": 989,
+        "mean_hold_per_attempt_ms": 0.3548311921132457,
+        "mean_wait_per_attempt_ms": 0.00012724469160768452
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700110,
+        "kind": "control",
+        "attempts_delta": 197,
+        "durable_commits_delta": 197,
+        "mean_hold_per_attempt_ms": 0.6825043807106599,
+        "mean_wait_per_attempt_ms": 0.013682197969543147
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700110,
+        "kind": "fence",
+        "attempts_delta": 83,
+        "durable_commits_delta": 83,
+        "mean_hold_per_attempt_ms": 3.4627091445783136,
+        "mean_wait_per_attempt_ms": 0.002962397590361446
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700110,
+        "kind": "write",
+        "attempts_delta": 976,
+        "durable_commits_delta": 976,
+        "mean_hold_per_attempt_ms": 0.39850204303278686,
+        "mean_wait_per_attempt_ms": 0.10519148463114754
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700120,
+        "kind": "collect",
+        "attempts_delta": 80,
+        "durable_commits_delta": 80,
+        "mean_hold_per_attempt_ms": 4.314926875,
+        "mean_wait_per_attempt_ms": 0.0582627375
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700120,
+        "kind": "control",
+        "attempts_delta": 57,
+        "durable_commits_delta": 57,
+        "mean_hold_per_attempt_ms": 0.6597283508771931,
+        "mean_wait_per_attempt_ms": 0.013613350877192983
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700120,
+        "kind": "fence",
+        "attempts_delta": 25,
+        "durable_commits_delta": 25,
+        "mean_hold_per_attempt_ms": 3.19870852,
+        "mean_wait_per_attempt_ms": 0.009575040000000002
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700120,
+        "kind": "write",
+        "attempts_delta": 751,
+        "durable_commits_delta": 751,
+        "mean_hold_per_attempt_ms": 0.3536927709720373,
+        "mean_wait_per_attempt_ms": 0.23636774434087882
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700130,
+        "kind": "control",
+        "attempts_delta": 133,
+        "durable_commits_delta": 132,
+        "mean_hold_per_attempt_ms": 0.7768184060150376,
+        "mean_wait_per_attempt_ms": 0.009355646616541353
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700130,
+        "kind": "fence",
+        "attempts_delta": 58,
+        "durable_commits_delta": 58,
+        "mean_hold_per_attempt_ms": 4.4823375,
+        "mean_wait_per_attempt_ms": 0.0027163620689655173
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700130,
+        "kind": "write",
+        "attempts_delta": 602,
+        "durable_commits_delta": 602,
+        "mean_hold_per_attempt_ms": 0.3932130149501661,
+        "mean_wait_per_attempt_ms": 0.11145270598006644
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700140,
+        "kind": "collect",
+        "attempts_delta": 40,
+        "durable_commits_delta": 40,
+        "mean_hold_per_attempt_ms": 4.960546525000001,
+        "mean_wait_per_attempt_ms": 0.02097625
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700140,
+        "kind": "control",
+        "attempts_delta": 2,
+        "durable_commits_delta": 2,
+        "mean_hold_per_attempt_ms": 0.1731605,
+        "mean_wait_per_attempt_ms": 0.0001205
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700140,
+        "kind": "write",
+        "attempts_delta": 407,
+        "durable_commits_delta": 407,
+        "mean_hold_per_attempt_ms": 0.40213430958230956,
+        "mean_wait_per_attempt_ms": 0.14850129484029484
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700150,
+        "kind": "control",
+        "attempts_delta": 11,
+        "durable_commits_delta": 11,
+        "mean_hold_per_attempt_ms": 0.5024968181818181,
+        "mean_wait_per_attempt_ms": 0.00011845454545454545
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700150,
+        "kind": "fence",
+        "attempts_delta": 4,
+        "durable_commits_delta": 4,
+        "mean_hold_per_attempt_ms": 3.0591315,
+        "mean_wait_per_attempt_ms": 0.0001095
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700150,
+        "kind": "write",
+        "attempts_delta": 429,
+        "durable_commits_delta": 429,
+        "mean_hold_per_attempt_ms": 0.36538499533799534,
+        "mean_wait_per_attempt_ms": 0.013629428904428906
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700160,
+        "kind": "collect",
+        "attempts_delta": 40,
+        "durable_commits_delta": 40,
+        "mean_hold_per_attempt_ms": 2.5081908250000002,
+        "mean_wait_per_attempt_ms": 0.007920825
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700160,
+        "kind": "control",
+        "attempts_delta": 102,
+        "durable_commits_delta": 102,
+        "mean_hold_per_attempt_ms": 0.5592201176470588,
+        "mean_wait_per_attempt_ms": 0.00011315686274509804
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700160,
+        "kind": "fence",
+        "attempts_delta": 43,
+        "durable_commits_delta": 43,
+        "mean_hold_per_attempt_ms": 2.7611193255813955,
+        "mean_wait_per_attempt_ms": 0.00011995348837209302
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700160,
+        "kind": "write",
+        "attempts_delta": 216,
+        "durable_commits_delta": 216,
+        "mean_hold_per_attempt_ms": 0.341014337962963,
+        "mean_wait_per_attempt_ms": 0.09780669907407408
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700170,
+        "kind": "control",
+        "attempts_delta": 62,
+        "durable_commits_delta": 62,
+        "mean_hold_per_attempt_ms": 0.5775036935483872,
+        "mean_wait_per_attempt_ms": 0.00011619354838709676
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700170,
+        "kind": "fence",
+        "attempts_delta": 24,
+        "durable_commits_delta": 24,
+        "mean_hold_per_attempt_ms": 3.757760125,
+        "mean_wait_per_attempt_ms": 0.00014845833333333334
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700170,
+        "kind": "write",
+        "attempts_delta": 188,
+        "durable_commits_delta": 187,
+        "mean_hold_per_attempt_ms": 0.3010687872340425,
+        "mean_wait_per_attempt_ms": 0.01844289893617021
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700180,
+        "kind": "collect",
+        "attempts_delta": 20,
+        "durable_commits_delta": 20,
+        "mean_hold_per_attempt_ms": 2.99475895,
+        "mean_wait_per_attempt_ms": 0.01044205
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700180,
+        "kind": "control",
+        "attempts_delta": 1,
+        "durable_commits_delta": 1,
+        "mean_hold_per_attempt_ms": 0.206531,
+        "mean_wait_per_attempt_ms": 5.3e-05
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700180,
+        "kind": "write",
+        "attempts_delta": 125,
+        "durable_commits_delta": 125,
+        "mean_hold_per_attempt_ms": 0.313339816,
+        "mean_wait_per_attempt_ms": 0.093242456
+      },
+      {
+        "node": "iOQ52GTLizby5cbu",
+        "window_utc_seconds": 1795700190,
+        "kind": "write",
+        "attempts_delta": 53,
+        "durable_commits_delta": 53,
+        "mean_hold_per_attempt_ms": 0.286569,
+        "mean_wait_per_attempt_ms": 0.0001299245283018868
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700110,
+        "kind": "control",
+        "attempts_delta": 131,
+        "durable_commits_delta": 131,
+        "mean_hold_per_attempt_ms": 2.8495495114503813,
+        "mean_wait_per_attempt_ms": 0.0001176412213740458
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700110,
+        "kind": "mount",
+        "attempts_delta": 82,
+        "durable_commits_delta": 82,
+        "mean_hold_per_attempt_ms": 7.2602811097560975,
+        "mean_wait_per_attempt_ms": 0.0006872682926829268
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700110,
+        "kind": "write",
+        "attempts_delta": 88,
+        "durable_commits_delta": 88,
+        "mean_hold_per_attempt_ms": 0.47334495454545455,
+        "mean_wait_per_attempt_ms": 1.6856665454545454
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700120,
+        "kind": "collect",
+        "attempts_delta": 144,
+        "durable_commits_delta": 144,
+        "mean_hold_per_attempt_ms": 5.368367618055556,
+        "mean_wait_per_attempt_ms": 0.03673730555555556
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700120,
+        "kind": "control",
+        "attempts_delta": 40,
+        "durable_commits_delta": 40,
+        "mean_hold_per_attempt_ms": 4.29102975,
+        "mean_wait_per_attempt_ms": 0.00011705
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700120,
+        "kind": "mount",
+        "attempts_delta": 25,
+        "durable_commits_delta": 25,
+        "mean_hold_per_attempt_ms": 8.37980612,
+        "mean_wait_per_attempt_ms": 0.00597932
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700120,
+        "kind": "write",
+        "attempts_delta": 734,
+        "durable_commits_delta": 734,
+        "mean_hold_per_attempt_ms": 0.34856903542234335,
+        "mean_wait_per_attempt_ms": 0.6092751825613079
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700130,
+        "kind": "control",
+        "attempts_delta": 1,
+        "durable_commits_delta": 1,
+        "mean_hold_per_attempt_ms": 0.347275,
+        "mean_wait_per_attempt_ms": 0.000143
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700130,
+        "kind": "write",
+        "attempts_delta": 769,
+        "durable_commits_delta": 769,
+        "mean_hold_per_attempt_ms": 0.3861613068920676,
+        "mean_wait_per_attempt_ms": 0.00012115734720416126
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700140,
+        "kind": "write",
+        "attempts_delta": 713,
+        "durable_commits_delta": 713,
+        "mean_hold_per_attempt_ms": 0.45437885413744744,
+        "mean_wait_per_attempt_ms": 0.00012168723702664796
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700150,
+        "kind": "control",
+        "attempts_delta": 1,
+        "durable_commits_delta": 1,
+        "mean_hold_per_attempt_ms": 0.181506,
+        "mean_wait_per_attempt_ms": 0.000149
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700150,
+        "kind": "write",
+        "attempts_delta": 731,
+        "durable_commits_delta": 731,
+        "mean_hold_per_attempt_ms": 0.3893916922024624,
+        "mean_wait_per_attempt_ms": 0.00012347742818057456
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700160,
+        "kind": "control",
+        "attempts_delta": 1,
+        "durable_commits_delta": 1,
+        "mean_hold_per_attempt_ms": 0.173877,
+        "mean_wait_per_attempt_ms": 9.9e-05
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700160,
+        "kind": "write",
+        "attempts_delta": 775,
+        "durable_commits_delta": 775,
+        "mean_hold_per_attempt_ms": 0.3279002116129032,
+        "mean_wait_per_attempt_ms": 0.00012287870967741935
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700170,
+        "kind": "control",
+        "attempts_delta": 1,
+        "durable_commits_delta": 1,
+        "mean_hold_per_attempt_ms": 0.318827,
+        "mean_wait_per_attempt_ms": 0.00015
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700170,
+        "kind": "write",
+        "attempts_delta": 743,
+        "durable_commits_delta": 743,
+        "mean_hold_per_attempt_ms": 0.30854810901749663,
+        "mean_wait_per_attempt_ms": 0.00013607267833109019
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700180,
+        "kind": "write",
+        "attempts_delta": 715,
+        "durable_commits_delta": 715,
+        "mean_hold_per_attempt_ms": 0.3133348671328671,
+        "mean_wait_per_attempt_ms": 0.00012258181818181817
+      },
+      {
+        "node": "JtybsiSKCSM0dmMF",
+        "window_utc_seconds": 1795700190,
+        "kind": "write",
+        "attempts_delta": 364,
+        "durable_commits_delta": 364,
+        "mean_hold_per_attempt_ms": 0.2972258543956044,
+        "mean_wait_per_attempt_ms": 0.00012570604395604394
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700130,
+        "kind": "collect",
+        "attempts_delta": 82,
+        "durable_commits_delta": 82,
+        "mean_hold_per_attempt_ms": 3.6122388170731705,
+        "mean_wait_per_attempt_ms": 0.015779463414634147
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700130,
+        "kind": "control",
+        "attempts_delta": 87,
+        "durable_commits_delta": 87,
+        "mean_hold_per_attempt_ms": 2.7001787701149427,
+        "mean_wait_per_attempt_ms": 0.00016950574712643678
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700130,
+        "kind": "mount",
+        "attempts_delta": 55,
+        "durable_commits_delta": 55,
+        "mean_hold_per_attempt_ms": 7.682336327272727,
+        "mean_wait_per_attempt_ms": 0.00020252727272727274
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700130,
+        "kind": "write",
+        "attempts_delta": 165,
+        "durable_commits_delta": 165,
+        "mean_hold_per_attempt_ms": 0.3008424666666667,
+        "mean_wait_per_attempt_ms": 0.8067088969696969
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700140,
+        "kind": "control",
+        "attempts_delta": 8,
+        "durable_commits_delta": 8,
+        "mean_hold_per_attempt_ms": 0.554974625,
+        "mean_wait_per_attempt_ms": 9.9375e-05
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700140,
+        "kind": "fence",
+        "attempts_delta": 3,
+        "durable_commits_delta": 3,
+        "mean_hold_per_attempt_ms": 2.0263443333333333,
+        "mean_wait_per_attempt_ms": 0.00011333333333333333
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700140,
+        "kind": "write",
+        "attempts_delta": 456,
+        "durable_commits_delta": 456,
+        "mean_hold_per_attempt_ms": 0.31126578289473683,
+        "mean_wait_per_attempt_ms": 0.00018339254385964912
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700150,
+        "kind": "collect",
+        "attempts_delta": 40,
+        "durable_commits_delta": 40,
+        "mean_hold_per_attempt_ms": 2.380932675,
+        "mean_wait_per_attempt_ms": 0.037349675000000006
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700150,
+        "kind": "control",
+        "attempts_delta": 168,
+        "durable_commits_delta": 168,
+        "mean_hold_per_attempt_ms": 0.5588642619047619,
+        "mean_wait_per_attempt_ms": 0.0034112142857142857
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700150,
+        "kind": "fence",
+        "attempts_delta": 66,
+        "durable_commits_delta": 66,
+        "mean_hold_per_attempt_ms": 2.902054363636364,
+        "mean_wait_per_attempt_ms": 0.002813651515151515
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700150,
+        "kind": "write",
+        "attempts_delta": 244,
+        "durable_commits_delta": 244,
+        "mean_hold_per_attempt_ms": 0.37755215573770495,
+        "mean_wait_per_attempt_ms": 0.1708784631147541
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700160,
+        "kind": "collect",
+        "attempts_delta": 20,
+        "durable_commits_delta": 20,
+        "mean_hold_per_attempt_ms": 1.9885835,
+        "mean_wait_per_attempt_ms": 0.0001075
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700160,
+        "kind": "control",
+        "attempts_delta": 1,
+        "durable_commits_delta": 1,
+        "mean_hold_per_attempt_ms": 0.12526,
+        "mean_wait_per_attempt_ms": 6.8e-05
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700160,
+        "kind": "write",
+        "attempts_delta": 113,
+        "durable_commits_delta": 113,
+        "mean_hold_per_attempt_ms": 0.3358723628318584,
+        "mean_wait_per_attempt_ms": 0.00020913274336283185
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700170,
+        "kind": "control",
+        "attempts_delta": 1,
+        "durable_commits_delta": 1,
+        "mean_hold_per_attempt_ms": 0.213224,
+        "mean_wait_per_attempt_ms": 0.000193
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700170,
+        "kind": "write",
+        "attempts_delta": 120,
+        "durable_commits_delta": 120,
+        "mean_hold_per_attempt_ms": 0.34931398333333336,
+        "mean_wait_per_attempt_ms": 0.00021609166666666666
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700180,
+        "kind": "write",
+        "attempts_delta": 131,
+        "durable_commits_delta": 131,
+        "mean_hold_per_attempt_ms": 0.35720103816793897,
+        "mean_wait_per_attempt_ms": 0.00020104580152671757
+      },
+      {
+        "node": "WWxuiQ9-qJfiHC00",
+        "window_utc_seconds": 1795700190,
+        "kind": "write",
+        "attempts_delta": 51,
+        "durable_commits_delta": 51,
+        "mean_hold_per_attempt_ms": 0.36164613725490197,
+        "mean_wait_per_attempt_ms": 0.00022545098039215684
+      },
+      {
+        "node": "aWxuiQ9-qJhAZ9Y1",
+        "window_utc_seconds": 1795700150,
+        "kind": "collect",
+        "attempts_delta": 64,
+        "durable_commits_delta": 64,
+        "mean_hold_per_attempt_ms": 2.96994521875,
+        "mean_wait_per_attempt_ms": 0.0082439375
+      },
+      {
+        "node": "aWxuiQ9-qJhAZ9Y1",
+        "window_utc_seconds": 1795700150,
+        "kind": "control",
+        "attempts_delta": 135,
+        "durable_commits_delta": 135,
+        "mean_hold_per_attempt_ms": 1.4525573111111112,
+        "mean_wait_per_attempt_ms": 0.0012257111111111112
+      },
+      {
+        "node": "aWxuiQ9-qJhAZ9Y1",
+        "window_utc_seconds": 1795700150,
+        "kind": "fence",
+        "attempts_delta": 26,
+        "durable_commits_delta": 26,
+        "mean_hold_per_attempt_ms": 3.2481556923076926,
+        "mean_wait_per_attempt_ms": 0.00012557692307692308
+      },
+      {
+        "node": "aWxuiQ9-qJhAZ9Y1",
+        "window_utc_seconds": 1795700150,
+        "kind": "mount",
+        "attempts_delta": 42,
+        "durable_commits_delta": 42,
+        "mean_hold_per_attempt_ms": 6.469692166666667,
+        "mean_wait_per_attempt_ms": 0.00018135714285714286
+      },
+      {
+        "node": "aWxuiQ9-qJhAZ9Y1",
+        "window_utc_seconds": 1795700150,
+        "kind": "write",
+        "attempts_delta": 221,
+        "durable_commits_delta": 221,
+        "mean_hold_per_attempt_ms": 0.37595227149321264,
+        "mean_wait_per_attempt_ms": 0.15563070135746604
+      },
+      {
+        "node": "aWxuiQ9-qJhAZ9Y1",
+        "window_utc_seconds": 1795700160,
+        "kind": "collect",
+        "attempts_delta": 20,
+        "durable_commits_delta": 20,
+        "mean_hold_per_attempt_ms": 2.0205669,
+        "mean_wait_per_attempt_ms": 0.0001381
+      },
+      {
+        "node": "aWxuiQ9-qJhAZ9Y1",
+        "window_utc_seconds": 1795700160,
+        "kind": "control",
+        "attempts_delta": 1,
+        "durable_commits_delta": 1,
+        "mean_hold_per_attempt_ms": 0.166142,
+        "mean_wait_per_attempt_ms": 0.000196
+      },
+      {
+        "node": "aWxuiQ9-qJhAZ9Y1",
+        "window_utc_seconds": 1795700160,
+        "kind": "write",
+        "attempts_delta": 113,
+        "durable_commits_delta": 113,
+        "mean_hold_per_attempt_ms": 0.3559766194690266,
+        "mean_wait_per_attempt_ms": 0.01990263716814159
+      },
+      {
+        "node": "aWxuiQ9-qJhAZ9Y1",
+        "window_utc_seconds": 1795700170,
+        "kind": "control",
+        "attempts_delta": 1,
+        "durable_commits_delta": 1,
+        "mean_hold_per_attempt_ms": 0.230116,
+        "mean_wait_per_attempt_ms": 0.000214
+      },
+      {
+        "node": "aWxuiQ9-qJhAZ9Y1",
+        "window_utc_seconds": 1795700170,
+        "kind": "write",
+        "attempts_delta": 104,
+        "durable_commits_delta": 104,
+        "mean_hold_per_attempt_ms": 0.3413577596153846,
+        "mean_wait_per_attempt_ms": 0.000231625
+      },
+      {
+        "node": "aWxuiQ9-qJhAZ9Y1",
+        "window_utc_seconds": 1795700180,
+        "kind": "write",
+        "attempts_delta": 116,
+        "durable_commits_delta": 116,
+        "mean_hold_per_attempt_ms": 0.3679844310344828,
+        "mean_wait_per_attempt_ms": 0.00021818103448275863
+      },
+      {
+        "node": "aWxuiQ9-qJhAZ9Y1",
+        "window_utc_seconds": 1795700190,
+        "kind": "write",
+        "attempts_delta": 61,
+        "durable_commits_delta": 61,
+        "mean_hold_per_attempt_ms": 0.35747845901639347,
+        "mean_wait_per_attempt_ms": 0.000209
+      },
+      {
+        "node": "xyMy3Duhx_hI9e_d",
+        "window_utc_seconds": 1795700150,
+        "kind": "control",
+        "attempts_delta": 87,
+        "durable_commits_delta": 87,
+        "mean_hold_per_attempt_ms": 2.9704562298850576,
+        "mean_wait_per_attempt_ms": 0.002630574712643678
+      },
+      {
+        "node": "xyMy3Duhx_hI9e_d",
+        "window_utc_seconds": 1795700150,
+        "kind": "mount",
+        "attempts_delta": 55,
+        "durable_commits_delta": 55,
+        "mean_hold_per_attempt_ms": 7.777320672727273,
+        "mean_wait_per_attempt_ms": 0.0002092
+      },
+      {
+        "node": "xyMy3Duhx_hI9e_d",
+        "window_utc_seconds": 1795700150,
+        "kind": "write",
+        "attempts_delta": 26,
+        "durable_commits_delta": 26,
+        "mean_hold_per_attempt_ms": 0.3727156153846154,
+        "mean_wait_per_attempt_ms": 1.4586663076923077
+      },
+      {
+        "node": "xyMy3Duhx_hI9e_d",
+        "window_utc_seconds": 1795700160,
+        "kind": "collect",
+        "attempts_delta": 131,
+        "durable_commits_delta": 131,
+        "mean_hold_per_attempt_ms": 5.892420251908398,
+        "mean_wait_per_attempt_ms": 0.04856730534351145
+      },
+      {
+        "node": "xyMy3Duhx_hI9e_d",
+        "window_utc_seconds": 1795700160,
+        "kind": "control",
+        "attempts_delta": 69,
+        "durable_commits_delta": 69,
+        "mean_hold_per_attempt_ms": 4.558326130434782,
+        "mean_wait_per_attempt_ms": 0.0037990289855072464
+      },
+      {
+        "node": "xyMy3Duhx_hI9e_d",
+        "window_utc_seconds": 1795700160,
+        "kind": "mount",
+        "attempts_delta": 42,
+        "durable_commits_delta": 42,
+        "mean_hold_per_attempt_ms": 9.676450261904762,
+        "mean_wait_per_attempt_ms": 0.00019561904761904763
+      },
+      {
+        "node": "xyMy3Duhx_hI9e_d",
+        "window_utc_seconds": 1795700160,
+        "kind": "write",
+        "attempts_delta": 411,
+        "durable_commits_delta": 411,
+        "mean_hold_per_attempt_ms": 0.8006779537712896,
+        "mean_wait_per_attempt_ms": 0.7943911922141119
+      },
+      {
+        "node": "xyMy3Duhx_hI9e_d",
+        "window_utc_seconds": 1795700170,
+        "kind": "control",
+        "attempts_delta": 1,
+        "durable_commits_delta": 1,
+        "mean_hold_per_attempt_ms": 0.220126,
+        "mean_wait_per_attempt_ms": 0.000185
+      },
+      {
+        "node": "xyMy3Duhx_hI9e_d",
+        "window_utc_seconds": 1795700170,
+        "kind": "write",
+        "attempts_delta": 431,
+        "durable_commits_delta": 431,
+        "mean_hold_per_attempt_ms": 0.33914832482598606,
+        "mean_wait_per_attempt_ms": 0.0001543317865429234
+      },
+      {
+        "node": "xyMy3Duhx_hI9e_d",
+        "window_utc_seconds": 1795700180,
+        "kind": "write",
+        "attempts_delta": 424,
+        "durable_commits_delta": 424,
+        "mean_hold_per_attempt_ms": 0.2960754363207547,
+        "mean_wait_per_attempt_ms": 0.00014381367924528303
+      },
+      {
+        "node": "xyMy3Duhx_hI9e_d",
+        "window_utc_seconds": 1795700190,
+        "kind": "write",
+        "attempts_delta": 198,
+        "durable_commits_delta": 198,
+        "mean_hold_per_attempt_ms": 0.2842245,
+        "mean_wait_per_attempt_ms": 0.00014966161616161616
+      },
+      {
+        "node": "eOQ52GTLizb7r8zb",
+        "window_utc_seconds": 1795700170,
+        "kind": "collect",
+        "attempts_delta": 35,
+        "durable_commits_delta": 35,
+        "mean_hold_per_attempt_ms": 1.5562392285714286,
+        "mean_wait_per_attempt_ms": 9.377142857142857e-05
+      },
+      {
+        "node": "eOQ52GTLizb7r8zb",
+        "window_utc_seconds": 1795700170,
+        "kind": "control",
+        "attempts_delta": 37,
+        "durable_commits_delta": 37,
+        "mean_hold_per_attempt_ms": 1.9649292432432433,
+        "mean_wait_per_attempt_ms": 0.00012562162162162163
+      },
+      {
+        "node": "eOQ52GTLizb7r8zb",
+        "window_utc_seconds": 1795700170,
+        "kind": "mount",
+        "attempts_delta": 23,
+        "durable_commits_delta": 23,
+        "mean_hold_per_attempt_ms": 7.307588826086956,
+        "mean_wait_per_attempt_ms": 0.00016113043478260868
+      },
+      {
+        "node": "eOQ52GTLizb7r8zb",
+        "window_utc_seconds": 1795700170,
+        "kind": "write",
+        "attempts_delta": 47,
+        "durable_commits_delta": 47,
+        "mean_hold_per_attempt_ms": 0.3343048085106383,
+        "mean_wait_per_attempt_ms": 0.11221834042553192
+      },
+      {
+        "node": "eOQ52GTLizb7r8zb",
+        "window_utc_seconds": 1795700180,
+        "kind": "write",
+        "attempts_delta": 141,
+        "durable_commits_delta": 141,
+        "mean_hold_per_attempt_ms": 0.3198378865248227,
+        "mean_wait_per_attempt_ms": 0.0001566241134751773
+      },
+      {
+        "node": "eOQ52GTLizb7r8zb",
+        "window_utc_seconds": 1795700190,
+        "kind": "write",
+        "attempts_delta": 70,
+        "durable_commits_delta": 70,
+        "mean_hold_per_attempt_ms": 0.30589911428571426,
+        "mean_wait_per_attempt_ms": 0.0001525
+      }
+    ],
+    "resource_facts": {
+      "max_node_cpu_pct_of_host": 38.05521819663412,
+      "min_mem_free_pct": 96.129957035007,
+      "min_disk_free_pct": 99.28597996226209
+    }
+  },
+  "binaries": [
+    {
+      "file": "node",
+      "sha256": "9b68013117337e5010b0ed2a6e8ebf6bb9df344b0ffb36b0cd6160ed19490002",
+      "source": "ec4b0af"
+    },
+    {
+      "file": "agent",
+      "sha256": "47e0c2545c0d29358e8efb919e934d6a54af516687a8dda073a03b95633612ab",
+      "source": "ec4b0af"
+    },
+    {
+      "file": "issuer",
+      "sha256": "686c9098f55f62f294d02bc404a1e2c9d557ff1b2aec7bf604ddc3a56adb1d1f",
+      "source": "ec4b0af"
+    },
+    {
+      "file": "provisioner",
+      "sha256": "d6645214dc07e02db9bfbeeb6e4da7feb6fb7cbc0f2681a66af2a8553b6adc9a",
+      "source": "ec4b0af"
+    },
+    {
+      "file": "experiment",
+      "sha256": "975151c96e7d6cc30668e86ad3ace4920e39ba1f66377343bd43ad489182a517",
+      "source": "2362b35"
+    }
+  ],
+  "cleanup": {
+    "run": "qual-fixed-1126-132654",
+    "checked_utc": "2026-11-26T13:44:41.706555+00:00",
+    "all_terminated": true,
+    "instances": [
+      {
+        "instance": "i-088caf50fa7db99b5",
+        "type": "c6i.4xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:27:45+00:00",
+        "upper_seconds_to_terminated_observation": 943.101032,
+        "price_usd_hour": 0.808,
+        "upper_compute_usd": 0.21167378718222227
+      },
+      {
+        "instance": "i-0b563111f2a0635d9",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:27:39+00:00",
+        "upper_seconds_to_terminated_observation": 949.101032,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.10492839187111111
+      },
+      {
+        "instance": "i-0af4b59dd3cda8fe9",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:27:43+00:00",
+        "upper_seconds_to_terminated_observation": 945.101032,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.10448616964888889
+      },
+      {
+        "instance": "i-0fc1f287fc5fdda45",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:35:36+00:00",
+        "upper_seconds_to_terminated_observation": 472.101032,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.05219339187111111
+      }
+    ],
+    "deleted_resources": [
+      {
+        "resource": "gateway",
+        "deleted": true,
+        "response": "An error occurred (InvalidInternetGatewayID.NotFound) when calling the DescribeInternetGateways operation: The internetGateway ID 'igw-09a7087fa2944bebe' does not exist"
+      },
+      {
+        "resource": "route_table",
+        "deleted": true,
+        "response": "An error occurred (InvalidRouteTableID.NotFound) when calling the DescribeRouteTables operation: The routeTable ID 'rtb-03ec3a667618454dc' does not exist"
+      },
+      {
+        "resource": "bucket",
+        "deleted": true,
+        "response": "An error occurred (404) when calling the HeadBucket operation: Not Found\n\nBucket absent from authenticated account ListBuckets (HeadBucket can retain regional routing metadata immediately after deletion)."
+      },
+      {
+        "resource": "role",
+        "deleted": true,
+        "response": "An error occurred (NoSuchEntity) when calling the GetRole operation: The role with name qual-fixed-1126-132654 cannot be found."
+      },
+      {
+        "resource": "profile",
+        "deleted": true,
+        "response": "An error occurred (NoSuchEntity) when calling the GetInstanceProfile operation: Instance Profile qual-fixed-1126-132654 cannot be found."
+      },
+      {
+        "resource": "template",
+        "deleted": true,
+        "response": "An error occurred (InvalidLaunchTemplateName.NotFoundException) when calling the DescribeLaunchTemplates operation: At least one of the launch templates specified in the request does not exist."
+      },
+      {
+        "resource": "vpc",
+        "deleted": true,
+        "response": "An error occurred (InvalidVpcID.NotFound) when calling the DescribeVpcs operation: The vpc ID 'vpc-01ea45bf547a8cb51' does not exist"
+      },
+      {
+        "resource": "subnet",
+        "deleted": true,
+        "response": "An error occurred (InvalidSubnetID.NotFound) when calling the DescribeSubnets operation: The subnet ID 'subnet-061ec0b9e9bbaa113' does not exist"
+      },
+      {
+        "resource": "security_group",
+        "deleted": true,
+        "response": "An error occurred (InvalidGroup.NotFound) when calling the DescribeSecurityGroups operation: The security group 'sg-0d7867e4f293fe7f2' does not exist"
+      }
+    ],
+    "all_resources_deleted": true,
+    "estimated_compute_upper_usd": 0.4732817405733334,
+    "note": "EC2 upper estimate through independently observed termination, minimum60s. Excludes EBS/S3/data transfer, not a billing export."
+  },
+  "artifact_root": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/outputs/fix-peer-spawn-20261126/aws",
+  "limitations": [
+    "Moderate load, not 16k/s",
+    "64 services on one machine",
+    "Compaction disabled in real cluster",
+    "Candidate lab p99 ~21% higher than one baseline run",
+    "Final ownership audit not simultaneous",
+    "HTTP ACK counter does not prove direct local application"
+  ],
+  "qualification_ec2_upper_total_usd": 0.959405568863889
+}

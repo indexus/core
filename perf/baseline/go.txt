@@ -1,0 +1,180 @@
+goos: linux
+goarch: amd64
+pkg: github.com/indexus/go-indexus-core/indexus
+cpu: Intel(R) Xeon(R) Processor @ 2.10GHz
+BenchmarkSummaryInventoryPayload-2   	      40	   8427674 ns/op	 2315157 B/op	   57353 allocs/op
+BenchmarkSummaryInventoryPayload-2   	      38	   8165810 ns/op	 2314242 B/op	   57242 allocs/op
+BenchmarkSummaryInventoryPayload-2   	      44	   7915577 ns/op	 2315124 B/op	   57353 allocs/op
+BenchmarkSummaryInventoryPayload-2   	      43	   8816183 ns/op	 2315168 B/op	   57353 allocs/op
+BenchmarkSummaryInventoryPayload-2   	      42	   7957630 ns/op	 2315173 B/op	   57353 allocs/op
+BenchmarkSummaryInventoryPayload-2   	      43	   9429181 ns/op	 2315132 B/op	   57353 allocs/op
+BenchmarkMonitoringZoneCount/materialized-2         	      13	  25180164 ns/op	11134359 B/op	  293827 allocs/op
+BenchmarkMonitoringZoneCount/materialized-2         	      13	  24809085 ns/op	11134313 B/op	  293826 allocs/op
+BenchmarkMonitoringZoneCount/materialized-2         	      13	  25840362 ns/op	11134327 B/op	  293826 allocs/op
+BenchmarkMonitoringZoneCount/materialized-2         	      12	  26513583 ns/op	11134308 B/op	  293826 allocs/op
+BenchmarkMonitoringZoneCount/materialized-2         	      14	  25147824 ns/op	11134403 B/op	  293827 allocs/op
+BenchmarkMonitoringZoneCount/materialized-2         	      14	  27539477 ns/op	11134332 B/op	  293826 allocs/op
+BenchmarkMonitoringZoneCount/versioned-2            	  821305	       400.3 ns/op	     320 B/op	       4 allocs/op
+BenchmarkMonitoringZoneCount/versioned-2            	  945721	       415.7 ns/op	     320 B/op	       4 allocs/op
+BenchmarkMonitoringZoneCount/versioned-2            	  890085	       398.5 ns/op	     320 B/op	       4 allocs/op
+BenchmarkMonitoringZoneCount/versioned-2            	  919375	       389.9 ns/op	     320 B/op	       4 allocs/op
+BenchmarkMonitoringZoneCount/versioned-2            	  953077	       391.1 ns/op	     320 B/op	       4 allocs/op
+BenchmarkMonitoringZoneCount/versioned-2            	  945006	       382.5 ns/op	     320 B/op	       4 allocs/op
+BenchmarkReadProjectionDense/256-2                  	    1569	    216102 ns/op	  129578 B/op	     952 allocs/op
+BenchmarkReadProjectionDense/256-2                  	    1426	    235710 ns/op	  129578 B/op	     952 allocs/op
+BenchmarkReadProjectionDense/256-2                  	    1566	    226544 ns/op	  129578 B/op	     952 allocs/op
+BenchmarkReadProjectionDense/256-2                  	    1610	    223226 ns/op	  129578 B/op	     952 allocs/op
+BenchmarkReadProjectionDense/256-2                  	    1540	    230183 ns/op	  129578 B/op	     952 allocs/op
+BenchmarkReadProjectionDense/256-2                  	    1527	    228645 ns/op	  129578 B/op	     952 allocs/op
+BenchmarkReadProjectionDense/512-2                  	     830	    476924 ns/op	  260428 B/op	    1798 allocs/op
+BenchmarkReadProjectionDense/512-2                  	     770	    430504 ns/op	  260428 B/op	    1798 allocs/op
+BenchmarkReadProjectionDense/512-2                  	     837	    433135 ns/op	  260428 B/op	    1798 allocs/op
+BenchmarkReadProjectionDense/512-2                  	     818	    425244 ns/op	  260428 B/op	    1798 allocs/op
+BenchmarkReadProjectionDense/512-2                  	     613	    586135 ns/op	  260428 B/op	    1798 allocs/op
+BenchmarkReadProjectionDense/512-2                  	     772	    441396 ns/op	  260428 B/op	    1798 allocs/op
+BenchmarkReadProjectionDense/1024-2                 	     397	    849863 ns/op	  495152 B/op	    3488 allocs/op
+BenchmarkReadProjectionDense/1024-2                 	     403	    965476 ns/op	  495152 B/op	    3488 allocs/op
+BenchmarkReadProjectionDense/1024-2                 	     374	    874340 ns/op	  495152 B/op	    3488 allocs/op
+BenchmarkReadProjectionDense/1024-2                 	     373	    839440 ns/op	  495153 B/op	    3488 allocs/op
+BenchmarkReadProjectionDense/1024-2                 	     404	    869007 ns/op	  495153 B/op	    3488 allocs/op
+BenchmarkReadProjectionDense/1024-2                 	     399	    925672 ns/op	  495153 B/op	    3488 allocs/op
+BenchmarkReadProjectionDense/2048-2                 	     181	   1844421 ns/op	  972410 B/op	    6866 allocs/op
+BenchmarkReadProjectionDense/2048-2                 	     198	   1850104 ns/op	  972410 B/op	    6866 allocs/op
+BenchmarkReadProjectionDense/2048-2                 	     204	   1764479 ns/op	  972410 B/op	    6866 allocs/op
+BenchmarkReadProjectionDense/2048-2                 	     186	   1847062 ns/op	  972411 B/op	    6866 allocs/op
+BenchmarkReadProjectionDense/2048-2                 	     194	   1817719 ns/op	  972410 B/op	    6866 allocs/op
+BenchmarkReadProjectionDense/2048-2                 	     205	   1785576 ns/op	  972410 B/op	    6866 allocs/op
+BenchmarkReadProjectionDense/8192-2                 	      45	   8730121 ns/op	 3835970 B/op	   27129 allocs/op
+BenchmarkReadProjectionDense/8192-2                 	      38	   9605641 ns/op	 3835980 B/op	   27129 allocs/op
+BenchmarkReadProjectionDense/8192-2                 	      43	  10576344 ns/op	 3835959 B/op	   27128 allocs/op
+BenchmarkReadProjectionDense/8192-2                 	      39	  11708187 ns/op	 3835944 B/op	   27128 allocs/op
+BenchmarkReadProjectionDense/8192-2                 	      33	  10143234 ns/op	 3835941 B/op	   27128 allocs/op
+BenchmarkReadProjectionDense/8192-2                 	      38	  10040785 ns/op	 3835943 B/op	   27128 allocs/op
+BenchmarkCloneReadSet-2                             	   16946	     24364 ns/op	   18024 B/op	     264 allocs/op
+BenchmarkCloneReadSet-2                             	   12846	     23371 ns/op	   18024 B/op	     264 allocs/op
+BenchmarkCloneReadSet-2                             	   12955	     23621 ns/op	   18024 B/op	     264 allocs/op
+BenchmarkCloneReadSet-2                             	   14845	     23634 ns/op	   18024 B/op	     264 allocs/op
+BenchmarkCloneReadSet-2                             	   14343	     25274 ns/op	   18024 B/op	     264 allocs/op
+BenchmarkCloneReadSet-2                             	   15103	     23695 ns/op	   18024 B/op	     264 allocs/op
+BenchmarkEncodeSets/precision-8-2                   	     162	   2173454 ns/op	    175009 bytes	 1514952 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-8-2                   	     158	   2463953 ns/op	    175009 bytes	 1514956 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-8-2                   	     128	   2998330 ns/op	    175009 bytes	 1514957 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-8-2                   	     176	   2095506 ns/op	    175009 bytes	 1514962 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-8-2                   	     175	   2245340 ns/op	    175009 bytes	 1514960 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-8-2                   	     148	   2486761 ns/op	    175009 bytes	 1514952 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-32-2                  	     130	   2753239 ns/op	    175009 bytes	 1516936 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-32-2                  	     134	   2292900 ns/op	    175009 bytes	 1516933 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-32-2                  	     100	   3085465 ns/op	    175009 bytes	 1516941 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-32-2                  	     126	   3041011 ns/op	    175009 bytes	 1516939 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-32-2                  	     138	   2842747 ns/op	    175009 bytes	 1516937 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-32-2                  	     147	   2515186 ns/op	    175009 bytes	 1516938 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-96-2                  	     145	   2339445 ns/op	    175009 bytes	 1522442 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-96-2                  	     133	   2898441 ns/op	    175009 bytes	 1522442 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-96-2                  	     122	   2534265 ns/op	    175009 bytes	 1522438 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-96-2                  	     136	   2886342 ns/op	    175009 bytes	 1522441 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-96-2                  	      92	   4498672 ns/op	    175009 bytes	 1522442 B/op	      40 allocs/op
+BenchmarkEncodeSets/precision-96-2                  	     127	   2403126 ns/op	    175009 bytes	 1522441 B/op	      40 allocs/op
+BenchmarkEncodeSetsBlock-2                          	      85	   5218374 ns/op	    320036 bytes	 1630273 B/op	       5 allocs/op
+BenchmarkEncodeSetsBlock-2                          	      73	   4872427 ns/op	    320036 bytes	 1630270 B/op	       5 allocs/op
+BenchmarkEncodeSetsBlock-2                          	      84	   4891070 ns/op	    320036 bytes	 1630270 B/op	       5 allocs/op
+BenchmarkEncodeSetsBlock-2                          	      78	   5182135 ns/op	    320036 bytes	 1630272 B/op	       5 allocs/op
+BenchmarkEncodeSetsBlock-2                          	      85	   4643213 ns/op	    320036 bytes	 1630278 B/op	       5 allocs/op
+BenchmarkEncodeSetsBlock-2                          	      98	   4851113 ns/op	    320036 bytes	 1630279 B/op	       5 allocs/op
+BenchmarkCompactSummaryBuild-2                      	     100	   5145420 ns/op	         1.067 nodes/point	 2588566 B/op	   36027 allocs/op
+BenchmarkCompactSummaryBuild-2                      	      81	   4686304 ns/op	         1.067 nodes/point	 2588560 B/op	   36027 allocs/op
+BenchmarkCompactSummaryBuild-2                      	      80	   6298659 ns/op	         1.067 nodes/point	 2588566 B/op	   36027 allocs/op
+BenchmarkCompactSummaryBuild-2                      	     100	   4118219 ns/op	         1.067 nodes/point	 2588572 B/op	   36027 allocs/op
+BenchmarkCompactSummaryBuild-2                      	      97	   3753354 ns/op	         1.067 nodes/point	 2588568 B/op	   36027 allocs/op
+BenchmarkCompactSummaryBuild-2                      	      98	   4442088 ns/op	         1.067 nodes/point	 2588569 B/op	   36027 allocs/op
+PASS
+ok  	github.com/indexus/go-indexus-core/indexus	46.942s
+goos: linux
+goarch: amd64
+pkg: github.com/indexus/go-indexus-core/internal/storage
+cpu: Intel(R) Xeon(R) Processor @ 2.10GHz
+BenchmarkInventoryPayloadProjection/metrics-only=false-2         	      75	   5309424 ns/op	    531054 response-bytes	  679983 B/op	    1025 allocs/op
+BenchmarkInventoryPayloadProjection/metrics-only=false-2         	      73	   4517288 ns/op	    531054 response-bytes	  680642 B/op	    1025 allocs/op
+BenchmarkInventoryPayloadProjection/metrics-only=false-2         	      92	   3939045 ns/op	    531054 response-bytes	  675450 B/op	    1025 allocs/op
+BenchmarkInventoryPayloadProjection/metrics-only=false-2         	      82	   4523947 ns/op	    531054 response-bytes	  677883 B/op	    1025 allocs/op
+BenchmarkInventoryPayloadProjection/metrics-only=false-2         	      99	   3841765 ns/op	    531054 response-bytes	  674033 B/op	    1024 allocs/op
+BenchmarkInventoryPayloadProjection/metrics-only=false-2         	      94	   3533573 ns/op	    531054 response-bytes	  675027 B/op	    1025 allocs/op
+BenchmarkInventoryPayloadProjection/metrics-only=true-2          	    1532	    302879 ns/op	      5358 response-bytes	   71372 B/op	    1088 allocs/op
+BenchmarkInventoryPayloadProjection/metrics-only=true-2          	    1399	    237345 ns/op	      5358 response-bytes	   71383 B/op	    1088 allocs/op
+BenchmarkInventoryPayloadProjection/metrics-only=true-2          	    1561	    230911 ns/op	      5358 response-bytes	   71382 B/op	    1088 allocs/op
+BenchmarkInventoryPayloadProjection/metrics-only=true-2          	    1706	    243567 ns/op	      5358 response-bytes	   71381 B/op	    1088 allocs/op
+BenchmarkInventoryPayloadProjection/metrics-only=true-2          	    1623	    219167 ns/op	      5358 response-bytes	   71382 B/op	    1088 allocs/op
+BenchmarkInventoryPayloadProjection/metrics-only=true-2          	    1411	    255553 ns/op	      5358 response-bytes	   71372 B/op	    1088 allocs/op
+BenchmarkRecordMetricsOpaqueProjection/full-json-2               	     130	   2785646 ns/op	     304 B/op	       8 allocs/op
+BenchmarkRecordMetricsOpaqueProjection/full-json-2               	     126	   2793832 ns/op	     304 B/op	       8 allocs/op
+BenchmarkRecordMetricsOpaqueProjection/full-json-2               	     120	   2986792 ns/op	     304 B/op	       8 allocs/op
+BenchmarkRecordMetricsOpaqueProjection/full-json-2               	     100	   3190646 ns/op	     304 B/op	       8 allocs/op
+BenchmarkRecordMetricsOpaqueProjection/full-json-2               	     123	   2851116 ns/op	     304 B/op	       8 allocs/op
+BenchmarkRecordMetricsOpaqueProjection/full-json-2               	     115	   3015215 ns/op	     304 B/op	       8 allocs/op
+BenchmarkRecordMetricsOpaqueProjection/header-2                  	  189189	      1650 ns/op	     400 B/op	       9 allocs/op
+BenchmarkRecordMetricsOpaqueProjection/header-2                  	  177189	      2293 ns/op	     400 B/op	       9 allocs/op
+BenchmarkRecordMetricsOpaqueProjection/header-2                  	  192596	      1875 ns/op	     400 B/op	       9 allocs/op
+BenchmarkRecordMetricsOpaqueProjection/header-2                  	  205762	      1734 ns/op	     400 B/op	       9 allocs/op
+BenchmarkRecordMetricsOpaqueProjection/header-2                  	  211068	      2136 ns/op	     400 B/op	       9 allocs/op
+BenchmarkRecordMetricsOpaqueProjection/header-2                  	  219544	      1966 ns/op	     400 B/op	       9 allocs/op
+BenchmarkSnapshotSeal/64-2                                       	    1900	    181827 ns/op	   33915 B/op	     394 allocs/op
+BenchmarkSnapshotSeal/64-2                                       	    2247	    158315 ns/op	   33986 B/op	     394 allocs/op
+BenchmarkSnapshotSeal/64-2                                       	    2482	    163950 ns/op	   33996 B/op	     394 allocs/op
+BenchmarkSnapshotSeal/64-2                                       	    2454	    176641 ns/op	   33837 B/op	     394 allocs/op
+BenchmarkSnapshotSeal/64-2                                       	    2238	    219342 ns/op	   34016 B/op	     394 allocs/op
+BenchmarkSnapshotSeal/64-2                                       	    2289	    222409 ns/op	   34040 B/op	     394 allocs/op
+BenchmarkSnapshotSeal/1024-2                                     	     128	   2762221 ns/op	  565199 B/op	    6155 allocs/op
+BenchmarkSnapshotSeal/1024-2                                     	     122	   2911226 ns/op	  602113 B/op	    6155 allocs/op
+BenchmarkSnapshotSeal/1024-2                                     	     100	   3037327 ns/op	  598154 B/op	    6155 allocs/op
+BenchmarkSnapshotSeal/1024-2                                     	     120	   2920070 ns/op	  577183 B/op	    6155 allocs/op
+BenchmarkSnapshotSeal/1024-2                                     	     100	   3247733 ns/op	  587673 B/op	    6155 allocs/op
+BenchmarkSnapshotSeal/1024-2                                     	     100	   3256188 ns/op	  587668 B/op	    6155 allocs/op
+BenchmarkStoredZoneKeyDecode-2                                   	  798634	       497.8 ns/op	      24 B/op	       5 allocs/op
+BenchmarkStoredZoneKeyDecode-2                                   	  886046	       427.1 ns/op	      24 B/op	       5 allocs/op
+BenchmarkStoredZoneKeyDecode-2                                   	  706543	       470.5 ns/op	      24 B/op	       5 allocs/op
+BenchmarkStoredZoneKeyDecode-2                                   	 1000000	       440.2 ns/op	      24 B/op	       5 allocs/op
+BenchmarkStoredZoneKeyDecode-2                                   	  804800	       460.9 ns/op	      24 B/op	       5 allocs/op
+BenchmarkStoredZoneKeyDecode-2                                   	  725204	       512.5 ns/op	      24 B/op	       5 allocs/op
+PASS
+ok  	github.com/indexus/go-indexus-core/internal/storage	17.736s
+goos: linux
+goarch: amd64
+pkg: github.com/indexus/go-indexus-core/internal/storage
+cpu: Intel(R) Xeon(R) Processor @ 2.10GHz
+BenchmarkCausalInsert/same-zone/logical-update-2         	    2904	    128828 ns/op	        15.96 bolt-write-us/op	         1.000 inserts/commit	      7762 inserts/s	   72918 B/op	     461 allocs/op
+BenchmarkCausalInsert/same-zone/logical-update-2         	    4396	    133185 ns/op	        18.75 bolt-write-us/op	         1.000 inserts/commit	      7508 inserts/s	   78277 B/op	     497 allocs/op
+BenchmarkCausalInsert/same-zone/logical-update-2         	    3440	    154325 ns/op	        20.33 bolt-write-us/op	         1.000 inserts/commit	      6480 inserts/s	   74545 B/op	     477 allocs/op
+BenchmarkCausalInsert/same-zone/logical-update-2         	    2541	    126365 ns/op	        16.87 bolt-write-us/op	         1.000 inserts/commit	      7914 inserts/s	   70839 B/op	     449 allocs/op
+BenchmarkCausalInsert/same-zone/logical-update-2         	    2677	    133562 ns/op	        20.08 bolt-write-us/op	         1.000 inserts/commit	      7487 inserts/s	   71343 B/op	     452 allocs/op
+BenchmarkCausalInsert/same-zone/logical-update-2         	    2815	    125348 ns/op	        19.44 bolt-write-us/op	         1.000 inserts/commit	      7978 inserts/s	   71778 B/op	     459 allocs/op
+BenchmarkCausalInsert/same-zone/logical-batch-2          	    1082	    328217 ns/op	         4.992 bolt-write-us/op	         7.956 inserts/commit	      3047 inserts/s	   14400 B/op	     141 allocs/op
+BenchmarkCausalInsert/same-zone/logical-batch-2          	    1072	    352280 ns/op	         8.142 bolt-write-us/op	         8.000 inserts/commit	      2839 inserts/s	   14319 B/op	     140 allocs/op
+BenchmarkCausalInsert/same-zone/logical-batch-2          	     908	    365340 ns/op	         7.260 bolt-write-us/op	         7.965 inserts/commit	      2737 inserts/s	   13638 B/op	     137 allocs/op
+BenchmarkCausalInsert/same-zone/logical-batch-2          	    1034	    339822 ns/op	         6.531 bolt-write-us/op	         7.954 inserts/commit	      2943 inserts/s	   14236 B/op	     140 allocs/op
+BenchmarkCausalInsert/same-zone/logical-batch-2          	     990	    353266 ns/op	         6.341 bolt-write-us/op	         7.984 inserts/commit	      2831 inserts/s	   13997 B/op	     139 allocs/op
+BenchmarkCausalInsert/same-zone/logical-batch-2          	    1068	    342673 ns/op	         8.192 bolt-write-us/op	         7.970 inserts/commit	      2918 inserts/s	   14311 B/op	     140 allocs/op
+BenchmarkCausalInsert/distinct-zones/logical-update-2    	    3418	    116419 ns/op	        18.81 bolt-write-us/op	         1.000 inserts/commit	      8590 inserts/s	   63297 B/op	     457 allocs/op
+BenchmarkCausalInsert/distinct-zones/logical-update-2    	    4018	    115738 ns/op	        17.70 bolt-write-us/op	         1.000 inserts/commit	      8640 inserts/s	   63756 B/op	     464 allocs/op
+BenchmarkCausalInsert/distinct-zones/logical-update-2    	    4237	    131971 ns/op	        20.18 bolt-write-us/op	         1.000 inserts/commit	      7577 inserts/s	   63983 B/op	     466 allocs/op
+BenchmarkCausalInsert/distinct-zones/logical-update-2    	    4357	    114417 ns/op	        20.91 bolt-write-us/op	         1.000 inserts/commit	      8740 inserts/s	   64195 B/op	     467 allocs/op
+BenchmarkCausalInsert/distinct-zones/logical-update-2    	    4182	    109651 ns/op	        19.09 bolt-write-us/op	         1.000 inserts/commit	      9120 inserts/s	   63886 B/op	     466 allocs/op
+BenchmarkCausalInsert/distinct-zones/logical-update-2    	    6004	    116900 ns/op	        19.04 bolt-write-us/op	         1.000 inserts/commit	      8554 inserts/s	   66241 B/op	     480 allocs/op
+BenchmarkCausalInsert/distinct-zones/logical-batch-2     	     993	    323236 ns/op	         5.198 bolt-write-us/op	         7.944 inserts/commit	      3094 inserts/s	   16858 B/op	     180 allocs/op
+BenchmarkCausalInsert/distinct-zones/logical-batch-2     	    1038	    338707 ns/op	         6.300 bolt-write-us/op	         7.985 inserts/commit	      2952 inserts/s	   17006 B/op	     180 allocs/op
+BenchmarkCausalInsert/distinct-zones/logical-batch-2     	    1050	    338965 ns/op	         6.895 bolt-write-us/op	         7.955 inserts/commit	      2950 inserts/s	   17066 B/op	     181 allocs/op
+BenchmarkCausalInsert/distinct-zones/logical-batch-2     	     979	    344410 ns/op	         5.847 bolt-write-us/op	         7.959 inserts/commit	      2904 inserts/s	   16814 B/op	     179 allocs/op
+BenchmarkCausalInsert/distinct-zones/logical-batch-2     	    1038	    335096 ns/op	         6.055 bolt-write-us/op	         7.985 inserts/commit	      2984 inserts/s	   17008 B/op	     180 allocs/op
+BenchmarkCausalInsert/distinct-zones/logical-batch-2     	    1060	    339840 ns/op	         7.198 bolt-write-us/op	         7.970 inserts/commit	      2943 inserts/s	   17075 B/op	     181 allocs/op
+PASS
+ok  	github.com/indexus/go-indexus-core/internal/storage	11.136s
+goos: linux
+goarch: amd64
+pkg: github.com/indexus/go-indexus-core/internal/mesh
+cpu: Intel(R) Xeon(R) Processor @ 2.10GHz
+BenchmarkKnowledgeFrameCopies/typed-2         	     572	    652679 ns/op	  824618 B/op	      38 allocs/op
+BenchmarkKnowledgeFrameCopies/typed-2         	     567	    567344 ns/op	  824608 B/op	      38 allocs/op
+BenchmarkKnowledgeFrameCopies/typed-2         	     609	    545852 ns/op	  824609 B/op	      38 allocs/op
+BenchmarkKnowledgeFrameCopies/typed-2         	     559	    553610 ns/op	  824608 B/op	      38 allocs/op
+BenchmarkKnowledgeFrameCopies/typed-2         	     698	    573550 ns/op	  824608 B/op	      38 allocs/op
+BenchmarkKnowledgeFrameCopies/typed-2         	     610	    588224 ns/op	  824608 B/op	      38 allocs/op
+PASS
+ok  	github.com/indexus/go-indexus-core/internal/mesh	2.126s

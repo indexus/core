@@ -1,0 +1,7 @@
+# Built binaries, terraform state and campaign results stay local.
+aws/.bin/
+aws/.state/
+aws/.terraform/
+aws/.terraform.lock.hcl
+results/
+__pycache__/

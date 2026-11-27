@@ -1,0 +1,40 @@
+#!/bin/bash
+# Extra load machine (LOAD-SYNC): runs only a load agent; the coordinating load
+# machine sends it its share of every step with a common start time.
+set -uxo pipefail
+# QUIC over UDP: room for the socket buffers quic-go asks for (see host.sh.tftpl).
+sysctl -w net.core.rmem_max=7500000 net.core.wmem_max=7500000
+DEADLINE=$(( $(date +%s) + ${ttl} * 60 ))
+cat >/usr/local/bin/indexus-deadline <<DEADLINE_SCRIPT
+#!/bin/bash
+left=\$(( ($DEADLINE - \$(date +%s)) / 60 ))
+if (( left < 1 )); then shutdown -h now; else shutdown -h +\$left; fi
+DEADLINE_SCRIPT
+chmod +x /usr/local/bin/indexus-deadline
+cat >/etc/systemd/system/indexus-deadline.service <<UNIT
+[Unit]
+Description=Terminate this experiment instance at its deadline
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/indexus-deadline
+[Install]
+WantedBy=multi-user.target
+UNIT
+systemctl enable --now indexus-deadline.service
+
+install -d /opt/indexus
+until aws s3 cp "s3://${bucket}/bin/experiment" /opt/indexus/experiment --region "${region}"; do sleep 5; done
+until aws s3 cp "s3://${bucket}/bin/ca/ca.crt" /opt/indexus/ca.crt --region "${region}"; do sleep 5; done
+chmod +x /opt/indexus/experiment
+cat >/etc/systemd/system/indexus-loadagent.service <<UNIT
+[Unit]
+Description=Indexus load agent
+[Service]
+LimitNOFILE=1048576
+Environment=SSL_CERT_FILE=/opt/indexus/ca.crt
+ExecStart=/opt/indexus/experiment loadagent -listen :22200 -dir /var/tmp/indexus-load
+Restart=always
+[Install]
+WantedBy=multi-user.target
+UNIT
+systemctl enable --now indexus-loadagent.service

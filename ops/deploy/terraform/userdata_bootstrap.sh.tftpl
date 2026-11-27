@@ -1,0 +1,106 @@
+#!/bin/bash
+set -euxo pipefail
+dnf install -y awscli jq
+
+install -d -m 0755 /opt/indexus /etc/indexus /var/lib/indexus /var/lib/indexus/leave
+
+# deploy.sh uploads after terraform apply, so both objects can lag the instance
+# boot. Wait for the pair: taking issuer alone leaves node missing and aborts
+# before any unit is installed.
+for i in $(seq 1 120); do
+  if aws s3 ls "s3://${bucket}/bin/issuer" --region "${region}" >/dev/null 2>&1 \
+    && aws s3 ls "s3://${bucket}/bin/node" --region "${region}" >/dev/null 2>&1 \
+    && aws s3 ls "s3://${bucket}/bin/provisioner" --region "${region}" >/dev/null 2>&1; then
+    break
+  fi
+  sleep 5
+done
+
+aws s3 cp "s3://${bucket}/bin/issuer" /opt/indexus/issuer --region "${region}"
+aws s3 cp "s3://${bucket}/bin/node" /opt/indexus/node --region "${region}"
+aws s3 cp "s3://${bucket}/bin/provisioner" /opt/indexus/provisioner --region "${region}"
+chmod +x /opt/indexus/issuer /opt/indexus/node /opt/indexus/provisioner
+
+# Refresh public IP on every service start (EC2 stop/start can change it).
+# Writes systemd drop-ins with Environment=PUBLIC_IP=...
+cat >/usr/local/bin/indexus-refresh-public-ip <<'REFRESH'
+#!/bin/bash
+set -euo pipefail
+TOKEN=$(curl -sf -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" || true)
+if [[ -n "$${TOKEN:-}" ]]; then
+  PUBLIC_IP=$(curl -sf -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-ipv4 || true)
+else
+  PUBLIC_IP=$(curl -sf http://169.254.169.254/latest/meta-data/public-ipv4 || true)
+fi
+if [[ -z "$${PUBLIC_IP:-}" ]]; then
+  PUBLIC_IP=$(curl -sf https://checkip.amazonaws.com || true)
+fi
+PUBLIC_IP=$(echo "$PUBLIC_IP" | tr -d '[:space:]')
+test -n "$PUBLIC_IP"
+if [[ -f /etc/indexus/node.json ]]; then
+ jq --arg ip "$PUBLIC_IP" '.network.advertise=[$ip]' /etc/indexus/node.json >/etc/indexus/node.json.next
+ mv /etc/indexus/node.json.next /etc/indexus/node.json
+fi
+install -d -m 0755 /etc/indexus
+printf '%s\n' "$PUBLIC_IP" >/etc/indexus/public_ip
+install -d /etc/systemd/system/indexus-node.service.d /etc/systemd/system/indexus-issuer.service.d
+PUBLIC_IP=$(cat /etc/indexus/public_ip)
+cat >/etc/indexus/node.json <<JSON
+{
+  "storage": {
+    "path": "/var/lib/indexus/backup",
+    "identity_directory": "/etc/indexus"
+  },
+  "identity": {
+    "network": "${network_id}",
+    "cluster": "indexus",
+    "issuer": "http://127.0.0.1:22000"
+  },
+  "network": {
+    "listen": "0.0.0.0:21000",
+    "monitoring": "127.0.0.1:19000",
+    "advertise": [
+      "$${PUBLIC_IP}"
+    ]
+  },
+  "limits": {
+    "data_bytes": 34359738368,
+    "memory_refuse_pct": 60
+  },
+  "provisioner": "http://127.0.0.1:22010"
+}
+JSON
+cat >/etc/systemd/system/indexus-provisioner.service <<EOF
+[Unit]
+Description=Indexus process provisioner
+After=indexus-issuer.service
+Requires=indexus-issuer.service
+[Service]
+ExecStart=/opt/indexus/provisioner -addr :22010 -issuer http://127.0.0.1:22000 -network ${network_id} -bootstrap $${PUBLIC_IP} -region ${region} -launchTemplate ${launch_template_id} -spawnMax ${spawn_max}
+Restart=on-failure
+RestartSec=3
+[Install]
+WantedBy=multi-user.target
+EOF
+cat >/etc/systemd/system/indexus-node.service <<EOF
+[Unit]
+Description=Indexus Bootstrap Node
+After=indexus-issuer.service
+Requires=indexus-issuer.service
+[Service]
+Environment=GOMEMLIMIT=1536MiB
+MemoryHigh=1792M
+MemoryMax=2G
+WorkingDirectory=/var/lib/indexus
+ExecStartPre=/usr/local/bin/indexus-refresh-public-ip
+ExecStart=/opt/indexus/node serve -config /etc/indexus/node.json
+Restart=always
+RestartSec=3
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+systemctl enable --now indexus-issuer.service
+sleep 2
+/opt/indexus/node init -config /etc/indexus/node.json
+systemctl enable --now indexus-provisioner.service indexus-node.service

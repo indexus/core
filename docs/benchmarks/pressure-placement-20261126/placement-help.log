@@ -1,0 +1,13 @@
+usage: placement.py [-h] --bin BIN --out OUT --image IMAGE
+                    [--trigger {demand,controlled}]
+
+Real provisioner/hooks + two agents, on one shared Linux VM. Demand mode uses
+real node write-pressure requests; controlled mode diagnoses coalescing
+without creating donor demand.
+
+options:
+  -h, --help            show this help message and exit
+  --bin BIN
+  --out OUT
+  --image IMAGE
+  --trigger {demand,controlled}

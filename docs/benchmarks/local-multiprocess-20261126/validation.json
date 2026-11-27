@@ -1,0 +1,21 @@
+{
+  "gofmt": "empty",
+  "go_build": "passed",
+  "go_test_all": "passed, opt-in heavy labs not enabled",
+  "race": [
+    "cmd/experiment (complete)",
+    "internal/mesh TestCopyBudgetSeparateProcessesAndCrash and helper"
+  ],
+  "linux_flock_subprocess_test": "passed, slots 1 and 2, process crash",
+  "node_queue_tests": "11 passed",
+  "python_decoding_tests": "2 passed",
+  "successful_live_runs": 9,
+  "acknowledged_and_audited": 34997,
+  "aws_launched": false,
+  "limits": [
+    "full mesh -race not rerun in this pass",
+    "one physical Docker VM",
+    "no real provisioner or multi-machine placement"
+  ],
+  "intentional_red": "New referral tests fail semantically against the old collectionTotal; existing assertions unchanged."
+}

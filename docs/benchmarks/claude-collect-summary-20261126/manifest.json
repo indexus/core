@@ -1,0 +1,23 @@
+{
+  "base": "557e07f",
+  "claude_tip": "bebd97a",
+  "validated_production_tip": "630ce85",
+  "local_output": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/outputs/review-claude-collect-20261126",
+  "sha256": {
+    "lab8.log": "d2d8053d2aa93964c08c8859d408db5463d47beb9d4739c4c4f77d64cee00c44",
+    "collection-after.log": "732aaa4442a8d3d111dba38a3c886702339357cf8d86562e6712af3dad877086",
+    "inventory-after.log": "46d3ed02a95c56846c93185e070bcac9dd3b169f20e7a0edb6070c795852fe22",
+    "lab8-summary.json": "31860f1740a1315df07eb1d5f2f3ce7f28a0411c929d8d83993d15419572809d",
+    "empty-inventory-before.log": "8a011406cc9b3ea1ff710e9687a328e16ed1c02ceb0131eb2a3bc8ab95dde12c",
+    "empty-inventory-after.log": "cf679c2cf809eeaae26a7b55e4bfd804d94ba460d9e68301de48ef3ce1b4ccbc",
+    "targeted.log": "5edf08d136f0bea4f0394017f033db3d97a16c1f03755825b518e95482335e41",
+    "batch-before.log": "a819393a6d96a13b2b8c44ac88df4b0174bbd6d5dc8a8fcf753dd3f6ffbc3af3",
+    "baseline.json": "47d6fbca3ed99a47f179231624f9e5cedb43aa0ee4dd335237c8fa38174b32b9",
+    "race.log": "16510d7a731bac85417eb84dbc1bc85ed0fc361bed9daa674eafa57b976a04c9",
+    "validation.json": "7e59b259ff465b54d1012ffd32dffab858dac17cddd3428eff57dd7496a18c57",
+    "all-tests.log": "94c40e41b06023ce3c54cd87bab2503bed4e902b83404c89b082e6c8ae1d8aaa",
+    "batch-after.log": "86f1955cfa36ac244278b2eb70e5c34e3011074686a5540d8e3ba52954eb25f9",
+    "quic-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

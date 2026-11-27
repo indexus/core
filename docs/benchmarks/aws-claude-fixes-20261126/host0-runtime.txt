@@ -1,0 +1,41 @@
+Linux ip-10-77-6-216.eu-west-3.compute.internal 6.18.62-127.179.amzn2023.x86_64 #2 SMP PREEMPT_DYNAMIC Wed Nov 11 00:36:10 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+
+HOST_MOUNT_NAMESPACE
+mnt:[4026531832]
+/proc  proc   proc
+host stat device=22 inode=4026532019
+
+HOST_CPU_SET
+cpu  4247 0 646 29355 567 0 17 16 0 0
+cpu0 1723 0 165 6457 326 0 3 0 0 0
+cpu1 698 0 160 7786 75 0 4 15 0 0
+cpu2 1142 0 189 7273 103 0 8 0 0 0
+cpu3 681 0 129 7838 62 0 2 0 0 0
+
+NODE_PID 2902
+mnt:[4026531832]
+node root stat device=22 inode=4026532019
+cpu0
+cpu1
+cpu2
+cpu3
+0::/system.slice/indexus-agent.service
+
+NODE_PID 3081
+mnt:[4026531832]
+node root stat device=22 inode=4026532019
+cpu0
+cpu1
+cpu2
+cpu3
+0::/system.slice/indexus-agent.service
+
+LOG_PATHS
+/var/lib/indexus/slots/0/node.log
+/var/lib/indexus/slots/0/backup.causal.db.records/00000000000000000001.log
+/var/lib/indexus/slots/0/backup.causal.db.records/00000000000000000011.log
+/var/lib/indexus/slots/0/backup.causal.db.records/00000000000000068074.log
+/var/lib/indexus/slots/0/backup.causal.db.records/00000000000000133659.log
+/var/lib/indexus/slots/1/node.log
+/var/lib/indexus/slots/1/backup.causal.db.records/00000000000000000001.log
+/var/lib/indexus/slots/1/backup.causal.db.records/00000000000000053420.log

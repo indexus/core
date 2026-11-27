@@ -1,0 +1,5 @@
+ok  	github.com/indexus/go-indexus-core/internal/storage	132.073s
+ok  	github.com/indexus/go-indexus-core/internal/autoscale	7.840s
+ok  	github.com/indexus/go-indexus-core/cmd/experiment	4.871s
+ok  	github.com/indexus/go-indexus-core/internal/adapter/http/monitoring	2.743s
+ok  	github.com/indexus/go-indexus-core/internal/mesh	286.846s

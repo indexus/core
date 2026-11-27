@@ -1,0 +1,77 @@
+#!/bin/bash
+# Load machine: waits for every host's agent, publishes the agent list for the
+# provisioner, runs plan/scenarios.sh, uploads results to
+# s3://${bucket}/results/, writes DONE, then terminates.
+set -uxo pipefail
+# QUIC over UDP: room for the socket buffers quic-go asks for (see host.sh.tftpl).
+sysctl -w net.core.rmem_max=7500000 net.core.wmem_max=7500000
+# Safety net that survives reboots: terminate at a fixed deadline.
+DEADLINE=$(( $(date +%s) + ${ttl} * 60 ))
+cat >/usr/local/bin/indexus-deadline <<DEADLINE_SCRIPT
+#!/bin/bash
+left=\$(( ($DEADLINE - \$(date +%s)) / 60 ))
+if (( left < 1 )); then shutdown -h now; else shutdown -h +\$left; fi
+DEADLINE_SCRIPT
+chmod +x /usr/local/bin/indexus-deadline
+cat >/etc/systemd/system/indexus-deadline.service <<UNIT
+[Unit]
+Description=Terminate this experiment instance at its deadline
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/indexus-deadline
+[Install]
+WantedBy=multi-user.target
+UNIT
+systemctl enable --now indexus-deadline.service
+
+install -d /opt/indexus /results
+until aws s3 cp "s3://${bucket}/bin/experiment" /opt/indexus/experiment --region "${region}"; do sleep 5; done
+# The auditor follows the tested protocol even when the load generator is pinned.
+until aws s3 cp "s3://${bucket}/bin/agent" /opt/indexus/auditor --region "${region}"; do sleep 5; done
+export AUDITOR=/opt/indexus/auditor
+until aws s3 cp "s3://${bucket}/bin/ca/ca.crt" /opt/indexus/ca.crt --region "${region}"; do sleep 5; done
+until aws s3 cp "s3://${bucket}/plan/scenarios.sh" /opt/indexus/scenarios.sh --region "${region}"; do sleep 5; done
+chmod +x /opt/indexus/*
+ulimit -n 1048576
+
+IPS="${ips}"
+AGENTS=$(for ip in $IPS; do printf 'http://%s:22100,' $ip; done | sed 's/,$//')
+for ip in $IPS; do
+  until curl -sf --max-time 2 "http://$ip:22100/count"; do sleep 5; done
+done
+echo -n "$AGENTS" | aws s3 cp - "s3://${bucket}/agents" --region "${region}"
+echo "agents up: $AGENTS" | tee /results/boot.log
+
+# LOAD-SYNC: this machine and the extra load machines each run a load agent;
+# scenarios.sh gives every step to all of them with one start time.
+cat >/etc/systemd/system/indexus-loadagent.service <<EOF
+[Unit]
+Description=Indexus load agent
+[Service]
+LimitNOFILE=1048576
+Environment=SSL_CERT_FILE=/opt/indexus/ca.crt
+ExecStart=/opt/indexus/experiment loadagent -listen :22200 -dir /var/tmp/indexus-load
+Restart=always
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl enable --now indexus-loadagent.service
+LOADERS="http://127.0.0.1:22200"
+for ip in ${load_ips}; do LOADERS="$LOADERS,http://$ip:22200"; done
+for a in $${LOADERS//,/ }; do
+  until curl -sf --max-time 2 "$a/status"; do sleep 5; done
+done
+echo "load agents up: $LOADERS" | tee -a /results/boot.log
+
+export AGENTS LOADERS SLOTS=${slots} RESOURCE_SLOTS=${resource_slots} SIZES="${sizes}" ITEMS=${items} MODE=${mode}
+export ISSUER="http://$${IPS%% *}:22000" PROVISIONER="http://$${IPS%% *}:22010"
+export SSL_CERT_FILE=/opt/indexus/ca.crt # nodes serve TLS + HTTP/3 (NET-1)
+if aws s3 cp "s3://${bucket}/plan/env" /opt/indexus/plan.env --region "${region}"; then set -a; . /opt/indexus/plan.env; set +a; fi
+# Bounded so the results always upload before the instance's own deadline.
+export RESULTS_URL="s3://${bucket}/results" AGENTS_S3="s3://${bucket}/agents"
+timeout $(( DEADLINE - $(date +%s) - 300 )) /opt/indexus/scenarios.sh /results >/results/scenarios.log 2>&1 || echo "scenarios exit $?" >>/results/boot.log
+# The acknowledged keys served the audits above; they are gigabytes per run.
+find /results -name acked.jsonl -delete
+aws s3 cp /results "s3://${bucket}/results/" --recursive --region "${region}"
+echo done | aws s3 cp - "s3://${bucket}/results/DONE" --region "${region}"
+shutdown -h now

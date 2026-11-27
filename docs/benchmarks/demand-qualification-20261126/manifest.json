@@ -1,0 +1,34 @@
+{
+  "production_node_source": "e6e86d7",
+  "local_outputs": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/outputs/demand-qualification-20261126",
+  "binary_sha256": {
+    "provisioner": "267d1ef90b0a8841afacc4336335b6eeba86154d2624731ac02fa7251490acdf",
+    "experiment": "b995b21964de95446d5e115f0fb396f11cffe9898ca2b62c870d934d528fbc38",
+    "node": "9e3b612040565cd8d11ddbe3b111b12a9a5201690889b472b933d94aae7c0ed5",
+    "issuer": "876de07d17efacfe4e2f5c1a3cb2aba0913f63b7792ada88ac1e5b5465de7ee2"
+  },
+  "sha256": {
+    "machines.log": "f6e493dfe94371e743870add678fc30fe118e9aa13ef8d196578249201de4401",
+    "summary.json": "6b07680b2a4bf69f37a955137f925fb2cb9356a1d31bbc7e166800d1c3cd46fd",
+    "audit.json": "487af1b215f42d87dae415c09afb9f7ed6d90b1f4976f275246b7ba2af714795",
+    "setup.json": "3ae6a5aa07ddfba8fd6137812951bbd35df337d11887a46d38e089e98984f4cc",
+    "samples.jsonl.gz": "7bc1292be10570271c027b840837140540365d0366bf1b70e72c1ee227c53769",
+    "provisioner.log": "ae38be0c3c5dcbeaed6c56722493e838cb49bec06b06f40a135a411761b5cd54",
+    "load-summary.json": "a2d5cf783dca0172efb136274e2c91a3eaa89cafa7a7fec075b1b90c7e7eda1d",
+    "audit.log": "dcb410bc9f612442f9f009102a9d32da70fdf70efb8f9c39fdbda27eb6b73cb9",
+    "experiment-race.log": "71aa53261807d1e8ae2871e65cbf7a892f9b6087a44670232c5f064e2b041aa3",
+    "live.html": "c508d28de2f65246e52f8f7ea581c072c3b8ce83561a332606cce299708f5de0",
+    "all-tests.log": "00a62c4eefc90768646150af6e9fd3761ca6218ca07b04bda94123f3fc44d465",
+    "experiment-tests.log": "28e1042eaff714b1ba12f27491af7ae6ee49c176f1d252b2c018953fe049ef8d",
+    "live.jsonl": "aa06d20159069dc205daee467623e30db05a81926f8f294c2a621602d5e0f22c",
+    "load.log": "e913035f18a6f5801f4cfb0b33a3a8d7f9fd575809a095b29d57d90dd8444bd9",
+    "failure.json": "e1881bf01b00fcfa678d15c422ecc0b752abf2fc885d3dcc6902826131a4bde4",
+    "initial.json": "41798017eea21c293ad9eff12ac23631632f772bfb2a79ff62fdd29011cf7dd9",
+    "load.jsonl": "53631a970d6bc6d6d80ac1fb421f411e949615cc9fa15baab3e22b4401a0d886",
+    "reserve-2.log": "aca554bc885713150c8ee4a84d6e22d5719aeece6387b4d3753517a060757231",
+    "offline-replay.log": "c133b7af45bcd5ae0b81a2159610708cbb87c47ec05c54e79764567f5f7bebbd",
+    "reserve-0.log": "a9d9d8ee77eb74340945a0c947e03dc6a9013c8a529b982df7a4db7ce17fe6f8",
+    "reserve-1.log": "7c7a68f806917d3491cce636d07c91bb2800433e401748ed48c444eb9e61fa27",
+    "build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

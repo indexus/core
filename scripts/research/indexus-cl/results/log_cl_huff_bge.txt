@@ -1,0 +1,31 @@
+{'data': 'huffpost__bge-small-en-v1.5', 'n': 209527, 'd': 384, 'C': 42}
+STATIC {"logreg_trained": 0.6394702302827825, "ridge_sums": 0.5611740842381577, "lda_sums": 0.5871614365827467, "ncm_sums": 0.5255458775802411} {"ridge_lambda": 1e-06, "lda_shrink": 0.001, "logreg_C": 10.0} {"logreg": 99.62221455574036, "ridge_solve": 0.005537986755371094, "lda_solve": 0.00507044792175293} 149s
+ZONES k=8 tau=30.0 {"0": 0.5604, "1": 0.5658, "2": 0.567, "3": 0.5691, "4": 0.5746, "5": 0.5764, "6": 0.5768, "7": 0.5774, "8": 0.578, "9": 0.5779, "10": 0.5787}
+ZONES k=8 tau=300.0 {"0": 0.5604, "1": 0.5641, "2": 0.5672, "3": 0.5677, "4": 0.5692, "5": 0.571, "6": 0.5721, "7": 0.5727, "8": 0.5727, "9": 0.572, "10": 0.5714}
+ZONES k=8 tau=3000.0 {"0": 0.5604, "1": 0.5607, "2": 0.562, "3": 0.5629, "4": 0.5635, "5": 0.563, "6": 0.5636, "7": 0.5636, "8": 0.5633, "9": 0.5637, "10": 0.5627}
+ZONES 62s
+YEAR 2012 25084 {'lda_sums': np.float64(0.79), 'ridge_sums': np.float64(0.774), 'lda_decay0.5': np.float64(0.79), 'lda_window2': np.float64(0.79), 'sgd_online': np.float64(0.701), 'logreg_retrain': np.float64(0.816), 'logreg_first_year': np.float64(0.816)}
+YEAR 2013 27667 {'lda_sums': np.float64(0.784), 'ridge_sums': np.float64(0.766), 'lda_decay0.5': np.float64(0.786), 'lda_window2': np.float64(0.784), 'sgd_online': np.float64(0.756), 'logreg_retrain': np.float64(0.806), 'logreg_first_year': np.float64(0.771)}
+YEAR 2014 25872 {'lda_sums': np.float64(0.548), 'ridge_sums': np.float64(0.447), 'lda_decay0.5': np.float64(0.554), 'lda_window2': np.float64(0.552), 'sgd_online': np.float64(0.556), 'logreg_retrain': np.float64(0.562), 'logreg_first_year': np.float64(0.345)}
+YEAR 2015 25605 {'lda_sums': np.float64(0.508), 'ridge_sums': np.float64(0.404), 'lda_decay0.5': np.float64(0.544), 'lda_window2': np.float64(0.563), 'sgd_online': np.float64(0.61), 'logreg_retrain': np.float64(0.526), 'logreg_first_year': np.float64(0.163)}
+YEAR 2016 25679 {'lda_sums': np.float64(0.584), 'ridge_sums': np.float64(0.521), 'lda_decay0.5': np.float64(0.62), 'lda_window2': np.float64(0.639), 'sgd_online': np.float64(0.673), 'logreg_retrain': np.float64(0.638), 'logreg_first_year': np.float64(0.154)}
+YEAR 2017 23912 {'lda_sums': np.float64(0.547), 'ridge_sums': np.float64(0.513), 'lda_decay0.5': np.float64(0.591), 'lda_window2': np.float64(0.614), 'sgd_online': np.float64(0.666), 'logreg_retrain': np.float64(0.604), 'logreg_first_year': np.float64(0.138)}
+YEAR 2018 7788 {'lda_sums': np.float64(0.594), 'ridge_sums': np.float64(0.61), 'lda_decay0.5': np.float64(0.634), 'lda_window2': np.float64(0.647), 'sgd_online': np.float64(0.709), 'logreg_retrain': np.float64(0.669), 'logreg_first_year': np.float64(0.193)}
+YEAR 2019 1604 {'lda_sums': np.float64(0.449), 'ridge_sums': np.float64(0.354), 'lda_decay0.5': np.float64(0.499), 'lda_window2': np.float64(0.591), 'sgd_online': np.float64(0.691), 'logreg_retrain': np.float64(0.446), 'logreg_first_year': np.float64(0.137)}
+YEAR 2020 1644 {'lda_sums': np.float64(0.524), 'ridge_sums': np.float64(0.585), 'lda_decay0.5': np.float64(0.624), 'lda_window2': np.float64(0.712), 'sgd_online': np.float64(0.746), 'logreg_retrain': np.float64(0.578), 'logreg_first_year': np.float64(0.173)}
+YEAR 2021 1653 {'lda_sums': np.float64(0.499), 'ridge_sums': np.float64(0.564), 'lda_decay0.5': np.float64(0.63), 'lda_window2': np.float64(0.753), 'sgd_online': np.float64(0.714), 'logreg_retrain': np.float64(0.596), 'logreg_first_year': np.float64(0.15)}
+YEAR 2022 1119 {'lda_sums': np.float64(0.498), 'ridge_sums': np.float64(0.545), 'lda_decay0.5': np.float64(0.656), 'lda_window2': np.float64(0.753), 'sgd_online': np.float64(0.76), 'logreg_retrain': np.float64(0.577), 'logreg_first_year': np.float64(0.176)}
+STREAM lda_sums {"prequential_acc": 0.5099, "final_acc_all_years": 0.5582, "avg_acc_seen": 0.6291, "BWT": -0.0185, "FWT": 0.5099, "update_seconds_total": 0.7943}
+STREAM ridge_sums {"prequential_acc": 0.4964, "final_acc_all_years": 0.5481, "avg_acc_seen": 0.6076, "BWT": -0.0054, "FWT": 0.4964, "update_seconds_total": 0.0395}
+STREAM lda_decay0.5 {"prequential_acc": 0.5437, "final_acc_all_years": 0.5478, "avg_acc_seen": 0.6104, "BWT": -0.0904, "FWT": 0.5437, "update_seconds_total": 0.8511}
+STREAM lda_window2 {"prequential_acc": 0.5747, "final_acc_all_years": 0.5049, "avg_acc_seen": 0.5397, "BWT": -0.1845, "FWT": 0.5747, "update_seconds_total": 1.899}
+STREAM sgd_online {"prequential_acc": 0.5848, "final_acc_all_years": 0.5577, "avg_acc_seen": 0.5087, "BWT": -0.1448, "FWT": 0.5848, "update_seconds_total": 12.5785}
+STREAM logreg_retrain {"prequential_acc": 0.5436, "final_acc_all_years": 0.6169, "avg_acc_seen": 0.674, "BWT": -0.0032, "FWT": 0.5436, "update_seconds_total": 481.6217}
+STREAM logreg_first_year {"prequential_acc": 0.2401, "final_acc_all_years": 0.2924, "avg_acc_seen": 0.4774, "BWT": 0.0, "FWT": 0.2401, "update_seconds_total": 0.0}
+STREAM 515s
+CLASSINC lda_sums {"final_avg_acc": 0.5779, "BWT": -0.1538}
+CLASSINC ridge_sums {"final_avg_acc": 0.5123, "BWT": -0.2504}
+CLASSINC ncm_sums {"final_avg_acc": 0.5206, "BWT": -0.1561}
+CLASSINC sgd_online {"final_avg_acc": 0.1484, "BWT": -0.8538}
+CLASSINC 17s
+WROTE

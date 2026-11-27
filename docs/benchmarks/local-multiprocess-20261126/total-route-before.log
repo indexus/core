@@ -1,0 +1,9 @@
+--- FAIL: TestCollectionTotalFollowsShallowReferral (0.00s)
+    totals_test.go:47: got 0: <nil>
+--- FAIL: TestCollectionTotalRejectsReferralCycleAndMissingRoute (0.00s)
+    totals_test.go:65: cycle=false: unavailable total became zero
+--- FAIL: TestCollectionTotalPreservesTLSAcrossReferral (0.01s)
+    totals_test.go:102: TLS referral: 0 <nil>
+FAIL
+FAIL	github.com/indexus/go-indexus-core/cmd/experiment	0.450s
+FAIL

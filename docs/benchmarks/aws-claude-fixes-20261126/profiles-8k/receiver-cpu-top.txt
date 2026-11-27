@@ -1,0 +1,374 @@
+File: node
+Build ID: 81464165eda01af8f8d2faa51ad304aee77f4d61
+Type: cpu
+Time: 2026-11-26 18:26:01 CET
+Duration: 10s, Total samples = 5.29s (52.89%)
+Showing nodes accounting for 4.32s, 81.66% of 5.29s total
+Dropped 358 nodes (cum <= 0.03s)
+      flat  flat%   sum%        cum   cum%
+         0     0%     0%      1.77s 33.46%  github.com/indexus/go-indexus-core/indexus.(*Worker).everyWith
+         0     0%     0%      1.77s 33.46%  github.com/indexus/go-indexus-core/indexus.(*Worker).everyWith.func1
+         0     0%     0%      1.52s 28.73%  github.com/indexus/go-indexus-core/indexus.(*Node).RefreshContext
+         0     0%     0%      1.52s 28.73%  github.com/indexus/go-indexus-core/indexus.(*Node).meshMaintainContext
+         0     0%     0%      1.52s 28.73%  github.com/indexus/go-indexus-core/indexus.(*Worker).Start
+         0     0%     0%      1.52s 28.73%  github.com/indexus/go-indexus-core/indexus.(*Worker).Start.func1
+         0     0%     0%      1.52s 28.73%  github.com/indexus/go-indexus-core/indexus.(*Worker).every (inline)
+         0     0%     0%      1.52s 28.73%  github.com/indexus/go-indexus-core/indexus.maintainPhases (inline)
+         0     0%     0%      1.52s 28.73%  github.com/indexus/go-indexus-core/indexus.maintainPhasesWithin
+         0     0%     0%      1.52s 28.73%  github.com/indexus/go-indexus-core/internal/app/node.run.func1
+         0     0%     0%      1.52s 28.73%  github.com/indexus/go-indexus-core/internal/mesh.(*Service).Resume
+         0     0%     0%      1.52s 28.73%  github.com/indexus/go-indexus-core/internal/mesh.(*Service).resumeTransfer
+         0     0%     0%      1.52s 28.73%  github.com/indexus/go-indexus-core/internal/storage.(*Store).CollectTransferred
+         0     0%     0%      1.36s 25.71%  github.com/indexus/go-indexus-core/internal/storage.(*Store).compactStaging
+         0     0%     0%      1.24s 23.44%  github.com/indexus/go-indexus-core/internal/storage.(*Store).updateLocked
+         0     0%     0%      1.24s 23.44%  github.com/indexus/go-indexus-core/internal/storage.(*Store).updateWroteKind
+         0     0%     0%      1.20s 22.68%  github.com/indexus/go-indexus-core/internal/storage.(*Store).updateCausalKind
+         0     0%     0%      1.14s 21.55%  runtime.systemstack
+         0     0%     0%      0.95s 17.96%  runtime.gcBgMarkWorker
+     0.05s  0.95%  0.95%      0.94s 17.77%  github.com/indexus/go-indexus-core/internal/zonelog.eachKey
+         0     0%  0.95%      0.93s 17.58%  runtime.gcBgMarkWorker.func2
+     0.02s  0.38%  1.32%      0.93s 17.58%  runtime.gcDrain
+         0     0%  1.32%      0.88s 16.64%  github.com/indexus/go-indexus-core/internal/storage.(*Store).accountUsage
+         0     0%  1.32%      0.88s 16.64%  github.com/indexus/go-indexus-core/internal/storage.(*Store).usageAfter
+         0     0%  1.32%      0.84s 15.88%  github.com/indexus/go-indexus-core/internal/storage.reservationDelta
+         0     0%  1.32%      0.80s 15.12%  github.com/indexus/go-indexus-core/internal/storage.reservedBy
+         0     0%  1.32%      0.76s 14.37%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).FlushPendingEdges
+         0     0%  1.32%      0.76s 14.37%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).sendEdge
+         0     0%  1.32%      0.74s 13.99%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).armFlushLocked.func1
+     0.05s  0.95%  2.27%      0.69s 13.04%  runtime.mallocgc
+         0     0%  2.27%      0.63s 11.91%  net/http.HandlerFunc.ServeHTTP
+         0     0%  2.27%      0.62s 11.72%  net/http.(*ServeMux).ServeHTTP
+         0     0%  2.27%      0.60s 11.34%  github.com/indexus/go-indexus-core/internal/adapter/http/p2p.NewHttpHandler.func2
+         0     0%  2.27%      0.60s 11.34%  github.com/indexus/go-indexus-core/internal/adapter/http/p2p.NewHttpHandler.withCORS.func3
+     0.02s  0.38%  2.65%      0.59s 11.15%  github.com/indexus/go-indexus-core/internal/zonelog.(*cache).get
+         0     0%  2.65%      0.58s 10.96%  runtime.gcDrainMarkWorkerIdle (inline)
+         0     0%  2.65%      0.56s 10.59%  github.com/indexus/go-indexus-core/internal/zonelog.(*Store).build
+         0     0%  2.65%      0.56s 10.59%  github.com/indexus/go-indexus-core/internal/zonelog.(*Store).workOnce
+         0     0%  2.65%      0.54s 10.21%  github.com/indexus/go-indexus-core/indexus.(*Node).MeshData
+         0     0%  2.65%      0.53s 10.02%  github.com/indexus/go-indexus-core/internal/storage.(*Tx).run (inline)
+         0     0%  2.65%      0.52s  9.83%  github.com/indexus/go-indexus-core/internal/adapter/http/p2p.NewHttpHandler.func1
+         0     0%  2.65%      0.52s  9.83%  github.com/indexus/go-indexus-core/internal/adapter/meshhttp.(*Handler).ServeHTTP
+         0     0%  2.65%      0.52s  9.83%  github.com/indexus/go-indexus-core/internal/adapter/meshhttp.(*Handler).serveMesh
+         0     0%  2.65%      0.52s  9.83%  github.com/indexus/go-indexus-core/internal/app/node.configureCluster.func2
+         0     0%  2.65%      0.52s  9.83%  github.com/quic-go/quic-go/http3.(*RawServerConn).HandleRequestStream
+         0     0%  2.65%      0.52s  9.83%  github.com/quic-go/quic-go/http3.(*RawServerConn).handleRequestStream
+         0     0%  2.65%      0.52s  9.83%  github.com/quic-go/quic-go/http3.(*RawServerConn).handleRequestStream.func2
+         0     0%  2.65%      0.52s  9.83%  github.com/quic-go/quic-go/http3.(*Server).handleConn.func3
+         0     0%  2.65%      0.52s  9.83%  sync.(*WaitGroup).Go.func1
+     0.01s  0.19%  2.84%      0.51s  9.64%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).valueEdges
+         0     0%  2.84%      0.51s  9.64%  github.com/indexus/go-indexus-core/internal/zonelog.(*Store).startWork.func2
+     0.16s  3.02%  5.86%      0.47s  8.88%  runtime.scanObject
+         0     0%  5.86%      0.46s  8.70%  github.com/indexus/go-indexus-core/internal/zonelog.(*Store).build.func1
+         0     0%  5.86%      0.45s  8.51%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).boundaryKeys
+     0.28s  5.29% 11.15%      0.44s  8.32%  runtime.tryDeferToSpanScan
+         0     0% 11.15%      0.42s  7.94%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).contributionOf
+         0     0% 11.15%      0.41s  7.75%  github.com/indexus/go-indexus-core/indexus.(*Node).meshServeSummary
+         0     0% 11.15%      0.41s  7.75%  github.com/indexus/go-indexus-core/internal/storage.(*txReader).ScanWith
+     0.01s  0.19% 11.34%      0.41s  7.75%  github.com/indexus/go-indexus-core/internal/storage.reservationDelta.func1
+     0.01s  0.19% 11.53%      0.41s  7.75%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).ExportPage
+         0     0% 11.53%      0.41s  7.75%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).valueWithIncoming
+         0     0% 11.53%      0.41s  7.75%  github.com/indexus/go-indexus-core/internal/zonelog.(*Snapshot).ScanWith
+     0.03s  0.57% 12.10%      0.41s  7.75%  runtime.scanSpan
+     0.01s  0.19% 12.29%      0.40s  7.56%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).zoneTotal
+         0     0% 12.29%      0.39s  7.37%  github.com/indexus/go-indexus-core/internal/storage.ZoneInventory.Each
+     0.05s  0.95% 13.23%      0.39s  7.37%  github.com/indexus/go-indexus-core/internal/storage.ZoneInventory.Each.func1
+         0     0% 13.23%      0.39s  7.37%  github.com/indexus/go-indexus-core/internal/summary.boundariesIn
+     0.01s  0.19% 13.42%      0.39s  7.37%  github.com/indexus/go-indexus-core/internal/zonelog.(*segment).seek
+         0     0% 13.42%      0.38s  7.18%  github.com/indexus/go-indexus-core/internal/zonelog.(*Store).payload
+         0     0% 13.42%      0.37s  6.99%  github.com/indexus/go-indexus-core/internal/storage.(*ZoneSums).Children (inline)
+         0     0% 13.42%      0.37s  6.99%  github.com/indexus/go-indexus-core/internal/storage.(*txReader).Get
+         0     0% 13.42%      0.37s  6.99%  github.com/indexus/go-indexus-core/internal/storage.committedValue
+         0     0% 13.42%      0.37s  6.99%  github.com/indexus/go-indexus-core/internal/zonelog.(*Snapshot).Children
+     0.01s  0.19% 13.61%      0.37s  6.99%  github.com/indexus/go-indexus-core/internal/zonelog.(*Snapshot).spansInto
+         0     0% 13.61%      0.37s  6.99%  github.com/indexus/go-indexus-core/internal/zonelog.(*Store).Get
+         0     0% 13.61%      0.36s  6.81%  github.com/indexus/go-indexus-core/internal/storage.(*Store).view
+         0     0% 13.61%      0.36s  6.81%  github.com/indexus/go-indexus-core/internal/zonelog.valFile.read
+     0.10s  1.89% 15.50%      0.36s  6.81%  runtime.mallocgcSmallNoscan
+         0     0% 15.50%      0.35s  6.62%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).exportKeysFor
+         0     0% 15.50%      0.35s  6.62%  runtime.gcDrainMarkWorkerDedicated (inline)
+     0.01s  0.19% 15.69%      0.34s  6.43%  github.com/indexus/go-indexus-core/internal/summary.boundariesIn.func1
+     0.01s  0.19% 15.88%      0.34s  6.43%  github.com/indexus/go-indexus-core/internal/zonelog.(*Snapshot).lookup
+     0.03s  0.57% 16.45%      0.34s  6.43%  runtime.growslice
+         0     0% 16.45%      0.33s  6.24%  github.com/indexus/go-indexus-core/internal/storage.key
+         0     0% 16.45%      0.32s  6.05%  github.com/indexus/go-indexus-core/internal/zonelog.(*Snapshot).Get
+         0     0% 16.45%      0.32s  6.05%  github.com/indexus/go-indexus-core/internal/zonelog.valFile.frame
+         0     0% 16.45%      0.32s  6.05%  github.com/indexus/go-indexus-core/internal/zonelog.valFile.read.func2
+         0     0% 16.45%      0.31s  5.86%  compress/flate.(*Writer).Write (inline)
+         0     0% 16.45%      0.31s  5.86%  compress/flate.(*compressor).encSpeed
+         0     0% 16.45%      0.31s  5.86%  compress/flate.(*compressor).write
+         0     0% 16.45%      0.31s  5.86%  github.com/indexus/go-indexus-core/internal/zonelog.(*valWriter).frame.func1
+         0     0% 16.45%      0.30s  5.67%  compress/flate.(*decompressor).Read
+         0     0% 16.45%      0.30s  5.67%  github.com/indexus/go-indexus-core/internal/storage.scanPaged
+     0.02s  0.38% 16.82%      0.30s  5.67%  github.com/indexus/go-indexus-core/internal/tree.NewZoneKey
+         0     0% 16.82%      0.30s  5.67%  io.ReadAtLeast
+         0     0% 16.82%      0.30s  5.67%  io.ReadFull (inline)
+     0.01s  0.19% 17.01%      0.28s  5.29%  github.com/indexus/go-indexus-core/internal/tree.ZoneID
+     0.01s  0.19% 17.20%      0.28s  5.29%  github.com/indexus/go-indexus-core/internal/zonelog.(*page).row
+         0     0% 17.20%      0.28s  5.29%  github.com/indexus/go-indexus-core/internal/zonelog.(*segIter).load
+         0     0% 17.20%      0.28s  5.29%  github.com/indexus/go-indexus-core/internal/zonelog.(*segIter).next
+     0.28s  5.29% 22.50%      0.28s  5.29%  runtime.memmove
+     0.04s  0.76% 23.25%      0.27s  5.10%  compress/flate.(*decompressor).huffmanBlock
+         0     0% 23.25%      0.27s  5.10%  github.com/indexus/go-indexus-core/internal/storage.(*Tx).scanRows
+         0     0% 23.25%      0.26s  4.91%  github.com/indexus/go-indexus-core/internal/tree.ZoneKeyID
+         0     0% 23.25%      0.25s  4.73%  github.com/indexus/go-indexus-core/indexus.(*Worker).spawn.func1
+     0.05s  0.95% 24.20%      0.23s  4.35%  github.com/indexus/go-indexus-core/internal/tree.MergeEncodings
+     0.01s  0.19% 24.39%      0.22s  4.16%  github.com/indexus/go-indexus-core/internal/storage.element (inline)
+         0     0% 24.39%      0.22s  4.16%  github.com/indexus/go-indexus-core/internal/zonelog.(*segment).get
+         0     0% 24.39%      0.21s  3.97%  github.com/indexus/go-indexus-core/internal/storage.(*Store).compactStaging.func1
+         0     0% 24.39%      0.20s  3.78%  github.com/indexus/go-indexus-core/internal/storage.(*Tx).any
+     0.03s  0.57% 24.95%      0.19s  3.59%  bytes.Compare (inline)
+     0.19s  3.59% 28.54%      0.19s  3.59%  cmpbody
+         0     0% 28.54%      0.19s  3.59%  compress/flate.(*decompressor).nextBlock
+         0     0% 28.54%      0.19s  3.59%  github.com/indexus/go-indexus-core/indexus.(*Node).UpdateContext
+         0     0% 28.54%      0.19s  3.59%  github.com/indexus/go-indexus-core/indexus.(*Worker).startSafe.func1
+         0     0% 28.54%      0.19s  3.59%  github.com/indexus/go-indexus-core/internal/storage.(*Store).commitSpatial
+         0     0% 28.54%      0.19s  3.59%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).Reconcile
+         0     0% 28.54%      0.19s  3.59%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).refreshLocked
+     0.01s  0.19% 28.73%      0.19s  3.59%  runtime.mapassign
+         0     0% 28.73%      0.18s  3.40%  github.com/indexus/go-indexus-core/internal/storage.(*Tx).commit
+     0.04s  0.76% 29.49%      0.18s  3.40%  github.com/indexus/go-indexus-core/internal/zonelog.(*segment).mayHold
+         0     0% 29.49%      0.17s  3.21%  github.com/indexus/go-indexus-core/internal/storage.(*Store).updateCausalKind.func1
+     0.03s  0.57% 30.06%      0.17s  3.21%  runtime.mapaccess1
+     0.17s  3.21% 33.27%      0.17s  3.21%  runtime.memclrNoHeapPointers
+     0.01s  0.19% 33.46%      0.17s  3.21%  runtime.newobject
+         0     0% 33.46%      0.16s  3.02%  compress/flate.(*huffmanBitWriter).writeBlockDynamic
+         0     0% 33.46%      0.16s  3.02%  github.com/indexus/go-indexus-core/internal/storage.(*Store).compactStaging.func2
+         0     0% 33.46%      0.16s  3.02%  github.com/indexus/go-indexus-core/internal/storage.dropStagingBatch
+     0.04s  0.76% 34.22%      0.16s  3.02%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).dueEdges
+         0     0% 34.22%      0.16s  3.02%  github.com/indexus/go-indexus-core/internal/zonelog.(*Store).Apply
+     0.03s  0.57% 34.78%      0.16s  3.02%  runtime.mallocgcSmallScanNoHeader
+     0.04s  0.76% 35.54%      0.16s  3.02%  sort.Search (inline)
+     0.09s  1.70% 37.24%      0.15s  2.84%  compress/flate.(*deflateFast).encode
+         0     0% 37.24%      0.15s  2.84%  github.com/indexus/go-indexus-core/internal/storage.(*Store).compactZoneRows
+         0     0% 37.24%      0.15s  2.84%  github.com/indexus/go-indexus-core/internal/zonelog.(*segWriter).add
+     0.03s  0.57% 37.81%      0.15s  2.84%  github.com/indexus/go-indexus-core/internal/zonelog.(*segWriter).flushPage
+     0.14s  2.65% 40.45%      0.14s  2.65%  aeshashbody
+         0     0% 40.45%      0.14s  2.65%  github.com/indexus/go-indexus-core/internal/zonelog.(*Store).ScanWith
+     0.01s  0.19% 40.64%      0.14s  2.65%  github.com/indexus/go-indexus-core/internal/zonelog.(*page).search (inline)
+         0     0% 40.64%      0.14s  2.65%  internal/runtime/maps.(*table).rehash
+     0.01s  0.19% 40.83%      0.14s  2.65%  runtime.makeslice
+     0.05s  0.95% 41.78%      0.14s  2.65%  runtime.scanObjectsSmall
+     0.11s  2.08% 43.86%      0.13s  2.46%  compress/flate.(*decompressor).huffSym
+     0.05s  0.95% 44.80%      0.13s  2.46%  compress/flate.(*huffmanBitWriter).writeTokens
+     0.02s  0.38% 45.18%      0.13s  2.46%  github.com/indexus/go-indexus-core/internal/zonelog.(*cache).page
+     0.01s  0.19% 45.37%      0.13s  2.46%  internal/runtime/maps.(*table).split
+         0     0% 45.37%      0.12s  2.27%  github.com/indexus/go-indexus-core/internal/zonelog.hash64
+     0.12s  2.27% 47.64%      0.12s  2.27%  hash/fnv.(*sum64a).Write (inline)
+         0     0% 47.64%      0.12s  2.27%  runtime.bgsweep
+     0.01s  0.19% 47.83%      0.12s  2.27%  runtime.sweepone
+         0     0% 47.83%      0.11s  2.08%  github.com/indexus/go-indexus-core/gateway/http3server.(*Server).Serve.func1
+         0     0% 47.83%      0.11s  2.08%  github.com/indexus/go-indexus-core/internal/storage.(*Store).zoneRowBatch
+         0     0% 47.83%      0.11s  2.08%  github.com/indexus/go-indexus-core/internal/storage.(*Store).zoneRowBatch.func1
+         0     0% 47.83%      0.11s  2.08%  github.com/indexus/go-indexus-core/internal/storage.escape (inline)
+         0     0% 47.83%      0.11s  2.08%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).Fold
+         0     0% 47.83%      0.11s  2.08%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).FoldLocal
+         0     0% 47.83%      0.11s  2.08%  github.com/indexus/go-indexus-core/internal/zonelog.(*Store).prepareSnapshot
+     0.11s  2.08% 49.91%      0.11s  2.08%  internal/runtime/syscall/linux.Syscall6
+         0     0% 49.91%      0.11s  2.08%  net/http.(*http2serverConn).runHandler
+         0     0% 49.91%      0.11s  2.08%  net/http.initALPNRequest.ServeHTTP
+         0     0% 49.91%      0.11s  2.08%  net/http.serverHandler.ServeHTTP
+         0     0% 49.91%      0.11s  2.08%  strings.(*Builder).WriteString (inline)
+         0     0% 49.91%      0.11s  2.08%  syscall.RawSyscall6
+         0     0% 49.91%      0.11s  2.08%  syscall.Syscall
+         0     0% 49.91%      0.10s  1.89%  github.com/indexus/go-indexus-core/internal/storage.(*Tx).each
+         0     0% 49.91%      0.10s  1.89%  github.com/indexus/go-indexus-core/internal/storage.(*Tx).rows (inline)
+         0     0% 49.91%      0.10s  1.89%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).boundaries (inline)
+     0.07s  1.32% 51.23%      0.10s  1.89%  github.com/indexus/go-indexus-core/internal/tree.(*Base).Decode
+     0.02s  0.38% 51.61%      0.10s  1.89%  github.com/indexus/go-indexus-core/internal/zonelog.(*segment).seek.(*page).search.func3 (inline)
+         0     0% 51.61%      0.10s  1.89%  runtime.(*mcache).nextFree
+     0.01s  0.19% 51.80%      0.10s  1.89%  runtime.(*mcache).refill
+         0     0% 51.80%      0.10s  1.89%  runtime.concatstring2
+     0.02s  0.38% 52.17%      0.10s  1.89%  runtime.concatstrings
+     0.10s  1.89% 54.06%      0.10s  1.89%  runtime.nextFreeFast (inline)
+     0.10s  1.89% 55.95%      0.10s  1.89%  runtime.spanClass.sizeclass (inline)
+     0.01s  0.19% 56.14%      0.10s  1.89%  type:.hash.github.com/indexus/go-indexus-core/internal/tree.Key
+         0     0% 56.14%      0.09s  1.70%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).PollHost
+         0     0% 56.14%      0.09s  1.70%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).PollRemoteHosts
+     0.03s  0.57% 56.71%      0.09s  1.70%  github.com/indexus/go-indexus-core/internal/zonelog.(*segment).refs
+     0.03s  0.57% 57.28%      0.09s  1.70%  runtime.mapaccess2
+         0     0% 57.28%      0.09s  1.70%  runtime.slicebytetostring
+     0.06s  1.13% 58.41%      0.08s  1.51%  compress/flate.(*huffmanBitWriter).writeCode
+         0     0% 58.41%      0.08s  1.51%  github.com/indexus/go-indexus-core/indexus.(*Node).meshApplyView
+         0     0% 58.41%      0.08s  1.51%  github.com/indexus/go-indexus-core/indexus.(*Node).meshApplyViewIfChanged
+         0     0% 58.41%      0.08s  1.51%  github.com/indexus/go-indexus-core/indexus.(*Node).meshRefreshViewFor
+         0     0% 58.41%      0.08s  1.51%  github.com/indexus/go-indexus-core/indexus.(*Node).meshRefreshViewIfChanged (inline)
+         0     0% 58.41%      0.08s  1.51%  github.com/indexus/go-indexus-core/internal/adapter/http/p2p.(*Handler).New
+         0     0% 58.41%      0.08s  1.51%  github.com/indexus/go-indexus-core/internal/adapter/http/p2p.(*Handler).writeItem
+         0     0% 58.41%      0.08s  1.51%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).SetView
+         0     0% 58.41%      0.08s  1.51%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).repush
+     0.05s  0.95% 59.36%      0.08s  1.51%  github.com/indexus/go-indexus-core/internal/zonelog.(*skiplist).seek
+         0     0% 59.36%      0.08s  1.51%  internal/runtime/gc/scan.ScanSpanPacked (inline)
+         0     0% 59.36%      0.08s  1.51%  internal/runtime/gc/scan.ScanSpanPackedAVX512
+     0.07s  1.32% 60.68%      0.08s  1.51%  internal/runtime/gc/scan.scanSpanPackedAVX512
+     0.01s  0.19% 60.87%      0.08s  1.51%  runtime.(*sweepLocked).sweep
+         0     0% 60.87%      0.08s  1.51%  runtime.newstack
+         0     0% 60.87%      0.07s  1.32%  encoding/json.(*decodeState).object
+         0     0% 60.87%      0.07s  1.32%  encoding/json.(*decodeState).unmarshal
+         0     0% 60.87%      0.07s  1.32%  encoding/json.(*decodeState).value
+     0.01s  0.19% 61.06%      0.07s  1.32%  gcWriteBarrier
+         0     0% 61.06%      0.07s  1.32%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).pollResponse
+     0.01s  0.19% 61.25%      0.07s  1.32%  github.com/indexus/go-indexus-core/internal/tree.Key.Compare
+         0     0% 61.25%      0.07s  1.32%  github.com/indexus/go-indexus-core/internal/zonelog.(*skiplist).get
+     0.05s  0.95% 62.19%      0.07s  1.32%  internal/sync.(*Mutex).Lock (inline)
+         0     0% 62.19%      0.07s  1.32%  runtime.mallocgcLarge
+     0.01s  0.19% 62.38%      0.07s  1.32%  runtime.typedmemmove
+         0     0% 62.38%      0.07s  1.32%  runtime.wbBufFlush
+         0     0% 62.38%      0.07s  1.32%  runtime.wbBufFlush.func1
+     0.01s  0.19% 62.57%      0.07s  1.32%  runtime.wbBufFlush1
+         0     0% 62.57%      0.07s  1.32%  slices.SortFunc[go.shape.[]github.com/indexus/go-indexus-core/internal/tree.Key,go.shape.struct { Collection string; Location string }] (inline)
+         0     0% 62.57%      0.07s  1.32%  slices.pdqsortCmpFunc[go.shape.struct { Collection string; Location string }]
+         0     0% 62.57%      0.07s  1.32%  sync.(*Mutex).Lock (inline)
+     0.01s  0.19% 62.76%      0.06s  1.13%  cmp.Compare[go.shape.string] (inline)
+         0     0% 62.76%      0.06s  1.13%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).pushEdges
+     0.01s  0.19% 62.95%      0.06s  1.13%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).routeEdges
+         0     0% 62.95%      0.06s  1.13%  internal/poll.ignoringEINTRIO (inline)
+     0.06s  1.13% 64.08%      0.06s  1.13%  internal/runtime/maps.ctrlGroup.matchH2 (inline)
+         0     0% 64.08%      0.06s  1.13%  runtime.(*mheap).alloc
+         0     0% 64.08%      0.06s  1.13%  runtime.(*mheap).alloc.func1
+         0     0% 64.08%      0.06s  1.13%  runtime.(*mheap).allocSpan
+     0.01s  0.19% 64.27%      0.06s  1.13%  runtime.mapIterNext
+         0     0% 64.27%      0.06s  1.13%  sort.Slice
+         0     0% 64.27%      0.06s  1.13%  sort.pdqsort_func
+     0.02s  0.38% 64.65%      0.05s  0.95%  compress/flate.(*dictDecoder).tryWriteCopy (inline)
+         0     0% 64.65%      0.05s  0.95%  encoding/json.(*Decoder).Decode
+         0     0% 64.65%      0.05s  0.95%  encoding/json.Unmarshal
+         0     0% 64.65%      0.05s  0.95%  github.com/indexus/go-indexus-core/indexus.(*Node).Observe
+         0     0% 64.65%      0.05s  0.95%  github.com/indexus/go-indexus-core/internal/storage.(*Tx).scanRows.func4
+         0     0% 64.65%      0.05s  0.95%  github.com/indexus/go-indexus-core/internal/storage.reservationDelta.func2
+         0     0% 64.65%      0.05s  0.95%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).claimEdge
+         0     0% 64.65%      0.05s  0.95%  github.com/indexus/go-indexus-core/internal/summary.resolveHolder
+     0.01s  0.19% 64.84%      0.05s  0.95%  github.com/indexus/go-indexus-core/internal/zonelog.(*Store).Snapshot
+         0     0% 64.84%      0.05s  0.95%  github.com/indexus/go-indexus-core/internal/zonelog.(*Store).startWork.func1
+         0     0% 64.84%      0.05s  0.95%  internal/poll.(*FD).Write
+     0.02s  0.38% 65.22%      0.05s  0.95%  internal/runtime/maps.(*Iter).Next
+         0     0% 65.22%      0.05s  0.95%  internal/runtime/maps.(*table).reset
+         0     0% 65.22%      0.05s  0.95%  internal/runtime/maps.newGroups (inline)
+         0     0% 65.22%      0.05s  0.95%  internal/runtime/maps.newTable
+         0     0% 65.22%      0.05s  0.95%  internal/runtime/maps.newarray
+         0     0% 65.22%      0.05s  0.95%  internal/runtime/maps.typedmemmove
+         0     0% 65.22%      0.05s  0.95%  net/http.(*http2serverConn).writeFrameAsync
+         0     0% 65.22%      0.05s  0.95%  runtime.(*mcentral).cacheSpan
+         0     0% 65.22%      0.05s  0.95%  runtime.(*mcentral).grow
+     0.01s  0.19% 65.41%      0.05s  0.95%  runtime.(*mcentral).uncacheSpan
+     0.01s  0.19% 65.60%      0.05s  0.95%  runtime.(*mheap).initSpan
+         0     0% 65.60%      0.05s  0.95%  runtime.copystack
+     0.02s  0.38% 65.97%      0.05s  0.95%  runtime.mapaccess2_faststr
+         0     0% 65.97%      0.05s  0.95%  runtime.newarray
+     0.04s  0.76% 66.73%      0.05s  0.95%  runtime.pcvalue
+         0     0% 66.73%      0.05s  0.95%  runtime.profilealloc
+         0     0% 66.73%      0.05s  0.95%  runtime.schedule
+     0.03s  0.57% 67.30%      0.05s  0.95%  slices.partitionCmpFunc[go.shape.struct { Collection string; Location string }]
+         0     0% 67.30%      0.05s  0.95%  strings.Replace
+         0     0% 67.30%      0.05s  0.95%  strings.ReplaceAll (inline)
+         0     0% 67.30%      0.05s  0.95%  syscall.Write (inline)
+         0     0% 67.30%      0.05s  0.95%  syscall.write
+         0     0% 67.30%      0.04s  0.76%  bufio.(*Writer).Flush
+     0.01s  0.19% 67.49%      0.04s  0.76%  container/list.(*List).MoveToFront (inline)
+         0     0% 67.49%      0.04s  0.76%  encoding/json.(*decodeState).array
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/indexus.(*Node).Count
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/indexus.(*Node).MeasureItems
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/adapter/http/p2p.(*Handler).clientTokenOK
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/adapter/http/p2p.(*Handler).requireClientScope
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/adapter/meshhttp.(*Client).Exchange
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/adapter/meshhttp.(*Client).request
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/mesh.(*Service).Exchange (inline)
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/mesh.(*Service).call
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/storage.(*Store).PlanningTotals
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/storage.(*Store).deleteZoneRows (inline)
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/storage.(*Store).eachGatedZoneFrom
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/storage.(*Store).eachInventoryZoneFrom (inline)
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/storage.(*Store).scanZonePages
+         0     0% 67.49%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/storage.(*Store).scanZonePages.func1
+     0.01s  0.19% 67.67%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/storage.(*Store).zoneRowBatch.func1.1
+         0     0% 67.67%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/storage.(*Tx).each.func1
+         0     0% 67.67%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/storage.(*diskBatch).commit
+         0     0% 67.67%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/storage.(*diskBatch).run
+         0     0% 67.67%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/storage.OpenWithOptions.func1
+         0     0% 67.67%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/storage.split
+         0     0% 67.67%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).queueEdgeLocked
+         0     0% 67.67%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/tree.(*View).OwnerName (inline)
+         0     0% 67.67%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/zonelog.(*Store).sync
+     0.02s  0.38% 68.05%      0.04s  0.76%  github.com/indexus/go-indexus-core/internal/zonelog.(*memChunkIter).refill
+     0.02s  0.38% 68.43%      0.04s  0.76%  internal/runtime/maps.(*table).uncheckedPutSlot
+     0.04s  0.76% 69.19%      0.04s  0.76%  internal/sync.(*Mutex).Unlock (inline)
+         0     0% 69.19%      0.04s  0.76%  os.(*File).Write
+         0     0% 69.19%      0.04s  0.76%  os.(*File).write (inline)
+         0     0% 69.19%      0.04s  0.76%  runtime.(*mcache).prepareForSweep
+     0.02s  0.38% 69.57%      0.04s  0.76%  runtime.(*mcache).releaseAll
+     0.04s  0.76% 70.32%      0.04s  0.76%  runtime.(*mspan).moveInlineMarks
+         0     0% 70.32%      0.04s  0.76%  runtime.callers
+         0     0% 70.32%      0.04s  0.76%  runtime.callers.func1
+     0.02s  0.38% 70.70%      0.04s  0.76%  runtime.findObject
+         0     0% 70.70%      0.04s  0.76%  runtime.findRunnable
+     0.04s  0.76% 71.46%      0.04s  0.76%  runtime.futex
+         0     0% 71.46%      0.04s  0.76%  runtime.futexwakeup
+         0     0% 71.46%      0.04s  0.76%  runtime.mProf_Malloc
+     0.02s  0.38% 71.83%      0.04s  0.76%  runtime.mallocgcTiny
+         0     0% 71.83%      0.04s  0.76%  runtime.mapassign_faststr
+         0     0% 71.83%      0.04s  0.76%  runtime.memclrNoHeapPointersChunked
+         0     0% 71.83%      0.04s  0.76%  runtime.notewakeup
+         0     0% 71.83%      0.04s  0.76%  runtime.startm
+     0.01s  0.19% 72.02%      0.04s  0.76%  runtime.tracebackPCs
+     0.03s  0.57% 72.59%      0.04s  0.76%  runtime.typePointers.next
+     0.04s  0.76% 73.35%      0.04s  0.76%  runtime.typePointers.nextFast (inline)
+         0     0% 73.35%      0.04s  0.76%  runtime.wakep
+         0     0% 73.35%      0.04s  0.76%  sync.(*Mutex).Unlock (inline)
+         0     0% 73.35%      0.03s  0.57%  bufio.(*Writer).Write
+         0     0% 73.35%      0.03s  0.57%  bytes.(*Buffer).Write
+     0.03s  0.57% 73.91%      0.03s  0.57%  bytes.(*Reader).ReadByte
+     0.03s  0.57% 74.48%      0.03s  0.57%  compress/flate.(*deflateFast).matchLen
+         0     0% 74.48%      0.03s  0.57%  compress/flate.(*huffmanBitWriter).indexTokens
+         0     0% 74.48%      0.03s  0.57%  compress/flate.(*huffmanEncoder).generate
+     0.02s  0.38% 74.86%      0.03s  0.57%  container/list.(*List).move (inline)
+     0.01s  0.19% 75.05%      0.03s  0.57%  encoding/json.(*decodeState).literalStore
+         0     0% 75.05%      0.03s  0.57%  github.com/indexus/go-indexus-core/indexus.(*Node).meshFoldInstalled
+         0     0% 75.05%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/adapter/http/p2p.(*Handler).New.func1
+         0     0% 75.05%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/storage.(*Store).eachZoneFrom
+         0     0% 75.05%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/storage.(*Tx).walk
+         0     0% 75.05%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/storage.(*Tx).walk.func1
+         0     0% 75.05%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/storage.affectedRequests
+         0     0% 75.05%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/storage.bucketDelta
+         0     0% 75.05%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/storage.lastElement (inline)
+         0     0% 75.05%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/storage.unescape
+         0     0% 75.05%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).acceptAll
+         0     0% 75.05%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).boundaryKeys.func1
+     0.01s  0.19% 75.24%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).settleEdges
+         0     0% 75.24%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/summary.(*Tree).storeEdgeValue
+     0.03s  0.57% 75.80%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/tree.(*Base).IndexOf (inline)
+         0     0% 75.80%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/tree.(*View).Owner
+     0.03s  0.57% 76.37%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/tree.Bit (inline)
+         0     0% 76.37%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/tree.CheckName
+     0.01s  0.19% 76.56%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/tree.checkChars
+         0     0% 76.56%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/tree.indexedOwner (inline)
+     0.02s  0.38% 76.94%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/zonelog.(*Snapshot).ScanWith.func2
+         0     0% 76.94%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/zonelog.(*memChunkIter).next
+         0     0% 76.94%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/zonelog.(*segWriter).writePayload
+         0     0% 76.94%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/zonelog.(*valWriter).Write
+     0.02s  0.38% 77.32%      0.03s  0.57%  github.com/indexus/go-indexus-core/internal/zonelog.makeKey
+         0     0% 77.32%      0.03s  0.57%  internal/poll.(*FD).Fsync
+         0     0% 77.32%      0.03s  0.57%  internal/poll.(*FD).Fsync.func1 (inline)
+         0     0% 77.32%      0.03s  0.57%  internal/poll.ignoringEINTR (inline)
+         0     0% 77.32%      0.03s  0.57%  net/http.(*http2writeResHeaders).writeFrame
+         0     0% 77.32%      0.03s  0.57%  net/http.http2encodeHeaders
+         0     0% 77.32%      0.03s  0.57%  os.(*File).Sync
+     0.03s  0.57% 77.88%      0.03s  0.57%  runtime.(*mspan).init
+         0     0% 77.88%      0.03s  0.57%  runtime.(*unwinder).next
+         0     0% 77.88%      0.03s  0.57%  runtime.acquirep
+         0     0% 77.88%      0.03s  0.57%  runtime.acquirepNoTrace
+     0.02s  0.38% 78.26%      0.03s  0.57%  runtime.bulkBarrierPreWrite
+     0.03s  0.57% 78.83%      0.03s  0.57%  runtime.extractHeapBitsSmall
+     0.03s  0.57% 79.40%      0.03s  0.57%  runtime.gcmarknewobject
+         0     0% 79.40%      0.03s  0.57%  runtime.gcstopm
+         0     0% 79.40%      0.03s  0.57%  runtime.gopreempt_m (inline)
+         0     0% 79.40%      0.03s  0.57%  runtime.goschedImpl
+     0.03s  0.57% 79.96%      0.03s  0.57%  runtime.heapArenaOf (inline)
+         0     0% 79.96%      0.03s  0.57%  runtime.mcall
+         0     0% 79.96%      0.03s  0.57%  runtime.rawstring (inline)
+         0     0% 79.96%      0.03s  0.57%  runtime.rawstringtmp
+     0.01s  0.19% 80.15%      0.03s  0.57%  runtime.scanObjectSmall
+     0.03s  0.57% 80.72%      0.03s  0.57%  runtime.spanOf (inline)
+         0     0% 80.72%      0.03s  0.57%  runtime.stopm
+         0     0% 80.72%      0.03s  0.57%  sort.insertionSort_func
+     0.02s  0.38% 81.10%      0.03s  0.57%  strings.Count
+     0.03s  0.57% 81.66%      0.03s  0.57%  sync/atomic.(*Int32).Add (inline)
+         0     0% 81.66%      0.03s  0.57%  syscall.Fsync

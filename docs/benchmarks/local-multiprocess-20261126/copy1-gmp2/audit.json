@@ -1,0 +1,25 @@
+{
+  "acked_keys": 3500,
+  "checked_keys": 3500,
+  "missing": 0,
+  "read_errors": 0,
+  "oversized_locations": 0,
+  "items_match_acked": true,
+  "collections_checked": 8,
+  "zones": 3500,
+  "double_owned_zones": 0,
+  "ownership_retries": 0,
+  "moving_at_ownership": 0,
+  "items_held": 1486,
+  "items_before_run": 0,
+  "nodes_answering": 5,
+  "nodes_gone": 0,
+  "per_node_items": {
+    "http://127.0.0.1:19100": 762,
+    "http://127.0.0.1:19101": 0,
+    "http://127.0.0.1:19102": 357,
+    "http://127.0.0.1:19103": 230,
+    "http://127.0.0.1:19104": 137
+  },
+  "pass": true
+}

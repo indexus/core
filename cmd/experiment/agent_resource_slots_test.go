@@ -1,0 +1,86 @@
+package main
+
+import (
+	"testing"
+	"time"
+
+	"github.com/indexus/go-indexus-core/internal/autoscale"
+)
+
+func TestResourceSlotsGrowPastFiveAndDeferOnPressure(t *testing.T) {
+	var used []*slot
+	const addressSlots = 100
+	host := autoscale.ResourceSample{MemTotal: 32 << 30, MemPct: 20, DiskOK: true, DiskFreePct: 90}
+	facts := func(cpu float64, mode bool) autoscale.MachineFacts {
+		slots, ceiling := used, addressSlots
+		if !mode {
+			slots, ceiling = make([]*slot, addressSlots), 0
+			copy(slots, used)
+		}
+		f := machineFacts(slots, 4, host, ceiling)
+		f.HostCPUOK = true
+		f.CPUPct = max(f.CPUPct, cpu)
+		ready, _ := autoscale.ReceiverOffer(f)
+		f.ReceiverReady = &ready
+		return f
+	}
+	for i := 0; i < 9; i++ {
+		if f := facts(5, true); offeredSlots(f) != 1 || f.ReceiverReady == nil || !*f.ReceiverReady {
+			t.Fatalf("cannot grow at %d: %+v", i, f)
+		}
+		v := &slot{}
+		used = append(used, v)
+		if f := facts(5, true); offeredSlots(f) != 0 {
+			t.Fatalf("second concurrent start allowed: %+v", f)
+		}
+		at := time.Now()
+		v.record("ready", false, 10, nil, at.Add(-time.Second))
+		v.record("ready", false, 10, nil, at)
+	}
+	if f := facts(40, true); offeredSlots(f) != 0 || f.ReceiverReady == nil || *f.ReceiverReady {
+		t.Fatalf("CPU headroom ignored: %+v", f)
+	}
+	if f := facts(40, false); offeredSlots(f) != 91 {
+		t.Fatalf("fixed addresses lost: %+v", f)
+	}
+	host.DiskFreePct = 30
+	if f := facts(5, true); offeredSlots(f) != 0 {
+		t.Fatal("offered with saturated disk")
+	}
+	host.DiskFreePct = 90
+	host.MemPct = 70
+	if f := facts(5, true); offeredSlots(f) != 0 {
+		t.Fatal("offered with saturated RAM")
+	}
+	host.MemPct = 20
+	f := facts(5, false)
+	f.HostCPUOK = false
+	f.AddressSlots = addressSlots
+	if offeredSlots(f) != 0 {
+		t.Fatal("offered without machine CPU observation")
+	}
+	for j := range used[0].cpu {
+		used[0].cpu[j].at = used[0].cpu[j].at.Add(-time.Minute)
+	}
+	if f := facts(5, true); offeredSlots(f) != 0 || f.Receiving != 1 {
+		t.Fatalf("stale slot looked available: %+v", f)
+	}
+	used = nil
+	f = facts(45, true)
+	f.Machine = "warming"
+	book, ok := autoscale.ReadyReserve([]autoscale.MachineFacts{f}, "", 0, 1, map[string]bool{f.Machine: true})
+	if !ok || book.Warming != 1 || book.Boots() != 0 || f.Free != addressSlots || offeredSlots(f) != 0 {
+		t.Fatalf("warm capacity: %+v %+v", f, book)
+	}
+	if choice := autoscale.Place([]autoscale.MachineFacts{f}, "donor", true); choice.Machine != "" {
+		t.Fatalf("unready host placed: %+v", choice)
+	}
+	f.HostCPUOK = false
+	if ready, known := autoscale.ReceiverOffer(f); ready || known {
+		t.Fatal("unknown host CPU produced an offer")
+	}
+	if _, ok := autoscale.ReadyReserve([]autoscale.MachineFacts{f}, "", 15, 1, nil); ok {
+		t.Fatal("unknown CPU used to compute global reserve")
+	}
+
+}

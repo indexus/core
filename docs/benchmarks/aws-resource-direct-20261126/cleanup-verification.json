@@ -1,0 +1,18 @@
+{
+  "run": "aws-resource-direct-16k-20261126",
+  "checked_at": "2026-11-26T15:40:25.016473+00:00",
+  "cleanup_completed_by": "2026-11-26T15:40:21.245286+00:00",
+  "instances": 22,
+  "checks": {
+    "all_instances_terminated": true,
+    "vpc_deleted": true,
+    "security_group_deleted": true,
+    "template_deleted": true,
+    "role_deleted": true,
+    "instance-profile_deleted": true,
+    "bucket_deleted": true
+  },
+  "ec2_launch_to_verification_upper_usd": 2.201,
+  "ec2_launch_to_termination_request_usd": 1.455,
+  "cost_note": "Upper: launch to independent verification; estimate: launch to termination request; excludes EBS/S3/API/transfer charges; not final AWS invoice"
+}

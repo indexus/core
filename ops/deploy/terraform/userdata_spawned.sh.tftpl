@@ -1,0 +1,109 @@
+#!/bin/bash
+# Fast spawn boot for a pre-baked Indexus AMI.
+# No dnf, no S3 binary pull — only IMDS + bootstrap discovery + env file + start.
+set -euxo pipefail
+
+TOKEN=$(curl -sf -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+PUBLIC_IP=$(curl -sf -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-ipv4 | tr -d '[:space:]')
+INSTANCE_ID=$(curl -sf -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id | tr -d '[:space:]')
+REGION="${region}"
+
+PREFER_NEAR=$(curl -sf -H "X-aws-ec2-metadata-token: $TOKEN" \
+  http://169.254.169.254/latest/meta-data/tags/instance/PreferNear 2>/dev/null || true)
+PREFER_NEAR=$(echo "$${PREFER_NEAR:-}" | tr -d '[:space:]')
+if [[ -z "$PREFER_NEAR" || "$PREFER_NEAR" == "None" ]]; then
+  PREFER_NEAR=$(aws ec2 describe-tags --region "$REGION" \
+    --filters "Name=resource-id,Values=$INSTANCE_ID" "Name=key,Values=PreferNear" \
+    --query 'Tags[0].Value' --output text 2>/dev/null || true)
+  PREFER_NEAR=$(echo "$${PREFER_NEAR:-}" | tr -d '[:space:]')
+  if [[ "$PREFER_NEAR" == "None" ]]; then PREFER_NEAR=""; fi
+fi
+
+# Bootstrap should already be up when we scale; keep a short poll only.
+BOOTSTRAP_HOST=""
+for i in $(seq 1 15); do
+  BOOTSTRAP_HOST=$(aws ec2 describe-instances --region "$REGION" \
+    --filters "Name=tag:Role,Values=bootstrap-issuer" "Name=instance-state-name,Values=running" \
+    --query 'Reservations[0].Instances[0].PublicIpAddress' --output text 2>/dev/null || true)
+  if [[ -n "$BOOTSTRAP_HOST" && "$BOOTSTRAP_HOST" != "None" ]]; then
+    break
+  fi
+  sleep 1
+done
+test -n "$BOOTSTRAP_HOST"
+ISSUER_URL="http://$${BOOTSTRAP_HOST}:22000"
+
+# Issuer health — short window (baked image should be ready in tens of seconds).
+for i in $(seq 1 20); do
+  if curl -sf --max-time 1 "$${ISSUER_URL}/health" >/dev/null; then break; fi
+  sleep 1
+done
+
+install -d -m 0755 /etc/indexus /var/lib/indexus /var/lib/indexus/leave /var/lib/indexus/backup /var/lib/indexus/archive
+
+# Fallback if someone launched with a stock AMI by mistake.
+if [[ ! -x /opt/indexus/node ]]; then
+  dnf install -y aws-cli jq || dnf install -y awscli jq || true
+  aws s3 cp "s3://${bucket}/bin/node" /opt/indexus/node --region "$REGION"
+  chmod +x /opt/indexus/node
+fi
+
+cat >/etc/indexus/node.json <<JSON
+{
+  "storage": {
+    "path": "/var/lib/indexus/backup",
+    "identity_directory": "/etc/indexus"
+  },
+  "identity": {
+    "network": "${network_id}",
+    "cluster": "indexus",
+    "issuer": "$${ISSUER_URL}",
+    "name": "$${PREFER_NEAR}"
+  },
+  "network": {
+    "listen": "0.0.0.0:21000",
+    "monitoring": "127.0.0.1:19000",
+    "advertise": [
+      "$${PUBLIC_IP}"
+    ],
+    "bootstrap": [
+      "http://$${BOOTSTRAP_HOST}:21000"
+    ]
+  },
+  "limits": {
+    "data_bytes": 34359738368,
+    "memory_refuse_pct": 60
+  },
+  "provisioner": "http://$${BOOTSTRAP_HOST}:22010"
+}
+JSON
+
+# Ensure unit exists (baked AMI ships it; recreate if missing).
+if [[ ! -f /etc/systemd/system/indexus-node.service ]]; then
+  cat >/etc/systemd/system/indexus-node.service <<'UNIT'
+[Unit]
+Description=Indexus Node
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=simple
+Environment=GOMEMLIMIT=1536MiB
+WorkingDirectory=/var/lib/indexus
+ExecStart=/opt/indexus/node serve -config /etc/indexus/node.json
+Restart=always
+RestartSec=2
+[Install]
+WantedBy=multi-user.target
+UNIT
+fi
+
+# Apply the same resident-memory budget to already baked node units.
+mkdir -p /etc/systemd/system/indexus-node.service.d
+cat >/etc/systemd/system/indexus-node.service.d/memory.conf <<'UNIT'
+[Service]
+MemoryHigh=1792M
+MemoryMax=2G
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now indexus-node.service

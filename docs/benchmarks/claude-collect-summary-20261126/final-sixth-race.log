@@ -1,0 +1,4 @@
+ok  	github.com/indexus/go-indexus-core/internal/storage	127.634s
+ok  	github.com/indexus/go-indexus-core/internal/summary	20.825s
+ok  	github.com/indexus/go-indexus-core/internal/mesh	245.105s
+ok  	github.com/indexus/go-indexus-core/cmd/experiment	5.683s

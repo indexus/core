@@ -1,0 +1,32 @@
+=== RUN   TestBoundaryBatchKeepsPublishedPagesImmutable
+--- PASS: TestBoundaryBatchKeepsPublishedPagesImmutable (0.17s)
+=== RUN   TestPollsOfDifferentCollectionsShareOneInventory
+--- PASS: TestPollsOfDifferentCollectionsShareOneInventory (0.00s)
+=== RUN   TestInventoryDiscoveryWorkUnderChurn
+=== RUN   TestInventoryDiscoveryWorkUnderChurn/zones=1024/stable
+    inventory_churn_work_test.go:76: seed_zones=1024 mode=stable polls=8 rebuilds=1 extensions=0 revision=1 discovery_time=58.458µs
+=== RUN   TestInventoryDiscoveryWorkUnderChurn/zones=1024/new-zone
+    inventory_churn_work_test.go:76: seed_zones=1024 mode=new-zone polls=8 rebuilds=1 extensions=7 revision=9 discovery_time=140.082µs
+=== RUN   TestInventoryDiscoveryWorkUnderChurn/zones=1024/alternating-collections
+    inventory_churn_work_test.go:76: seed_zones=1024 mode=alternating-collections polls=8 rebuilds=1 extensions=0 revision=1 discovery_time=59.081µs
+=== RUN   TestInventoryDiscoveryWorkUnderChurn/zones=1024/oversized
+    inventory_churn_work_test.go:76: seed_zones=1024 mode=oversized polls=8 rebuilds=8 extensions=0 revision=1 discovery_time=401.291µs
+=== RUN   TestInventoryDiscoveryWorkUnderChurn/zones=8192/stable
+    inventory_churn_work_test.go:76: seed_zones=8192 mode=stable polls=8 rebuilds=1 extensions=0 revision=1 discovery_time=677.082µs
+=== RUN   TestInventoryDiscoveryWorkUnderChurn/zones=8192/new-zone
+    inventory_churn_work_test.go:76: seed_zones=8192 mode=new-zone polls=8 rebuilds=1 extensions=7 revision=9 discovery_time=835.208µs
+=== RUN   TestInventoryDiscoveryWorkUnderChurn/zones=8192/alternating-collections
+    inventory_churn_work_test.go:76: seed_zones=8192 mode=alternating-collections polls=8 rebuilds=1 extensions=0 revision=1 discovery_time=759.207µs
+=== RUN   TestInventoryDiscoveryWorkUnderChurn/zones=8192/oversized
+    inventory_churn_work_test.go:76: seed_zones=8192 mode=oversized polls=8 rebuilds=8 extensions=0 revision=1 discovery_time=5.389334ms
+--- PASS: TestInventoryDiscoveryWorkUnderChurn (1.28s)
+    --- PASS: TestInventoryDiscoveryWorkUnderChurn/zones=1024/stable (0.02s)
+    --- PASS: TestInventoryDiscoveryWorkUnderChurn/zones=1024/new-zone (0.03s)
+    --- PASS: TestInventoryDiscoveryWorkUnderChurn/zones=1024/alternating-collections (0.02s)
+    --- PASS: TestInventoryDiscoveryWorkUnderChurn/zones=1024/oversized (0.03s)
+    --- PASS: TestInventoryDiscoveryWorkUnderChurn/zones=8192/stable (0.22s)
+    --- PASS: TestInventoryDiscoveryWorkUnderChurn/zones=8192/new-zone (0.32s)
+    --- PASS: TestInventoryDiscoveryWorkUnderChurn/zones=8192/alternating-collections (0.29s)
+    --- PASS: TestInventoryDiscoveryWorkUnderChurn/zones=8192/oversized (0.37s)
+PASS
+ok  	github.com/indexus/go-indexus-core/internal/summary	2.007s

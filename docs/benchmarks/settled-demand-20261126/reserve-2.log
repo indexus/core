@@ -1,0 +1,16 @@
+
+
+██╗███╗   ██╗██████╗ ███████╗██╗  ██╗██╗   ██╗███████╗
+██║████╗  ██║██╔══██╗██╔════╝╚██╗██╔╝██║   ██║██╔════╝
+██║██╔██╗ ██║██║  ██║█████╗   ╚███╔╝ ██║   ██║███████╗
+██║██║╚██╗██║██║  ██║██╔══╝   ██╔██╗ ██║   ██║╚════██║
+██║██║ ╚████║██████╔╝███████╗██╔╝ ██╗╚██████╔╝███████║
+╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+
+Indexus dev (none, go1.26.0)
+
+time=2026-11-26T20:24:48.101Z level=INFO msg="starting node" component=node name=HokWeyHbOYFyzzL9 monitoring_port=19102 p2p_port=21102 bootstraps=donor:21100 advertise=172.25.0.4 storage=/data/slots/2/backup issuer=http://controller:22000 require_auth=true
+time=2026-11-26T20:24:48.101Z level=INFO msg="autoscale enabled" component=node role="" pressure_hold=0s cooldown=0s window=0s
+time=2026-11-26T20:24:48.113Z level=INFO msg="p2p server listening" component=node addr=[::]:21102 tls=false auth=true
+time=2026-11-26T20:24:48.117Z level=INFO msg="monitoring server listening" component=node addr=[::]:19102 tls=false
+time=2026-11-26T20:24:48.318Z level=INFO msg="background jobs started" component=node interval=10s

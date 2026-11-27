@@ -1,0 +1,101 @@
+{
+  "fixed_five": {
+    "source": "c9f98abe2738f62e04a4724158910a67fc970674",
+    "load": {
+      "acked": 18904,
+      "drain_completed": true,
+      "exhausted": 0,
+      "offered": 18904,
+      "queued_unfinished": 0,
+      "shed": 0
+    },
+    "client_latency_ms_p50_p95_p99": [
+      8.192,
+      65.536,
+      262.144
+    ],
+    "acked_keys": 18904,
+    "checked_keys": 18904,
+    "missing": 0,
+    "read_errors": 0,
+    "oversized_locations": 0,
+    "items_match_acked": true,
+    "collections_checked": 17,
+    "settlement_polls": 1,
+    "settlement_wait_ms": 4,
+    "zones": 18904,
+    "double_owned_zones": 0,
+    "ownership_retries": 0,
+    "moving_at_ownership": 0,
+    "nodes_answering": 10,
+    "nodes_gone": 0,
+    "pass": true
+  },
+  "late_receiver": {
+    "source": "57be1845f931e0e915ccc3a82734595c4e22199c",
+    "load": {
+      "acked": 18904,
+      "drain_completed": true,
+      "exhausted": 0,
+      "offered": 18904,
+      "queued_unfinished": 0,
+      "shed": 0
+    },
+    "client_latency_ms_p50_p95_p99": [
+      8.192,
+      16.384,
+      32.768
+    ],
+    "acked_keys": 18904,
+    "checked_keys": 18904,
+    "missing": 0,
+    "read_errors": 0,
+    "oversized_locations": 0,
+    "items_match_acked": false,
+    "collections_checked": 17,
+    "total_errors": {
+      "Placeh0000000000": "status 503: cluster transaction is not ready: inventory changed during paginated read"
+    },
+    "settlement_polls": 11,
+    "settlement_wait_ms": 2557,
+    "zones": 15640,
+    "double_owned_zones": 0,
+    "ownership_retries": 0,
+    "moving_at_ownership": 0,
+    "nodes_answering": 10,
+    "nodes_gone": 0,
+    "pass": false
+  },
+  "resource_receiver": {
+    "source": "bce19fee1a6447cdd05bfed29e24994c7ae080d5",
+    "load": {
+      "acked": 18904,
+      "drain_completed": true,
+      "exhausted": 0,
+      "offered": 18904,
+      "queued_unfinished": 0,
+      "shed": 0
+    },
+    "client_latency_ms_p50_p95_p99": [
+      8.192,
+      32.768,
+      131.072
+    ],
+    "acked_keys": 18904,
+    "checked_keys": 18904,
+    "missing": 0,
+    "read_errors": 0,
+    "oversized_locations": 0,
+    "items_match_acked": true,
+    "collections_checked": 17,
+    "settlement_polls": 2,
+    "settlement_wait_ms": 199,
+    "zones": 18904,
+    "double_owned_zones": 0,
+    "ownership_retries": 0,
+    "moving_at_ownership": 0,
+    "nodes_answering": 10,
+    "nodes_gone": 0,
+    "pass": true
+  }
+}

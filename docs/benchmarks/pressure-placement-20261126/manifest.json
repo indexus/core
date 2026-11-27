@@ -1,0 +1,30 @@
+{
+  "production_base": "07a5c70",
+  "local_outputs": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/outputs/pressure-placement-20261126",
+  "live_binary_sha256": {
+    "provisioner": "5644238c3e912c4d2afc348c88e498c74d5bd0ce4050dc336caac497b1e57ce6",
+    "experiment": "03c6da90ce76360f5b5672ff3d156025d0d7290471085c0d5741b4d07606dae3",
+    "node": "68171a1b93cd532ea6e28a0fa9cf00804a3e4766e434959b4a069148e40b607e",
+    "issuer": "4cf5b8d5a9b6b9fa0407ece5158208c593bbd401e595708e398a6dc030771383"
+  },
+  "sha256": {
+    "all-tests.log": "9284fb96e2059c5bb519e81d252a40884bbc3e8d9cc30c9fc3df6c7825e21d47",
+    "answers.json": "4abe84e14ddf0101989e950556aaf57c183f5e491496e8dd01aca2853ae7d971",
+    "autoscale-after.log": "2e776ff4a6da42914307b94a7fe5106be16c5e9c28649853f73eb1d832df3974",
+    "autoscale-race.log": "b64f998818ed49978996a667aba55dac0543155fb89812932634e30ccb21d629",
+    "build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "initial.json": "f8f3dcf7d2e5054be148af0047d0735915965784c03052cc9fc78f23fc6c988c",
+    "load-summary.json": "8a383420760c6d1163b2c05aa8313d068132eb72acc08080fc64dac5d0152a9f",
+    "load.jsonl": "bd45c0d6db01a5e2109dad5aa6e7307f29b9e3f01e51effbe59736bdb1ea2e51",
+    "machines.log": "f2f278ce4c4cf715e0062635f7528a90a41bb69eadaf79c468453e0a0ec2c499",
+    "placement-help.log": "cfaa6a15642b972ccdbbbfd90995417fedd51686eb286c4067dc5b4485866f7e",
+    "provisioner.log": "bc377b433a9ce28586045ce293f7271aaad57f6bb98b49e51ece103f95ddad8c",
+    "python-tests.log": "a6707d4eff38012da33ddc34bc6dc076a3b17151cfc9aef223c8790cbe64c3da",
+    "race.log": "6a92b0b71e932c66673168c020d2ba4ef61d273e238ebc45ac7175606bdaf008",
+    "reserve-agent.log": "7d0e3cd8e89b5c89d542fda30764bc8be8958646259f1965522c06025d1dde82",
+    "reserve-node.log": "18e2f1a760a3dbce25a218e50f1e24ad79054ea15d62acc8d8b35ad5d8743791",
+    "result.json": "6ab2c846e26fecd2de20fe88834d945e95ec6a1632411323f414c5c6c0b005e7",
+    "samples.jsonl.gz": "7b0e5a1cb34197501b2f701b2efb7ff6429ceae2c7601feefe669600e34885cf",
+    "timers-before.log": "fafa44281ee15fd48a60c8e2edacf0e038d94981be03e9475db6b8b3a529c7ba"
+  }
+}

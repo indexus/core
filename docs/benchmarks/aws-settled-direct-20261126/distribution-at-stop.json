@@ -1,0 +1,212 @@
+[
+  {
+    "url": "https://10.77.14.136:19101",
+    "name": "ZJsoHg7TDns1iwaO",
+    "duration": 34.01111962600004,
+    "applied_s": 420.656542840269,
+    "arrived_s": 420.5977385426748,
+    "first_write_after_s": 0.223725614,
+    "joining": false,
+    "owned_items_advisory": 89815
+  },
+  {
+    "url": "https://10.77.14.136:19100",
+    "name": "Z3soHg7TDntBP5sy",
+    "duration": 34.01639344700004,
+    "applied_s": 378.4645782645537,
+    "arrived_s": 378.4645782645537,
+    "first_write_after_s": 23.54596416,
+    "joining": false,
+    "owned_items_advisory": 81268
+  },
+  {
+    "url": "https://10.77.8.49:19100",
+    "name": "9FY241qOQevkyi7_",
+    "duration": 33.99622304500002,
+    "applied_s": 356.42194675452635,
+    "arrived_s": 356.3631166898644,
+    "first_write_after_s": 23.7669645,
+    "joining": false,
+    "owned_items_advisory": 74706
+  },
+  {
+    "url": "https://10.77.8.143:19100",
+    "name": "TV_T6Xem6h43YN6y",
+    "duration": 33.993530048000025,
+    "applied_s": 343.3888738097316,
+    "arrived_s": 343.33003908450075,
+    "first_write_after_s": 24.139806598,
+    "joining": false,
+    "owned_items_advisory": 73238
+  },
+  {
+    "url": "https://10.77.2.81:19100",
+    "name": "zgbLp3bdRShfDazY",
+    "duration": 33.99696996999995,
+    "applied_s": 272.31838626117457,
+    "arrived_s": 272.171314330811,
+    "first_write_after_s": 24.310642347,
+    "joining": false,
+    "owned_items_advisory": 55682
+  },
+  {
+    "url": "https://10.77.8.49:19102",
+    "name": "ngbLp3bdRSh-sOsL",
+    "duration": 33.99850621799999,
+    "applied_s": 263.12920757864583,
+    "arrived_s": 262.98214229383774,
+    "first_write_after_s": 0.587569047,
+    "joining": false,
+    "owned_items_advisory": 51754
+  },
+  {
+    "url": "https://10.77.5.99:19100",
+    "name": "5FY241qOQexlFvPf",
+    "duration": 33.999626686,
+    "applied_s": 260.70874488895265,
+    "arrived_s": 260.70874488895265,
+    "first_write_after_s": 0.802739077,
+    "joining": false,
+    "owned_items_advisory": 52977
+  },
+  {
+    "url": "https://10.77.6.205:19100",
+    "name": "TE_T6Xem6h7R0j-T",
+    "duration": 33.99722394899999,
+    "applied_s": 260.19771535670344,
+    "arrived_s": 260.2565436893638,
+    "first_write_after_s": 0.926131736,
+    "joining": false,
+    "owned_items_advisory": 53512
+  },
+  {
+    "url": "https://10.77.8.49:19101",
+    "name": "rgbLp3bdRSh51ws2",
+    "duration": 33.99833685499999,
+    "applied_s": 255.6889778777975,
+    "arrived_s": 255.6889778777975,
+    "first_write_after_s": 0.634295016,
+    "joining": false,
+    "owned_items_advisory": 57402
+  },
+  {
+    "url": "https://10.77.14.136:19102",
+    "name": "1FY241qOQewCWDHm",
+    "duration": 34.004121794000014,
+    "applied_s": 246.17603862003145,
+    "arrived_s": 246.20544681960376,
+    "first_write_after_s": 0.307591583,
+    "joining": false,
+    "owned_items_advisory": 51968
+  },
+  {
+    "url": "https://10.77.6.67:19100",
+    "name": "_gbLp3bdRSfcAuM6",
+    "duration": 33.99776830000002,
+    "applied_s": 242.92771005207408,
+    "arrived_s": 242.89829635670515,
+    "first_write_after_s": 0.360414578,
+    "joining": false,
+    "owned_items_advisory": 47083
+  },
+  {
+    "url": "https://10.77.8.143:19101",
+    "name": "TF_T6Xem6h5IH0h8",
+    "duration": 33.996659549000015,
+    "applied_s": 183.3121277994299,
+    "arrived_s": 183.34154245408322,
+    "first_write_after_s": 0.342671505,
+    "joining": false,
+    "owned_items_advisory": 37114
+  },
+  {
+    "url": "https://10.77.8.49:19103",
+    "name": "DFY241qOQevYlCDz",
+    "duration": 33.99809022599999,
+    "applied_s": 166.0093247144735,
+    "arrived_s": 166.12697838188276,
+    "first_write_after_s": 0.534679063,
+    "joining": true,
+    "owned_items_advisory": 40287
+  },
+  {
+    "url": "https://10.77.10.80:19100",
+    "name": "Z1soHg7TDnsdy2DP",
+    "duration": 33.99754273000002,
+    "applied_s": 138.03938823669205,
+    "arrived_s": 138.03938823669205,
+    "first_write_after_s": 1.229892274,
+    "joining": true,
+    "owned_items_advisory": 29315
+  },
+  {
+    "url": "https://10.77.10.189:19100",
+    "name": "TVxT6Xem6h6BMzdQ",
+    "duration": 33.99875062999996,
+    "applied_s": 135.9755848181297,
+    "arrived_s": 136.09323620019168,
+    "first_write_after_s": 1.045658166,
+    "joining": true,
+    "owned_items_advisory": 24828
+  },
+  {
+    "url": "https://10.77.3.182:19100",
+    "name": "ZNsoHg7TDnrmsPaN",
+    "duration": 33.99785213900003,
+    "applied_s": 91.47636701532738,
+    "arrived_s": 91.41753976965836,
+    "first_write_after_s": 0.994061085,
+    "joining": true,
+    "owned_items_advisory": 22643
+  },
+  {
+    "url": "https://10.77.0.66:19100",
+    "name": "TF-T6Xem6h7FHuEs",
+    "duration": 33.99952236400003,
+    "applied_s": 79.0305219947765,
+    "arrived_s": 79.05993417266812,
+    "first_write_after_s": 0.941892236,
+    "joining": true,
+    "owned_items_advisory": 14123
+  },
+  {
+    "url": "https://10.77.3.70:19100",
+    "name": "TVzT6Xem6h40XqWC",
+    "duration": 33.99956441300003,
+    "applied_s": 41.94171380192025,
+    "arrived_s": 41.91230166040418,
+    "first_write_after_s": 0.984623577,
+    "joining": true,
+    "owned_items_advisory": 7779
+  },
+  {
+    "url": "https://10.77.0.8:19100",
+    "name": "1VY241qOQeuzybjc",
+    "duration": 27.997225426,
+    "applied_s": 17.966066006415133,
+    "arrived_s": 17.966066006415133,
+    "first_write_after_s": 0.694267731,
+    "joining": true,
+    "owned_items_advisory": 425
+  },
+  {
+    "url": "https://10.77.14.255:19100",
+    "name": "ZJMoHg7TDns0ccDG",
+    "duration": 27.99812318100004,
+    "applied_s": 9.107753343018612,
+    "arrived_s": 9.107753343018612,
+    "first_write_after_s": 2.759879898,
+    "joining": true,
+    "owned_items_advisory": 364
+  },
+  {
+    "url": "https://10.77.5.99:19101",
+    "name": "TV_TEXem6h4RGLsV",
+    "duration": 15.999737417000006,
+    "applied_s": 4.5625748784124545,
+    "arrived_s": 4.5625748784124545,
+    "first_write_after_s": 8.893018939,
+    "joining": true,
+    "owned_items_advisory": 241
+  }
+]

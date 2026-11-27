@@ -1,0 +1,45 @@
+{
+  "local_root": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/outputs/aws-claude-fixes-2a63338-20261126",
+  "files": [
+    {
+      "file": "captured/steps-1/metrics.jsonl",
+      "bytes": 45150097,
+      "sha256": "9198d091ed4bc9c8a0faac55feeca49043144c94fe45753788792d3e45b4d731"
+    },
+    {
+      "file": "captured/steps-1/machines.jsonl",
+      "bytes": 573164,
+      "sha256": "492e0a7c687951d208b3c8ece7d7514d4eea8509af2a48aaed1178f777d9b1d5"
+    },
+    {
+      "file": "captured/steps-1/load.jsonl",
+      "bytes": 290772,
+      "sha256": "5f373e624b92b467e6b4ba4b39633ccd05cda0d18fe8d325a61979f12bac6675"
+    },
+    {
+      "file": "captured/steps-1/load-summary.json",
+      "bytes": 116,
+      "sha256": "1f856419430bdf863ae104187bd19108e59d8e3807a43a235e26dd07f5c6cacb"
+    },
+    {
+      "file": "captured/operator/placement.jsonl",
+      "bytes": 898279,
+      "sha256": "1204d1af4d00c2f978253ad45ecbd2137d8208b983b47355e8b2598ef0c85ff5"
+    },
+    {
+      "file": "captured/operator/acked-final.jsonl.gz",
+      "bytes": 55108366,
+      "sha256": "beb187cbb011b3f6bb328424132802b8b950137a10fbc2e8c68b6e2b47079f6c"
+    },
+    {
+      "file": "captured/operator/sentinel.jsonl",
+      "bytes": 5297336,
+      "sha256": "804904afa7cfa5813d4bb578bf9080d4efcc4e6758f5cad8dc2ee2d6fd9d97ba"
+    },
+    {
+      "file": "captured/operator/incident/reason.txt",
+      "bytes": 67,
+      "sha256": "f98b26fc25e880efca97d934a70de6147478107e583763f9abbc1d84213185a6"
+    }
+  ]
+}

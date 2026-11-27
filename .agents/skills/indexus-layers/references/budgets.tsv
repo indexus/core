@@ -1,0 +1,26 @@
+# chemin (relatif à la racine indexus)	lignes hors tests au 2026-11-13 (0 : couche créée après)	cible
+core/internal/tree	0	1500
+core/internal/algebra	0	1000
+core/internal/protocol	5026	2500
+core/internal/causal	1212	2000
+core/internal/storage	4897	4500
+core/internal/zonelog	0	1600
+core/internal/mesh	1988	3500
+core/indexus	6372	2500
+core/internal/adapter	3170	2800
+core/internal/app	1017	1000
+core/cmd	733	500
+core/internal/simulation	353	0
+core/internal/modelcheck	614	0
+sdk/src/utilities	725	0
+sdk/src/api	794	0
+sdk/src/network	2929	0
+sdk/src/local	429	0
+sdk/src/runtime	228	0
+sdk/src/tree	0	1000
+sdk/src/wire	0	1600
+sdk/src/store	0	700
+sdk/src/walk	0	700
+sdk/src/gpu	315	2500
+sdk/src/map	5641	1500
+sdk/src/react	1089	400

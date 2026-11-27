@@ -1,0 +1,682 @@
+[
+  {
+    "quiet_s": 1.7080456018447876e-06,
+    "collections": {
+      "Multiu0000000006": {
+        "expected": 413,
+        "by_node": [
+          412,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000005": {
+        "expected": 423,
+        "by_node": [
+          419,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000002": {
+        "expected": 416,
+        "by_node": [
+          415,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000007": {
+        "expected": 488,
+        "by_node": [
+          486,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000001": {
+        "expected": 442,
+        "by_node": [
+          434,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000004": {
+        "expected": 436,
+        "by_node": [
+          433,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000000": {
+        "expected": 450,
+        "by_node": [
+          446,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000003": {
+        "expected": 431,
+        "by_node": [
+          428,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "quiet_s": 5.059784208075143,
+    "collections": {
+      "Multiu0000000006": {
+        "expected": 413,
+        "by_node": [
+          413,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000005": {
+        "expected": 423,
+        "by_node": [
+          423,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000002": {
+        "expected": 416,
+        "by_node": [
+          416,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000007": {
+        "expected": 488,
+        "by_node": [
+          488,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000001": {
+        "expected": 442,
+        "by_node": [
+          442,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000004": {
+        "expected": 436,
+        "by_node": [
+          436,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000000": {
+        "expected": 450,
+        "by_node": [
+          450,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000003": {
+        "expected": 431,
+        "by_node": [
+          431,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "quiet_s": 10.134475250029936,
+    "collections": {
+      "Multiu0000000006": {
+        "expected": 413,
+        "by_node": [
+          413,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000005": {
+        "expected": 423,
+        "by_node": [
+          423,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000002": {
+        "expected": 416,
+        "by_node": [
+          416,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000007": {
+        "expected": 488,
+        "by_node": [
+          488,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000001": {
+        "expected": 442,
+        "by_node": [
+          442,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000004": {
+        "expected": 436,
+        "by_node": [
+          436,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000000": {
+        "expected": 450,
+        "by_node": [
+          450,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000003": {
+        "expected": 431,
+        "by_node": [
+          431,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "quiet_s": 15.245303208008409,
+    "collections": {
+      "Multiu0000000006": {
+        "expected": 413,
+        "by_node": [
+          413,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000005": {
+        "expected": 423,
+        "by_node": [
+          423,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000002": {
+        "expected": 416,
+        "by_node": [
+          416,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000007": {
+        "expected": 488,
+        "by_node": [
+          488,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000001": {
+        "expected": 442,
+        "by_node": [
+          442,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000004": {
+        "expected": 436,
+        "by_node": [
+          436,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000000": {
+        "expected": 450,
+        "by_node": [
+          450,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000003": {
+        "expected": 431,
+        "by_node": [
+          431,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "quiet_s": 20.31251045805402,
+    "collections": {
+      "Multiu0000000006": {
+        "expected": 413,
+        "by_node": [
+          413,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000005": {
+        "expected": 423,
+        "by_node": [
+          423,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000002": {
+        "expected": 416,
+        "by_node": [
+          416,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000007": {
+        "expected": 488,
+        "by_node": [
+          488,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000001": {
+        "expected": 442,
+        "by_node": [
+          442,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000004": {
+        "expected": 436,
+        "by_node": [
+          436,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000000": {
+        "expected": 450,
+        "by_node": [
+          450,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000003": {
+        "expected": 431,
+        "by_node": [
+          431,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "quiet_s": 25.4129052500939,
+    "collections": {
+      "Multiu0000000006": {
+        "expected": 413,
+        "by_node": [
+          413,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000005": {
+        "expected": 423,
+        "by_node": [
+          423,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000002": {
+        "expected": 416,
+        "by_node": [
+          416,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000007": {
+        "expected": 488,
+        "by_node": [
+          488,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000001": {
+        "expected": 442,
+        "by_node": [
+          442,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000004": {
+        "expected": 436,
+        "by_node": [
+          436,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000000": {
+        "expected": 450,
+        "by_node": [
+          450,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000003": {
+        "expected": 431,
+        "by_node": [
+          431,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "quiet_s": 30.513803250039928,
+    "collections": {
+      "Multiu0000000006": {
+        "expected": 413,
+        "by_node": [
+          413,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000005": {
+        "expected": 423,
+        "by_node": [
+          423,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000002": {
+        "expected": 416,
+        "by_node": [
+          416,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000007": {
+        "expected": 488,
+        "by_node": [
+          488,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000001": {
+        "expected": 442,
+        "by_node": [
+          442,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000004": {
+        "expected": 436,
+        "by_node": [
+          436,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000000": {
+        "expected": 450,
+        "by_node": [
+          450,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000003": {
+        "expected": 431,
+        "by_node": [
+          431,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "quiet_s": 35.099302874994464,
+    "collections": {
+      "Multiu0000000006": {
+        "expected": 413,
+        "by_node": [
+          413,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000005": {
+        "expected": 423,
+        "by_node": [
+          423,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000002": {
+        "expected": 416,
+        "by_node": [
+          416,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000007": {
+        "expected": 488,
+        "by_node": [
+          488,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000001": {
+        "expected": 442,
+        "by_node": [
+          442,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000004": {
+        "expected": 436,
+        "by_node": [
+          436,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000000": {
+        "expected": 450,
+        "by_node": [
+          450,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Multiu0000000003": {
+        "expected": 431,
+        "by_node": [
+          431,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  }
+]

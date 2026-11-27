@@ -1,0 +1,6 @@
+{
+  "storage": {"path": "/var/lib/indexus/backup", "identity_directory": "/var/lib/indexus/keys"},
+  "identity": {"network": "indexus", "cluster": "indexus", "issuer": "http://127.0.0.1:22000"},
+  "network": {"listen": "127.0.0.1:21000", "monitoring": "127.0.0.1:19000", "advertise": ["127.0.0.1"]},
+  "limits": {"data_bytes": 34359738368, "memory_refuse_pct": 60}
+}

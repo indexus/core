@@ -1,0 +1,3 @@
+2026/11/26 19:49:28 agent: 5 slots on :22100
+2026/11/26 19:49:45 slot 0 started {Genesis:false PreferNear:eVY4cPFnu6j9L9zJ Compaction:false Items:0 Provisioner:http://controller:22010 Bootstrap:http://donor:21100 RetiredExit:0 Replication: ReplicaMachine:}
+2026/11/26 19:50:00 slot 0 exited after 15s: <nil>

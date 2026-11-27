@@ -1,0 +1,1 @@
+19:49:45 spawn: capacity=2 reason=operator accounted=2 live=2 busy=1 empty=1 booting=0 deficit=0 free=5 best=http://reserve:22100(5) reserve=floor=1,pending=0,ready=0,warming=0 place=new chosen=http://reserve:22100 why=empty machine: cpu 27% + receiver 22% <= 60%

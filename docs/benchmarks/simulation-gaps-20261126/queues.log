@@ -1,0 +1,13 @@
+SYNTHETIC COSTS: no measured AWS throughput or p99 forecast
+no_background 0.25 ACK 31998 offered 32000 intended p99 2.048 maintenance debt 0
+no_background 0.125 ACK 31996 offered 32000 intended p99 2.048 maintenance debt 0
+short_collector_50pct 0.25 ACK 31986 offered 32000 intended p99 8.192 maintenance debt 178
+short_collector_50pct 0.125 ACK 31986 offered 32000 intended p99 8.192 maintenance debt 179
+long_collector_50pct 0.25 ACK 31693 offered 32000 intended p99 131.072 maintenance debt 0
+long_collector_50pct 0.125 ACK 31691 offered 32000 intended p99 131.072 maintenance debt 0
+collector_90pct_ready_hosts_only 0.25 ACK 31883 offered 32000 intended p99 32.768 maintenance debt 1419
+collector_90pct_ready_hosts_only 0.125 ACK 31883 offered 32000 intended p99 32.768 maintenance debt 1419
+collector_90pct_installed_piece 0.25 ACK 31971 offered 32000 intended p99 32.768 maintenance debt 755
+collector_90pct_installed_piece 0.125 ACK 31971 offered 32000 intended p99 32.768 maintenance debt 755
+collector_and_summary 0.25 ACK 31883 offered 32000 intended p99 32.768 maintenance debt 1419
+collector_and_summary 0.125 ACK 31883 offered 32000 intended p99 32.768 maintenance debt 1419

@@ -1,0 +1,30 @@
+{
+  "acked_keys": 17999,
+  "checked_keys": 17999,
+  "missing": 0,
+  "read_errors": 0,
+  "oversized_locations": 0,
+  "items_match_acked": true,
+  "collections_checked": 17,
+  "settlement_polls": 24,
+  "settlement_wait_ms": 5841,
+  "zones": 17999,
+  "double_owned_zones": 0,
+  "ownership_retries": 0,
+  "moving_at_ownership": 0,
+  "items_held": 22474,
+  "items_before_run": 0,
+  "nodes_answering": 8,
+  "nodes_gone": 0,
+  "per_node_items": {
+    "http://donor:19100": 2267,
+    "http://donor:19101": 1103,
+    "http://donor:19102": 2359,
+    "http://donor:19103": 1021,
+    "http://donor:19104": 1140,
+    "http://reserve:19100": 559,
+    "http://reserve:19101": 8153,
+    "http://reserve:19102": 5872
+  },
+  "pass": true
+}

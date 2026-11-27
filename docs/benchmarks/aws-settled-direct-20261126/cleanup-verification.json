@@ -1,0 +1,9 @@
+{
+  "active_instances": [],
+  "vpcs": [],
+  "security_groups": [],
+  "templates": [],
+  "iam_role": "absent",
+  "instance_profile": "absent",
+  "bucket": "absent"
+}

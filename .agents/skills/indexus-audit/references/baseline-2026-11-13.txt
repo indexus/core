@@ -1,0 +1,127 @@
+== 1. Budgets (lignes hors tests) ==
+couche                               actuel    cible   écart
+core/internal/protocol                 5026     2500    +2526
+core/internal/causal                   1212     2000     -788
+core/internal/storage                  4897     4500     +397
+core/internal/mesh                     1988     3500    -1512
+core/indexus                           6372     2500    +3872
+core/internal/adapter                  3170     2800     +370
+core/internal/app                      1017     1000      +17
+core/cmd                                733      500     +233
+core/internal/benchmark                2789        0    +2789
+core/internal/simulation                353        0     +353
+core/internal/modelcheck                614        0     +614
+sdk-js/src/model                        754        0     +754
+sdk-js/src/library                      663        0     +663
+sdk-js/src/entities                     612        0     +612
+sdk-js/src/utilities                    725        0     +725
+sdk-js/src/api                          794        0     +794
+sdk-js/src/network                     2929        0    +2929
+sdk-js/src/cube                         824        0     +824
+sdk-js/src/grid                        1462        0    +1462
+sdk-js/src/local                        429        0     +429
+sdk-js/src/runtime                      228        0     +228
+sdk-js/src/tree                           0     1000    -1000
+sdk-js/src/wire                           0     1600    -1600
+sdk-js/src/store                          0      700     -700
+sdk-js/src/walk                           0      700     -700
+sdk-js/src/gpu                          315     2500    -2185
+sdk-js/src/map                         5641     1500    +4141
+sdk-js/src/react                       1089      400     +689
+
+== 2. Imports interdits ==
+-- adapter/app/cmd importent mesh, causal ou storage
+   core/internal/app/node/cluster.go:10:	"github.com/indexus/go-indexus-core/internal/mesh"
+   core/internal/app/node/cluster.go:11:	"github.com/indexus/go-indexus-core/internal/storage"
+   core/internal/app/node/mesh.go:20:	"github.com/indexus/go-indexus-core/internal/causal"
+   core/internal/app/node/mesh.go:21:	"github.com/indexus/go-indexus-core/internal/mesh"
+   core/internal/app/node/mesh.go:22:	"github.com/indexus/go-indexus-core/internal/storage"
+   core/internal/adapter/http/p2p/content_records.go:9:	"github.com/indexus/go-indexus-core/internal/mesh"
+   core/internal/adapter/meshhttp/http.go:15:	"github.com/indexus/go-indexus-core/internal/causal"
+   core/internal/adapter/meshhttp/http.go:16:	"github.com/indexus/go-indexus-core/internal/mesh"
+   core/internal/adapter/meshhttp/http.go:17:	"github.com/indexus/go-indexus-core/internal/storage"
+   core/cmd/localaudit/main.go:7:	"github.com/indexus/go-indexus-core/internal/storage"
+   core/cmd/localdata/main.go:21:	"github.com/indexus/go-indexus-core/internal/causal"
+   core/cmd/localdata/main.go:23:	"github.com/indexus/go-indexus-core/internal/storage"
+-- sdk-js/src/utilities importe gpu|network|api|grid|cube|local|map|react|runtime
+   sdk-js/src/utilities/gpuOverlap.js:1:import {computeContext} from '../gpu/device.js';
+-- sdk-js/src/api importe network|grid|cube|local|gpu|map|react|runtime
+   sdk-js/src/api/getNeighbors.js:1:import { Peer } from "../network/peer.js";
+   sdk-js/src/api/pingPeer.js:1:import { Peer } from "../network/peer.js";
+   sdk-js/src/api/getSet.js:1:import { Peer } from "../network/peer.js";
+-- sdk-js/src/gpu importe network|api|grid|cube|local|map|react|runtime|wire|store|walk
+   sdk-js/src/gpu/store.js:3:import {drop} from '../network/block.js';
+-- le SDK s'importe lui-même par son nom de paquet
+   sdk-js/src/map/lib/readTrace.js:1:import { readTrace } from 'js-indexus-sdk';
+   sdk-js/src/map/workers/grid.worker.js:115:} from "js-indexus-sdk";
+-- métier DVF dans le SDK
+   sdk-js/src/react/useGridWorker.js:99:    dvf: {
+   sdk-js/src/react/useGridWorker.js:1068:    dvf:viewportDvfFromPayload(payload),
+   sdk-js/src/map/lib/heatmapConfig.js:27:export const METRIC_VALEUR_FONCIERE_INDEX = 0;
+   sdk-js/src/map/lib/heatmapConfig.js:28:export const METRIC_SURFACE_BATI_INDEX = 1;
+   sdk-js/src/map/workers/grid.worker.js:101:  METRIC_SURFACE_BATI_INDEX,
+   sdk-js/src/map/workers/grid.worker.js:102:  METRIC_VALEUR_FONCIERE_INDEX,
+   sdk-js/src/map/workers/grid.worker.js:1585:  const sumV = metricSums?.[METRIC_VALEUR_FONCIERE_INDEX] || 0;
+   sdk-js/src/map/workers/grid.worker.js:1586:  const sumS = metricSums?.[METRIC_SURFACE_BATI_INDEX] || 0;
+   sdk-js/src/map/workers/grid.worker.js:1953: * DVF → (valeur / surface) / 10000  (= €/m² scaled)
+   sdk-js/src/map/workers/grid.worker.js:1960:  const valeur = Number(m[METRIC_VALEUR_FONCIERE_INDEX]) || 0;
+   sdk-js/src/map/workers/grid.worker.js:1961:  const surface = Number(m[METRIC_SURFACE_BATI_INDEX]) || 0;
+   sdk-js/src/map/workers/grid.worker.js:1965:    return { n: valeur, d: surface, kind: "dvf" };
+   sdk-js/src/map/workers/grid.worker.js:1968:    return { n: prixSum, d: count, kind: "dvf" };
+   sdk-js/src/map/visualization/webgpu/shaders.js:352:  // DVF keeps its existing image crossfade. Never fill a missing endpoint
+-- nouveau programme WebGL hors SDK
+   experiences/src/rendering/webgl.js:2:export function createProgram(gl,vertex,fragment,attributes={}, {transformFeedbackVaryings}={}) {
+   experiences/src/rendering/webgl.js:3: const program=gl.createProgram(),shaders=[];
+   experiences/src/experiences/point-cloud/solarShadows.js:40:function program(gl,vertex){const p=createProgram(gl,vertex,fragment);return {program:p,uniforms:uniformLocations(gl,p,['matrix','morph','
+   experiences/src/experiences/point-cloud/layer.js:302:    this.program=createProgram(gl,vertex,fragment);
+   experiences/src/experiences/point-cloud/layer.js:306:    this.meshProgram=createProgram(gl,meshVertex,fragment);
+   experiences/src/experiences/point-cloud/layer.js:308:    this.canopyProgram=createProgram(gl,canopyVertex,fragment);
+   experiences/src/experiences/point-cloud/canopyLod.js:139:  this.program=createProgram(gl,canopyVertexSource,pointFragment);this.uniforms=uniformLocations(gl,this.program,[...new Set([...uniforms,'m
+   experiences/src/experiences/point-cloud/atmosphere.js:18:  this.map=map;this.gl=gl;if(this.profile)this.metrics=new RenderMetrics(gl,{enabled:true});this.program=createProgram(gl,rainVertex,rainFra
+   experiences/src/experiences/point-cloud/atmosphere.js:21:  this.cloudProgram=createProgram(gl,cloudVertex,cloudFragment);this.cloudUniforms=uniformLocations(gl,this.cloudProgram,['cropRadius','matr
+   experiences/src/experiences/point-cloud/pointDepthPass.js:40: constructor(gl,{profile=false,maxPixels=Infinity,taps=8,optical=false}={}){if(taps!==4&&taps!==8)throw Error('EDL supports four or eigh
+   experiences/src/experiences/point-cloud/celestialSky.js:45: onAdd(map,gl){this.program=createProgram(gl,vertex,fragment);this.vao=gl.createVertexArray();this.uniforms=Object.fromEntries(['viewMatri
+   experiences/src/experiences/point-cloud/streetLights.js:37:  this.map=map;this.gl=gl;this.program=createProgram(gl,vertex,fragment);this.vao=gl.createVertexArray();this.buffer=gl.createBuffer();
+   experiences/src/experiences/point-cloud/wallLod.js:18: constructor(gl,fragment,uniforms){this.gl=gl;this.program=createProgram(gl,vertex,fragment);this.uniforms=uniformLocations(gl,this.program,[..
+   experiences/src/experiences/explore/coarseProxyLayer.js:40: onAdd(map,gl){this.map=map;this.gl=gl;this.program=createProgram(gl,vertex,fragment);this.uniforms=uniformLocations(gl,this.program,['mat
+   experiences/src/experiences/weather/animatedWeather.js:525:    const program = createProgram(gl,fullscreenVertex,fragment,{position:0});
+   experiences/src/experiences/weather/animatedWeather.js:526:    const composite = createProgram(gl,fullscreenVertex,contourFragment,{position:0});
+
+== 3. Poids ==
+-- fichiers de plus de 600 lignes (hors tests)
+     2889 sdk-js/src/map/workers/grid.worker.js
+     2270 dashboard/server.js
+     1634 experiences/src/experiences/chronicle/OrganicApp.jsx
+     1586 dashboard/src/components/OpsPanel.jsx
+     1240 sdk-js/src/grid/layer.js
+     1147 core/internal/storage/data.go
+     1110 dashboard/src/components/AggregateHeatmap.jsx
+     1088 sdk-js/src/react/useGridWorker.js
+     1076 core/ops/audit/scan.go
+     1048 core/internal/mesh/service.go
+     1035 dashboard/src/App.jsx
+      984 core/internal/storage/causal_data.go
+      879 core/internal/protocol/codec.go
+      846 experiences/src/experiences/weather/animatedWeather.js
+      820 core/internal/benchmark/run.go
+      811 core/indexus/autoscale.go
+      801 experiences/src/experiences/chronicle/people-model.js
+      779 experiences/src/experiences/weather/main.js
+      725 dashboard/lib/dvfLoader.js
+      653 core/internal/benchmark/scale.go
+      608 core/internal/adapter/provisioner/server.go
+      606 core/indexus/summary.go
+-- lignes de plus de 160 caractères
+   core               105
+   sdk-js/src         10
+   dashboard/src      7
+   experiences/src    1398
+
+== 4. Git ==
+   core         codex/unified-sdk-webgpu           12 fichiers non commités
+   sdk-js       codex/shared-cube-canopy           71 fichiers non commités
+   dashboard    codex/unified-sdk-webgpu           5 fichiers non commités
+   experiences  codex/shared-cube-canopy           152 fichiers non commités
+   landing      codex/backup-20261110              0 fichiers non commités
+
+violations de couches : 49

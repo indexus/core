@@ -1,0 +1,25 @@
+audit reads done in 1s, 0 attempts repeated after a 503
+audit ownership https://10.77.0.8:19100: 1ms <nil>
+audit ownership https://10.77.5.99:19101: 155ms <nil>
+audit ownership https://10.77.14.255:19100: 178ms <nil>
+audit ownership https://10.77.0.66:19100: 184ms <nil>
+audit ownership https://10.77.10.80:19100: 325ms <nil>
+audit ownership https://10.77.2.81:19100: 360ms <nil>
+audit ownership https://10.77.8.49:19103: 374ms <nil>
+audit ownership https://10.77.3.70:19100: 214ms <nil>
+audit ownership https://10.77.6.205:19100: 408ms <nil>
+audit ownership https://10.77.14.136:19101: 123ms <nil>
+audit ownership https://10.77.6.67:19101: 103ms <nil>
+audit ownership https://10.77.10.189:19100: 574ms <nil>
+audit ownership https://10.77.3.182:19100: 390ms <nil>
+audit ownership https://10.77.8.143:19100: 135ms <nil>
+audit ownership https://10.77.5.99:19100: 475ms <nil>
+audit ownership https://10.77.8.143:19101: 290ms <nil>
+audit ownership https://10.77.14.136:19100: 735ms <nil>
+audit ownership https://10.77.14.136:19102: 544ms <nil>
+audit ownership https://10.77.6.67:19100: 491ms <nil>
+audit ownership https://10.77.8.49:19100: 680ms <nil>
+audit ownership https://10.77.8.49:19101: 690ms <nil>
+audit ownership https://10.77.8.49:19102: 732ms <nil>
+audit totals done: 257 collections in 2.454s, mismatches 55, unavailable 0
+/results/operator/drain-audit/run.sh: line 15: 10722 Killed                  /opt/indexus/experiment audit -targets "$TARGETS" -monitors "$MONITORS" -issuer http://10.77.2.81:22000 -sample 20000 -settle 180s -out /results/operator/drain-audit

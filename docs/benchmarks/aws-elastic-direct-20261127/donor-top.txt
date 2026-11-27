@@ -1,0 +1,26 @@
+File: node
+Build ID: 548075c5da823c834cc5c4130b017d453449366f
+Type: cpu
+Time: 2026-11-27 05:28:55 CET
+Duration: 10s, Total samples = 1530ms (15.29%)
+Showing nodes accounting for 690ms, 45.10% of 1530ms total
+Showing top 18 nodes out of 574
+      flat  flat%   sum%        cum   cum%
+      90ms  5.88%  5.88%       90ms  5.88%  runtime.asyncPreempt
+      70ms  4.58% 10.46%       70ms  4.58%  crypto/internal/fips140/edwards25519/field.feMul
+      70ms  4.58% 15.03%       70ms  4.58%  internal/runtime/syscall/linux.Syscall6
+      50ms  3.27% 18.30%       90ms  5.88%  compress/flate.(*decompressor).huffSym
+      40ms  2.61% 20.92%       40ms  2.61%  cmpbody
+      40ms  2.61% 23.53%       40ms  2.61%  compress/flate.(*dictDecoder).tryWriteCopy (inline)
+      40ms  2.61% 26.14%       40ms  2.61%  crypto/internal/fips140/edwards25519/field.feSquare
+      40ms  2.61% 28.76%       40ms  2.61%  runtime.futex
+      40ms  2.61% 31.37%       40ms  2.61%  runtime.tryDeferToSpanScan
+      30ms  1.96% 33.33%       40ms  2.61%  compress/flate.(*deflateFast).encode
+      30ms  1.96% 35.29%       30ms  1.96%  crypto/internal/fips140/edwards25519/field.(*Element).Subtract
+      30ms  1.96% 37.25%       60ms  3.92%  runtime.mallocgcSmallNoscan
+      20ms  1.31% 38.56%       20ms  1.31%  bytes.(*Reader).ReadByte
+      20ms  1.31% 39.87%      180ms 11.76%  compress/flate.(*decompressor).huffmanBlock
+      20ms  1.31% 41.18%       30ms  1.96%  compress/flate.(*huffmanBitWriter).writeCode
+      20ms  1.31% 42.48%       50ms  3.27%  encoding/json.checkValid
+      20ms  1.31% 43.79%       20ms  1.31%  memeqbody
+      20ms  1.31% 45.10%       50ms  3.27%  runtime.(*unwinder).resolveInternal

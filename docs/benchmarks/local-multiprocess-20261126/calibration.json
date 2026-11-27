@@ -1,0 +1,1529 @@
+{
+  "calibrated": false,
+  "calibration_scope": "partial: local wall time of writer transactions and measured logical work; not AWS p99",
+  "source_sha256": "ab7c35f79ba639c34563b03cf4e8cb55a1b93521626545131dc73ca1362a5be3",
+  "collection_evidence_sha256": "732aaa4442a8d3d111dba38a3c886702339357cf8d86562e6712af3dad877086",
+  "laws": {
+    "inventory": {
+      "catalog_zones": 40000,
+      "added_zones": 8,
+      "opened_subtrees": 30,
+      "scope": "one deterministic persistent-tree fixture; not a universal time coefficient"
+    },
+    "reserved": {
+      "formula": "reads = 8 + receipts * (sessions + 1)",
+      "scope": "measured fixture only",
+      "observations": [
+        {
+          "sessions": 1,
+          "receipts": 1,
+          "reads": 10,
+          "scanned": 11,
+          "commits": 1
+        },
+        {
+          "sessions": 1,
+          "receipts": 16,
+          "reads": 40,
+          "scanned": 71,
+          "commits": 1
+        },
+        {
+          "sessions": 1,
+          "receipts": 64,
+          "reads": 136,
+          "scanned": 263,
+          "commits": 1
+        },
+        {
+          "sessions": 8,
+          "receipts": 1,
+          "reads": 17,
+          "scanned": 11,
+          "commits": 1
+        },
+        {
+          "sessions": 8,
+          "receipts": 16,
+          "reads": 152,
+          "scanned": 71,
+          "commits": 1
+        },
+        {
+          "sessions": 8,
+          "receipts": 64,
+          "reads": 584,
+          "scanned": 263,
+          "commits": 1
+        },
+        {
+          "sessions": 32,
+          "receipts": 1,
+          "reads": 41,
+          "scanned": 11,
+          "commits": 1
+        },
+        {
+          "sessions": 32,
+          "receipts": 16,
+          "reads": 536,
+          "scanned": 71,
+          "commits": 1
+        },
+        {
+          "sessions": 32,
+          "receipts": 64,
+          "reads": 2120,
+          "scanned": 263,
+          "commits": 1
+        }
+      ]
+    },
+    "installed": {
+      "scope": "64 receipts, measured at 0/8/32 waiting sessions; no extrapolation to other receipt sizes",
+      "observations": [
+        {
+          "sessions": 0,
+          "reads": 71,
+          "scanned": 326,
+          "commits": 1,
+          "receipts": 64
+        },
+        {
+          "sessions": 8,
+          "reads": 71,
+          "scanned": 326,
+          "commits": 1,
+          "receipts": 64
+        },
+        {
+          "sessions": 32,
+          "reads": 71,
+          "scanned": 326,
+          "commits": 1,
+          "receipts": 64
+        }
+      ]
+    }
+  },
+  "missing": [
+    "CPU and I/O service by operation",
+    "per-zone staging cost under larger payloads",
+    "fsync tail distribution",
+    "group commit and burst schedules",
+    "copy timeout/bypass scheduling",
+    "installed-share and membership traces across hosts",
+    "boot/placement/retirement",
+    "cgroup versus host resource scope"
+  ],
+  "rows": [
+    {
+      "run_name": "copy1-gmp1",
+      "gomaxprocs": "1",
+      "copy_slots": 1,
+      "measuredWriterByKind": {
+        "collect": {
+          "attempts": 78,
+          "commits": 75,
+          "errors": 0,
+          "hold_ns": 232183711,
+          "wait_ns": 4489877,
+          "max_hold_ns": 19450417,
+          "mean_hold_ms_per_attempt": 2.9767142435897433,
+          "p99_hold_ms_upper": 32.768
+        },
+        "control": {
+          "attempts": 217,
+          "commits": 216,
+          "errors": 0,
+          "hold_ns": 344761586,
+          "wait_ns": 2813833,
+          "max_hold_ns": 10581083,
+          "mean_hold_ms_per_attempt": 1.5887630691244239,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 45,
+          "commits": 45,
+          "errors": 0,
+          "hold_ns": 136588870,
+          "wait_ns": 5915,
+          "max_hold_ns": 8379541,
+          "mean_hold_ms_per_attempt": 3.035308222222222,
+          "p99_hold_ms_upper": 16.384
+        },
+        "mount": {
+          "attempts": 45,
+          "commits": 45,
+          "errors": 0,
+          "hold_ns": 254765540,
+          "wait_ns": 12915,
+          "max_hold_ns": 15687666,
+          "mean_hold_ms_per_attempt": 5.661456444444444,
+          "p99_hold_ms_upper": 16.384
+        },
+        "write": {
+          "attempts": 3489,
+          "commits": 3487,
+          "errors": 0,
+          "hold_ns": 8027519367,
+          "wait_ns": 51975225,
+          "max_hold_ns": 56349208,
+          "mean_hold_ms_per_attempt": 2.300808073086844,
+          "p99_hold_ms_upper": 16.384
+        }
+      },
+      "assumptions": [
+        "equal steady routing shares",
+        "mean service only",
+        "no maintenance bursts or group commit",
+        "CPU and disk work not identified"
+      ],
+      "config": {
+        "writeCpuMs": 0,
+        "writeIoMs": 0,
+        "writeHoldMs": 2.300808073086844,
+        "durationMs": 2000,
+        "stepMs": 0.125,
+        "rate": 100,
+        "hosts": [
+          {
+            "id": "local",
+            "cores": 8
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1
+          }
+        ]
+      },
+      "result": {
+        "source": "synthetic-execution-model",
+        "calibrated": false,
+        "scope": "synthetic bounded queue replay; not protocol execution or an AWS latency forecast",
+        "offered": 200,
+        "acked": 199,
+        "shed": 0,
+        "queued": 0,
+        "inFlight": 1,
+        "peakQueued": 0,
+        "peakInFlight": 1,
+        "unfinishedFraction": 0.005,
+        "serviceMs": {
+          "samples": 199,
+          "p50": 4.096,
+          "p95": 4.096,
+          "p99": 4.096
+        },
+        "intendedMs": {
+          "samples": 199,
+          "p50": 4.096,
+          "p95": 4.096,
+          "p99": 4.096
+        },
+        "hosts": [
+          {
+            "id": "local",
+            "cpuPct": 0,
+            "ioPct": 0
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1,
+            "acked": 39,
+            "writerPct": 4.63125
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.86875
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1,
+            "acked": 42,
+            "writerPct": 4.99375
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1,
+            "acked": 36,
+            "writerPct": 4.275
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.86875
+          }
+        ],
+        "background": [],
+        "unresolvedInstalls": 0,
+        "stepMs": 0.125
+      }
+    },
+    {
+      "run_name": "copy1-gmp2",
+      "gomaxprocs": "2",
+      "copy_slots": 1,
+      "measuredWriterByKind": {
+        "collect": {
+          "attempts": 69,
+          "commits": 69,
+          "errors": 0,
+          "hold_ns": 143133750,
+          "wait_ns": 6363461,
+          "max_hold_ns": 8437791,
+          "mean_hold_ms_per_attempt": 2.0744021739130436,
+          "p99_hold_ms_upper": 16.384
+        },
+        "control": {
+          "attempts": 210,
+          "commits": 205,
+          "errors": 4,
+          "hold_ns": 317811045,
+          "wait_ns": 36995129,
+          "max_hold_ns": 7853167,
+          "mean_hold_ms_per_attempt": 1.5133859285714286,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 39,
+          "commits": 39,
+          "errors": 0,
+          "hold_ns": 106910378,
+          "wait_ns": 6791,
+          "max_hold_ns": 7586209,
+          "mean_hold_ms_per_attempt": 2.7412917435897435,
+          "p99_hold_ms_upper": 8.192
+        },
+        "mount": {
+          "attempts": 39,
+          "commits": 39,
+          "errors": 0,
+          "hold_ns": 205133086,
+          "wait_ns": 517207,
+          "max_hold_ns": 15110292,
+          "mean_hold_ms_per_attempt": 5.259822717948718,
+          "p99_hold_ms_upper": 16.384
+        },
+        "write": {
+          "attempts": 3497,
+          "commits": 3496,
+          "errors": 0,
+          "hold_ns": 7541716595,
+          "wait_ns": 45193115,
+          "max_hold_ns": 17136542,
+          "mean_hold_ms_per_attempt": 2.1566247054618244,
+          "p99_hold_ms_upper": 16.384
+        }
+      },
+      "assumptions": [
+        "equal steady routing shares",
+        "mean service only",
+        "no maintenance bursts or group commit",
+        "CPU and disk work not identified"
+      ],
+      "config": {
+        "writeCpuMs": 0,
+        "writeIoMs": 0,
+        "writeHoldMs": 2.1566247054618244,
+        "durationMs": 2000,
+        "stepMs": 0.125,
+        "rate": 100,
+        "hosts": [
+          {
+            "id": "local",
+            "cores": 8
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1
+          }
+        ]
+      },
+      "result": {
+        "source": "synthetic-execution-model",
+        "calibrated": false,
+        "scope": "synthetic bounded queue replay; not protocol execution or an AWS latency forecast",
+        "offered": 200,
+        "acked": 199,
+        "shed": 0,
+        "queued": 0,
+        "inFlight": 1,
+        "peakQueued": 0,
+        "peakInFlight": 1,
+        "unfinishedFraction": 0.005,
+        "serviceMs": {
+          "samples": 199,
+          "p50": 4.096,
+          "p95": 4.096,
+          "p99": 4.096
+        },
+        "intendedMs": {
+          "samples": 199,
+          "p50": 4.096,
+          "p95": 4.096,
+          "p99": 4.096
+        },
+        "hosts": [
+          {
+            "id": "local",
+            "cpuPct": 0,
+            "ioPct": 0
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1,
+            "acked": 39,
+            "writerPct": 4.3875
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.6125
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1,
+            "acked": 42,
+            "writerPct": 4.73125
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1,
+            "acked": 36,
+            "writerPct": 4.05
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.6125
+          }
+        ],
+        "background": [],
+        "unresolvedInstalls": 0,
+        "stepMs": 0.125
+      }
+    },
+    {
+      "run_name": "copy1-gmpdefault",
+      "gomaxprocs": "default",
+      "copy_slots": 1,
+      "measuredWriterByKind": {
+        "collect": {
+          "attempts": 70,
+          "commits": 67,
+          "errors": 0,
+          "hold_ns": 252777293,
+          "wait_ns": 32328751,
+          "max_hold_ns": 36417959,
+          "mean_hold_ms_per_attempt": 3.611104185714286,
+          "p99_hold_ms_upper": 65.536
+        },
+        "control": {
+          "attempts": 198,
+          "commits": 196,
+          "errors": 1,
+          "hold_ns": 335083507,
+          "wait_ns": 11920960,
+          "max_hold_ns": 6326334,
+          "mean_hold_ms_per_attempt": 1.6923409444444446,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 42,
+          "commits": 42,
+          "errors": 0,
+          "hold_ns": 120754252,
+          "wait_ns": 1542705,
+          "max_hold_ns": 8205875,
+          "mean_hold_ms_per_attempt": 2.8751012380952377,
+          "p99_hold_ms_upper": 16.384
+        },
+        "mount": {
+          "attempts": 42,
+          "commits": 42,
+          "errors": 0,
+          "hold_ns": 224474338,
+          "wait_ns": 13588,
+          "max_hold_ns": 16275917,
+          "mean_hold_ms_per_attempt": 5.344627095238095,
+          "p99_hold_ms_upper": 16.384
+        },
+        "write": {
+          "attempts": 3481,
+          "commits": 3480,
+          "errors": 0,
+          "hold_ns": 7579156593,
+          "wait_ns": 91880913,
+          "max_hold_ns": 103208750,
+          "mean_hold_ms_per_attempt": 2.1772929023269176,
+          "p99_hold_ms_upper": 8.192
+        }
+      },
+      "assumptions": [
+        "equal steady routing shares",
+        "mean service only",
+        "no maintenance bursts or group commit",
+        "CPU and disk work not identified"
+      ],
+      "config": {
+        "writeCpuMs": 0,
+        "writeIoMs": 0,
+        "writeHoldMs": 2.1772929023269176,
+        "durationMs": 2000,
+        "stepMs": 0.125,
+        "rate": 100,
+        "hosts": [
+          {
+            "id": "local",
+            "cores": 8
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1
+          }
+        ]
+      },
+      "result": {
+        "source": "synthetic-execution-model",
+        "calibrated": false,
+        "scope": "synthetic bounded queue replay; not protocol execution or an AWS latency forecast",
+        "offered": 200,
+        "acked": 199,
+        "shed": 0,
+        "queued": 0,
+        "inFlight": 1,
+        "peakQueued": 0,
+        "peakInFlight": 1,
+        "unfinishedFraction": 0.005,
+        "serviceMs": {
+          "samples": 199,
+          "p50": 4.096,
+          "p95": 4.096,
+          "p99": 4.096
+        },
+        "intendedMs": {
+          "samples": 199,
+          "p50": 4.096,
+          "p95": 4.096,
+          "p99": 4.096
+        },
+        "hosts": [
+          {
+            "id": "local",
+            "cpuPct": 0,
+            "ioPct": 0
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1,
+            "acked": 39,
+            "writerPct": 4.3875
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.6125
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1,
+            "acked": 42,
+            "writerPct": 4.73125
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1,
+            "acked": 36,
+            "writerPct": 4.05
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.6125
+          }
+        ],
+        "background": [],
+        "unresolvedInstalls": 0,
+        "stepMs": 0.125
+      }
+    },
+    {
+      "run_name": "copy2-gmp1",
+      "gomaxprocs": "1",
+      "copy_slots": 2,
+      "measuredWriterByKind": {
+        "collect": {
+          "attempts": 71,
+          "commits": 71,
+          "errors": 0,
+          "hold_ns": 185611914,
+          "wait_ns": 12884,
+          "max_hold_ns": 14599292,
+          "mean_hold_ms_per_attempt": 2.614252309859155,
+          "p99_hold_ms_upper": 16.384
+        },
+        "control": {
+          "attempts": 182,
+          "commits": 181,
+          "errors": 0,
+          "hold_ns": 272820958,
+          "wait_ns": 4586707,
+          "max_hold_ns": 7836709,
+          "mean_hold_ms_per_attempt": 1.4990162527472528,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 34,
+          "commits": 34,
+          "errors": 0,
+          "hold_ns": 121944293,
+          "wait_ns": 11584,
+          "max_hold_ns": 9812167,
+          "mean_hold_ms_per_attempt": 3.5865968529411765,
+          "p99_hold_ms_upper": 16.384
+        },
+        "mount": {
+          "attempts": 34,
+          "commits": 34,
+          "errors": 0,
+          "hold_ns": 221572459,
+          "wait_ns": 9168,
+          "max_hold_ns": 15569125,
+          "mean_hold_ms_per_attempt": 6.516837029411765,
+          "p99_hold_ms_upper": 16.384
+        },
+        "write": {
+          "attempts": 3469,
+          "commits": 3468,
+          "errors": 0,
+          "hold_ns": 7489872693,
+          "wait_ns": 19744133,
+          "max_hold_ns": 102217292,
+          "mean_hold_ms_per_attempt": 2.1590869682905733,
+          "p99_hold_ms_upper": 16.384
+        }
+      },
+      "assumptions": [
+        "equal steady routing shares",
+        "mean service only",
+        "no maintenance bursts or group commit",
+        "CPU and disk work not identified"
+      ],
+      "config": {
+        "writeCpuMs": 0,
+        "writeIoMs": 0,
+        "writeHoldMs": 2.1590869682905733,
+        "durationMs": 2000,
+        "stepMs": 0.125,
+        "rate": 100,
+        "hosts": [
+          {
+            "id": "local",
+            "cores": 8
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1
+          }
+        ]
+      },
+      "result": {
+        "source": "synthetic-execution-model",
+        "calibrated": false,
+        "scope": "synthetic bounded queue replay; not protocol execution or an AWS latency forecast",
+        "offered": 200,
+        "acked": 199,
+        "shed": 0,
+        "queued": 0,
+        "inFlight": 1,
+        "peakQueued": 0,
+        "peakInFlight": 1,
+        "unfinishedFraction": 0.005,
+        "serviceMs": {
+          "samples": 199,
+          "p50": 4.096,
+          "p95": 4.096,
+          "p99": 4.096
+        },
+        "intendedMs": {
+          "samples": 199,
+          "p50": 4.096,
+          "p95": 4.096,
+          "p99": 4.096
+        },
+        "hosts": [
+          {
+            "id": "local",
+            "cpuPct": 0,
+            "ioPct": 0
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1,
+            "acked": 39,
+            "writerPct": 4.3875
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.6125
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1,
+            "acked": 42,
+            "writerPct": 4.73125
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1,
+            "acked": 36,
+            "writerPct": 4.05
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.6125
+          }
+        ],
+        "background": [],
+        "unresolvedInstalls": 0,
+        "stepMs": 0.125
+      }
+    },
+    {
+      "run_name": "copy2-gmp2",
+      "gomaxprocs": "2",
+      "copy_slots": 2,
+      "measuredWriterByKind": {
+        "collect": {
+          "attempts": 74,
+          "commits": 74,
+          "errors": 0,
+          "hold_ns": 200962459,
+          "wait_ns": 1265168,
+          "max_hold_ns": 14531208,
+          "mean_hold_ms_per_attempt": 2.7157089054054055,
+          "p99_hold_ms_upper": 16.384
+        },
+        "control": {
+          "attempts": 205,
+          "commits": 203,
+          "errors": 1,
+          "hold_ns": 322303795,
+          "wait_ns": 27659249,
+          "max_hold_ns": 9375667,
+          "mean_hold_ms_per_attempt": 1.5722136341463413,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 45,
+          "commits": 45,
+          "errors": 0,
+          "hold_ns": 131861417,
+          "wait_ns": 392747,
+          "max_hold_ns": 7362791,
+          "mean_hold_ms_per_attempt": 2.930253711111111,
+          "p99_hold_ms_upper": 8.192
+        },
+        "mount": {
+          "attempts": 45,
+          "commits": 45,
+          "errors": 0,
+          "hold_ns": 235970249,
+          "wait_ns": 8917,
+          "max_hold_ns": 19157333,
+          "mean_hold_ms_per_attempt": 5.243783311111112,
+          "p99_hold_ms_upper": 32.768
+        },
+        "write": {
+          "attempts": 3417,
+          "commits": 3415,
+          "errors": 0,
+          "hold_ns": 7301364615,
+          "wait_ns": 45081291,
+          "max_hold_ns": 96875000,
+          "mean_hold_ms_per_attempt": 2.1367762993854256,
+          "p99_hold_ms_upper": 16.384
+        }
+      },
+      "assumptions": [
+        "equal steady routing shares",
+        "mean service only",
+        "no maintenance bursts or group commit",
+        "CPU and disk work not identified"
+      ],
+      "config": {
+        "writeCpuMs": 0,
+        "writeIoMs": 0,
+        "writeHoldMs": 2.1367762993854256,
+        "durationMs": 2000,
+        "stepMs": 0.125,
+        "rate": 100,
+        "hosts": [
+          {
+            "id": "local",
+            "cores": 8
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1
+          }
+        ]
+      },
+      "result": {
+        "source": "synthetic-execution-model",
+        "calibrated": false,
+        "scope": "synthetic bounded queue replay; not protocol execution or an AWS latency forecast",
+        "offered": 200,
+        "acked": 199,
+        "shed": 0,
+        "queued": 0,
+        "inFlight": 1,
+        "peakQueued": 0,
+        "peakInFlight": 1,
+        "unfinishedFraction": 0.005,
+        "serviceMs": {
+          "samples": 199,
+          "p50": 4.096,
+          "p95": 4.096,
+          "p99": 4.096
+        },
+        "intendedMs": {
+          "samples": 199,
+          "p50": 4.096,
+          "p95": 4.096,
+          "p99": 4.096
+        },
+        "hosts": [
+          {
+            "id": "local",
+            "cpuPct": 0,
+            "ioPct": 0
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1,
+            "acked": 39,
+            "writerPct": 4.3875
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.6125
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1,
+            "acked": 42,
+            "writerPct": 4.73125
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1,
+            "acked": 36,
+            "writerPct": 4.05
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.6125
+          }
+        ],
+        "background": [],
+        "unresolvedInstalls": 0,
+        "stepMs": 0.125
+      }
+    },
+    {
+      "run_name": "copy2-gmpdefault",
+      "gomaxprocs": "default",
+      "copy_slots": 2,
+      "measuredWriterByKind": {
+        "collect": {
+          "attempts": 59,
+          "commits": 59,
+          "errors": 0,
+          "hold_ns": 148626709,
+          "wait_ns": 2109541,
+          "max_hold_ns": 12999000,
+          "mean_hold_ms_per_attempt": 2.5190967627118646,
+          "p99_hold_ms_upper": 16.384
+        },
+        "control": {
+          "attempts": 183,
+          "commits": 182,
+          "errors": 0,
+          "hold_ns": 236736000,
+          "wait_ns": 7521541,
+          "max_hold_ns": 5276708,
+          "mean_hold_ms_per_attempt": 1.293639344262295,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 34,
+          "commits": 34,
+          "errors": 0,
+          "hold_ns": 90884582,
+          "wait_ns": 4517206,
+          "max_hold_ns": 6341000,
+          "mean_hold_ms_per_attempt": 2.6730759411764704,
+          "p99_hold_ms_upper": 8.192
+        },
+        "mount": {
+          "attempts": 34,
+          "commits": 34,
+          "errors": 0,
+          "hold_ns": 175735292,
+          "wait_ns": 5752,
+          "max_hold_ns": 18871458,
+          "mean_hold_ms_per_attempt": 5.16868505882353,
+          "p99_hold_ms_upper": 32.768
+        },
+        "write": {
+          "attempts": 3436,
+          "commits": 3436,
+          "errors": 0,
+          "hold_ns": 7380805568,
+          "wait_ns": 32752624,
+          "max_hold_ns": 49130709,
+          "mean_hold_ms_per_attempt": 2.148080782305006,
+          "p99_hold_ms_upper": 16.384
+        }
+      },
+      "assumptions": [
+        "equal steady routing shares",
+        "mean service only",
+        "no maintenance bursts or group commit",
+        "CPU and disk work not identified"
+      ],
+      "config": {
+        "writeCpuMs": 0,
+        "writeIoMs": 0,
+        "writeHoldMs": 2.148080782305006,
+        "durationMs": 2000,
+        "stepMs": 0.125,
+        "rate": 100,
+        "hosts": [
+          {
+            "id": "local",
+            "cores": 8
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1
+          }
+        ]
+      },
+      "result": {
+        "source": "synthetic-execution-model",
+        "calibrated": false,
+        "scope": "synthetic bounded queue replay; not protocol execution or an AWS latency forecast",
+        "offered": 200,
+        "acked": 199,
+        "shed": 0,
+        "queued": 0,
+        "inFlight": 1,
+        "peakQueued": 0,
+        "peakInFlight": 1,
+        "unfinishedFraction": 0.005,
+        "serviceMs": {
+          "samples": 199,
+          "p50": 4.096,
+          "p95": 4.096,
+          "p99": 4.096
+        },
+        "intendedMs": {
+          "samples": 199,
+          "p50": 4.096,
+          "p95": 4.096,
+          "p99": 4.096
+        },
+        "hosts": [
+          {
+            "id": "local",
+            "cpuPct": 0,
+            "ioPct": 0
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1,
+            "acked": 39,
+            "writerPct": 4.3875
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.6125
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1,
+            "acked": 42,
+            "writerPct": 4.73125
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1,
+            "acked": 36,
+            "writerPct": 4.05
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.6125
+          }
+        ],
+        "background": [],
+        "unresolvedInstalls": 0,
+        "stepMs": 0.125
+      }
+    },
+    {
+      "run_name": "quiet-counts-fixed",
+      "gomaxprocs": "2",
+      "copy_slots": 2,
+      "measuredWriterByKind": {
+        "collect": {
+          "attempts": 74,
+          "commits": 74,
+          "errors": 0,
+          "hold_ns": 148568665,
+          "wait_ns": 3561964,
+          "max_hold_ns": 8187458,
+          "mean_hold_ms_per_attempt": 2.0076846621621622,
+          "p99_hold_ms_upper": 8.192
+        },
+        "control": {
+          "attempts": 198,
+          "commits": 197,
+          "errors": 0,
+          "hold_ns": 291824257,
+          "wait_ns": 8625627,
+          "max_hold_ns": 10500917,
+          "mean_hold_ms_per_attempt": 1.4738598838383838,
+          "p99_hold_ms_upper": 16.384
+        },
+        "fence": {
+          "attempts": 42,
+          "commits": 42,
+          "errors": 0,
+          "hold_ns": 127060210,
+          "wait_ns": 8170,
+          "max_hold_ns": 13718375,
+          "mean_hold_ms_per_attempt": 3.0252430952380953,
+          "p99_hold_ms_upper": 16.384
+        },
+        "mount": {
+          "attempts": 42,
+          "commits": 42,
+          "errors": 0,
+          "hold_ns": 224015001,
+          "wait_ns": 8165,
+          "max_hold_ns": 18317875,
+          "mean_hold_ms_per_attempt": 5.3336905,
+          "p99_hold_ms_upper": 32.768
+        },
+        "write": {
+          "attempts": 3495,
+          "commits": 3494,
+          "errors": 0,
+          "hold_ns": 6811516633,
+          "wait_ns": 43550948,
+          "max_hold_ns": 14143000,
+          "mean_hold_ms_per_attempt": 1.9489317977110157,
+          "p99_hold_ms_upper": 8.192
+        }
+      },
+      "assumptions": [
+        "equal steady routing shares",
+        "mean service only",
+        "no maintenance bursts or group commit",
+        "CPU and disk work not identified"
+      ],
+      "config": {
+        "writeCpuMs": 0,
+        "writeIoMs": 0,
+        "writeHoldMs": 1.9489317977110157,
+        "durationMs": 2000,
+        "stepMs": 0.125,
+        "rate": 100,
+        "hosts": [
+          {
+            "id": "local",
+            "cores": 8
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1
+          }
+        ]
+      },
+      "result": {
+        "source": "synthetic-execution-model",
+        "calibrated": false,
+        "scope": "synthetic bounded queue replay; not protocol execution or an AWS latency forecast",
+        "offered": 200,
+        "acked": 199,
+        "shed": 0,
+        "queued": 0,
+        "inFlight": 1,
+        "peakQueued": 0,
+        "peakInFlight": 1,
+        "unfinishedFraction": 0.005,
+        "serviceMs": {
+          "samples": 199,
+          "p50": 2.048,
+          "p95": 2.048,
+          "p99": 2.048
+        },
+        "intendedMs": {
+          "samples": 199,
+          "p50": 2.048,
+          "p95": 2.048,
+          "p99": 2.048
+        },
+        "hosts": [
+          {
+            "id": "local",
+            "cpuPct": 0,
+            "ioPct": 0
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1,
+            "acked": 39,
+            "writerPct": 3.9
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.1
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1,
+            "acked": 42,
+            "writerPct": 4.20625
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1,
+            "acked": 36,
+            "writerPct": 3.6
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.1
+          }
+        ],
+        "background": [],
+        "unresolvedInstalls": 0,
+        "stepMs": 0.125
+      }
+    },
+    {
+      "run_name": "routed-totals",
+      "gomaxprocs": "2",
+      "copy_slots": 2,
+      "measuredWriterByKind": {
+        "collect": {
+          "attempts": 83,
+          "commits": 80,
+          "errors": 0,
+          "hold_ns": 219495455,
+          "wait_ns": 25465254,
+          "max_hold_ns": 37400166,
+          "mean_hold_ms_per_attempt": 2.6445235542168675,
+          "p99_hold_ms_upper": 65.536
+        },
+        "control": {
+          "attempts": 218,
+          "commits": 216,
+          "errors": 1,
+          "hold_ns": 287834700,
+          "wait_ns": 8842165,
+          "max_hold_ns": 6190625,
+          "mean_hold_ms_per_attempt": 1.320342660550459,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 45,
+          "commits": 45,
+          "errors": 0,
+          "hold_ns": 120034918,
+          "wait_ns": 598000,
+          "max_hold_ns": 7112541,
+          "mean_hold_ms_per_attempt": 2.6674426222222225,
+          "p99_hold_ms_upper": 8.192
+        },
+        "mount": {
+          "attempts": 45,
+          "commits": 45,
+          "errors": 0,
+          "hold_ns": 222534254,
+          "wait_ns": 8706,
+          "max_hold_ns": 15281375,
+          "mean_hold_ms_per_attempt": 4.945205644444444,
+          "p99_hold_ms_upper": 16.384
+        },
+        "write": {
+          "attempts": 3492,
+          "commits": 3492,
+          "errors": 0,
+          "hold_ns": 6971026958,
+          "wait_ns": 44230741,
+          "max_hold_ns": 30961959,
+          "mean_hold_ms_per_attempt": 1.996284924971363,
+          "p99_hold_ms_upper": 16.384
+        }
+      },
+      "assumptions": [
+        "equal steady routing shares",
+        "mean service only",
+        "no maintenance bursts or group commit",
+        "CPU and disk work not identified"
+      ],
+      "config": {
+        "writeCpuMs": 0,
+        "writeIoMs": 0,
+        "writeHoldMs": 1.996284924971363,
+        "durationMs": 2000,
+        "stepMs": 0.125,
+        "rate": 100,
+        "hosts": [
+          {
+            "id": "local",
+            "cores": 8
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1
+          }
+        ]
+      },
+      "result": {
+        "source": "synthetic-execution-model",
+        "calibrated": false,
+        "scope": "synthetic bounded queue replay; not protocol execution or an AWS latency forecast",
+        "offered": 200,
+        "acked": 199,
+        "shed": 0,
+        "queued": 0,
+        "inFlight": 1,
+        "peakQueued": 0,
+        "peakInFlight": 1,
+        "unfinishedFraction": 0.005,
+        "serviceMs": {
+          "samples": 199,
+          "p50": 2.048,
+          "p95": 2.048,
+          "p99": 2.048
+        },
+        "intendedMs": {
+          "samples": 199,
+          "p50": 2.048,
+          "p95": 2.048,
+          "p99": 2.048
+        },
+        "hosts": [
+          {
+            "id": "local",
+            "cpuPct": 0,
+            "ioPct": 0
+          }
+        ],
+        "nodes": [
+          {
+            "id": "n0",
+            "host": "local",
+            "weight": 1,
+            "acked": 39,
+            "writerPct": 3.9
+          },
+          {
+            "id": "n1",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.1
+          },
+          {
+            "id": "n2",
+            "host": "local",
+            "weight": 1,
+            "acked": 42,
+            "writerPct": 4.20625
+          },
+          {
+            "id": "n3",
+            "host": "local",
+            "weight": 1,
+            "acked": 36,
+            "writerPct": 3.6
+          },
+          {
+            "id": "n4",
+            "host": "local",
+            "weight": 1,
+            "acked": 41,
+            "writerPct": 4.1
+          }
+        ],
+        "background": [],
+        "unresolvedInstalls": 0,
+        "stepMs": 0.125
+      }
+    }
+  ]
+}

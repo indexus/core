@@ -1,0 +1,11 @@
+{
+  "production_base": "eaef9dd",
+  "go_version": "go1.26.0 darwin/arm64",
+  "scope": "local diagnostics and synthetic queue examples, no AWS",
+  "source_hashes": {
+    "internal/storage/collection_work_axes_test.go": "8198cb645e57813cd6f56b89af0481be08ab6d8eddb19f9da85b6bce0ef0cb73",
+    "internal/summary/inventory_churn_work_test.go": "ca5752ae45ef1b331989d780376c312fc2bd1138131dbb930b3fbd3b1a720ec1",
+    "ops/experiment/sizing/queues.mjs": "a849cd264f7e2a34f929281c25f520aa3bcd4ade89103d4d454abda439d53a8b",
+    "ops/experiment/sizing/run-queues.mjs": "6b95b1e3003344efe8b8155a5311d4d45f643f12f82e4cbdf0712aa9ac73135a"
+  }
+}

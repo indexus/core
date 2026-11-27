@@ -1,0 +1,87 @@
+{
+  "base": "0b4ddb43100b25de39d917f68ce7fe4a8c3cdd25",
+  "trigger": "demand",
+  "scope": "two agents/three containers, shared VM CPU; real hooks and resource facts",
+  "spawned": 3,
+  "coalesced": 0,
+  "final_reserve": {
+    "machine": "",
+    "running": 3,
+    "free": 2,
+    "receiving": 1,
+    "vnodes": [
+      "HmEWeyHbOYC6n-lZ",
+      "HoEWeyHbOYCDFTHb"
+    ],
+    "cores": 8,
+    "cpu_pct": 28.571428571428573,
+    "cpu_ok": true,
+    "host_cpu_pct": 28.571428571428573,
+    "host_cpu_ok": true,
+    "receiver_ready": false,
+    "mem_free_pct": 74.4200100887068,
+    "mem_ok": true,
+    "disk_free_pct": 42.026145315848225,
+    "disk_ok": true
+  },
+  "placement": {
+    "applied": {
+      "local": 2,
+      "new": 1
+    },
+    "decided": {
+      "local": 2,
+      "new": 1
+    },
+    "last": [
+      {
+        "at": "2026-11-26T20:24:16.355549213Z",
+        "requester_id": "LmEWeyHbOYFZ1bRx",
+        "prefer_near": "HmEWeyHbOYFZ1bRx",
+        "machines": 2,
+        "kind": "new",
+        "machine": "http://reserve:22100",
+        "reason": "empty machine: cpu 12% + receiver 22% <= 60%",
+        "applied": "new",
+        "reserve": {
+          "floor": 1,
+          "pending": 0,
+          "ready": 0,
+          "warming": 0
+        }
+      },
+      {
+        "at": "2026-11-26T20:24:31.68486272Z",
+        "requester_id": "HmEWeyHbOYC6n-lZ",
+        "prefer_near": "HoEWeyHbOYC6n-lZ",
+        "machines": 2,
+        "kind": "local",
+        "machine": "http://reserve:22100",
+        "reason": "donor machine keeps headroom: cpu 8% + receiver 22% <= 60%",
+        "applied": "local",
+        "reserve": {
+          "floor": 1,
+          "pending": 0,
+          "ready": 0,
+          "warming": 0
+        }
+      },
+      {
+        "at": "2026-11-26T20:24:48.070778005Z",
+        "requester_id": "HoEWeyHbOYCDFTHb",
+        "prefer_near": "HokWeyHbOYCDFTHb",
+        "machines": 2,
+        "kind": "local",
+        "machine": "http://reserve:22100",
+        "reason": "donor machine keeps headroom: cpu 8% + receiver 22% <= 60%",
+        "applied": "local",
+        "reserve": {
+          "floor": 1,
+          "pending": 0,
+          "ready": 0,
+          "warming": 0
+        }
+      }
+    ]
+  }
+}

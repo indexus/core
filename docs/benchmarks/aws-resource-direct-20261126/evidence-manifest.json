@@ -1,0 +1,48 @@
+{
+  "run": "aws-resource-direct-16k-20261126",
+  "source": "420061d64c2a72e1f25eae2ccce4171a292fde6b",
+  "loader": "2362b35844ac6903f9abd34b5c93f13116098de8",
+  "result": "operator_stopped_before_16k; no completed audit",
+  "files": [
+    {
+      "path": "captured/steps-1/metrics.jsonl",
+      "bytes": 45449187,
+      "sha256": "9397cdf3dec0b07c424fa601916029a44a3f683783472c2253e67d509796d584"
+    },
+    {
+      "path": "captured/steps-1/machines.jsonl",
+      "bytes": 704886,
+      "sha256": "9fb414913f772e37dfba5185fd1c337b4b7af223392ac030bc8b49b483e942a6"
+    },
+    {
+      "path": "captured/steps-1/load.jsonl",
+      "bytes": 228588,
+      "sha256": "85a62991f2fd4616a058e6649b6ca3e99dc9cb716093726d47d02f5b0b04c0f9"
+    },
+    {
+      "path": "captured/steps-1/load-summary.json",
+      "bytes": 116,
+      "sha256": "dc33ae5cda5c5730e490cb7b220a1e9ee96d886df2bd86269a27962547b3ad76"
+    },
+    {
+      "path": "captured/operator/acked.jsonl.gz",
+      "bytes": 33390765,
+      "sha256": "f45d769f3ee0202066dc45fd724bec46afb1eb6092eda2ec753384728e5f1b13"
+    },
+    {
+      "path": "profiles/donor-t4k-cpu.pprof",
+      "bytes": 67202,
+      "sha256": "c853a8fd230ca803a8fa51d1d84dc62db80d40f9ac8398f3e6ab35897f87d993"
+    },
+    {
+      "path": "profiles/post-stop-10.77.1.145-slot1.pprof",
+      "bytes": 58607,
+      "sha256": "6476fa83056ef4282b8f5026388ffb3b7b2e552a87801c1b73b9d4d5def40189"
+    },
+    {
+      "path": "profiles/post-stop-10.77.11.141-slot0.pprof",
+      "bytes": 78832,
+      "sha256": "eb64bd07c43a05d68cd39fbbfc11434d4eb04938ba40649071c7894bf697f8c7"
+    }
+  ]
+}

@@ -1,0 +1,201 @@
+[
+  {
+    "base_rate": 2000,
+    "cpus": 8,
+    "direct": true,
+    "event": "configuration",
+    "faults": true,
+    "fixed_rate": 200,
+    "fsync": true,
+    "full_node_facade": true,
+    "gomaxprocs": 8,
+    "gossip_ms": 1000,
+    "hosts": 4,
+    "incremental_accounting": true,
+    "members": [
+      {
+        "host": "http://127.0.0.1:52609",
+        "index": 0,
+        "name": "0G40000000000000"
+      },
+      {
+        "host": "http://127.0.0.1:52610",
+        "index": 1,
+        "name": "WG40000000000000"
+      },
+      {
+        "host": "http://127.0.0.1:52611",
+        "index": 2,
+        "name": "GG40000000000000"
+      },
+      {
+        "host": "http://127.0.0.1:52612",
+        "index": 3,
+        "name": "mG40000000000000"
+      },
+      {
+        "host": "http://127.0.0.1:52613",
+        "index": 4,
+        "name": "8G40000000000000"
+      },
+      {
+        "host": "http://127.0.0.1:52614",
+        "index": 5,
+        "name": "eG40000000000000"
+      },
+      {
+        "host": "http://127.0.0.1:52615",
+        "index": 6,
+        "name": "OG40000000000000"
+      },
+      {
+        "host": "http://127.0.0.1:52616",
+        "index": 7,
+        "name": "uG40000000000000"
+      }
+    ],
+    "network_delay_ms": 1,
+    "nodes": 8,
+    "note": "single physical host; no claim of EC2 throughput equivalence",
+    "phase_seconds": 3,
+    "prejoined": false,
+    "production_maintenance": true,
+    "request_timeout_ms": 30000,
+    "seed_zones": 512,
+    "slots": 2,
+    "stacks": true,
+    "store_memory_bytes": 2097152,
+    "sync_delay_ms": 1,
+    "tail_rate": 0,
+    "unique_zones": false,
+    "write_attempts": 5,
+    "write_trace": false
+  },
+  {
+    "duration_ms": 750,
+    "event": "partition",
+    "node": 6
+  },
+  {
+    "duration_ms": 750,
+    "event": "io-tail",
+    "extra_sync_ms": 25,
+    "host": 0
+  },
+  {
+    "event": "reopened",
+    "node": 7,
+    "same_storage_identity": true
+  },
+  {
+    "ack_latency": {
+      "count": 2400,
+      "max_us": 252862,
+      "mean_us": 47867,
+      "p50_us": 33901,
+      "p95_us": 132975,
+      "p99_us": 203042
+    },
+    "event": "client-latency",
+    "intended_latency": {
+      "count": 2400,
+      "max_us": 258466,
+      "mean_us": 50976,
+      "p50_us": 37311,
+      "p95_us": 137560,
+      "p99_us": 204186
+    },
+    "request_timeout_ms": 30000,
+    "rpc_attempts_per_write": 5
+  },
+  {
+    "counters": {
+      "busy": 88,
+      "copy_slot_busy": 0,
+      "copy_slot_shared": 0,
+      "copy_slot_timeouts": 0,
+      "copy_slot_waits": 0,
+      "cutover_call_us_log2": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        135,
+        235,
+        117,
+        15,
+        0,
+        1
+      ],
+      "cutover_failed_us_log2": [],
+      "folds": 0,
+      "folds_aborted": 0,
+      "freeze_return_to_install_ack_us_log2": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        26,
+        261,
+        127,
+        64,
+        26,
+        0,
+        0,
+        1
+      ],
+      "given": 12,
+      "install_to_first_write_us_log2": [],
+      "open": {
+        "count": 0,
+        "list": null,
+        "max_attempts": 0,
+        "oldest_seconds": 0
+      },
+      "taken": 12
+    },
+    "event": "handoff-timings"
+  },
+  {
+    "ack_duplicates": 0,
+    "ack_missing": 0,
+    "acked": 2400,
+    "base_rate": 2000,
+    "direct": true,
+    "elapsed_s": 29.367868042,
+    "event": "audit",
+    "failed": 0,
+    "frozen_remaining": 0,
+    "fsync": true,
+    "nodes": 8,
+    "observed_records": 2912,
+    "offered": 2400,
+    "prejoined": false,
+    "seed_zones": 512,
+    "shed": 0,
+    "tail_offered": 0,
+    "unique_zones": false,
+    "writable_ack_duplicates": 0,
+    "writable_ack_missing": 0
+  }
+]

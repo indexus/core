@@ -1,0 +1,19 @@
+✔ bounded workers report loss, unfinished work and intended latency (3.788792ms)
+✔ an atomic maintenance commit blocks writes even on an otherwise idle multicore host (0.5115ms)
+✔ ready machines provide no relief until an installed routing share moves (11.966833ms)
+✔ separate vnode writers still share the same physical CPU (12.241458ms)
+✔ shared disk service can bottleneck independent writers with spare CPU (8.560458ms)
+✔ maintenance debt is preserved, not discarded when a periodic job is late (0.933792ms)
+✔ summary work outside the writer consumes shared CPU (4.671917ms)
+✔ 64 vnodes are deterministic and retain demand/ACK accounting (15.077458ms)
+✔ configuration rejects vacuous or unbounded work instead of hiding it (0.49675ms)
+✔ AWS workload clock has 120-second ramps, not the fluid example’s 60-second ramps (0.3555ms)
+✔ measured writer wall time blocks only the writer, without invented CPU or disk work (1.335709ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 116.770834

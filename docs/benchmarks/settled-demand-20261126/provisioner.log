@@ -1,0 +1,6 @@
+2026/11/26 20:24:16 INFO placement decided kind=new machine=http://reserve:22100 reason="empty machine: cpu 12% + receiver 22% <= 60%" applied=new requester=LmEWeyHbOYFZ1bRx prefer_near=HmEWeyHbOYFZ1bRx machines=2
+2026/11/26 20:24:16 INFO local process spawned instance=local-reserve-0
+2026/11/26 20:24:31 INFO placement decided kind=local machine=http://reserve:22100 reason="donor machine keeps headroom: cpu 8% + receiver 22% <= 60%" applied=local requester=HmEWeyHbOYC6n-lZ prefer_near=HoEWeyHbOYC6n-lZ machines=2
+2026/11/26 20:24:31 INFO local process spawned instance=local-reserve-1
+2026/11/26 20:24:48 INFO placement decided kind=local machine=http://reserve:22100 reason="donor machine keeps headroom: cpu 8% + receiver 22% <= 60%" applied=local requester=HoEWeyHbOYCDFTHb prefer_near=HokWeyHbOYCDFTHb machines=2
+2026/11/26 20:24:48 INFO local process spawned instance=local-reserve-2

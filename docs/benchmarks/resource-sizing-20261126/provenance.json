@@ -1,0 +1,11 @@
+{
+  "model_sha256": "598328cc40d2d0cd0498f49d3bea7cacf49865a08991fec9aeaab5c3ced289fb",
+  "cases": 465,
+  "seeds": [
+    7,
+    19,
+    41
+  ],
+  "command": "node ops/experiment/sizing/sweep.mjs /absolute/output",
+  "kind": "resource planning model; not protocol execution or measured AWS latency"
+}

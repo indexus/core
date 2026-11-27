@@ -1,0 +1,12 @@
+=== RUN   TestReplayCapturedInventory
+    saved_inventory_replay_test.go:100: entry=OMXhkot1MsfKht5z zones=8998 records=8998 err=<nil>
+    saved_inventory_replay_test.go:100: entry=nd-qznRMpIFDRT-R zones=8998 records=8998 err=<nil>
+    saved_inventory_replay_test.go:100: entry=7JS5uWuq43tvJiPy zones=8998 records=8998 err=<nil>
+    saved_inventory_replay_test.go:100: entry=efFC326BnmtpygmC zones=8998 records=8998 err=<nil>
+    saved_inventory_replay_test.go:100: entry=a_arJ7StfVs5R0g7 zones=8998 records=8998 err=<nil>
+    saved_inventory_replay_test.go:100: entry=GMXhkot1MsfMn4H1 zones=8998 records=8998 err=<nil>
+    saved_inventory_replay_test.go:100: entry=HMXhkot1Msezh5Lw zones=8998 records=8998 err=<nil>
+    saved_inventory_replay_test.go:100: entry=HsXhkot1MshMS9Qz zones=8998 records=8998 err=<nil>
+--- PASS: TestReplayCapturedInventory (1.16s)
+PASS
+ok  	github.com/indexus/go-indexus-core/internal/mesh	1.563s

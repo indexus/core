@@ -1,0 +1,3 @@
+ok  	github.com/indexus/go-indexus-core/internal/autoscale	5.846s
+ok  	github.com/indexus/go-indexus-core/internal/adapter/provisioner	6.269s
+ok  	github.com/indexus/go-indexus-core/internal/app/node	35.504s

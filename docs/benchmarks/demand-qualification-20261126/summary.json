@@ -1,0 +1,205 @@
+{
+  "source": "e6e86d7",
+  "qualification": "failed (initial audit returned HTTP 503 during ongoing transfer)",
+  "load": {
+    "acked": 17999,
+    "drain_completed": true,
+    "exhausted": 0,
+    "offered": 17999,
+    "queued_unfinished": 0,
+    "shed": 0
+  },
+  "audit_original": {
+    "acked_keys": 17999,
+    "checked_keys": 17999,
+    "missing": 0,
+    "read_errors": 0,
+    "oversized_locations": 0,
+    "items_match_acked": false,
+    "collections_checked": 17,
+    "count_mismatches": {
+      "Placeh0000000000": [
+        8998,
+        0
+      ]
+    },
+    "mismatch_keys_checked": 8998,
+    "zones": 17999,
+    "double_owned_zones": 0,
+    "ownership_retries": 0,
+    "moving_at_ownership": 0,
+    "items_held": 16828,
+    "items_before_run": 0,
+    "nodes_answering": 8,
+    "nodes_gone": 0,
+    "per_node_items": {
+      "http://donor:19100": 1068,
+      "http://donor:19101": 2243,
+      "http://donor:19102": 2267,
+      "http://donor:19103": 1189,
+      "http://donor:19104": 1170,
+      "http://reserve:19100": 503,
+      "http://reserve:19101": 8162,
+      "http://reserve:19102": 226
+    },
+    "pass": false
+  },
+  "actual_numeric_hot_total_observed": false,
+  "actual_hot_total_http_status": 503,
+  "raw_moving_at_ownership_was_unmeasured_default": true,
+  "placement": {
+    "applied": {
+      "local": 2,
+      "new": 1
+    },
+    "decided": {
+      "local": 2,
+      "new": 1
+    },
+    "last": [
+      {
+        "at": "2026-11-26T19:59:18.781851881Z",
+        "requester_id": "OMXhkot1MsfKht5z",
+        "prefer_near": "GMXhkot1MsfKht5z",
+        "machines": 2,
+        "kind": "new",
+        "machine": "http://reserve:22100",
+        "reason": "empty machine: cpu 27% + receiver 22% <= 60%",
+        "applied": "new",
+        "reserve": {
+          "floor": 1,
+          "pending": 0,
+          "ready": 0,
+          "warming": 0
+        }
+      },
+      {
+        "at": "2026-11-26T19:59:34.095109222Z",
+        "requester_id": "GMXhkot1MsfMn4H1",
+        "prefer_near": "HMXhkot1MsfMn4H1",
+        "machines": 2,
+        "kind": "local",
+        "machine": "http://reserve:22100",
+        "reason": "donor machine keeps headroom: cpu 17% + receiver 22% <= 60%",
+        "applied": "local",
+        "reserve": {
+          "floor": 1,
+          "pending": 0,
+          "ready": 0,
+          "warming": 0
+        }
+      },
+      {
+        "at": "2026-11-26T19:59:50.417619632Z",
+        "requester_id": "HMXhkot1Msezh5Lw",
+        "prefer_near": "HsXhkot1Msezh5Lw",
+        "machines": 2,
+        "kind": "local",
+        "machine": "http://reserve:22100",
+        "reason": "donor machine keeps headroom: cpu 22% + receiver 22% <= 60%",
+        "applied": "local",
+        "reserve": {
+          "floor": 1,
+          "pending": 0,
+          "ready": 0,
+          "warming": 0
+        }
+      }
+    ]
+  },
+  "peers": [
+    {
+      "slot": 0,
+      "first_observed_s": 13.706730457954109,
+      "first_apply_observed_s": 13.706730457954109,
+      "first_apply_process_age_s": 0.258524292,
+      "joining_false_observed_s": 15.91458112502005,
+      "last_applied": 3795
+    },
+    {
+      "slot": 1,
+      "first_observed_s": 28.982000874937512,
+      "first_apply_observed_s": 28.982000874937512,
+      "first_apply_process_age_s": 0.2918025,
+      "joining_false_observed_s": 33.29041991697159,
+      "last_applied": 2967
+    },
+    {
+      "slot": 2,
+      "first_observed_s": 45.32683954201639,
+      "first_apply_observed_s": null,
+      "first_apply_process_age_s": null,
+      "joining_false_observed_s": 56.464955666917376,
+      "last_applied": 0
+    }
+  ],
+  "periods": [
+    {
+      "start_s": 0,
+      "end_s": 12,
+      "histogram_samples": 4396,
+      "offered_in_rows": 4400,
+      "acked_in_rows": 4396,
+      "p50_ms_upper": 8.192,
+      "p95_ms_upper": 8.192,
+      "p99_ms_upper": 16.384
+    },
+    {
+      "start_s": 12,
+      "end_s": 28,
+      "histogram_samples": 6400,
+      "offered_in_rows": 6400,
+      "acked_in_rows": 6400,
+      "p50_ms_upper": 8.192,
+      "p95_ms_upper": 16.384,
+      "p99_ms_upper": 32.768
+    },
+    {
+      "start_s": 28,
+      "end_s": 45,
+      "histogram_samples": 6800,
+      "offered_in_rows": 6800,
+      "acked_in_rows": 6800,
+      "p50_ms_upper": 8.192,
+      "p95_ms_upper": 16.384,
+      "p99_ms_upper": 32.768
+    }
+  ],
+  "copy_budget": {
+    "copy_slot_waits": 0,
+    "copy_slot_timeouts": 0,
+    "copy_slot_busy": 0,
+    "copy_slot_shared": 437
+  },
+  "last_observed_open": 0,
+  "last_observed_frozen": 0,
+  "shared_vm_cpu_peak_sample_pct": 68.53582554517133,
+  "offline_replay": {
+    "stores": 8,
+    "hot_records_per_entry": 8998,
+    "jobs_running": false,
+    "json_transport": true,
+    "original_stores_modified": false
+  },
+  "new_audit_live_qualification": false,
+  "campaign_relaunched_after_failure": false,
+  "aws_launched": false,
+  "replay_validation": "schema and JavaScript syntax checked; visual browser blocked file:// URL",
+  "shared_vm_cpu_under_write_load_peak_pct": 33.9622641509434,
+  "shared_vm_cpu_after_load_during_audit_peak_pct": 68.53582554517133,
+  "last_observed_mesh_request_response_bytes_by_kind": {
+    "admit": 173075,
+    "install": 94299,
+    "install-zone": 18913450,
+    "inventory-prefix": 136178159,
+    "membership": 458178,
+    "preload": 11035533,
+    "stage": 98316,
+    "summary-get": 1487629,
+    "write": 44039,
+    "handoff": 50998,
+    "rights": 522085,
+    "summary-contribute": 2714735
+  },
+  "last_observed_forwarded_attempts": 71
+}

@@ -1,0 +1,261 @@
+{
+  "source": "c2f226a8a9ddb5ae231cdc02342e4adf98b90fc8",
+  "windows": [
+    {
+      "from": 0,
+      "to": 120,
+      "published_points": 119,
+      "write_ms": {
+        "samples": 237980,
+        "0.5": 4.096,
+        "0.95": 4.096,
+        "0.99": 8.192
+      },
+      "intended_ms": {
+        "samples": 237980,
+        "0.5": 16.384,
+        "0.95": 16.384,
+        "0.99": 16.384
+      },
+      "last": {
+        "t": 119.000001366,
+        "offered": 2000,
+        "acked": 2000,
+        "queued": 0,
+        "shed": 0,
+        "cpu_cores": 0.26158799999999616
+      }
+    },
+    {
+      "from": 120,
+      "to": 180,
+      "published_points": 60,
+      "write_ms": {
+        "samples": 178006,
+        "0.5": 4.096,
+        "0.95": 8.192,
+        "0.99": 8.192
+      },
+      "intended_ms": {
+        "samples": 178006,
+        "0.5": 16.384,
+        "0.95": 16.384,
+        "0.99": 16.384
+      },
+      "last": {
+        "t": 179.000001456,
+        "offered": 3950,
+        "acked": 3949,
+        "queued": 0,
+        "shed": 0,
+        "cpu_cores": 0.506058000000003
+      }
+    },
+    {
+      "from": 180,
+      "to": 210,
+      "published_points": 30,
+      "write_ms": {
+        "samples": 119984,
+        "0.5": 4.096,
+        "0.95": 16.384,
+        "0.99": 32.768
+      },
+      "intended_ms": {
+        "samples": 119984,
+        "0.5": 16.384,
+        "0.95": 16.384,
+        "0.99": 32.768
+      },
+      "last": {
+        "t": 209.000001789,
+        "offered": 4000,
+        "acked": 4003,
+        "queued": 0,
+        "shed": 0,
+        "cpu_cores": 0.9476319999999987
+      }
+    },
+    {
+      "from": 210,
+      "to": 300,
+      "published_points": 90,
+      "write_ms": {
+        "samples": 359925,
+        "0.5": 8.192,
+        "0.95": 65.536,
+        "0.99": 131.072
+      },
+      "intended_ms": {
+        "samples": 359925,
+        "0.5": 16.384,
+        "0.95": 65.536,
+        "0.99": 131.072
+      },
+      "last": {
+        "t": 299.000002015,
+        "offered": 4000,
+        "acked": 3951,
+        "queued": 0,
+        "shed": 0,
+        "cpu_cores": 2.626497999999998
+      }
+    },
+    {
+      "from": 300,
+      "to": 315,
+      "published_points": 14,
+      "write_ms": {
+        "samples": 61606,
+        "0.5": 8.192,
+        "0.95": 65.536,
+        "0.99": 262.144
+      },
+      "intended_ms": {
+        "samples": 61606,
+        "0.5": 16.384,
+        "0.95": 131.072,
+        "0.99": 262.144
+      },
+      "last": {
+        "t": 313.000002497,
+        "offered": 4833,
+        "acked": 4792,
+        "queued": 0,
+        "shed": 0,
+        "cpu_cores": 3.6804240000000163
+      }
+    }
+  ],
+  "resource_hosts": {
+    "http://10.77.0.66:22100": {
+      "cpu_max": 58.631102164066434,
+      "above85_samples": 0,
+      "above85_span_seconds": 0,
+      "ram_used_max": 3.3865108225129603,
+      "disk_used_max": 0.7258653162011228,
+      "max_running": 1
+    },
+    "http://10.77.0.8:22100": {
+      "cpu_max": 24.735605170387778,
+      "above85_samples": 0,
+      "above85_span_seconds": 0,
+      "ram_used_max": 2.91577697814121,
+      "disk_used_max": 0.7145706656209825,
+      "max_running": 1
+    },
+    "http://10.77.10.189:22100": {
+      "cpu_max": 99.48298865910607,
+      "above85_samples": 1,
+      "above85_span_seconds": 0.0,
+      "ram_used_max": 3.23128683310496,
+      "disk_used_max": 0.7266503654863641,
+      "max_running": 1
+    },
+    "http://10.77.10.80:22100": {
+      "cpu_max": 59.14858096828047,
+      "above85_samples": 0,
+      "above85_span_seconds": 0,
+      "ram_used_max": 3.517485367948609,
+      "disk_used_max": 0.7371293520459119,
+      "max_running": 1
+    },
+    "http://10.77.14.136:22100": {
+      "cpu_max": 98.29045643153528,
+      "above85_samples": 9,
+      "above85_span_seconds": 555.9406154155731,
+      "ram_used_max": 4.4980299975119635,
+      "disk_used_max": 0.7951333417144753,
+      "max_running": 3
+    },
+    "http://10.77.14.255:22100": {
+      "cpu_max": 99.73333333333333,
+      "above85_samples": 15,
+      "above85_span_seconds": 210.35958051681519,
+      "ram_used_max": 3.402553069076106,
+      "disk_used_max": 0.7275587484197672,
+      "max_running": 1
+    },
+    "http://10.77.2.81:22100": {
+      "cpu_max": 99.24812030075188,
+      "above85_samples": 1,
+      "above85_span_seconds": 0.0,
+      "ram_used_max": 3.1638376118841336,
+      "disk_used_max": 0.7528141556763188,
+      "max_running": 1
+    },
+    "http://10.77.3.182:22100": {
+      "cpu_max": 33.05992634750586,
+      "above85_samples": 0,
+      "above85_span_seconds": 0,
+      "ram_used_max": 2.735264591820183,
+      "disk_used_max": 0.7191746844654006,
+      "max_running": 1
+    },
+    "http://10.77.3.70:22100": {
+      "cpu_max": 48.07467911318553,
+      "above85_samples": 0,
+      "above85_span_seconds": 0,
+      "ram_used_max": 3.6255472744894917,
+      "disk_used_max": 0.7209219111475988,
+      "max_running": 1
+    },
+    "http://10.77.5.99:22100": {
+      "cpu_max": 43.81382889670183,
+      "above85_samples": 0,
+      "above85_span_seconds": 0,
+      "ram_used_max": 3.5149721426918035,
+      "disk_used_max": 0.7276702735271385,
+      "max_running": 2
+    },
+    "http://10.77.6.205:22100": {
+      "cpu_max": 72.85785869383665,
+      "above85_samples": 0,
+      "above85_span_seconds": 0,
+      "ram_used_max": 3.4566828450722653,
+      "disk_used_max": 0.7341973351053781,
+      "max_running": 1
+    },
+    "http://10.77.6.67:22100": {
+      "cpu_max": 59.04522613065327,
+      "above85_samples": 0,
+      "above85_span_seconds": 0,
+      "ram_used_max": 3.308181497246821,
+      "disk_used_max": 0.7381466359665012,
+      "max_running": 2
+    },
+    "http://10.77.8.143:22100": {
+      "cpu_max": 92.14023831347387,
+      "above85_samples": 3,
+      "above85_span_seconds": 30.04135251045227,
+      "ram_used_max": 3.95524263276009,
+      "disk_used_max": 0.7407270208037886,
+      "max_running": 2
+    },
+    "http://10.77.8.187:22100": {
+      "cpu_max": 25.025571087623593,
+      "above85_samples": 0,
+      "above85_span_seconds": 0,
+      "ram_used_max": 3.7106850508808975,
+      "disk_used_max": 0.7008259615055152,
+      "max_running": 0
+    },
+    "http://10.77.8.49:22100": {
+      "cpu_max": 97.78628495339547,
+      "above85_samples": 10,
+      "above85_span_seconds": 510.86246824264526,
+      "ram_used_max": 4.697927344219693,
+      "disk_used_max": 0.7991618035341759,
+      "max_running": 4
+    }
+  },
+  "audit_files": {},
+  "load": {
+    "acked": 960761,
+    "drain_completed": true,
+    "exhausted": 64,
+    "offered": 960825,
+    "queued_unfinished": 0,
+    "shed": 0
+  }
+}

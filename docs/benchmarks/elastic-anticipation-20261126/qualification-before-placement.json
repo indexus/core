@@ -1,0 +1,76 @@
+{
+  "source": "7ee544137c15c7bc5bf85f9dc64e0801c8cc6d16",
+  "scope": "two logical agents, five slots each; three containers on one 8-vCPU Linux VM; HTTP direct, 400 writes/s for 45s; not independent host qualification",
+  "load": {
+    "acked": 18000,
+    "drain_completed": true,
+    "exhausted": 0,
+    "offered": 18000,
+    "queued_unfinished": 0,
+    "shed": 0
+  },
+  "audit": {
+    "acked_keys": 18000,
+    "checked_keys": 18000,
+    "missing": 0,
+    "read_errors": 0,
+    "oversized_locations": 0,
+    "items_match_acked": true,
+    "collections_checked": 17,
+    "settlement_polls": 21,
+    "settlement_wait_ms": 5078,
+    "zones": 18000,
+    "double_owned_zones": 0,
+    "ownership_retries": 0,
+    "moving_at_ownership": 0,
+    "items_held": 12104,
+    "items_before_run": 0,
+    "nodes_answering": 8,
+    "nodes_gone": 0,
+    "per_node_items": {
+      "http://donor:19100": 2268,
+      "http://donor:19101": 2359,
+      "http://donor:19102": 1068,
+      "http://donor:19103": 2243,
+      "http://donor:19104": 500,
+      "http://reserve:19100": 268,
+      "http://reserve:19101": 2415,
+      "http://reserve:19102": 983
+    },
+    "pass": true
+  },
+  "histogram_upper_bounds": {
+    "latency_us_log2": {
+      "samples": 17596,
+      "p50_bucket_ms": 8.192,
+      "p95_bucket_ms": 8.192,
+      "p99_bucket_ms": 16.384
+    },
+    "intended_latency_us_log2": {
+      "samples": 17596,
+      "p50_bucket_ms": 16.384,
+      "p95_bucket_ms": 16.384,
+      "p99_bucket_ms": 32.768
+    },
+    "read_latency_us_log2": {
+      "samples": 342,
+      "p50_bucket_ms": 2.048,
+      "p95_bucket_ms": 4.096,
+      "p99_bucket_ms": 8.192
+    }
+  },
+  "sampled_host_cpu_peak_pct": 68.42105263157895,
+  "copy_paced_lots": 13,
+  "copy_paced_ms": 1294,
+  "simulation64": {
+    "source": "7c7e0c0",
+    "vnodes": 64,
+    "seeded_zones": 1024,
+    "concurrent_joins": 4,
+    "continuous_writes": true,
+    "lost_install_ack": true,
+    "acked_and_observed_rows": 3492,
+    "join_and_audit_seconds": 7.355625416,
+    "pass": true
+  }
+}

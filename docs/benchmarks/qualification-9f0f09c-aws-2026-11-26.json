@@ -1,0 +1,1761 @@
+{
+  "source": "9f0f09c111e9301dea5fb9c8e3345250eb3b3b8d",
+  "source_tree": "f09066d7842567776cacf89ef488b0e928066ba2",
+  "run": "qual-9f-1126-122347",
+  "scope": "qualification only, no16k load; protocol source unchanged",
+  "budget_authorized_usd": 2,
+  "lab": [
+    {
+      "run": "before-1af",
+      "ref": "1afbd3d",
+      "faults": 0,
+      "process_elapsed_s": 53.126701524,
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1600,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 40.842912302,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 9792,
+        "offered": 1600,
+        "prejoined": false,
+        "seed_zones": 8192,
+        "shed": 0,
+        "tail_offered": 0,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1600,
+        "failed": 0,
+        "retried": 2,
+        "direct": 1517,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1600,
+          "p50": 9.812,
+          "p95": 26.569,
+          "p99": 64.795,
+          "max": 788.652
+        },
+        "IntendedUS": {
+          "n": 1600,
+          "p50": 13.962,
+          "p95": 29.638,
+          "p99": 69.54,
+          "max": 790.445
+        },
+        "RPCUS": {
+          "n": 1600,
+          "p50": 9.801,
+          "p95": 26.267,
+          "p99": 64.788,
+          "max": 688.281
+        },
+        "BackoffUS": {
+          "n": 1600,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 100.334
+        },
+        "queue_ms": {
+          "n": 1600,
+          "p50": 5.004,
+          "p95": 5.987,
+          "p99": 8.233,
+          "max": 16.426
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 2,
+          "mean_rpc_ms": 187.999375,
+          "mean_backoff_ms": 12.52275
+        },
+        "errors": {
+          "local disk does not hold writable authority\nlocal disk does not hold writable authority\nlocal disk does not hold writable authority": 2
+        }
+      },
+      "initial_40s": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 2,
+        "direct": 1516,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 9.812,
+          "p95": 27.587,
+          "p99": 65.486,
+          "max": 788.652
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 13.962,
+          "p95": 29.838,
+          "p99": 70.145,
+          "max": 790.445
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 9.801,
+          "p95": 26.425,
+          "p99": 65.479,
+          "max": 688.281
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 100.334
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.005,
+          "p95": 5.991,
+          "p99": 8.402,
+          "max": 16.426
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 2,
+          "mean_rpc_ms": 187.999375,
+          "mean_backoff_ms": 12.52275
+        },
+        "errors": {
+          "local disk does not hold writable authority\nlocal disk does not hold writable authority\nlocal disk does not hold writable authority": 2
+        }
+      },
+      "last_join_complete_s": 39.48601496,
+      "resources": {
+        "cpu_idle_min": 68.74606175173282,
+        "cpu_iowait_max": 7.876496534341525,
+        "mem_available_min_pct": 95.69680332511133,
+        "rss_max_bytes": 691748864,
+        "fdatasync_ms": {
+          "n": 53,
+          "p50": 0.899,
+          "p95": 1.046,
+          "p99": 1.945,
+          "max": 1.945
+        },
+        "vm_delta": {
+          "pswpin": 0,
+          "pswpout": 0,
+          "pgmajfault": 0
+        }
+      },
+      "handoff_timings": {
+        "counters": {
+          "busy": 279,
+          "cutover_call_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            115,
+            1107,
+            176,
+            19
+          ],
+          "cutover_failed_us_log2": [],
+          "folds": 0,
+          "folds_aborted": 0,
+          "freeze_return_to_install_ack_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            54,
+            768,
+            541,
+            45,
+            9
+          ],
+          "given": 167,
+          "install_to_first_write_us_log2": [],
+          "open": {
+            "count": 0,
+            "list": null,
+            "max_attempts": 0,
+            "oldest_seconds": 0
+          },
+          "taken": 167
+        },
+        "event": "handoff-timings"
+      },
+      "membership_transport": {
+        "counters": {
+          "async_sync_dropped": 1430,
+          "async_sync_failures": 0,
+          "async_syncs": 154,
+          "full_packets": 8887,
+          "known_vnodes": 64,
+          "membership_bytes": 12886,
+          "partners": 7,
+          "reference_packets": 2701,
+          "round_nanos": 81758654,
+          "rounds": 1108,
+          "version": "d34d67677d3c84af2bbcd4cdaf550bf4a25f7101d89ac5ab78e685b04011bc9e"
+        },
+        "event": "membership-transport"
+      },
+      "sampled_alloc_gib": 16.360540792346
+    },
+    {
+      "run": "before-2362",
+      "ref": "2362b35",
+      "faults": 0,
+      "process_elapsed_s": 53.12619453499997,
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1600,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 40.799498669,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 9792,
+        "offered": 1600,
+        "prejoined": false,
+        "seed_zones": 8192,
+        "shed": 0,
+        "tail_offered": 0,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1600,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1497,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1600,
+          "p50": 9.822,
+          "p95": 35.736,
+          "p99": 70.144,
+          "max": 122.828
+        },
+        "IntendedUS": {
+          "n": 1600,
+          "p50": 14.642,
+          "p95": 40.997,
+          "p99": 76.134,
+          "max": 136.584
+        },
+        "RPCUS": {
+          "n": 1600,
+          "p50": 9.812,
+          "p95": 35.729,
+          "p99": 70.135,
+          "max": 122.809
+        },
+        "BackoffUS": {
+          "n": 1600,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1600,
+          "p50": 5.006,
+          "p95": 6.014,
+          "p99": 10.205,
+          "max": 43.92
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 87.8189375,
+          "mean_backoff_ms": 0.0
+        },
+        "errors": {}
+      },
+      "initial_40s": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1496,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 9.822,
+          "p95": 35.736,
+          "p99": 70.269,
+          "max": 122.828
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 14.642,
+          "p95": 40.997,
+          "p99": 76.634,
+          "max": 136.584
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 9.812,
+          "p95": 35.729,
+          "p99": 70.26,
+          "max": 122.809
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 5.007,
+          "p95": 6.015,
+          "p99": 10.493,
+          "max": 43.92
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 87.8189375,
+          "mean_backoff_ms": 0.0
+        },
+        "errors": {}
+      },
+      "last_join_complete_s": 36.72148807,
+      "resources": {
+        "cpu_idle_min": 58.00508259212198,
+        "cpu_iowait_max": 7.750952986022872,
+        "mem_available_min_pct": 95.47412237672422,
+        "rss_max_bytes": 716234752,
+        "fdatasync_ms": {
+          "n": 53,
+          "p50": 0.899,
+          "p95": 1.055,
+          "p99": 1.941,
+          "max": 1.941
+        },
+        "vm_delta": {
+          "pswpin": 0,
+          "pswpout": 0,
+          "pgmajfault": 0
+        }
+      },
+      "handoff_timings": {
+        "counters": {
+          "busy": 207,
+          "cutover_call_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            15,
+            63,
+            347,
+            80,
+            4
+          ],
+          "cutover_failed_us_log2": [],
+          "folds": 0,
+          "folds_aborted": 0,
+          "freeze_return_to_install_ack_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            4,
+            36,
+            291,
+            163,
+            15
+          ],
+          "given": 175,
+          "install_to_first_write_us_log2": [],
+          "open": {
+            "count": 0,
+            "list": null,
+            "max_attempts": 0,
+            "oldest_seconds": 0
+          },
+          "taken": 175
+        },
+        "event": "handoff-timings"
+      },
+      "membership_transport": {
+        "counters": {
+          "async_sync_dropped": 529,
+          "async_sync_failures": 0,
+          "async_syncs": 155,
+          "full_packets": 9093,
+          "known_vnodes": 64,
+          "membership_bytes": 12886,
+          "partners": 6,
+          "reference_packets": 3644,
+          "round_nanos": 76513511,
+          "rounds": 1171,
+          "version": "fcec4ff4b6e0ba3d0cc4b309e9c465dd6b09b6a0837e87761ec87e63cee1ea6e"
+        },
+        "event": "membership-transport"
+      },
+      "sampled_alloc_gib": 29.87295239046216
+    },
+    {
+      "run": "new-faults",
+      "ref": "9f0f09c",
+      "faults": 1,
+      "process_elapsed_s": 55.12993005199999,
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1684,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 42.967782538,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 9876,
+        "offered": 1684,
+        "prejoined": false,
+        "seed_zones": 8192,
+        "shed": 0,
+        "tail_offered": 84,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1684,
+        "failed": 0,
+        "retried": 4,
+        "direct": 1594,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1684,
+          "p50": 9.804,
+          "p95": 27.945,
+          "p99": 70.337,
+          "max": 1025.833
+        },
+        "IntendedUS": {
+          "n": 1684,
+          "p50": 14.283,
+          "p95": 32.102,
+          "p99": 75.343,
+          "max": 1030.847
+        },
+        "RPCUS": {
+          "n": 1684,
+          "p50": 9.795,
+          "p95": 27.212,
+          "p99": 61.492,
+          "max": 247.99
+        },
+        "BackoffUS": {
+          "n": 1684,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 1000.281
+        },
+        "queue_ms": {
+          "n": 1684,
+          "p50": 3.959,
+          "p95": 5.92,
+          "p99": 7.692,
+          "max": 25.199
+        },
+        "slowest_1pct": {
+          "n": 17,
+          "retried": 4,
+          "mean_rpc_ms": 121.93076470588235,
+          "mean_backoff_ms": 117.75441176470589
+        },
+        "errors": {
+          "lab: bounded receiver partition": 10
+        }
+      },
+      "initial_40s": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 4,
+        "direct": 1510,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 9.791,
+          "p95": 27.204,
+          "p99": 70.751,
+          "max": 1025.833
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 14.117,
+          "p95": 31.238,
+          "p99": 75.343,
+          "max": 1030.847
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 9.782,
+          "p95": 26.892,
+          "p99": 62.529,
+          "max": 247.99
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 1000.281
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 4.266,
+          "p95": 5.92,
+          "p99": 7.586,
+          "max": 25.199
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 4,
+          "mean_rpc_ms": 125.1559375,
+          "mean_backoff_ms": 125.1140625
+        },
+        "errors": {
+          "lab: bounded receiver partition": 10
+        }
+      },
+      "last_join_complete_s": 42.11772847,
+      "resources": {
+        "cpu_idle_min": 71.49095446038677,
+        "cpu_iowait_max": 6.487835308796008,
+        "mem_available_min_pct": 95.68428773478338,
+        "rss_max_bytes": 682704896,
+        "fdatasync_ms": {
+          "n": 55,
+          "p50": 0.898,
+          "p95": 1.291,
+          "p99": 1.919,
+          "max": 1.919
+        },
+        "vm_delta": {
+          "pswpin": 0,
+          "pswpout": 0,
+          "pgmajfault": 0
+        }
+      },
+      "handoff_timings": {
+        "counters": {
+          "busy": 307,
+          "cutover_call_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            133,
+            1152,
+            178,
+            17
+          ],
+          "cutover_failed_us_log2": [],
+          "folds": 0,
+          "folds_aborted": 0,
+          "freeze_return_to_install_ack_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            42,
+            837,
+            549,
+            47,
+            6
+          ],
+          "given": 177,
+          "install_to_first_write_us_log2": [],
+          "open": {
+            "count": 0,
+            "list": null,
+            "max_attempts": 0,
+            "oldest_seconds": 0
+          },
+          "taken": 177
+        },
+        "event": "handoff-timings"
+      },
+      "membership_transport": {
+        "counters": {
+          "async_sync_dropped": 1494,
+          "async_sync_failures": 0,
+          "async_syncs": 164,
+          "full_packets": 10481,
+          "known_vnodes": 64,
+          "membership_bytes": 12886,
+          "partners": 7,
+          "reference_packets": 2624,
+          "round_nanos": 202726327,
+          "rounds": 1207,
+          "version": "567bb799ba4fac5e46468e8d44d9a459f67606bc3e4eb2e4e5d6dd73573fb5bf"
+        },
+        "event": "membership-transport"
+      },
+      "sampled_alloc_gib": 17.481749959290028
+    },
+    {
+      "run": "new-r1",
+      "ref": "9f0f09c",
+      "faults": 0,
+      "process_elapsed_s": 55.12902251500001,
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1657,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 42.304355144,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 9849,
+        "offered": 1657,
+        "prejoined": false,
+        "seed_zones": 8192,
+        "shed": 0,
+        "tail_offered": 57,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1657,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1580,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1657,
+          "p50": 9.808,
+          "p95": 24.728,
+          "p99": 55.861,
+          "max": 241.049
+        },
+        "IntendedUS": {
+          "n": 1657,
+          "p50": 13.919,
+          "p95": 28.731,
+          "p99": 65.08,
+          "max": 244.533
+        },
+        "RPCUS": {
+          "n": 1657,
+          "p50": 9.795,
+          "p95": 24.717,
+          "p99": 55.853,
+          "max": 241.025
+        },
+        "BackoffUS": {
+          "n": 1657,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1657,
+          "p50": 4.636,
+          "p95": 5.952,
+          "p99": 8.63,
+          "max": 30.649
+        },
+        "slowest_1pct": {
+          "n": 17,
+          "retried": 0,
+          "mean_rpc_ms": 151.0925294117647,
+          "mean_backoff_ms": 0.0
+        },
+        "errors": {}
+      },
+      "initial_40s": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 0,
+        "direct": 1523,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 9.803,
+          "p95": 23.051,
+          "p99": 55.58,
+          "max": 241.049
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 13.787,
+          "p95": 27.9,
+          "p99": 58.361,
+          "max": 244.533
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 9.792,
+          "p95": 23.022,
+          "p99": 55.573,
+          "max": 241.025
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 4.511,
+          "p95": 5.939,
+          "p99": 7.718,
+          "max": 30.649
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 0,
+          "mean_rpc_ms": 155.2463125,
+          "mean_backoff_ms": 0.0
+        },
+        "errors": {}
+      },
+      "last_join_complete_s": 41.43617446,
+      "resources": {
+        "cpu_idle_min": 71.88854489164086,
+        "cpu_iowait_max": 7.215189873417722,
+        "mem_available_min_pct": 95.64648099604787,
+        "rss_max_bytes": 693293056,
+        "fdatasync_ms": {
+          "n": 55,
+          "p50": 0.912,
+          "p95": 1.047,
+          "p99": 1.957,
+          "max": 1.957
+        },
+        "vm_delta": {
+          "pswpin": 0,
+          "pswpout": 0,
+          "pgmajfault": 21
+        }
+      },
+      "handoff_timings": {
+        "counters": {
+          "busy": 303,
+          "cutover_call_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            112,
+            1223,
+            172,
+            9
+          ],
+          "cutover_failed_us_log2": [],
+          "folds": 0,
+          "folds_aborted": 0,
+          "freeze_return_to_install_ack_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            51,
+            846,
+            559,
+            57,
+            3
+          ],
+          "given": 175,
+          "install_to_first_write_us_log2": [],
+          "open": {
+            "count": 0,
+            "list": null,
+            "max_attempts": 0,
+            "oldest_seconds": 0
+          },
+          "taken": 175
+        },
+        "event": "handoff-timings"
+      },
+      "membership_transport": {
+        "counters": {
+          "async_sync_dropped": 1529,
+          "async_sync_failures": 0,
+          "async_syncs": 162,
+          "full_packets": 10100,
+          "known_vnodes": 63,
+          "membership_bytes": 12886,
+          "partners": 7,
+          "reference_packets": 2697,
+          "round_nanos": 443819238,
+          "rounds": 1169,
+          "version": "967c107162e66537e9b675417b6d7d57302d7ca04bd122fe5aa7fd96855ab567"
+        },
+        "event": "membership-transport"
+      },
+      "sampled_alloc_gib": 17.646025590598583
+    },
+    {
+      "run": "new-r2",
+      "ref": "9f0f09c",
+      "faults": 0,
+      "process_elapsed_s": 55.13078189500001,
+      "audit": {
+        "ack_duplicates": 0,
+        "ack_missing": 0,
+        "acked": 1632,
+        "base_rate": 2000,
+        "direct": true,
+        "elapsed_s": 42.343422249,
+        "event": "audit",
+        "failed": 0,
+        "frozen_remaining": 0,
+        "fsync": true,
+        "nodes": 64,
+        "observed_records": 9824,
+        "offered": 1632,
+        "prejoined": false,
+        "seed_zones": 8192,
+        "shed": 0,
+        "tail_offered": 32,
+        "unique_zones": true,
+        "writable_ack_duplicates": 0,
+        "writable_ack_missing": 0
+      },
+      "writes": {
+        "count": 1632,
+        "failed": 0,
+        "retried": 1,
+        "direct": 1545,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1632,
+          "p50": 9.857,
+          "p95": 23.512,
+          "p99": 50.087,
+          "max": 650.836
+        },
+        "IntendedUS": {
+          "n": 1632,
+          "p50": 13.722,
+          "p95": 27.42,
+          "p99": 59.028,
+          "max": 655.855
+        },
+        "RPCUS": {
+          "n": 1632,
+          "p50": 9.846,
+          "p95": 23.418,
+          "p99": 50.078,
+          "max": 550.265
+        },
+        "BackoffUS": {
+          "n": 1632,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 100.547
+        },
+        "queue_ms": {
+          "n": 1632,
+          "p50": 3.923,
+          "p95": 5.896,
+          "p99": 6.465,
+          "max": 36.063
+        },
+        "slowest_1pct": {
+          "n": 17,
+          "retried": 1,
+          "mean_rpc_ms": 155.87229411764704,
+          "mean_backoff_ms": 5.914529411764707
+        },
+        "errors": {
+          "local disk does not hold writable authority\nlocal disk does not hold writable authority\nlocal disk does not hold writable authority": 1
+        }
+      },
+      "initial_40s": {
+        "count": 1599,
+        "failed": 0,
+        "retried": 1,
+        "direct": 1513,
+        "degraded": 0,
+        "LatencyUS": {
+          "n": 1599,
+          "p50": 9.852,
+          "p95": 23.384,
+          "p99": 50.087,
+          "max": 650.836
+        },
+        "IntendedUS": {
+          "n": 1599,
+          "p50": 13.689,
+          "p95": 27.229,
+          "p99": 59.028,
+          "max": 655.855
+        },
+        "RPCUS": {
+          "n": 1599,
+          "p50": 9.839,
+          "p95": 23.204,
+          "p99": 50.078,
+          "max": 550.265
+        },
+        "BackoffUS": {
+          "n": 1599,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 100.547
+        },
+        "queue_ms": {
+          "n": 1599,
+          "p50": 3.923,
+          "p95": 5.898,
+          "p99": 6.465,
+          "max": 36.063
+        },
+        "slowest_1pct": {
+          "n": 16,
+          "retried": 1,
+          "mean_rpc_ms": 161.9549375,
+          "mean_backoff_ms": 6.2841875
+        },
+        "errors": {
+          "local disk does not hold writable authority\nlocal disk does not hold writable authority\nlocal disk does not hold writable authority": 1
+        }
+      },
+      "last_join_complete_s": 40.807200618,
+      "resources": {
+        "cpu_idle_min": 70.84893882646692,
+        "cpu_iowait_max": 7.219083490269931,
+        "mem_available_min_pct": 95.712908946295,
+        "rss_max_bytes": 677089280,
+        "fdatasync_ms": {
+          "n": 55,
+          "p50": 0.89,
+          "p95": 1.04,
+          "p99": 2.045,
+          "max": 2.045
+        },
+        "vm_delta": {
+          "pswpin": 0,
+          "pswpout": 0,
+          "pgmajfault": 1
+        }
+      },
+      "handoff_timings": {
+        "counters": {
+          "busy": 314,
+          "cutover_call_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            3,
+            135,
+            1190,
+            160,
+            5
+          ],
+          "cutover_failed_us_log2": [],
+          "folds": 0,
+          "folds_aborted": 0,
+          "freeze_return_to_install_ack_us_log2": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            64,
+            851,
+            542,
+            35,
+            1
+          ],
+          "given": 176,
+          "install_to_first_write_us_log2": [],
+          "open": {
+            "count": 0,
+            "list": null,
+            "max_attempts": 0,
+            "oldest_seconds": 0
+          },
+          "taken": 176
+        },
+        "event": "handoff-timings"
+      },
+      "membership_transport": {
+        "counters": {
+          "async_sync_dropped": 1506,
+          "async_sync_failures": 0,
+          "async_syncs": 163,
+          "full_packets": 9227,
+          "known_vnodes": 61,
+          "membership_bytes": 12886,
+          "partners": 7,
+          "reference_packets": 2646,
+          "round_nanos": 540199930,
+          "rounds": 1091,
+          "version": "3476799219127104a6c5d01c1d6a0fe293c1cabfe5696f7394b80d2ab1e1a044"
+        },
+        "event": "membership-transport"
+      },
+      "sampled_alloc_gib": 17.12174605205655
+    }
+  ],
+  "real_cluster": {
+    "status": "PASS_OBSERVED",
+    "scope": "real H3 nodes/agents/provisioner; client over TLS/TCP; public monitoring snapshots are not simultaneous authority snapshots",
+    "placements": [],
+    "profile_requests": [
+      {
+        "agent": "http://10.77.10.225:22100",
+        "slot": 1,
+        "name": "JtybsiSKCSMYq6D0",
+        "start_ns": 1795696679743560681,
+        "facts_before": {
+          "machine": "",
+          "running": 2,
+          "free": 0,
+          "receiving": 1,
+          "vnodes": [
+            "bcUU1_8YT9YBvDjW"
+          ],
+          "cores": 4,
+          "cpu_pct": 6.343891205053042,
+          "cpu_ok": true,
+          "mem_free_pct": 97.80801790393716,
+          "mem_ok": true,
+          "disk_free_pct": 99.29210859492731,
+          "disk_ok": true
+        },
+        "stacks_status": 200,
+        "http_status": 200,
+        "bytes": 12911,
+        "file": "JtybsiSKCSMYq6D0-slot1.pprof",
+        "finish_ns": 1795696680755477639,
+        "facts_after": {
+          "machine": "",
+          "running": 2,
+          "free": 0,
+          "receiving": 1,
+          "vnodes": [
+            "bcUU1_8YT9YBvDjW"
+          ],
+          "cores": 4,
+          "cpu_pct": 6.343891205053042,
+          "cpu_ok": true,
+          "mem_free_pct": 97.76782564456774,
+          "mem_ok": true,
+          "disk_free_pct": 99.29077466717246,
+          "disk_ok": true
+        }
+      }
+    ],
+    "reads": 1104,
+    "read_unavailable": 0,
+    "initial_agents": [
+      "http://10.77.10.225:22100",
+      "http://10.77.2.119:22100"
+    ],
+    "configuration": {
+      "items_per_vnode": 2500,
+      "compaction": false,
+      "seed_rate": 400,
+      "live_rate": 200,
+      "live_seconds": 90,
+      "max_hosts": 3,
+      "slots": 2,
+      "trigger": "node autoscale from genuine stored items; no manual scale calls"
+    },
+    "placement_latest": {
+      "applied": {
+        "local": 2
+      },
+      "decided": {
+        "local": 2
+      },
+      "last": [
+        {
+          "at": "2026-11-26T12:32:18.26116681Z",
+          "requester_id": "fhPBTaCllt3XdTfd",
+          "prefer_near": "fhHsyBl_KLIzJRpG",
+          "machines": 2,
+          "kind": "local",
+          "machine": "http://10.77.10.225:22100",
+          "reason": "donor machine keeps headroom: cpu 0% + receiver 44% <= 75%",
+          "applied": "local"
+        },
+        {
+          "at": "2026-11-26T12:37:58.173877839Z",
+          "requester_id": "bcUU1_8YT9YBvDjW",
+          "prefer_near": "JtybsiSKCSMnKK7w",
+          "machines": 2,
+          "kind": "local",
+          "machine": "http://10.77.10.225:22100",
+          "reason": "donor machine keeps headroom: cpu 4% + receiver 44% <= 75%",
+          "applied": "local"
+        }
+      ]
+    },
+    "genesis": "bcUU1_8YT9YBvDjW",
+    "seed_load": {
+      "acked": 8000,
+      "drain_completed": true,
+      "exhausted": 0,
+      "offered": 8000,
+      "queued_unfinished": 0,
+      "shed": 0
+    },
+    "live_load": {
+      "acked": 18000,
+      "drain_completed": true,
+      "exhausted": 0,
+      "offered": 18000,
+      "queued_unfinished": 0,
+      "shed": 0
+    },
+    "active_nodes_at_audit": 2,
+    "audit": {
+      "acked_keys": 26000,
+      "checked_keys": 26000,
+      "missing": 0,
+      "read_errors": 0,
+      "oversized_locations": 0,
+      "items_match_acked": true,
+      "collections_checked": 16,
+      "zones": 26000,
+      "double_owned_zones": 0,
+      "ownership_retries": 0,
+      "moving_at_ownership": 0,
+      "items_held": 26000,
+      "items_before_run": 0,
+      "nodes_answering": 2,
+      "nodes_gone": 0,
+      "per_node_items": {
+        "https://10.77.10.225:19100": 12817,
+        "https://10.77.10.225:19101": 13183
+      },
+      "pass": true
+    }
+  },
+  "real_cluster_analysis": {
+    "nodes": {
+      "bcUU1_8YT9YBvDjW": {
+        "first_monitor_ns": 1795696647062450730,
+        "first_ready_ns": 1795696647062450730,
+        "first_join_complete_observation_ns": 1795696647062450730,
+        "first_http_ack_counter_observation_ns": 1795696647171576416,
+        "first_http_ack_is_direct_to_owner": "not established by this counter alone",
+        "ready_while_joining_samples": 0,
+        "health503_samples": 0
+      },
+      "JtybsiSKCSMYq6D0": {
+        "first_monitor_ns": 1795696679735430807,
+        "first_ready_ns": 1795696679735430807,
+        "first_join_complete_observation_ns": 1795696683656615160,
+        "first_http_ack_counter_observation_ns": 1795696680168391418,
+        "first_http_ack_is_direct_to_owner": "not established by this counter alone",
+        "ready_while_joining_samples": 36,
+        "health503_samples": 0
+      }
+    },
+    "client": {
+      "seed": {
+        "reads": 272,
+        "read_miss": 0,
+        "read_failed": 0,
+        "totals": 104,
+        "totals_exact": 104,
+        "totals_deficit": 0,
+        "histogram_records": 7596,
+        "ack_p50_bucket_bound_ms": 4.096,
+        "ack_p95_bucket_bound_ms": 4.096,
+        "ack_p99_bucket_bound_ms": 8.192,
+        "intended_p99_bucket_bound_ms": 16.384,
+        "note": "Bucket upper bounds; final partial second may be absent. Not exact trace quantiles."
+      },
+      "live": {
+        "reads": 1273,
+        "read_miss": 0,
+        "read_failed": 0,
+        "totals": 503,
+        "totals_exact": 503,
+        "totals_deficit": 0,
+        "histogram_records": 17798,
+        "ack_p50_bucket_bound_ms": 4.096,
+        "ack_p95_bucket_bound_ms": 4.096,
+        "ack_p99_bucket_bound_ms": 16.384,
+        "intended_p99_bucket_bound_ms": 16.384,
+        "note": "Bucket upper bounds; final partial second may be absent. Not exact trace quantiles."
+      }
+    },
+    "writer_windows": [
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696640,
+        "kind": "write",
+        "attempts_delta": 282,
+        "durable_commits_delta": 282,
+        "mean_hold_per_attempt_ms": 0.39317423758865244,
+        "mean_wait_per_attempt_ms": 0.00015257801418439718
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696650,
+        "kind": "write",
+        "attempts_delta": 982,
+        "durable_commits_delta": 982,
+        "mean_hold_per_attempt_ms": 0.42676968635437884,
+        "mean_wait_per_attempt_ms": 0.0001644470468431772
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696660,
+        "kind": "write",
+        "attempts_delta": 986,
+        "durable_commits_delta": 986,
+        "mean_hold_per_attempt_ms": 0.41041769979716025,
+        "mean_wait_per_attempt_ms": 0.00016821298174442192
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696670,
+        "kind": "control",
+        "attempts_delta": 27,
+        "durable_commits_delta": 27,
+        "mean_hold_per_attempt_ms": 0.7319899259259259,
+        "mean_wait_per_attempt_ms": 0.0038594074074074073
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696670,
+        "kind": "fence",
+        "attempts_delta": 12,
+        "durable_commits_delta": 12,
+        "mean_hold_per_attempt_ms": 2.7989849166666665,
+        "mean_wait_per_attempt_ms": 0.00018641666666666665
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696670,
+        "kind": "write",
+        "attempts_delta": 993,
+        "durable_commits_delta": 993,
+        "mean_hold_per_attempt_ms": 0.34766654984894263,
+        "mean_wait_per_attempt_ms": 0.01122727693856999
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696680,
+        "kind": "collect",
+        "attempts_delta": 80,
+        "durable_commits_delta": 80,
+        "mean_hold_per_attempt_ms": 4.7671219625,
+        "mean_wait_per_attempt_ms": 0.0209163875
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696680,
+        "kind": "control",
+        "attempts_delta": 226,
+        "durable_commits_delta": 226,
+        "mean_hold_per_attempt_ms": 0.7681859247787611,
+        "mean_wait_per_attempt_ms": 0.023605238938053098
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696680,
+        "kind": "fence",
+        "attempts_delta": 99,
+        "durable_commits_delta": 99,
+        "mean_hold_per_attempt_ms": 3.5168278181818184,
+        "mean_wait_per_attempt_ms": 0.0030212020202020204
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696680,
+        "kind": "write",
+        "attempts_delta": 798,
+        "durable_commits_delta": 797,
+        "mean_hold_per_attempt_ms": 0.4443823521303258,
+        "mean_wait_per_attempt_ms": 0.32702300375939847
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696690,
+        "kind": "write",
+        "attempts_delta": 716,
+        "durable_commits_delta": 716,
+        "mean_hold_per_attempt_ms": 0.3523185879888268,
+        "mean_wait_per_attempt_ms": 0.0001384608938547486
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696700,
+        "kind": "write",
+        "attempts_delta": 743,
+        "durable_commits_delta": 743,
+        "mean_hold_per_attempt_ms": 0.3666953795423957,
+        "mean_wait_per_attempt_ms": 0.00014831090174966351
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696710,
+        "kind": "write",
+        "attempts_delta": 759,
+        "durable_commits_delta": 759,
+        "mean_hold_per_attempt_ms": 0.39044811989459816,
+        "mean_wait_per_attempt_ms": 0.000163965744400527
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696720,
+        "kind": "write",
+        "attempts_delta": 724,
+        "durable_commits_delta": 724,
+        "mean_hold_per_attempt_ms": 0.39238155110497236,
+        "mean_wait_per_attempt_ms": 0.00014853176795580111
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696730,
+        "kind": "write",
+        "attempts_delta": 746,
+        "durable_commits_delta": 746,
+        "mean_hold_per_attempt_ms": 0.4017917868632708,
+        "mean_wait_per_attempt_ms": 0.00018250268096514744
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696740,
+        "kind": "write",
+        "attempts_delta": 721,
+        "durable_commits_delta": 721,
+        "mean_hold_per_attempt_ms": 0.43960394868238556,
+        "mean_wait_per_attempt_ms": 0.00018983356449375866
+      },
+      {
+        "node": "bcUU1_8YT9YBvDjW",
+        "window_utc_seconds": 1795696750,
+        "kind": "write",
+        "attempts_delta": 553,
+        "durable_commits_delta": 553,
+        "mean_hold_per_attempt_ms": 0.4374152567811935,
+        "mean_wait_per_attempt_ms": 0.0001603869801084991
+      },
+      {
+        "node": "JtybsiSKCSMYq6D0",
+        "window_utc_seconds": 1795696670,
+        "kind": "control",
+        "attempts_delta": 12,
+        "durable_commits_delta": 12,
+        "mean_hold_per_attempt_ms": 1.5333563333333333,
+        "mean_wait_per_attempt_ms": 0.00013766666666666666
+      },
+      {
+        "node": "JtybsiSKCSMYq6D0",
+        "window_utc_seconds": 1795696670,
+        "kind": "mount",
+        "attempts_delta": 9,
+        "durable_commits_delta": 9,
+        "mean_hold_per_attempt_ms": 6.467437111111111,
+        "mean_wait_per_attempt_ms": 0.00018155555555555554
+      },
+      {
+        "node": "JtybsiSKCSMYq6D0",
+        "window_utc_seconds": 1795696680,
+        "kind": "collect",
+        "attempts_delta": 144,
+        "durable_commits_delta": 144,
+        "mean_hold_per_attempt_ms": 5.34807875,
+        "mean_wait_per_attempt_ms": 0.05884632638888889
+      },
+      {
+        "node": "JtybsiSKCSMYq6D0",
+        "window_utc_seconds": 1795696680,
+        "kind": "control",
+        "attempts_delta": 159,
+        "durable_commits_delta": 159,
+        "mean_hold_per_attempt_ms": 3.7641658616352203,
+        "mean_wait_per_attempt_ms": 0.008491377358490567
+      },
+      {
+        "node": "JtybsiSKCSMYq6D0",
+        "window_utc_seconds": 1795696680,
+        "kind": "mount",
+        "attempts_delta": 99,
+        "durable_commits_delta": 99,
+        "mean_hold_per_attempt_ms": 8.083536191919192,
+        "mean_wait_per_attempt_ms": 0.0028333939393939394
+      },
+      {
+        "node": "JtybsiSKCSMYq6D0",
+        "window_utc_seconds": 1795696680,
+        "kind": "write",
+        "attempts_delta": 646,
+        "durable_commits_delta": 646,
+        "mean_hold_per_attempt_ms": 0.4072864566563467,
+        "mean_wait_per_attempt_ms": 0.9930885773993808
+      },
+      {
+        "node": "JtybsiSKCSMYq6D0",
+        "window_utc_seconds": 1795696690,
+        "kind": "write",
+        "attempts_delta": 751,
+        "durable_commits_delta": 751,
+        "mean_hold_per_attempt_ms": 0.3448286524633822,
+        "mean_wait_per_attempt_ms": 0.00015274966711051932
+      },
+      {
+        "node": "JtybsiSKCSMYq6D0",
+        "window_utc_seconds": 1795696700,
+        "kind": "write",
+        "attempts_delta": 722,
+        "durable_commits_delta": 722,
+        "mean_hold_per_attempt_ms": 0.3836380457063712,
+        "mean_wait_per_attempt_ms": 0.0001462770083102493
+      },
+      {
+        "node": "JtybsiSKCSMYq6D0",
+        "window_utc_seconds": 1795696710,
+        "kind": "write",
+        "attempts_delta": 735,
+        "durable_commits_delta": 735,
+        "mean_hold_per_attempt_ms": 0.400769631292517,
+        "mean_wait_per_attempt_ms": 0.00016770068027210886
+      },
+      {
+        "node": "JtybsiSKCSMYq6D0",
+        "window_utc_seconds": 1795696720,
+        "kind": "write",
+        "attempts_delta": 765,
+        "durable_commits_delta": 765,
+        "mean_hold_per_attempt_ms": 0.4272896156862745,
+        "mean_wait_per_attempt_ms": 0.0001523372549019608
+      },
+      {
+        "node": "JtybsiSKCSMYq6D0",
+        "window_utc_seconds": 1795696730,
+        "kind": "write",
+        "attempts_delta": 765,
+        "durable_commits_delta": 765,
+        "mean_hold_per_attempt_ms": 0.40020141568627454,
+        "mean_wait_per_attempt_ms": 0.0001964640522875817
+      },
+      {
+        "node": "JtybsiSKCSMYq6D0",
+        "window_utc_seconds": 1795696740,
+        "kind": "write",
+        "attempts_delta": 719,
+        "durable_commits_delta": 719,
+        "mean_hold_per_attempt_ms": 0.46125142698191934,
+        "mean_wait_per_attempt_ms": 0.0001905632823365786
+      },
+      {
+        "node": "JtybsiSKCSMYq6D0",
+        "window_utc_seconds": 1795696750,
+        "kind": "write",
+        "attempts_delta": 536,
+        "durable_commits_delta": 536,
+        "mean_hold_per_attempt_ms": 0.469105526119403,
+        "mean_wait_per_attempt_ms": 0.00016955410447761193
+      }
+    ],
+    "resource_facts": {
+      "max_node_cpu_pct_of_host": 40.42704150983339,
+      "min_mem_free_pct": 97.28883590987131,
+      "min_disk_free_pct": 99.28204159523501
+    }
+  },
+  "transport_reproduction": [
+    {
+      "url": "http://10.77.10.225:21100/ping",
+      "http_status": 400,
+      "body": "Client sent an HTTP request to an HTTPS server.\n"
+    },
+    {
+      "url": "https://10.77.10.225:21100/ping",
+      "http_status": 200,
+      "body": {
+        "contact_name": "bcUU1_8YT9YBvDjW"
+      }
+    },
+    {
+      "url": "http://10.77.10.225:21101/ping",
+      "http_status": 400,
+      "body": "Client sent an HTTP request to an HTTPS server.\n"
+    },
+    {
+      "url": "https://10.77.10.225:21101/ping",
+      "http_status": 200,
+      "body": {
+        "contact_name": "JtybsiSKCSMYq6D0"
+      }
+    }
+  ],
+  "cleanup": {
+    "run": "qual-9f-1126-122347",
+    "checked_utc": "2026-11-26T12:48:36.684797+00:00",
+    "all_terminated": true,
+    "instances": [
+      {
+        "instance": "i-090e251be30c8029c",
+        "type": "c6i.4xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T12:24:35+00:00",
+        "upper_seconds_to_terminated_observation": 1069.967923,
+        "price_usd_hour": 0.808,
+        "upper_compute_usd": 0.24014835605111112
+      },
+      {
+        "instance": "i-0b0716d1fba9bf836",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T12:41:08+00:00",
+        "upper_seconds_to_terminated_observation": 76.967923,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.008509231487222223
+      },
+      {
+        "instance": "i-091fa4bbc869d3e29",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T12:24:33+00:00",
+        "upper_seconds_to_terminated_observation": 1071.967923,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.11851200926500001
+      },
+      {
+        "instance": "i-0723be10c5306654b",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T12:24:29+00:00",
+        "upper_seconds_to_terminated_observation": 1075.967923,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.11895423148722223
+      }
+    ],
+    "deleted_resources": [
+      {
+        "resource": "gateway",
+        "deleted": true,
+        "response": "An error occurred (InvalidInternetGatewayID.NotFound) when calling the DescribeInternetGateways operation: The internetGateway ID 'igw-0afdc0c7f84924008' does not exist"
+      },
+      {
+        "resource": "route_table",
+        "deleted": true,
+        "response": "An error occurred (InvalidRouteTableID.NotFound) when calling the DescribeRouteTables operation: The routeTable ID 'rtb-06f8ba43a0e4cd0a3' does not exist"
+      },
+      {
+        "resource": "bucket",
+        "deleted": true,
+        "response": "An error occurred (404) when calling the HeadBucket operation: Not Found"
+      },
+      {
+        "resource": "role",
+        "deleted": true,
+        "response": "An error occurred (NoSuchEntity) when calling the GetRole operation: The role with name qual-9f-1126-122347 cannot be found."
+      },
+      {
+        "resource": "profile",
+        "deleted": true,
+        "response": "An error occurred (NoSuchEntity) when calling the GetInstanceProfile operation: Instance Profile qual-9f-1126-122347 cannot be found."
+      },
+      {
+        "resource": "template",
+        "deleted": true,
+        "response": "An error occurred (InvalidLaunchTemplateName.NotFoundException) when calling the DescribeLaunchTemplates operation: At least one of the launch templates specified in the request does not exist."
+      },
+      {
+        "resource": "vpc",
+        "deleted": true,
+        "response": "An error occurred (InvalidVpcID.NotFound) when calling the DescribeVpcs operation: The vpc ID 'vpc-05164dbe8c37e1c66' does not exist"
+      },
+      {
+        "resource": "subnet",
+        "deleted": true,
+        "response": "An error occurred (InvalidSubnetID.NotFound) when calling the DescribeSubnets operation: The subnet ID 'subnet-0a62db356008dc992' does not exist"
+      },
+      {
+        "resource": "security_group",
+        "deleted": true,
+        "response": "An error occurred (InvalidGroup.NotFound) when calling the DescribeSecurityGroups operation: The security group 'sg-0164d74c5c5a1d079' does not exist"
+      }
+    ],
+    "all_resources_deleted": true,
+    "estimated_compute_upper_usd": 0.48612382829055556,
+    "note": "EC2 upper estimate through independently observed termination, minimum60s. Excludes EBS/S3/data transfer, not a billing export."
+  },
+  "lab_binaries": [
+    {
+      "source": "9f0f09c111e9301dea5fb9c8e3345250eb3b3b8d",
+      "binary": "lab-9f0f09c",
+      "sha256": "788e0d5df5b4d890fce2b08d086fa566f84ebdc2c52814f2a5713891ae0d9af4"
+    },
+    {
+      "source": "2362b35844ac6903f9abd34b5c93f13116098de8",
+      "binary": "lab-2362b35",
+      "sha256": "36ca3dc12caad234b96bedacce87b889ef512015b0c41911782b659374c06e5d"
+    },
+    {
+      "source": "1afbd3db9f674749d7b0eb0a70e1c45d355121cf",
+      "binary": "lab-1afbd3d",
+      "sha256": "d5471cdae5f1f6b45e99a38fa42cd0c274afbc150855a81c47fae1ea407a6647"
+    }
+  ],
+  "shipped_binaries": [
+    {
+      "file": "node",
+      "sha256": "f2aac9c30aaf6162ae5d3d8386cdda1c70790669d6e04c776c8b923abb0cb538",
+      "source": "9f0f09c",
+      "tags": "diagnostic"
+    },
+    {
+      "file": "agent",
+      "sha256": "612831c8a0a9ac0d2bad9825df36ebd717871661bd5b6c77a59248e4e213d3d2",
+      "source": "9f0f09c",
+      "tags": ""
+    },
+    {
+      "file": "issuer",
+      "sha256": "686c9098f55f62f294d02bc404a1e2c9d557ff1b2aec7bf604ddc3a56adb1d1f",
+      "source": "9f0f09c",
+      "tags": ""
+    },
+    {
+      "file": "provisioner",
+      "sha256": "d6645214dc07e02db9bfbeeb6e4da7feb6fb7cbc0f2681a66af2a8553b6adc9a",
+      "source": "9f0f09c",
+      "tags": ""
+    },
+    {
+      "file": "experiment",
+      "sha256": "975151c96e7d6cc30668e86ad3ace4920e39ba1f66377343bd43ad489182a517",
+      "source": "2362b35",
+      "tags": ""
+    }
+  ],
+  "limits": [
+    "single writer temporal proof not established from /ownership snapshots",
+    "placement existing and cap fallback not qualified",
+    "large payload byte-grain not qualified",
+    "no repeated baseline runs; no causal statistical proof of performance gain"
+  ]
+}

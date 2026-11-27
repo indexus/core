@@ -1,0 +1,278 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Indexus local — demande réelle ; audit échoué</title><style>body{margin:0;padding:20px;background:#fafaf8;color:#252622}body>h1{font:600 20px system-ui}@media(prefers-color-scheme:dark){body{background:#1a1a19;color:#eeeee8}}.ix-dashboard {
+  --series-1:#347cca;
+  --series-2:#bc5a25;
+  --series-3:#148565;
+  color:inherit;
+  font:14px/1.5 system-ui,sans-serif;
+  min-width:0
+}
+.ix-dashboard * {
+  box-sizing:border-box
+}
+.ix-dashboard .note {
+  color:var(--muted-foreground,var(--muted,#777));
+  font-size:12px
+}
+.ix-dashboard .tiles {
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px
+}
+.ix-dashboard .tile {
+  padding:10px 14px;
+  border:1px solid var(--grid,#8885);
+  border-radius:8px;
+  flex:1 1 140px
+}
+.ix-dashboard strong {
+  display:block
+}
+.ix-dashboard .tile strong {
+  font-size:22px
+}
+.ix-dashboard .charts {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));
+  gap:16px;
+  margin-top:20px
+}
+.ix-dashboard figure {
+  margin:0;
+  border:1px solid var(--grid,#8885);
+  padding:12px;
+  border-radius:8px;
+  min-width:0
+}
+.ix-dashboard figcaption {
+  font-weight:600
+}
+.ix-dashboard svg {
+  width:100%;
+  display:block
+}
+.ix-dashboard svg text {
+  fill:currentColor;
+  font-size:12px
+}
+.ix-dashboard .gridline {
+  stroke:var(--grid,#8885)
+}
+.ix-dashboard .legend {
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  font-size:12px;
+  min-height:20px
+}
+.ix-dashboard .fleet {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));
+  gap:12px
+}
+.ix-dashboard .machine {
+  border:1px solid var(--grid,#8885);
+  padding:12px;
+  border-radius:8px;
+  min-width:0
+}
+.ix-dashboard h3 {
+  font-size:14px;
+  margin:0;
+  overflow-wrap:anywhere
+}
+.ix-dashboard .hot {
+  border-color:#c85c35;
+  background:#c85c350b
+}
+.ix-dashboard .resource {
+  display:grid;
+  grid-template-columns:74px minmax(20px,1fr) 60px;
+  gap:8px;
+  align-items:center;
+  font-size:12px
+}
+.ix-dashboard .resource>span:last-child {
+  text-align:right
+}
+.ix-dashboard .track {
+  background:#8882;
+  height:7px;
+  position:relative
+}
+.ix-dashboard .track:after {
+  content:'';
+  position:absolute;
+  left:60%;
+  height:11px;
+  top:-2px;
+  border-left:1px dashed currentColor
+}
+.ix-dashboard .track i {
+  display:block;
+  height:100%;
+  background:var(--series-1)
+}
+.ix-dashboard .track .danger {
+  background:var(--series-2)
+}
+.ix-dashboard .vnodes {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:12px
+}
+.ix-dashboard button {
+  font:inherit;
+  font-size:12px;
+  color:inherit;
+  background:#8881;
+  border:1px solid #8885;
+  border-radius:5px;
+  padding:5px 8px;
+  cursor:pointer
+}
+.ix-dashboard button:focus-visible {
+  outline:2px solid var(--series-1)
+}
+.ix-dashboard small {
+  display:block
+}
+.ix-dashboard .stale {
+  opacity:.55;
+  border-style:dashed
+}
+.ix-dashboard .detail {
+  overflow-wrap:anywhere;
+  min-height:42px
+}
+.ix-dashboard .transfers {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));
+  gap:10px
+}
+.ix-dashboard .transfer {
+  padding:10px;
+  border:1px solid #8885;
+  border-radius:5px;
+  overflow-wrap:anywhere
+}
+.ix-dashboard .transfer span {
+  display:block;
+  font-size:12px
+}
+.ix-dashboard .alert {
+  border-left:3px solid var(--series-2);
+  padding:8px
+}
+</style></head><body><h1>Indexus local — demande réelle ; audit échoué</h1><p>Télémétrie périmée</p><label>Instant observé <input id="moment" type="range" min="0" max="11" value="11"></label> <output id="time"></output><main id="dashboard"></main><script>/* Shared offline renderer: simulation and real campaigns use schema 1.
+ * No dependencies, external requests or interpolation of telemetry into HTML. */
+(function(global){
+  'use strict';
+  const fmt=(v,d=0)=>Number.isFinite(v)?v.toLocaleString('fr-FR',{maximumFractionDigits:d}):'—';
+  const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
+  const svg=(tag,attrs)=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;};
+  function render(root,points,index=points.length-1){
+    root.classList.add('ix-dashboard');root.replaceChildren();
+    const cols=Math.max(1,Math.floor((root.clientWidth+16)/436));
+    const chartWidth=Math.max(160,Math.min(600,(root.clientWidth-16*(cols-1))/cols-26));
+    points=points.map(p=>{
+      const hs=p.fleet?.machines||[],out={...p};
+      for(const k of ['cpu','ram','disk']){
+        const vs=hs.map(h=>h[k]).filter(Number.isFinite);out[k+'_max']=vs.length?Math.max(...vs):null;
+      }
+      out.machine_count=hs.length||null;return out;
+    });
+    if(!points.length){root.append(el('p','Aucune mesure disponible.'));return;}
+    const p=points[index],f=p.fleet||{},sim=f.source==='simulation';
+    root.append(el('p',sim?'Simulation de ressources : besoins de débit calculés ; ACK, lectures et latences non simulés.':'Mesures AWS : application au détenteur distincte des ACK client. Les tirets désignent une mesure inconnue.','note'));
+    if(p.metrics_stale||p.load_stale)root.append(el('p','Télémétrie périmée : '+[p.metrics_stale?'nœuds':'',p.load_stale?'charge':''].filter(Boolean).join(', '),'alert'));
+    const machines=f.machines||[],nodes=f.vnodes||[],transfers=f.transfers||[];
+    const tiles=el('div',null,'tiles');
+    const warm=machines.filter(h=>h.state==='warm').length,boot=machines.filter(h=>h.state==='booting').length;
+    const bad=machines.filter(h=>[h.cpu,h.ram,h.disk,h.io].some(v=>Number.isFinite(v)&&v>60)).length;
+    const unknown=machines.filter(h=>h.cpu==null||h.ram==null||h.disk==null).length;
+    const hasResources=machines.some(h=>[h.cpu,h.ram,h.disk].some(Number.isFinite));
+    const hasReadiness=sim||machines.some(h=>h.ready_offer!=null);
+    const stats=[['Demande /s',p.load_stale?null:p.offered],['ACK client /s',p.load_stale?null:p.acked],['Vnodes observés',nodes.filter(n=>n.state!=='stale').length||p.vnodes],['Machines',machines.length||null],['Chaudes / démarrage',`${hasReadiness?warm:'?'} / ${sim?boot:'?'}`],['Réceptions admissibles',machines.some(h=>h.ready_offer!=null)?machines.filter(h=>h.ready_offer).length:null],['Machines observées > 60 %',hasResources?bad:null],['Transferts',p.metrics_stale?null:p.open??transfers.length],['p99 écriture, ms',p.load_stale?null:p.p99_ms]];
+    for(const [label,value] of stats){const t=el('div',null,'tile');t.append(el('span',label),el('strong',typeof value==='string'?value:fmt(value,1)));tiles.append(t);}root.append(tiles);
+    const charts=el('div',null,'charts'),unmeasured=[];
+    for(const [title,series] of [
+      ['Écritures /s',[['offered','demandées'],['acked','ACK client'],['estimated_s','besoin réparti (simulation)']]],
+      ['Lectures client /s',[['reads_s','tentatives'],['read_failed_s','échecs']]],
+      ['Latence écriture, ms',[['p50_ms','p50'],['p95_ms','p95'],['p99_ms','p99']]],
+      ['Croissance du réseau',[['vnodes','vnodes'],['machine_count','machines']]],
+      ['Transferts ouverts',[['open','ouverts'],['frozen','gelés']]],
+      ['Ressources : maximum observé, %',[['cpu_max','CPU'],['ram_max','RAM'],['disk_max','disque']]],
+      ['Pression client',[['shed','non envoyées /s'],['queued','en file'],['in_flight','en vol']]],
+      ['Lectures et fraîcheur, p99 ms',[['read_p99_ms','lecture'],['fresh_p99_ms','total racine']]]
+    ]){
+      const past=points.slice(0,index+1);
+      if(past.some(p=>series.some(([k])=>Number.isFinite(p[k]))))charts.append(chart(past,title,series,chartWidth));else unmeasured.push(title);
+    }
+    root.append(charts);
+    if(unmeasured.length)root.append(el('p','Non mesuré : '+unmeasured.join(' · '),'note'));
+    const diagnostics=el('details'),more=el('div',null,'charts');diagnostics.append(el('summary','Routage, trafic et remontée des totaux'));
+    for(const [title,series] of [
+      ['Écritures réussies avec relais, %',[['relayed_pct','avec relais']]],
+      ['Trafic moyen par vnode, Kio/s',[['mesh_kb_s','mesh'],['gossip_kb_s','membership']]],
+      ['Membership, Kio',[['membership_kb','taille maximale']]],
+      ['Latence depuis l’arrivée prévue, ms',[['intended_p50_ms','p50'],['intended_p95_ms','p95'],['intended_p99_ms','p99']]],
+      ['Générateur de charge, % CPU',[['loader_pct','CPU']]],
+      ['Remontée des totaux',[['flush_s','temps le plus long (s)'],['pending_k','arêtes en attente (milliers)']]]
+    ])more.append(chart(points.slice(0,index+1),title,series,chartWidth));diagnostics.append(more);root.append(diagnostics);
+    root.append(el('h2','Machines et vnodes'));
+    root.append(el('p',`${unknown} machine(s) avec ressources inconnues. Cliquer un vnode pour son détail. Les liens ci-dessous montrent les transferts observés, pas toutes les connexions P2P.`, 'note'));
+    const detail=el('p','Sélectionner un vnode.','detail');detail.setAttribute('aria-live','polite');
+    const grid=el('div',null,'fleet');
+    for(const h of [...machines].sort((a,b)=>pressure(b)-pressure(a)||String(a.id).localeCompare(String(b.id)))){
+      const card=el('section',null,'machine '+(pressure(h)>60?'hot':''));
+      card.append(el('h3',h.label||h.id),el('p',`${h.state||'unknown'} · CPU : ${h.cpu_scope||'estimé'}`,'note'));
+      for(const [key,label] of [['cpu','CPU'],['ram','RAM'],['disk','Disque'],['io','Débit disque']]){
+        if(key==='io'&&h[key]==null)continue;
+        const row=el('div',null,'resource'),track=el('div',null,'track'),fill=el('i');
+        fill.style.width=Math.min(100,Math.max(0,h[key]||0))+'%';if(h[key]>60)fill.className='danger';
+        track.append(fill);row.append(el('span',label),track,el('span',fmt(h[key],1)+' %'));card.append(row);
+      }
+      const strip=el('div',null,'vnodes');
+      for(const n of nodes.filter(n=>n.machine===h.id)){
+        const b=el('button',String(n.label).slice(0,10),n.state==='stale'?'stale':'');b.type='button';
+        const rate=n.applied_s??n.estimated_s;
+        b.title=`${n.label} · ${n.state} · ${fmt(rate,1)} ${sim?'requises':'applications'}/s`;
+        b.onclick=()=>{detail.textContent=`${n.label} · machine ${h.label||h.id} · ${n.state} · ${fmt(rate,1)} ${sim?'écritures/s requises':'nouvelles applications/s'} · ${fmt(n.items)} items · ${n.monitor||'modèle de ressources'}`;};
+        b.append(el('small',fmt(rate,1)+'/s'));strip.append(b);
+      }
+      card.append(strip);grid.append(card);
+    }
+    if(!machines.length)grid.append(el('p','Cette archive contient uniquement les agrégats globaux ; aucun inventaire machine n’a été enregistré.'));
+    root.append(grid,detail,el('h2','Transferts et délégations'));
+    const list=el('div',null,'transfers');
+    if(!transfers.length)list.append(el('p',p.metrics_stale?'État des transferts inconnu.':'Aucun transfert observé à cet instant.'));
+    for(const tr of transfers){
+      const row=el('div',null,'transfer'+(tr.frozen?' hot':''));
+      row.append(el('strong',`${tr.source_machine||'?'} → ${tr.target_machine||'destination inconnue'}`),
+        el('span',`${tr.phase||'copie'}${tr.stale?' · état périmé':''} · âge ${fmt(tr.age_s,1)} s · ${tr.progress==null?'progression non mesurée':fmt(tr.progress*100,1)+' % copiés'}${tr.share==null?'':' · '+fmt(tr.share*100,1)+' % de charge déplacée'}${tr.frozen?' · gel observé':''}`));list.append(row);
+    }
+    root.append(list);
+  }
+  function pressure(h){return Math.max(...['cpu','ram','disk','io'].map(k=>Number.isFinite(h[k])?h[k]:-1));}
+  function chart(points,title,series,width){
+    const figure=el('figure'),caption=el('figcaption',title),legend=el('div',null,'legend');figure.append(caption,legend);
+    const values=series.flatMap(([k])=>points.map(p=>p[k]).filter(Number.isFinite));
+    if(!values.length){figure.append(el('p','Non mesuré.','note'));return figure;}
+    const w=width,h=190,l=55,r=12,t=12,b=28,top=Math.max(...values,1)*1.08;
+    const first=points[0].x??points[0].t??0,last=Math.max(first+1,points.at(-1).x??points.at(-1).t??0);
+    const sx=p=>l+((p.x??p.t??0)-first)/(last-first)*(w-l-r),sy=v=>t+(1-v/top)*(h-t-b);
+    const g=svg('svg',{viewBox:`0 0 ${w} ${h}`,role:'img','aria-label':title});
+    for(const f of [0,.5,1]){g.append(svg('line',{x1:l,x2:w-r,y1:sy(top*f),y2:sy(top*f),class:'gridline'}));const label=svg('text',{x:l-5,y:sy(top*f)+4,'text-anchor':'end'});label.textContent=fmt(top*f,1);g.append(label);}
+    for(const [i,[key,label]] of series.entries()){
+      if(!points.some(p=>Number.isFinite(p[key])))continue;
+      const color=`var(--series-${i+1})`;const leg=el('span',label);leg.style.color=color;legend.append(leg);
+      // Null samples split paths; stale intervals never look like valid flat lines.
+      let path='';for(const p of points){if(!Number.isFinite(p[key])){path+='|';continue;}path+=`${sx(p)},${sy(p[key])} `;}
+      for(const segment of path.split('|').filter(s=>s.trim()))g.append(svg('polyline',{points:segment,fill:'none',stroke:color,'stroke-width':2}));
+    }
+    for(const [x,label] of [[l,first],[w-r,last]]){const n=svg('text',{x,y:h-5,'text-anchor':x===l?'start':'end'});n.textContent=fmt(label)+' s';g.append(n);}figure.append(g);return figure;
+  }
+  global.IndexusDashboard={render};
+})(typeof window==='undefined'?globalThis:window);
+;const points=[{"phase":"Local · 2 pools / 1 VM · demande réelle","t":4,"wall":4.969744666945189,"metrics_stale":false,"load_stale":false,"reads_s":7.5,"read_failed_s":0.0,"read_miss_s":0.0,"read_p99_ms":16.384,"offered":400,"acked":399,"shed":0,"p50_ms":8.192,"p95_ms":8.192,"p99_ms":16.384,"intended_p50_ms":16.384,"intended_p95_ms":16.384,"intended_p99_ms":16.384,"in_flight":0,"queued":0,"workers":64,"refused_503":0.0,"slow_s":0,"fresh_p99_ms":null,"loader_pct":1,"ready_nodes":5,"nodes":5,"vnodes":5,"open":0,"busy":0,"frozen":0,"items":0,"skew":null,"stall_ms":0,"pending_k":0.0,"flush_s":0.0,"versions":2,"membership_kb":1.3,"fleet":{"schema":1,"source":"local-multiprocess","machines":[{"id":"donor","label":"donor","agent":"http://donor:22100","state":"active","cpu":8.064516129032258,"ram":22.60264028838938,"disk":57.45757949659493,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":false},{"id":"reserve","label":"reserve","agent":"http://reserve:22100","state":"warm","cpu":8.219178082191782,"ram":22.605494654215732,"disk":57.457612175135274,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":true}],"vnodes":[{"id":"OMXhkot1MsfKht5z@http://donor:19100","label":"OMXhkot1MsfKht5z","machine":"donor","state":"ready","applied_s":null,"items":0,"monitor":"http://donor:19100","wall":4.969744666945189},{"id":"nd-qznRMpIFDRT-R@http://donor:19101","label":"nd-qznRMpIFDRT-R","machine":"donor","state":"ready","applied_s":null,"items":0,"monitor":"http://donor:19101","wall":4.969744666945189},{"id":"7JS5uWuq43tvJiPy@http://donor:19102","label":"7JS5uWuq43tvJiPy","machine":"donor","state":"ready","applied_s":null,"items":0,"monitor":"http://donor:19102","wall":4.969744666945189},{"id":"efFC326BnmtpygmC@http://donor:19103","label":"efFC326BnmtpygmC","machine":"donor","state":"ready","applied_s":null,"items":0,"monitor":"http://donor:19103","wall":4.969744666945189},{"id":"a_arJ7StfVs5R0g7@http://donor:19104","label":"a_arJ7StfVs5R0g7","machine":"donor","state":"ready","applied_s":null,"items":0,"monitor":"http://donor:19104","wall":4.969744666945189}],"transfers":[]},"x":0.0},{"phase":"Local · 2 pools / 1 VM · demande réelle","t":9,"wall":9.865929374936968,"metrics_stale":false,"load_stale":false,"reads_s":7.8,"read_failed_s":0.0,"read_miss_s":0.0,"read_p99_ms":8.192,"offered":400,"acked":400,"shed":0,"p50_ms":8.192,"p95_ms":8.192,"p99_ms":16.384,"intended_p50_ms":16.384,"intended_p95_ms":16.384,"intended_p99_ms":16.384,"in_flight":0,"queued":0,"workers":64,"refused_503":0.0,"slow_s":0,"fresh_p99_ms":null,"loader_pct":1,"ready_nodes":5,"nodes":5,"vnodes":5,"open":0,"busy":0,"frozen":0,"items":0,"skew":null,"stall_ms":0,"pending_k":0.0,"flush_s":0.0,"versions":1,"membership_kb":1.3,"mesh_kb_s":38.0,"gossip_kb_s":1.68,"forward_attempts_per_entry":0.001,"relayed_pct":0.1,"value_load":0.0,"push_load":0.0,"fleet":{"schema":1,"source":"local-multiprocess","machines":[{"id":"donor","label":"donor","agent":"http://donor:22100","state":"active","cpu":7.838479809976247,"ram":22.932614820556353,"disk":57.46372306218053,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":false},{"id":"reserve","label":"reserve","agent":"http://reserve:22100","state":"warm","cpu":8.411214953271028,"ram":22.935616825994416,"disk":57.46374920501281,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":true}],"vnodes":[{"id":"OMXhkot1MsfKht5z@http://donor:19100","label":"OMXhkot1MsfKht5z","machine":"donor","state":"ready","applied_s":246.68526667037236,"items":0,"monitor":"http://donor:19100","wall":9.865929374936968},{"id":"nd-qznRMpIFDRT-R@http://donor:19101","label":"nd-qznRMpIFDRT-R","machine":"donor","state":"ready","applied_s":49.03638478685971,"items":0,"monitor":"http://donor:19101","wall":9.865929374936968},{"id":"7JS5uWuq43tvJiPy@http://donor:19102","label":"7JS5uWuq43tvJiPy","machine":"donor","state":"ready","applied_s":46.7980427261814,"items":0,"monitor":"http://donor:19102","wall":9.865929374936968},{"id":"efFC326BnmtpygmC@http://donor:19103","label":"efFC326BnmtpygmC","machine":"donor","state":"ready","applied_s":4.907050410876175,"items":0,"monitor":"http://donor:19103","wall":9.865929374936968},{"id":"a_arJ7StfVs5R0g7@http://donor:19104","label":"a_arJ7StfVs5R0g7","machine":"donor","state":"ready","applied_s":52.15922751292232,"items":0,"monitor":"http://donor:19104","wall":9.865929374936968}],"transfers":[]},"x":4.896184707991779},{"phase":"Local · 2 pools / 1 VM · demande réelle","t":14,"wall":14.769949916983023,"metrics_stale":false,"load_stale":false,"reads_s":8.4,"read_failed_s":0.0,"read_miss_s":0.0,"read_p99_ms":8.192,"offered":400,"acked":400,"shed":0,"p50_ms":8.192,"p95_ms":8.192,"p99_ms":16.384,"intended_p50_ms":16.384,"intended_p95_ms":16.384,"intended_p99_ms":32.768,"in_flight":0,"queued":0,"workers":64,"refused_503":0.0,"slow_s":0,"fresh_p99_ms":null,"loader_pct":1,"ready_nodes":6,"nodes":6,"vnodes":5,"open":0,"busy":0,"frozen":0,"items":233,"skew":6.0,"stall_ms":0,"pending_k":0.0,"flush_s":0.0,"versions":2,"membership_kb":1.5,"mesh_kb_s":109.7,"gossip_kb_s":0.26,"forward_attempts_per_entry":0.012,"relayed_pct":0.6,"value_load":0.0,"push_load":0.0,"fleet":{"schema":1,"source":"local-multiprocess","machines":[{"id":"donor","label":"donor","agent":"http://donor:22100","state":"active","cpu":22.802850356294538,"ram":23.753343422040132,"disk":57.49189196396132,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":false},{"id":"reserve","label":"reserve","agent":"http://reserve:22100","state":"active","cpu":23.2183908045977,"ram":23.806936601090072,"disk":57.49191157108553,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":1,"ready_offer":false}],"vnodes":[{"id":"OMXhkot1MsfKht5z@http://donor:19100","label":"OMXhkot1MsfKht5z","machine":"donor","state":"ready","applied_s":235.28009346025644,"items":0,"monitor":"http://donor:19100","wall":14.769949916983023},{"id":"nd-qznRMpIFDRT-R@http://donor:19101","label":"nd-qznRMpIFDRT-R","machine":"donor","state":"ready","applied_s":51.04518284900462,"items":0,"monitor":"http://donor:19101","wall":14.769949916983023},{"id":"7JS5uWuq43tvJiPy@http://donor:19102","label":"7JS5uWuq43tvJiPy","machine":"donor","state":"ready","applied_s":51.47096710828916,"items":0,"monitor":"http://donor:19102","wall":14.769949916983023},{"id":"efFC326BnmtpygmC@http://donor:19103","label":"efFC326BnmtpygmC","machine":"donor","state":"ready","applied_s":23.70115316661255,"items":0,"monitor":"http://donor:19103","wall":14.769949916983023},{"id":"a_arJ7StfVs5R0g7@http://donor:19104","label":"a_arJ7StfVs5R0g7","machine":"donor","state":"ready","applied_s":24.102265284124616,"items":0,"monitor":"http://donor:19104","wall":14.769949916983023},{"id":"GMXhkot1MsfMn4H1@http://reserve:19100","label":"GMXhkot1MsfMn4H1","machine":"reserve","state":"receiving","applied_s":null,"items":233,"monitor":"http://reserve:19100","wall":14.769949916983023}],"transfers":[]},"x":9.800205250037834},{"phase":"Local · 2 pools / 1 VM · demande réelle","t":19,"wall":19.73640529194381,"metrics_stale":false,"load_stale":false,"reads_s":8.4,"read_failed_s":0.0,"read_miss_s":0.0,"read_p99_ms":32.768,"offered":400,"acked":400,"shed":0,"p50_ms":8.192,"p95_ms":16.384,"p99_ms":32.768,"intended_p50_ms":16.384,"intended_p95_ms":32.768,"intended_p99_ms":65.536,"in_flight":4,"queued":0,"workers":64,"refused_503":0.0,"slow_s":0,"fresh_p99_ms":null,"loader_pct":2,"ready_nodes":6,"nodes":6,"vnodes":6,"open":0,"busy":0,"frozen":0,"items":233,"skew":6.0,"stall_ms":0,"pending_k":0.0,"flush_s":0.0,"versions":1,"membership_kb":1.5,"mesh_kb_s":186.2,"gossip_kb_s":1.75,"forward_attempts_per_entry":0.005,"relayed_pct":0.4,"value_load":0.0,"push_load":0.0,"fleet":{"schema":1,"source":"local-multiprocess","machines":[{"id":"donor","label":"donor","agent":"http://donor:22100","state":"active","cpu":10.416666666666666,"ram":24.50901216796467,"disk":57.52515871803655,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":false},{"id":"reserve","label":"reserve","agent":"http://reserve:22100","state":"active","cpu":10.657596371882086,"ram":24.517427625832013,"disk":57.52519793228497,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":true}],"vnodes":[{"id":"OMXhkot1MsfKht5z@http://donor:19100","label":"OMXhkot1MsfKht5z","machine":"donor","state":"ready","applied_s":37.22401285116667,"items":0,"monitor":"http://donor:19100","wall":19.73640529194381},{"id":"nd-qznRMpIFDRT-R@http://donor:19101","label":"nd-qznRMpIFDRT-R","machine":"donor","state":"ready","applied_s":52.30345020324836,"items":0,"monitor":"http://donor:19101","wall":19.73640529194381},{"id":"7JS5uWuq43tvJiPy@http://donor:19102","label":"7JS5uWuq43tvJiPy","machine":"donor","state":"ready","applied_s":50.85382539684533,"items":0,"monitor":"http://donor:19102","wall":19.73640529194381},{"id":"efFC326BnmtpygmC@http://donor:19103","label":"efFC326BnmtpygmC","machine":"donor","state":"ready","applied_s":24.507259890154863,"items":0,"monitor":"http://donor:19103","wall":19.73640529194381},{"id":"a_arJ7StfVs5R0g7@http://donor:19104","label":"a_arJ7StfVs5R0g7","machine":"donor","state":"ready","applied_s":26.130583661810114,"items":0,"monitor":"http://donor:19104","wall":19.73640529194381},{"id":"GMXhkot1MsfMn4H1@http://reserve:19100","label":"GMXhkot1MsfMn4H1","machine":"reserve","state":"ready","applied_s":210.99868926744335,"items":233,"monitor":"http://reserve:19100","wall":19.73640529194381}],"transfers":[]},"x":14.766660624998622},{"phase":"Local · 2 pools / 1 VM · demande réelle","t":24,"wall":24.613876249990426,"metrics_stale":false,"load_stale":false,"reads_s":7.0,"read_failed_s":0.6,"read_miss_s":0.0,"read_p99_ms":32.768,"offered":400,"acked":400,"shed":0,"p50_ms":8.192,"p95_ms":8.192,"p99_ms":32.768,"intended_p50_ms":16.384,"intended_p95_ms":16.384,"intended_p99_ms":32.768,"in_flight":12,"queued":0,"workers":64,"refused_503":0.0,"slow_s":0,"fresh_p99_ms":null,"loader_pct":1,"ready_nodes":6,"nodes":6,"vnodes":6,"open":0,"busy":0,"frozen":0,"items":233,"skew":6.0,"stall_ms":0,"pending_k":0.0,"flush_s":0.0,"versions":1,"membership_kb":1.5,"mesh_kb_s":1134.9,"gossip_kb_s":0.0,"forward_attempts_per_entry":0.0,"relayed_pct":0.0,"value_load":0.0,"push_load":0.0,"fleet":{"schema":1,"source":"local-multiprocess","machines":[{"id":"donor","label":"donor","agent":"http://donor:22100","state":"active","cpu":12.380952380952381,"ram":24.30458051895323,"disk":57.52690375209118,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":false},{"id":"reserve","label":"reserve","agent":"http://reserve:22100","state":"active","cpu":12.296983758700696,"ram":24.32520085138843,"disk":57.52692335921539,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":true}],"vnodes":[{"id":"OMXhkot1MsfKht5z@http://donor:19100","label":"OMXhkot1MsfKht5z","machine":"donor","state":"ready","applied_s":22.960504554102716,"items":0,"monitor":"http://donor:19100","wall":24.613876249990426},{"id":"nd-qznRMpIFDRT-R@http://donor:19101","label":"nd-qznRMpIFDRT-R","machine":"donor","state":"ready","applied_s":51.66106376975394,"items":0,"monitor":"http://donor:19101","wall":24.613876249990426},{"id":"7JS5uWuq43tvJiPy@http://donor:19102","label":"7JS5uWuq43tvJiPy","machine":"donor","state":"ready","applied_s":49.84945752053031,"items":0,"monitor":"http://donor:19102","wall":24.613876249990426},{"id":"efFC326BnmtpygmC@http://donor:19103","label":"efFC326BnmtpygmC","machine":"donor","state":"ready","applied_s":26.470931558931014,"items":0,"monitor":"http://donor:19103","wall":24.613876249990426},{"id":"a_arJ7StfVs5R0g7@http://donor:19104","label":"a_arJ7StfVs5R0g7","machine":"donor","state":"ready","applied_s":25.646325865922243,"items":0,"monitor":"http://donor:19104","wall":24.613876249990426},{"id":"GMXhkot1MsfMn4H1@http://reserve:19100","label":"GMXhkot1MsfMn4H1","machine":"reserve","state":"ready","applied_s":223.70485438400115,"items":233,"monitor":"http://reserve:19100","wall":24.613876249990426}],"transfers":[]},"x":19.644131583045237},{"phase":"Local · 2 pools / 1 VM · demande réelle","t":29,"wall":29.52144662500359,"metrics_stale":false,"load_stale":false,"reads_s":7.8,"read_failed_s":0.6,"read_miss_s":0.0,"read_p99_ms":4.096,"offered":400,"acked":400,"shed":0,"p50_ms":8.192,"p95_ms":8.192,"p99_ms":16.384,"intended_p50_ms":16.384,"intended_p95_ms":16.384,"intended_p99_ms":16.384,"in_flight":0,"queued":0,"workers":64,"refused_503":0.0,"slow_s":0,"fresh_p99_ms":null,"loader_pct":1,"ready_nodes":7,"nodes":7,"vnodes":7,"open":1,"busy":0,"frozen":1,"items":4714,"skew":2.12,"stall_ms":0,"pending_k":0.0,"flush_s":0.0,"versions":2,"membership_kb":1.7,"mesh_kb_s":604.6,"gossip_kb_s":1.69,"forward_attempts_per_entry":0.003,"relayed_pct":0.3,"value_load":0.0,"push_load":0.0,"fleet":{"schema":1,"source":"local-multiprocess","machines":[{"id":"donor","label":"donor","agent":"http://donor:22100","state":"active","cpu":22.66355140186916,"ram":25.03770961749038,"disk":57.54126270272051,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":false},{"id":"reserve","label":"reserve","agent":"http://reserve:22100","state":"active","cpu":23.058823529411764,"ram":25.095338279260318,"disk":57.54151759533523,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":1,"ready_offer":false}],"vnodes":[{"id":"OMXhkot1MsfKht5z@http://donor:19100","label":"OMXhkot1MsfKht5z","machine":"donor","state":"ready","applied_s":21.83099402905359,"items":656,"monitor":"http://donor:19100","wall":29.52144662500359},{"id":"nd-qznRMpIFDRT-R@http://donor:19101","label":"nd-qznRMpIFDRT-R","machine":"donor","state":"ready","applied_s":50.199377561674225,"items":1423,"monitor":"http://donor:19101","wall":29.52144662500359},{"id":"7JS5uWuq43tvJiPy@http://donor:19102","label":"7JS5uWuq43tvJiPy","machine":"donor","state":"ready","applied_s":49.19057436487093,"items":1428,"monitor":"http://donor:19102","wall":29.52144662500359},{"id":"efFC326BnmtpygmC@http://donor:19103","label":"efFC326BnmtpygmC","machine":"donor","state":"ready","applied_s":29.605893232153306,"items":0,"monitor":"http://donor:19103","wall":29.52144662500359},{"id":"a_arJ7StfVs5R0g7@http://donor:19104","label":"a_arJ7StfVs5R0g7","machine":"donor","state":"ready","applied_s":25.93669571940383,"items":748,"monitor":"http://donor:19104","wall":29.52144662500359},{"id":"GMXhkot1MsfMn4H1@http://reserve:19100","label":"GMXhkot1MsfMn4H1","machine":"reserve","state":"ready","applied_s":219.5040634819093,"items":233,"monitor":"http://reserve:19100","wall":29.52144662500359},{"id":"HMXhkot1Msezh5Lw@http://reserve:19101","label":"HMXhkot1Msezh5Lw","machine":"reserve","state":"receiving","applied_s":null,"items":226,"monitor":"http://reserve:19101","wall":29.52144662500359}],"transfers":[{"id":"GMXhkot1MsfMn4H1@http://reserve:19100:664d869e236711e3d253db10ebaa7abb:69","source":"GMXhkot1MsfMn4H1@http://reserve:19100","source_machine":"reserve","target_machine":null,"target":null,"phase":"warm-copy","age_s":0.110543125,"phase_age_s":0.011384542,"progress":null,"frozen":true}]},"x":24.551701958058402},{"phase":"Local · 2 pools / 1 VM · demande réelle","t":34,"wall":34.91957466700114,"metrics_stale":false,"load_stale":false,"reads_s":4.4,"read_failed_s":0.8,"read_miss_s":0.0,"read_p99_ms":4.096,"offered":400,"acked":400,"shed":0,"p50_ms":8.192,"p95_ms":32.768,"p99_ms":65.536,"intended_p50_ms":16.384,"intended_p95_ms":32.768,"intended_p99_ms":65.536,"in_flight":0,"queued":0,"workers":64,"refused_503":0.0,"slow_s":0,"fresh_p99_ms":null,"loader_pct":1,"ready_nodes":7,"nodes":7,"vnodes":7,"open":0,"busy":0,"frozen":0,"items":4714,"skew":2.12,"stall_ms":0,"pending_k":0.0,"flush_s":0.0,"versions":1,"membership_kb":1.7,"mesh_kb_s":1187.6,"gossip_kb_s":0.54,"forward_attempts_per_entry":0.012,"relayed_pct":0.9,"value_load":0.0,"push_load":0.0,"fleet":{"schema":1,"source":"local-multiprocess","machines":[{"id":"donor","label":"donor","agent":"http://donor:22100","state":"active","cpu":8.564814814814815,"ram":25.948547595319823,"disk":57.63557950587563,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":false},{"id":"reserve","label":"reserve","agent":"http://reserve:22100","state":"active","cpu":15.65886832636218,"ram":25.951401961146175,"disk":57.63559911299984,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":true}],"vnodes":[{"id":"OMXhkot1MsfKht5z@http://donor:19100","label":"OMXhkot1MsfKht5z","machine":"donor","state":"ready","applied_s":21.094298162486254,"items":656,"monitor":"http://donor:19100","wall":34.91957466700114},{"id":"nd-qznRMpIFDRT-R@http://donor:19101","label":"nd-qznRMpIFDRT-R","machine":"donor","state":"ready","applied_s":52.91961417460954,"items":1423,"monitor":"http://donor:19101","wall":34.91957466700114},{"id":"7JS5uWuq43tvJiPy@http://donor:19102","label":"7JS5uWuq43tvJiPy","machine":"donor","state":"ready","applied_s":53.61276014039861,"items":1428,"monitor":"http://donor:19102","wall":34.91957466700114},{"id":"efFC326BnmtpygmC@http://donor:19103","label":"efFC326BnmtpygmC","machine":"donor","state":"ready","applied_s":24.949806791874988,"items":0,"monitor":"http://donor:19103","wall":34.91957466700114},{"id":"a_arJ7StfVs5R0g7@http://donor:19104","label":"a_arJ7StfVs5R0g7","machine":"donor","state":"ready","applied_s":25.680594833063086,"items":748,"monitor":"http://donor:19104","wall":34.91957466700114},{"id":"GMXhkot1MsfMn4H1@http://reserve:19100","label":"GMXhkot1MsfMn4H1","machine":"reserve","state":"ready","applied_s":72.93842819102072,"items":233,"monitor":"http://reserve:19100","wall":34.91957466700114},{"id":"HMXhkot1Msezh5Lw@http://reserve:19101","label":"HMXhkot1Msezh5Lw","machine":"reserve","state":"ready","applied_s":148.9611516565184,"items":226,"monitor":"http://reserve:19101","wall":34.91957466700114}],"transfers":[]},"x":29.949830000055954},{"phase":"Local · 2 pools / 1 VM · demande réelle","t":39,"wall":39.83390566695016,"metrics_stale":false,"load_stale":false,"reads_s":8.0,"read_failed_s":0.4,"read_miss_s":0.0,"read_p99_ms":4.096,"offered":400,"acked":400,"shed":0,"p50_ms":8.192,"p95_ms":8.192,"p99_ms":16.384,"intended_p50_ms":16.384,"intended_p95_ms":16.384,"intended_p99_ms":32.768,"in_flight":0,"queued":0,"workers":64,"refused_503":0.0,"slow_s":0,"fresh_p99_ms":null,"loader_pct":1,"ready_nodes":7,"nodes":7,"vnodes":7,"open":0,"busy":0,"frozen":0,"items":5750,"skew":1.74,"stall_ms":0,"pending_k":0.0,"flush_s":0.0,"versions":1,"membership_kb":1.7,"mesh_kb_s":501.5,"gossip_kb_s":1.43,"forward_attempts_per_entry":0.0,"relayed_pct":0.0,"value_load":0.0,"push_load":0.01,"fleet":{"schema":1,"source":"local-multiprocess","machines":[{"id":"donor","label":"donor","agent":"http://donor:22100","state":"active","cpu":8.470588235294118,"ram":26.24550006766816,"disk":57.65242202557148,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":false},{"id":"reserve","label":"reserve","agent":"http://reserve:22100","state":"active","cpu":10.873227496643198,"ram":26.25081509368964,"disk":57.65244163269569,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":true}],"vnodes":[{"id":"OMXhkot1MsfKht5z@http://donor:19100","label":"OMXhkot1MsfKht5z","machine":"donor","state":"ready","applied_s":25.448868185550104,"items":656,"monitor":"http://donor:19100","wall":39.83390566695016},{"id":"nd-qznRMpIFDRT-R@http://donor:19101","label":"nd-qznRMpIFDRT-R","machine":"donor","state":"ready","applied_s":47.645438916334555,"items":1423,"monitor":"http://donor:19101","wall":39.83390566695016},{"id":"7JS5uWuq43tvJiPy@http://donor:19102","label":"7JS5uWuq43tvJiPy","machine":"donor","state":"ready","applied_s":48.081700157606164,"items":1428,"monitor":"http://donor:19102","wall":39.83390566695016},{"id":"efFC326BnmtpygmC@http://donor:19103","label":"efFC326BnmtpygmC","machine":"donor","state":"ready","applied_s":26.89003707654131,"items":1036,"monitor":"http://donor:19103","wall":39.83390566695016},{"id":"a_arJ7StfVs5R0g7@http://donor:19104","label":"a_arJ7StfVs5R0g7","machine":"donor","state":"ready","applied_s":29.13673531858132,"items":748,"monitor":"http://donor:19104","wall":39.83390566695016},{"id":"GMXhkot1MsfMn4H1@http://reserve:19100","label":"GMXhkot1MsfMn4H1","machine":"reserve","state":"ready","applied_s":12.436090464748261,"items":233,"monitor":"http://reserve:19100","wall":39.83390566695016},{"id":"HMXhkot1Msezh5Lw@http://reserve:19101","label":"HMXhkot1Msezh5Lw","machine":"reserve","state":"ready","applied_s":210.4803992456336,"items":226,"monitor":"http://reserve:19101","wall":39.83390566695016}],"transfers":[]},"x":34.86416100000497},{"phase":"Local · 2 pools / 1 VM · demande réelle","t":44,"wall":44.772389749996364,"metrics_stale":false,"load_stale":false,"reads_s":7.8,"read_failed_s":0.0,"read_miss_s":0.0,"read_p99_ms":4.096,"offered":400,"acked":400,"shed":0,"p50_ms":8.192,"p95_ms":8.192,"p99_ms":16.384,"intended_p50_ms":16.384,"intended_p95_ms":16.384,"intended_p99_ms":16.384,"in_flight":0,"queued":0,"workers":64,"refused_503":0.0,"slow_s":0,"fresh_p99_ms":null,"loader_pct":1,"ready_nodes":7,"nodes":7,"vnodes":7,"open":0,"busy":0,"frozen":0,"items":6020,"skew":1.66,"stall_ms":0,"pending_k":0.0,"flush_s":0.0,"versions":1,"membership_kb":1.7,"mesh_kb_s":7.4,"gossip_kb_s":0.15,"forward_attempts_per_entry":0.0,"relayed_pct":0.0,"value_load":0.0,"push_load":0.0,"fleet":{"schema":1,"source":"local-multiprocess","machines":[{"id":"donor","label":"donor","agent":"http://donor:22100","state":"active","cpu":10.574712643678161,"ram":26.313266649442042,"disk":57.65805580592764,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":false},{"id":"reserve","label":"reserve","agent":"http://reserve:22100","state":"active","cpu":7.925407925407925,"ram":26.318680101871337,"disk":57.65806887734378,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":true}],"vnodes":[{"id":"OMXhkot1MsfKht5z@http://donor:19100","label":"OMXhkot1MsfKht5z","machine":"donor","state":"ready","applied_s":26.716961108469263,"items":656,"monitor":"http://donor:19100","wall":44.772389749996364},{"id":"nd-qznRMpIFDRT-R@http://donor:19101","label":"nd-qznRMpIFDRT-R","machine":"donor","state":"ready","applied_s":47.151506387381446,"items":1423,"monitor":"http://donor:19101","wall":44.772389749996364},{"id":"7JS5uWuq43tvJiPy@http://donor:19102","label":"7JS5uWuq43tvJiPy","machine":"donor","state":"ready","applied_s":51.001049892434175,"items":1428,"monitor":"http://donor:19102","wall":44.772389749996364},{"id":"efFC326BnmtpygmC@http://donor:19103","label":"efFC326BnmtpygmC","machine":"donor","state":"ready","applied_s":26.30497681828794,"items":1036,"monitor":"http://donor:19103","wall":44.772389749996364},{"id":"a_arJ7StfVs5R0g7@http://donor:19104","label":"a_arJ7StfVs5R0g7","machine":"donor","state":"ready","applied_s":25.894168311662305,"items":748,"monitor":"http://donor:19104","wall":44.772389749996364},{"id":"GMXhkot1MsfMn4H1@http://reserve:19100","label":"GMXhkot1MsfMn4H1","machine":"reserve","state":"ready","applied_s":11.316526742104356,"items":503,"monitor":"http://reserve:19100","wall":44.772389749996364},{"id":"HMXhkot1Msezh5Lw@http://reserve:19101","label":"HMXhkot1Msezh5Lw","machine":"reserve","state":"ready","applied_s":211.90018143354095,"items":226,"monitor":"http://reserve:19101","wall":44.772389749996364}],"transfers":[]},"x":39.802645083051175},{"phase":"Local · 2 pools / 1 VM · demande réelle","t":49.872840250027366,"wall":49.872840250027366,"metrics_stale":false,"load_stale":true,"ready_nodes":8,"nodes":8,"vnodes":8,"open":1,"busy":0,"frozen":1,"items":16828,"skew":3.88,"stall_ms":0,"pending_k":0.0,"flush_s":0.0,"versions":1,"membership_kb":2.0,"mesh_kb_s":446.5,"gossip_kb_s":2.17,"forward_attempts_per_entry":0.0,"relayed_pct":0.0,"value_load":0.01,"push_load":0.04,"fleet":{"schema":1,"source":"local-multiprocess","machines":[{"id":"donor","label":"donor","agent":"http://donor:22100","state":"active","cpu":68.53582554517133,"ram":27.13571771306242,"disk":57.66114719584465,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":false},{"id":"reserve","label":"reserve","agent":"http://reserve:22100","state":"active","cpu":68.18181818181819,"ram":27.121101391503345,"disk":57.66116680296886,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":1,"ready_offer":false}],"vnodes":[{"id":"OMXhkot1MsfKht5z@http://donor:19100","label":"OMXhkot1MsfKht5z","machine":"donor","state":"ready","applied_s":2.549790355972146,"items":1068,"monitor":"http://donor:19100","wall":49.872840250027366},{"id":"nd-qznRMpIFDRT-R@http://donor:19101","label":"nd-qznRMpIFDRT-R","machine":"donor","state":"ready","applied_s":2.746516891996221,"items":2243,"monitor":"http://donor:19101","wall":49.872840250027366},{"id":"7JS5uWuq43tvJiPy@http://donor:19102","label":"7JS5uWuq43tvJiPy","machine":"donor","state":"ready","applied_s":5.097014147175818,"items":2267,"monitor":"http://donor:19102","wall":49.872840250027366},{"id":"efFC326BnmtpygmC@http://donor:19103","label":"efFC326BnmtpygmC","machine":"donor","state":"ready","applied_s":0.5881522557837523,"items":1189,"monitor":"http://donor:19103","wall":49.872840250027366},{"id":"a_arJ7StfVs5R0g7@http://donor:19104","label":"a_arJ7StfVs5R0g7","machine":"donor","state":"ready","applied_s":0.9793954054185134,"items":1170,"monitor":"http://donor:19104","wall":49.872840250027366},{"id":"GMXhkot1MsfMn4H1@http://reserve:19100","label":"GMXhkot1MsfMn4H1","machine":"reserve","state":"ready","applied_s":0.19564743786700844,"items":503,"monitor":"http://reserve:19100","wall":49.872840250027366},{"id":"HMXhkot1Msezh5Lw@http://reserve:19101","label":"HMXhkot1Msezh5Lw","machine":"reserve","state":"ready","applied_s":12.310681638213687,"items":8162,"monitor":"http://reserve:19101","wall":49.872840250027366},{"id":"HsXhkot1MshMS9Qz@http://reserve:19102","label":"HsXhkot1MshMS9Qz","machine":"reserve","state":"receiving","applied_s":null,"items":226,"monitor":"http://reserve:19102","wall":49.872840250027366}],"transfers":[{"id":"HMXhkot1Msezh5Lw@http://reserve:19101:94e056ebd7dfffb843f56722a868ae0c:87","source":"HMXhkot1Msezh5Lw@http://reserve:19101","source_machine":"reserve","target_machine":null,"target":null,"phase":"install","age_s":0.859364167,"phase_age_s":0.020490667,"progress":null,"frozen":true}]},"x":44.90309558308218,"offered":null,"acked":null,"p50_ms":null,"p95_ms":null,"p99_ms":null,"reads_s":null,"read_failed_s":null,"read_p99_ms":null},{"phase":"Local · 2 pools / 1 VM · demande réelle","t":54.82280095794704,"wall":54.82280095794704,"metrics_stale":false,"load_stale":true,"ready_nodes":8,"nodes":8,"vnodes":8,"open":1,"busy":0,"frozen":0,"items":16842,"skew":3.88,"stall_ms":0,"pending_k":0.0,"flush_s":0.0,"versions":1,"membership_kb":2.0,"mesh_kb_s":412.6,"gossip_kb_s":0.55,"forward_attempts_per_entry":null,"relayed_pct":null,"value_load":0.0,"push_load":0.01,"fleet":{"schema":1,"source":"local-multiprocess","machines":[{"id":"donor","label":"donor","agent":"http://donor:22100","state":"active","cpu":36.74418604651163,"ram":27.76003641777089,"disk":57.76187552861624,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":false},{"id":"reserve","label":"reserve","agent":"http://reserve:22100","state":"active","cpu":37.41339491916859,"ram":27.73823496844203,"disk":57.762300349640775,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":1,"ready_offer":false}],"vnodes":[{"id":"OMXhkot1MsfKht5z@http://donor:19100","label":"OMXhkot1MsfKht5z","machine":"donor","state":"ready","applied_s":0.0,"items":1068,"monitor":"http://donor:19100","wall":54.82280095794704},{"id":"nd-qznRMpIFDRT-R@http://donor:19101","label":"nd-qznRMpIFDRT-R","machine":"donor","state":"ready","applied_s":0.0,"items":2243,"monitor":"http://donor:19101","wall":54.82280095794704},{"id":"7JS5uWuq43tvJiPy@http://donor:19102","label":"7JS5uWuq43tvJiPy","machine":"donor","state":"ready","applied_s":0.0,"items":2267,"monitor":"http://donor:19102","wall":54.82280095794704},{"id":"efFC326BnmtpygmC@http://donor:19103","label":"efFC326BnmtpygmC","machine":"donor","state":"ready","applied_s":0.0,"items":1189,"monitor":"http://donor:19103","wall":54.82280095794704},{"id":"a_arJ7StfVs5R0g7@http://donor:19104","label":"a_arJ7StfVs5R0g7","machine":"donor","state":"ready","applied_s":0.0,"items":1170,"monitor":"http://donor:19104","wall":54.82280095794704},{"id":"GMXhkot1MsfMn4H1@http://reserve:19100","label":"GMXhkot1MsfMn4H1","machine":"reserve","state":"ready","applied_s":0.0,"items":517,"monitor":"http://reserve:19100","wall":54.82280095794704},{"id":"HMXhkot1Msezh5Lw@http://reserve:19101","label":"HMXhkot1Msezh5Lw","machine":"reserve","state":"ready","applied_s":0.0,"items":8162,"monitor":"http://reserve:19101","wall":54.82280095794704},{"id":"HsXhkot1MshMS9Qz@http://reserve:19102","label":"HsXhkot1MshMS9Qz","machine":"reserve","state":"receiving","applied_s":0.0,"items":226,"monitor":"http://reserve:19102","wall":54.82280095794704}],"transfers":[{"id":"HMXhkot1Msezh5Lw@http://reserve:19101:94e056ebd7dfffb843f56722a868ae0c:120","source":"HMXhkot1Msezh5Lw@http://reserve:19101","source_machine":"reserve","target_machine":null,"target":null,"phase":"copy-slot","age_s":0.008952167,"phase_age_s":0.008950917,"progress":null,"frozen":false}]},"x":49.85305629100185,"offered":null,"acked":null,"p50_ms":null,"p95_ms":null,"p99_ms":null,"reads_s":null,"read_failed_s":null,"read_p99_ms":null},{"phase":"Local · 2 pools / 1 VM · demande réelle","t":59.23068349994719,"wall":59.23068349994719,"metrics_stale":false,"load_stale":true,"ready_nodes":8,"nodes":8,"vnodes":8,"open":0,"busy":0,"frozen":0,"items":16596,"skew":3.79,"stall_ms":0,"pending_k":0.0,"flush_s":0.0,"versions":1,"membership_kb":2.0,"mesh_kb_s":194.1,"gossip_kb_s":1.87,"forward_attempts_per_entry":null,"relayed_pct":null,"value_load":0.01,"push_load":0.0,"fleet":{"schema":1,"source":"local-multiprocess","machines":[{"id":"donor","label":"donor","agent":"http://donor:22100","state":"active","cpu":22.07207207207207,"ram":28.412751141131167,"disk":57.781423831452976,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":false},{"id":"reserve","label":"reserve","agent":"http://reserve:22100","state":"active","cpu":23.495268621147158,"ram":28.424463883659982,"disk":57.781423831452976,"cpu_scope":"shared Docker VM","slots":5,"cores":8,"receiving":0,"ready_offer":true}],"vnodes":[{"id":"OMXhkot1MsfKht5z@http://donor:19100","label":"OMXhkot1MsfKht5z","machine":"donor","state":"ready","applied_s":0.0,"items":1068,"monitor":"http://donor:19100","wall":59.23068349994719},{"id":"nd-qznRMpIFDRT-R@http://donor:19101","label":"nd-qznRMpIFDRT-R","machine":"donor","state":"ready","applied_s":0.0,"items":2243,"monitor":"http://donor:19101","wall":59.23068349994719},{"id":"7JS5uWuq43tvJiPy@http://donor:19102","label":"7JS5uWuq43tvJiPy","machine":"donor","state":"ready","applied_s":0.0,"items":2267,"monitor":"http://donor:19102","wall":59.23068349994719},{"id":"efFC326BnmtpygmC@http://donor:19103","label":"efFC326BnmtpygmC","machine":"donor","state":"ready","applied_s":0.0,"items":1189,"monitor":"http://donor:19103","wall":59.23068349994719},{"id":"a_arJ7StfVs5R0g7@http://donor:19104","label":"a_arJ7StfVs5R0g7","machine":"donor","state":"ready","applied_s":0.0,"items":1170,"monitor":"http://donor:19104","wall":59.23068349994719},{"id":"GMXhkot1MsfMn4H1@http://reserve:19100","label":"GMXhkot1MsfMn4H1","machine":"reserve","state":"ready","applied_s":0.0,"items":517,"monitor":"http://reserve:19100","wall":59.23068349994719},{"id":"HMXhkot1Msezh5Lw@http://reserve:19101","label":"HMXhkot1Msezh5Lw","machine":"reserve","state":"ready","applied_s":0.0,"items":289,"monitor":"http://reserve:19101","wall":59.23068349994719},{"id":"HsXhkot1MshMS9Qz@http://reserve:19102","label":"HsXhkot1MshMS9Qz","machine":"reserve","state":"ready","applied_s":0.0,"items":7853,"monitor":"http://reserve:19102","wall":59.23068349994719}],"transfers":[]},"audit":"fail","read_errors":0,"missing":0,"double":0,"x":54.260938833002,"offered":null,"acked":null,"p50_ms":null,"p95_ms":null,"p99_ms":null,"reads_s":null,"read_failed_s":null,"read_p99_ms":null}];const slider=document.getElementById("moment");function draw(){IndexusDashboard.render(document.getElementById("dashboard"),points,+slider.value);document.getElementById("time").textContent=(points[+slider.value]?.x??0)+" s";}slider.oninput=draw;draw();</script></body></html>

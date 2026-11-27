@@ -1,0 +1,56 @@
+{
+  "source_commit": "2a63338a2865a770e65200f845b77e32332de087",
+  "baseline_commit": "420061d",
+  "loader_commit": "2362b35844ac6903f9abd34b5c93f13116098de8",
+  "run_count": 1,
+  "stop_on_first_sentinel": true,
+  "budget_usd": 8,
+  "env": {
+    "MODE": "steps",
+    "STEP_ROUTE": "direct",
+    "NET": "h3",
+    "HOST_TYPE": "i4i.xlarge",
+    "LOADER_TYPE": "c6i.4xlarge",
+    "HOSTS": "6",
+    "SLOTS": "5",
+    "HOSTS_MAX": "32",
+    "LOADERS": "1",
+    "SIZES": "4",
+    "ITEMS": "500000",
+    "SCALING_WRITES": "500",
+    "DATA_BYTES": "4294967296",
+    "WRITE_CAP": "0",
+    "RESOURCE_SIGNALS": "true",
+    "READY_RESERVE_PCT": "15",
+    "STEP_RATE": "2000",
+    "STEP_RAMP": "120",
+    "STEP_PLATEAU": "120",
+    "STEP_TAIL": "180",
+    "STEP_PASSES": "1",
+    "STEP_WORKERS": "4096",
+    "BUDGET": "8",
+    "TTL": "30",
+    "CPU_PROFILE": "1",
+    "OPEN_LIVE": "1",
+    "SAMPLE": "20000",
+    "OBSERVE_SECONDS": "1800"
+  },
+  "heavy_lab": "not yet run; portable 16 GiB RAM, 25 GiB disk available; prior qualification reports swap under heavy lab; no claim of 64-machine coverage",
+  "classification": {
+    "functional": [
+      "arrival demand",
+      "physical host pressure and coalescing",
+      "reserve backlog arithmetic",
+      "safe jobs at first right",
+      "durable staging session index"
+    ],
+    "scheduling": [
+      "shared soft copy budget, default two slots per 4-vCPU host, 10s source wait then bypass"
+    ],
+    "optimization": [
+      "single capacity check per preload",
+      "indexed zone count",
+      "unchanged committed row read reuse"
+    ]
+  }
+}

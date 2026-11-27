@@ -1,0 +1,38 @@
+ok  	github.com/indexus/go-indexus-core/cmd/experiment	2.444s
+?   	github.com/indexus/go-indexus-core/cmd/issuer	[no test files]
+?   	github.com/indexus/go-indexus-core/cmd/node	[no test files]
+?   	github.com/indexus/go-indexus-core/cmd/provisioner	[no test files]
+ok  	github.com/indexus/go-indexus-core/indexus	44.055s
+ok  	github.com/indexus/go-indexus-core/internal/adapter/http/monitoring	1.320s
+ok  	github.com/indexus/go-indexus-core/internal/adapter/http/p2p	1.798s
+?   	github.com/indexus/go-indexus-core/internal/adapter/issuer	[no test files]
+ok  	github.com/indexus/go-indexus-core/internal/adapter/meshhttp	3.729s
+?   	github.com/indexus/go-indexus-core/internal/adapter/observability/logging	[no test files]
+ok  	github.com/indexus/go-indexus-core/internal/adapter/peer	1.688s
+ok  	github.com/indexus/go-indexus-core/internal/adapter/provisioner	11.645s
+?   	github.com/indexus/go-indexus-core/internal/adapter/transport	[no test files]
+ok  	github.com/indexus/go-indexus-core/internal/algebra	3.132s
+ok  	github.com/indexus/go-indexus-core/internal/app/node	44.153s
+ok  	github.com/indexus/go-indexus-core/internal/architecture	1.252s
+ok  	github.com/indexus/go-indexus-core/internal/auth	1.029s
+ok  	github.com/indexus/go-indexus-core/internal/autoscale	4.900s
+ok  	github.com/indexus/go-indexus-core/internal/causal	2.236s
+?   	github.com/indexus/go-indexus-core/internal/diagnostics	[no test files]
+ok  	github.com/indexus/go-indexus-core/internal/mesh	80.666s
+ok  	github.com/indexus/go-indexus-core/internal/metrics	1.657s
+ok  	github.com/indexus/go-indexus-core/internal/modelcheck	3.393s
+ok  	github.com/indexus/go-indexus-core/internal/prep	0.834s
+ok  	github.com/indexus/go-indexus-core/internal/protocol	1.023s
+ok  	github.com/indexus/go-indexus-core/internal/replication/convergent	21.849s
+ok  	github.com/indexus/go-indexus-core/internal/simulation	0.489s
+ok  	github.com/indexus/go-indexus-core/internal/storage	70.812s
+ok  	github.com/indexus/go-indexus-core/internal/summary	21.020s
+ok  	github.com/indexus/go-indexus-core/internal/testkit	0.268s
+ok  	github.com/indexus/go-indexus-core/internal/testoracle	0.288s
+ok  	github.com/indexus/go-indexus-core/internal/tree	0.581s
+ok  	github.com/indexus/go-indexus-core/internal/wire	0.428s
+ok  	github.com/indexus/go-indexus-core/internal/zonelog	71.573s
+ok  	github.com/indexus/go-indexus-core/internal/zonelog/compare	0.330s
+?   	github.com/indexus/go-indexus-core/scripts/research/indexus-cl/zonecheck	[no test files]
+ok  	github.com/indexus/go-indexus-core/tools/localdata	1.303s
+ok  	github.com/indexus/go-indexus-core/tools/prep	0.271s

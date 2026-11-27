@@ -1,0 +1,173 @@
+{
+  "base": "0b4ddb43100b25de39d917f68ce7fe4a8c3cdd25",
+  "windows": [
+    {
+      "from_s": 0,
+      "to_s": 12,
+      "write_ms": {
+        "n": 4396,
+        "0.5": 8.192,
+        "0.95": 8.192,
+        "0.99": 16.384
+      },
+      "intended_ms": {
+        "n": 4396,
+        "0.5": 16.384,
+        "0.95": 16.384,
+        "0.99": 32.768
+      },
+      "read_ms": {
+        "n": 85,
+        "0.5": 2.048,
+        "0.95": 8.192,
+        "0.99": 8.192
+      }
+    },
+    {
+      "from_s": 12,
+      "to_s": 28,
+      "write_ms": {
+        "n": 6400,
+        "0.5": 8.192,
+        "0.95": 32.768,
+        "0.99": 262.144
+      },
+      "intended_ms": {
+        "n": 6400,
+        "0.5": 16.384,
+        "0.95": 65.536,
+        "0.99": 262.144
+      },
+      "read_ms": {
+        "n": 134,
+        "0.5": 2.048,
+        "0.95": 16.384,
+        "0.99": 131.072
+      }
+    },
+    {
+      "from_s": 28,
+      "to_s": 45,
+      "write_ms": {
+        "n": 6800,
+        "0.5": 8.192,
+        "0.95": 16.384,
+        "0.99": 32.768
+      },
+      "intended_ms": {
+        "n": 6800,
+        "0.5": 16.384,
+        "0.95": 16.384,
+        "0.99": 65.536
+      },
+      "read_ms": {
+        "n": 134,
+        "0.5": 2.048,
+        "0.95": 4.096,
+        "0.99": 16.384
+      }
+    },
+    {
+      "from_s": 0,
+      "to_s": 1000,
+      "write_ms": {
+        "n": 17596,
+        "0.5": 8.192,
+        "0.95": 16.384,
+        "0.99": 131.072
+      },
+      "intended_ms": {
+        "n": 17596,
+        "0.5": 16.384,
+        "0.95": 32.768,
+        "0.99": 131.072
+      },
+      "read_ms": {
+        "n": 353,
+        "0.5": 2.048,
+        "0.95": 8.192,
+        "0.99": 65.536
+      }
+    }
+  ],
+  "receivers": [
+    {
+      "slot": 0,
+      "first_observed_s": 13.076735166017897,
+      "first_applied_observed_s": 13.617005416075699,
+      "first_write_after_start_s": 0.302943292,
+      "first_join_complete_observed_s": 17.223924625082873,
+      "final_applied": 3654
+    },
+    {
+      "slot": 1,
+      "first_observed_s": 28.691479583038017,
+      "first_applied_observed_s": 29.239835833082907,
+      "first_write_after_start_s": 0.3632965,
+      "first_join_complete_observed_s": 33.53143666603137,
+      "final_applied": 3047
+    },
+    {
+      "slot": 2,
+      "first_observed_s": 44.9471413330175,
+      "first_applied_observed_s": null,
+      "first_write_after_start_s": null,
+      "first_join_complete_observed_s": 58.07656587508973,
+      "final_applied": 0
+    }
+  ],
+  "resources": [
+    {
+      "from_s": 0,
+      "to_s": 45,
+      "shared_vm_cpu_max_pct": 45.714285714285715,
+      "mem_free_min_pct": 74.16759556589032,
+      "disk_free_min_pct": 42.019544250697734
+    },
+    {
+      "from_s": 45,
+      "to_s": 1000,
+      "shared_vm_cpu_max_pct": 66.4459161147903,
+      "mem_free_min_pct": 72.06077830681971,
+      "disk_free_min_pct": 41.87461492425016
+    }
+  ],
+  "load": {
+    "acked": 17999,
+    "drain_completed": true,
+    "exhausted": 0,
+    "offered": 17999,
+    "queued_unfinished": 0,
+    "shed": 0
+  },
+  "audit": {
+    "acked_keys": 17999,
+    "checked_keys": 17999,
+    "missing": 0,
+    "read_errors": 0,
+    "oversized_locations": 0,
+    "items_match_acked": true,
+    "collections_checked": 17,
+    "settlement_polls": 24,
+    "settlement_wait_ms": 5841,
+    "zones": 17999,
+    "double_owned_zones": 0,
+    "ownership_retries": 0,
+    "moving_at_ownership": 0,
+    "items_held": 22474,
+    "items_before_run": 0,
+    "nodes_answering": 8,
+    "nodes_gone": 0,
+    "per_node_items": {
+      "http://donor:19100": 2267,
+      "http://donor:19101": 1103,
+      "http://donor:19102": 2359,
+      "http://donor:19103": 1021,
+      "http://donor:19104": 1140,
+      "http://reserve:19100": 559,
+      "http://reserve:19101": 8153,
+      "http://reserve:19102": 5872
+    },
+    "pass": true
+  }
+}

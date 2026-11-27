@@ -1,0 +1,626 @@
+{
+  "run": "exp-16k-direct-fixed-20261126-134721",
+  "source": "5e5890d60f16846e518e8265c3e70374337ff9ab",
+  "loader": "2362b35844ac6903f9abd34b5c93f13116098de8",
+  "status": "stopped_on_throughput_collapse_before16k",
+  "load_summary": {
+    "acked": 1235768,
+    "drain_completed": true,
+    "exhausted": 16313,
+    "offered": 1446030,
+    "queued_unfinished": 47981,
+    "shed": 145968
+  },
+  "operator_stop": {
+    "unix": 1795701973.8626523,
+    "reason": "load stopped after collapse during ramp to8k; provisioner stopped; still not quiet after300s; audit interrupted, not qualified",
+    "ack_ledgers": [
+      {
+        "path": "/results/steps-1/acked.jsonl",
+        "bytes": 76809024,
+        "lines": 1236899,
+        "sha256": "8857fe9dcc1aafbeb375895d0f1d4675c69cfc4252ceb9f7ebcffc011dfda201"
+      }
+    ]
+  },
+  "preflight": {
+    "run": "preflight-16k",
+    "region": "eu-west-3",
+    "bucket": "not-created",
+    "host_type": "i4i.xlarge",
+    "loader_type": "c6i.4xlarge",
+    "hosts": 2,
+    "slots": 2,
+    "loaders": 1,
+    "ttl": 30,
+    "budget": "7.25",
+    "max_hosts": 32,
+    "host_price": "0.3980000000",
+    "loader_price": "0.8080000000",
+    "max_machines": 32,
+    "max_vnodes": 64,
+    "limits": {
+      "budget": 34,
+      "quota": 123,
+      "operator": 32
+    },
+    "reason": "operator",
+    "host_vcpus": 4,
+    "loader_vcpus": 16,
+    "quota_vcpus": 512,
+    "other_vcpus": 2
+  },
+  "live_windows": [
+    {
+      "t_start": 0,
+      "t_end": 120,
+      "samples": 23,
+      "max_p99_bucket_ms": 262.144,
+      "min_acked_offered_point_ratio": 0.9875,
+      "max_relay_pct": 1.0
+    },
+    {
+      "t_start": 180,
+      "t_end": 300,
+      "samples": 24,
+      "max_p99_bucket_ms": 524.288,
+      "min_acked_offered_point_ratio": 0.994,
+      "max_relay_pct": 0.7
+    },
+    {
+      "t_start": 300,
+      "t_end": 400,
+      "samples": 17,
+      "max_p99_bucket_ms": 8388.608,
+      "min_acked_offered_point_ratio": 0.4044155844155844,
+      "max_relay_pct": 0.3
+    }
+  ],
+  "facts_at_failure": [
+    {
+      "host": "10.77.12.183_22100-facts.json",
+      "cpu_pct": 2.706660982222657,
+      "mem_free_pct": 97.68372735657321,
+      "disk_free_pct": 99.28946435649915
+    },
+    {
+      "host": "10.77.14.10_22100-facts.json",
+      "cpu_pct": 0,
+      "mem_free_pct": 98.04722807095722,
+      "disk_free_pct": 99.29917403849448
+    },
+    {
+      "host": "10.77.14.207_22100-facts.json",
+      "cpu_pct": 0,
+      "mem_free_pct": 98.05521205842051,
+      "disk_free_pct": 99.29917403849448
+    },
+    {
+      "host": "10.77.13.111_22100-facts.json",
+      "cpu_pct": 2.233008671401292,
+      "mem_free_pct": 97.60887621353515,
+      "disk_free_pct": 99.29026733727224
+    },
+    {
+      "host": "10.77.15.65_22100-facts.json",
+      "cpu_pct": 0,
+      "mem_free_pct": 97.74982707545352,
+      "disk_free_pct": 99.29917403849448
+    },
+    {
+      "host": "10.77.5.189_22100-facts.json",
+      "cpu_pct": 7.949372064205964,
+      "mem_free_pct": 97.04255774774808,
+      "disk_free_pct": 99.2765025149021
+    },
+    {
+      "host": "10.77.9.153_22100-facts.json",
+      "cpu_pct": 5.594996510688413,
+      "mem_free_pct": 97.25246819742212,
+      "disk_free_pct": 99.28218504713783
+    },
+    {
+      "host": "10.77.3.122_22100-facts.json",
+      "cpu_pct": 18.50538461697528,
+      "mem_free_pct": 97.14502475593443,
+      "disk_free_pct": 99.27524424927891
+    },
+    {
+      "host": "10.77.0.198_22100-facts.json",
+      "cpu_pct": 11.190054876930697,
+      "mem_free_pct": 97.60505103006449,
+      "disk_free_pct": 99.28607268117489
+    },
+    {
+      "host": "10.77.3.190_22100-facts.json",
+      "cpu_pct": 2.3307477269678265,
+      "mem_free_pct": 97.7332036090099,
+      "disk_free_pct": 99.29054768077744
+    },
+    {
+      "host": "10.77.0.204_22100-facts.json",
+      "cpu_pct": 6.375417375890996,
+      "mem_free_pct": 97.12427912020172,
+      "disk_free_pct": 99.28133701896843
+    },
+    {
+      "host": "10.77.10.207_22100-facts.json",
+      "cpu_pct": 92.3136511477883,
+      "mem_free_pct": 95.8677227647277,
+      "disk_free_pct": 99.24638023943041
+    },
+    {
+      "host": "10.77.1.191_22100-facts.json",
+      "cpu_pct": 21.791738586461452,
+      "mem_free_pct": 96.88192487129689,
+      "disk_free_pct": 99.27730899450209
+    },
+    {
+      "host": "10.77.11.59_22100-facts.json",
+      "cpu_pct": 12.443581514115493,
+      "mem_free_pct": 96.35113205515265,
+      "disk_free_pct": 99.29287440066462
+    },
+    {
+      "host": "10.77.14.130_22100-facts.json",
+      "cpu_pct": 23.815404673740787,
+      "mem_free_pct": 95.55967752117613,
+      "disk_free_pct": 99.27856769747865
+    },
+    {
+      "host": "10.77.3.69_22100-facts.json",
+      "cpu_pct": 0,
+      "mem_free_pct": 98.08592232210529,
+      "disk_free_pct": 99.29917403849448
+    },
+    {
+      "host": "10.77.10.56_22100-facts.json",
+      "cpu_pct": 9.53272187270446,
+      "mem_free_pct": 96.9873750242769,
+      "disk_free_pct": 99.2802703141179
+    },
+    {
+      "host": "10.77.11.91_22100-facts.json",
+      "cpu_pct": 21.242096431544027,
+      "mem_free_pct": 97.00226646217756,
+      "disk_free_pct": 99.27616750222663
+    },
+    {
+      "host": "10.77.13.85_22100-facts.json",
+      "cpu_pct": 99.78074163970541,
+      "mem_free_pct": 94.50390831755928,
+      "disk_free_pct": 99.23958595494784
+    },
+    {
+      "host": "10.77.7.220_22100-facts.json",
+      "cpu_pct": 0,
+      "mem_free_pct": 98.07670050598682,
+      "disk_free_pct": 99.29917403849448
+    },
+    {
+      "host": "10.77.6.48_22100-facts.json",
+      "cpu_pct": 0,
+      "mem_free_pct": 98.07682452680949,
+      "disk_free_pct": 99.29917403849448
+    },
+    {
+      "host": "10.77.14.101_22100-facts.json",
+      "cpu_pct": 3.0074964953176204,
+      "mem_free_pct": 97.65539319105575,
+      "disk_free_pct": 99.29009370798742
+    },
+    {
+      "host": "10.77.11.79_22100-facts.json",
+      "cpu_pct": 5.048519372676178,
+      "mem_free_pct": 97.01970745184542,
+      "disk_free_pct": 99.27566279644658
+    },
+    {
+      "host": "10.77.7.46_22100-facts.json",
+      "cpu_pct": 5.4602408410214185,
+      "mem_free_pct": 97.15532313000114,
+      "disk_free_pct": 99.28046668577755
+    },
+    {
+      "host": "10.77.11.254_22100-facts.json",
+      "cpu_pct": 7.0515124253925805,
+      "mem_free_pct": 97.05815437442054,
+      "disk_free_pct": 99.2814393596552
+    },
+    {
+      "host": "10.77.2.78_22100-facts.json",
+      "cpu_pct": 3.405292008651849,
+      "mem_free_pct": 97.58350074950457,
+      "disk_free_pct": 99.29055380372452
+    },
+    {
+      "host": "10.77.3.59_22100-facts.json",
+      "cpu_pct": 8.391994914765503,
+      "mem_free_pct": 97.13196567404853,
+      "disk_free_pct": 99.28027774912506
+    },
+    {
+      "host": "10.77.5.181_22100-facts.json",
+      "cpu_pct": 9.835423054919518,
+      "mem_free_pct": 96.34197122594962,
+      "disk_free_pct": 99.27750405410166
+    }
+  ],
+  "artifact_root": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/outputs/fix-peer-spawn-20261126/next-16k",
+  "observations": [
+    "No valid completed audit",
+    "Generator stopped by SIGINT; outstanding request outcomes may be unknown",
+    "Provisioner stopped at14:00:21UTC to limit churn before audit",
+    "Quiet wait exhausted300s; open transfers remained",
+    "Audit logged184 total mismatches while transfers still active; final audit interrupted, no verdict of loss or preservation",
+    "No claim that candidate merges fix all causes or qualify16k/s"
+  ],
+  "cleanup": {
+    "run": "exp-16k-direct-fixed-20261126-134721",
+    "checked_utc": "2026-11-26T14:10:01.208192+00:00",
+    "all_terminated": true,
+    "instances": [
+      {
+        "instance": "i-08148c6933d1f41e1",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:48:01+00:00",
+        "upper_seconds_to_terminated_observation": 1311.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.14500707323999998
+      },
+      {
+        "instance": "i-0b842b5d5326d3a45",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:58:22+00:00",
+        "upper_seconds_to_terminated_observation": 690.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.07635207324
+      },
+      {
+        "instance": "i-02fd2324b051352ff",
+        "type": "c6i.4xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:48:07+00:00",
+        "upper_seconds_to_terminated_observation": 1305.621768,
+        "price_usd_hour": 0.808,
+        "upper_compute_usd": 0.29303955237333335
+      },
+      {
+        "instance": "i-0e5df9f17d69d318b",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:56:13+00:00",
+        "upper_seconds_to_terminated_observation": 819.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.09061373990666667
+      },
+      {
+        "instance": "i-0202a64aa198e01f8",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:51:31+00:00",
+        "upper_seconds_to_terminated_observation": 1101.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.12179040657333333
+      },
+      {
+        "instance": "i-0af30a3b27b3b4830",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:50:53+00:00",
+        "upper_seconds_to_terminated_observation": 1139.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.12599151768444444
+      },
+      {
+        "instance": "i-02eec6ad334b9e529",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:48:05+00:00",
+        "upper_seconds_to_terminated_observation": 1307.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.14456485101777777
+      },
+      {
+        "instance": "i-0dca52bd7100b900f",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:53:59+00:00",
+        "upper_seconds_to_terminated_observation": 953.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.1054281843511111
+      },
+      {
+        "instance": "i-0cd90dbd51ed84688",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:53:59+00:00",
+        "upper_seconds_to_terminated_observation": 953.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.1054281843511111
+      },
+      {
+        "instance": "i-0bf6fe2bc0675fef5",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:53:19+00:00",
+        "upper_seconds_to_terminated_observation": 993.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.10985040657333334
+      },
+      {
+        "instance": "i-098a7f65c74a201e5",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:51:50+00:00",
+        "upper_seconds_to_terminated_observation": 1082.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.11968985101777779
+      },
+      {
+        "instance": "i-06eb7e6d333c524e3",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:51:14+00:00",
+        "upper_seconds_to_terminated_observation": 1118.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.12366985101777778
+      },
+      {
+        "instance": "i-040e08d699e73c1dc",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:54:28+00:00",
+        "upper_seconds_to_terminated_observation": 924.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.10222207324
+      },
+      {
+        "instance": "i-058d61dda085d1b76",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:53:18+00:00",
+        "upper_seconds_to_terminated_observation": 994.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.1099609621288889
+      },
+      {
+        "instance": "i-0ae78e1d4a3fdf988",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:52:00+00:00",
+        "upper_seconds_to_terminated_observation": 1072.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.11858429546222223
+      },
+      {
+        "instance": "i-09289d95cb3bd59c7",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:52:00+00:00",
+        "upper_seconds_to_terminated_observation": 1072.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.11858429546222223
+      },
+      {
+        "instance": "i-07bba97e81e3114d3",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:59:39+00:00",
+        "upper_seconds_to_terminated_observation": 613.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.06783929546222223
+      },
+      {
+        "instance": "i-044499a69901c9201",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:56:26+00:00",
+        "upper_seconds_to_terminated_observation": 806.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.08917651768444446
+      },
+      {
+        "instance": "i-0b5dd37ee4088eb6d",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:51:43+00:00",
+        "upper_seconds_to_terminated_observation": 1089.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.12046373990666667
+      },
+      {
+        "instance": "i-026ca58471482012a",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:51:43+00:00",
+        "upper_seconds_to_terminated_observation": 1089.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.12046373990666667
+      },
+      {
+        "instance": "i-085b5b4e0bf7c403e",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:49:54+00:00",
+        "upper_seconds_to_terminated_observation": 1198.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.13251429546222224
+      },
+      {
+        "instance": "i-0f2797ea74cd1439e",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:49:54+00:00",
+        "upper_seconds_to_terminated_observation": 1198.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.13251429546222224
+      },
+      {
+        "instance": "i-04feb166532ad6e12",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:53:02+00:00",
+        "upper_seconds_to_terminated_observation": 1010.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.11172985101777778
+      },
+      {
+        "instance": "i-0aa19e7c83482bc52",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:53:02+00:00",
+        "upper_seconds_to_terminated_observation": 1010.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.11172985101777778
+      },
+      {
+        "instance": "i-068c74a8db8706252",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:53:02+00:00",
+        "upper_seconds_to_terminated_observation": 1010.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.11172985101777778
+      },
+      {
+        "instance": "i-003ebeff165c2bf42",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:52:53+00:00",
+        "upper_seconds_to_terminated_observation": 1019.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.11272485101777778
+      },
+      {
+        "instance": "i-0e3b9f79b0ea0a553",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:52:52+00:00",
+        "upper_seconds_to_terminated_observation": 1020.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.11283540657333332
+      },
+      {
+        "instance": "i-06afef7ffdb821f4d",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:50:26+00:00",
+        "upper_seconds_to_terminated_observation": 1166.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.12897651768444443
+      },
+      {
+        "instance": "i-03119be2279b6325c",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:52:59+00:00",
+        "upper_seconds_to_terminated_observation": 1013.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.11206151768444444
+      },
+      {
+        "instance": "i-09ef14c749a9482d6",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:50:48+00:00",
+        "upper_seconds_to_terminated_observation": 1144.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.12654429546222223
+      },
+      {
+        "instance": "i-0ef2f4a115ef91cdc",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:50:20+00:00",
+        "upper_seconds_to_terminated_observation": 1172.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.12963985101777778
+      },
+      {
+        "instance": "i-0e323135a90322e80",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:53:27+00:00",
+        "upper_seconds_to_terminated_observation": 985.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.1089659621288889
+      },
+      {
+        "instance": "i-0b2f5a65ecda4c972",
+        "type": "i4i.xlarge",
+        "state": "terminated",
+        "launch": "2026-11-26T13:53:27+00:00",
+        "upper_seconds_to_terminated_observation": 985.621768,
+        "price_usd_hour": 0.398,
+        "upper_compute_usd": 0.1089659621288889
+      }
+    ],
+    "deleted_resources": [
+      {
+        "resource": "gateway",
+        "deleted": true,
+        "response": "An error occurred (InvalidInternetGatewayID.NotFound) when calling the DescribeInternetGateways operation: The internetGateway ID 'igw-04e59904295c8af39' does not exist"
+      },
+      {
+        "resource": "route_table",
+        "deleted": true,
+        "response": "An error occurred (InvalidRouteTableID.NotFound) when calling the DescribeRouteTables operation: The routeTable ID 'rtb-0d276dc5c7b193c58' does not exist"
+      },
+      {
+        "resource": "bucket",
+        "deleted": true,
+        "response": "An error occurred (404) when calling the HeadBucket operation: Not Found\n\nBucket absent from authenticated account ListBuckets (HeadBucket can retain regional routing metadata immediately after deletion)."
+      },
+      {
+        "resource": "role",
+        "deleted": true,
+        "response": "An error occurred (NoSuchEntity) when calling the GetRole operation: The role with name exp-16k-direct-fixed-20261126-134721 cannot be found."
+      },
+      {
+        "resource": "profile",
+        "deleted": true,
+        "response": "An error occurred (NoSuchEntity) when calling the GetInstanceProfile operation: Instance Profile exp-16k-direct-fixed-20261126-134721 cannot be found."
+      },
+      {
+        "resource": "template",
+        "deleted": true,
+        "response": "An error occurred (InvalidLaunchTemplateName.NotFoundException) when calling the DescribeLaunchTemplates operation: At least one of the launch templates specified in the request does not exist."
+      },
+      {
+        "resource": "vpc",
+        "deleted": true,
+        "response": "An error occurred (InvalidVpcID.NotFound) when calling the DescribeVpcs operation: The vpc ID 'vpc-0b8fbcd769f85d3f9' does not exist"
+      },
+      {
+        "resource": "subnet",
+        "deleted": true,
+        "response": "An error occurred (InvalidSubnetID.NotFound) when calling the DescribeSubnets operation: The subnet ID 'subnet-0cdcd56ae55e60a25' does not exist"
+      },
+      {
+        "resource": "security_group",
+        "deleted": true,
+        "response": "An error occurred (InvalidGroup.NotFound) when calling the DescribeSecurityGroups operation: The security group 'sg-06bcf78a56f7760fb' does not exist"
+      }
+    ],
+    "all_resources_deleted": true,
+    "estimated_compute_upper_usd": 3.9496531182755557,
+    "note": "EC2 upper estimate through independently observed termination, minimum60s. Excludes EBS/S3/data transfer, not a billing export."
+  },
+  "integrated_claude_head": "0980a4655ae9ef88b280b6fd76b139cfa404799a",
+  "resource_policy_commit": "ac539ed",
+  "post_fix_aws_qualified": false,
+  "validation": {
+    "full_normal_suite": "pass",
+    "race_merged_packages": "pass: autoscale, provisioner, meshhttp, peer, p2p, node, mesh, storage, summary, wire, zonelog, indexus",
+    "race_leaf_selection": "pass: protocol, autoscale, simulation",
+    "race_resource_policy": "pass: autoscale, provisioner, experiment",
+    "host_cpu_meter": "pass with race detection",
+    "quic": "pass",
+    "vet": "pass",
+    "spawn_python": "16 tests pass",
+    "deployment_python": "5 tests pass"
+  }
+}

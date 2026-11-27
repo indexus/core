@@ -1,0 +1,235 @@
+{
+  "source_commit": "e65dfd38356f97b00df78af6aa20b285748caf17",
+  "go_version": "go1.26.0 darwin/arm64",
+  "unit": "passed",
+  "vet": "passed",
+  "race": "passed",
+  "fuzz": {
+    "handoff_seconds": 30,
+    "handoff_cases": 3489,
+    "directory_seconds": 30,
+    "directory_cases": 1247800
+  },
+  "powerfs64": {
+    "runs": 2,
+    "same_transcript": "11037c2e738668fd2e60730ebd707c5169e3df8304d76ce9126adcf8ca49aa3a",
+    "stats_per_run": {
+      "steps": 3522,
+      "writes": 284,
+      "early_writes": 23,
+      "transfers": 51,
+      "drops": 43,
+      "lost_replies": 25,
+      "crashes": 167,
+      "restarts": 167,
+      "io_cuts": 10,
+      "replays": 153,
+      "compactions": 171
+    }
+  },
+  "http64": {
+    "scope": "64 services in one process, real HTTP/files/fsync; 32 serialized simulated devices with 1ms extra sync delay; not AWS throughput",
+    "audit": {
+      "ack_duplicates": 0,
+      "ack_missing": 0,
+      "acked": 1480,
+      "base_rate": 40,
+      "direct": true,
+      "elapsed_s": 103.808991292,
+      "event": "audit",
+      "failed": 0,
+      "frozen_remaining": 0,
+      "fsync": true,
+      "nodes": 64,
+      "observed_records": 1608,
+      "offered": 1480,
+      "prejoined": false,
+      "seed_zones": 128,
+      "shed": 0,
+      "tail_offered": 280,
+      "unique_zones": true,
+      "writable_ack_duplicates": 0,
+      "writable_ack_missing": 0
+    },
+    "latency": {
+      "ack_latency": {
+        "count": 1480,
+        "max_us": 752746,
+        "mean_us": 199394,
+        "p50_us": 177625,
+        "p95_us": 450696,
+        "p99_us": 566489
+      },
+      "event": "client-latency",
+      "intended_latency": {
+        "count": 1480,
+        "max_us": 771969,
+        "mean_us": 203880,
+        "p50_us": 181682,
+        "p95_us": 456515,
+        "p99_us": 572225
+      },
+      "request_timeout_ms": 10000,
+      "rpc_attempts_per_write": 5
+    }
+  },
+  "tlc": {
+    "tool": "TLC 2.19",
+    "tools_release": "v1.7.4",
+    "jar_sha256": "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88",
+    "positive_configurations": 11,
+    "expected_counterexamples": 20,
+    "scope": "bounded abstract models, some historical; no automatic refinement proof for Go"
+  },
+  "logs_sha256": {
+    "target-final-unit-v3.log": "a8c8527dfa407c660425a0674253c1e846c323079e836b4ddfc0711d7669837b",
+    "target-final-vet-v2.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "target-final-race-v2.log": "0c2cab8e92cfcfcd3162c973a3507cc6bce2d447372a5be597c0e38fc812ee09",
+    "target-final-fuzz-v3.log": "a0085959b5bb795e686622075c8a3ec89743ca44fa033948d44b862632e570e7",
+    "target-final-directory-fuzz-v3.log": "021b6aae67c5efa90bf49f25ac19a2f661c5866e751012d8c40225662df3db8a",
+    "target-final-schedule64-v3.log": "d1a05ea8f11dcb30097a884e52e3adf539f51fd2d01277d5e6990efa4715ee66",
+    "target-http64-v6.log": "bd44dc06c28f3967f55b828b507d97c8b833e5666dbbff0b88410d3cf5f28e7c",
+    "target-final-tlc/results.json": "0959632a5c87e34b4112a9067e89fd8c1846a26ffc2f8ebd7af9ee2c6e080964",
+    "target-perf-before-b.log": "f0eb7e0968ce08fd0105cce8fbfba48de2291f5f1455f41fb0ddaeb6a08ea62f",
+    "target-perf-after-b.log": "e420940e0bb27bfec76725b885663c3adb7f9530f41761248a680f8a3b2d32cf",
+    "target-logical-before-b.log": "1d25d7b0d375e19eef14339f1b4c941061736ab77c7d155e367779522ada222b",
+    "target-logical-after-b.log": "e976ab7b28de1a00a33a8436017a3658f8d05541eb3bb1920643b77b510c1ee1",
+    "target-read-before-b.log": "c98b4a785e3716e21cf95f029947a7cf6a09b80b5f89b9a6a65ffa58efb2e0da",
+    "target-read-after-b.log": "ce807e437224417da23f7d45feaa238e25d967c7383e66aab777b6aa9f9f3366"
+  },
+  "benchmarks": {
+    "baseline_commit": "50533fe",
+    "after_commit": "7aaabf7",
+    "notes": "GOMAXPROCS=4; sequential before-b then after-b, no other test campaign; three samples each; hardware fsync is variable; no AWS or end-to-end SLA",
+    "results": [
+      {
+        "case": "BenchmarkCausalInsert/same-zone/durable-update",
+        "before_ns": 4206050.0,
+        "after_ns": 4402038.0,
+        "change_pct": 4.66,
+        "before_samples": [
+          4438031.0,
+          4206050.0,
+          4165721.0
+        ],
+        "after_samples": [
+          4438909.0,
+          4402038.0,
+          4288947.0
+        ]
+      },
+      {
+        "case": "BenchmarkCausalInsert/distinct-zones/durable-update",
+        "before_ns": 4183041.0,
+        "after_ns": 4349184.0,
+        "change_pct": 3.97,
+        "before_samples": [
+          4183041.0,
+          4427828.0,
+          4098587.0
+        ],
+        "after_samples": [
+          4276116.0,
+          4931984.0,
+          4349184.0
+        ]
+      },
+      {
+        "case": "BenchmarkInventoryPayloadProjection/metrics-only=false",
+        "before_ns": 107281.0,
+        "after_ns": 125682.0,
+        "change_pct": 17.15,
+        "before_samples": [
+          121424.0,
+          107281.0,
+          105226.0
+        ],
+        "after_samples": [
+          125918.0,
+          120875.0,
+          125682.0
+        ]
+      },
+      {
+        "case": "BenchmarkInventoryPayloadProjection/metrics-only=true",
+        "before_ns": 49773.0,
+        "after_ns": 49092.0,
+        "change_pct": -1.37,
+        "before_samples": [
+          49773.0,
+          48899.0,
+          51526.0
+        ],
+        "after_samples": [
+          49092.0,
+          48596.0,
+          51995.0
+        ]
+      },
+      {
+        "case": "BenchmarkCausalInsert/same-zone/logical-update",
+        "before_ns": 33318.0,
+        "after_ns": 31525.0,
+        "change_pct": -5.38,
+        "before_samples": [
+          70464.0,
+          33318.0,
+          30757.0
+        ],
+        "after_samples": [
+          31525.0,
+          29539.0,
+          33670.0
+        ]
+      },
+      {
+        "case": "BenchmarkCausalInsert/distinct-zones/logical-update",
+        "before_ns": 29688.0,
+        "after_ns": 34495.0,
+        "change_pct": 16.19,
+        "before_samples": [
+          29483.0,
+          29688.0,
+          31698.0
+        ],
+        "after_samples": [
+          34495.0,
+          32556.0,
+          35541.0
+        ]
+      },
+      {
+        "case": "BenchmarkSteadyRead/ordinary",
+        "before_ns": 11216.0,
+        "after_ns": 9048.0,
+        "change_pct": -19.33,
+        "before_samples": [
+          12105.0,
+          11216.0,
+          10320.0
+        ],
+        "after_samples": [
+          10924.0,
+          9048.0,
+          8690.0
+        ]
+      },
+      {
+        "case": "BenchmarkSteadyRead/fresh",
+        "before_ns": 69997.0,
+        "after_ns": 67583.0,
+        "change_pct": -3.45,
+        "before_samples": [
+          69997.0,
+          70253.0,
+          68700.0
+        ],
+        "after_samples": [
+          67368.0,
+          70876.0,
+          67583.0
+        ]
+      }
+    ]
+  }
+}

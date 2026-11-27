@@ -1,0 +1,5 @@
+=== RUN   TestInventorySinceSkipsWhatACommitDidNotTouch
+    zone_inventory_since_test.go:75: 8 zones added to 40000: 30 subtrees opened
+--- PASS: TestInventorySinceSkipsWhatACommitDidNotTouch (0.07s)
+PASS
+ok  	github.com/indexus/go-indexus-core/internal/storage	0.320s

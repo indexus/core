@@ -1,0 +1,1278 @@
+{
+  "schema": "indexus-perf/1",
+  "suite": "core/go",
+  "commit": "29cc477",
+  "branch": "refactor/layers-v1",
+  "date": "2026-11-13T10:59:33Z",
+  "env": {
+    "benchtime": "300ms",
+    "cores": 2,
+    "count": 6,
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "machine": "agents-container (Linux, 2 vCPU partagés)",
+    "os": "linux amd64",
+    "runtime": "go1.24.7"
+  },
+  "metrics": [
+    {
+      "name": "indexus/BenchmarkSummaryInventoryPayload",
+      "unit": "ns/op",
+      "value": 8296740,
+      "samples": [
+        8427670,
+        8165810,
+        7915580,
+        8816180,
+        7957630,
+        9429180
+      ],
+      "better": "lower",
+      "noise": 6.43555
+    },
+    {
+      "name": "indexus/BenchmarkSummaryInventoryPayload",
+      "unit": "B/op",
+      "value": 2315140,
+      "samples": [
+        2315160,
+        2314240,
+        2315120,
+        2315170,
+        2315170,
+        2315130
+      ],
+      "better": "lower",
+      "noise": 0.00140886
+    },
+    {
+      "name": "indexus/BenchmarkSummaryInventoryPayload",
+      "unit": "allocs/op",
+      "value": 57353,
+      "samples": [
+        57353,
+        57242,
+        57353,
+        57353,
+        57353,
+        57353
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkMonitoringZoneCount/materialized",
+      "unit": "ns/op",
+      "value": 25510300,
+      "samples": [
+        25180200,
+        24809100,
+        25840400,
+        26513600,
+        25147800,
+        27539500
+      ],
+      "better": "lower",
+      "noise": 3.45613
+    },
+    {
+      "name": "indexus/BenchmarkMonitoringZoneCount/materialized",
+      "unit": "B/op",
+      "value": 11134300,
+      "samples": [
+        11134400,
+        11134300,
+        11134300,
+        11134300,
+        11134400,
+        11134300
+      ],
+      "better": "lower",
+      "noise": 0.000252996
+    },
+    {
+      "name": "indexus/BenchmarkMonitoringZoneCount/materialized",
+      "unit": "allocs/op",
+      "value": 293826,
+      "samples": [
+        293827,
+        293826,
+        293826,
+        293826,
+        293827,
+        293826
+      ],
+      "better": "lower",
+      "noise": 0.000189217
+    },
+    {
+      "name": "indexus/BenchmarkMonitoringZoneCount/versioned",
+      "unit": "ns/op",
+      "value": 394.8,
+      "samples": [
+        400.3,
+        415.7,
+        398.5,
+        389.9,
+        391.1,
+        382.5
+      ],
+      "better": "lower",
+      "noise": 1.95277
+    },
+    {
+      "name": "indexus/BenchmarkMonitoringZoneCount/versioned",
+      "unit": "B/op",
+      "value": 320,
+      "samples": [
+        320,
+        320,
+        320,
+        320,
+        320,
+        320
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkMonitoringZoneCount/versioned",
+      "unit": "allocs/op",
+      "value": 4,
+      "samples": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/256",
+      "unit": "ns/op",
+      "value": 227594,
+      "samples": [
+        216102,
+        235710,
+        226544,
+        223226,
+        230183,
+        228645
+      ],
+      "better": "lower",
+      "noise": 2.26597
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/256",
+      "unit": "B/op",
+      "value": 129578,
+      "samples": [
+        129578,
+        129578,
+        129578,
+        129578,
+        129578,
+        129578
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/256",
+      "unit": "allocs/op",
+      "value": 952,
+      "samples": [
+        952,
+        952,
+        952,
+        952,
+        952,
+        952
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/512",
+      "unit": "ns/op",
+      "value": 437266,
+      "samples": [
+        476924,
+        430504,
+        433135,
+        425244,
+        586135,
+        441396
+      ],
+      "better": "lower",
+      "noise": 6.25226
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/512",
+      "unit": "B/op",
+      "value": 260428,
+      "samples": [
+        260428,
+        260428,
+        260428,
+        260428,
+        260428,
+        260428
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/512",
+      "unit": "allocs/op",
+      "value": 1798,
+      "samples": [
+        1798,
+        1798,
+        1798,
+        1798,
+        1798,
+        1798
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/1024",
+      "unit": "ns/op",
+      "value": 871674,
+      "samples": [
+        849863,
+        965476,
+        874340,
+        839440,
+        869007,
+        925672
+      ],
+      "better": "lower",
+      "noise": 4.9486
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/1024",
+      "unit": "B/op",
+      "value": 495152,
+      "samples": [
+        495152,
+        495152,
+        495152,
+        495153,
+        495153,
+        495153
+      ],
+      "better": "lower",
+      "noise": 0.000149711
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/1024",
+      "unit": "allocs/op",
+      "value": 3488,
+      "samples": [
+        3488,
+        3488,
+        3488,
+        3488,
+        3488,
+        3488
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/2048",
+      "unit": "ns/op",
+      "value": 1831070,
+      "samples": [
+        1844420,
+        1850100,
+        1764480,
+        1847060,
+        1817720,
+        1785580
+      ],
+      "better": "lower",
+      "noise": 2.13715
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/2048",
+      "unit": "B/op",
+      "value": 972410,
+      "samples": [
+        972410,
+        972410,
+        972410,
+        972411,
+        972410,
+        972410
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/2048",
+      "unit": "allocs/op",
+      "value": 6866,
+      "samples": [
+        6866,
+        6866,
+        6866,
+        6866,
+        6866,
+        6866
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/8192",
+      "unit": "ns/op",
+      "value": 10092000,
+      "samples": [
+        8730120,
+        9605640,
+        10576300,
+        11708200,
+        10143200,
+        10040800
+      ],
+      "better": "lower",
+      "noise": 7.13022
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/8192",
+      "unit": "B/op",
+      "value": 3835950,
+      "samples": [
+        3835970,
+        3835980,
+        3835960,
+        3835940,
+        3835940,
+        3835940
+      ],
+      "better": "lower",
+      "noise": 0.000463795
+    },
+    {
+      "name": "indexus/BenchmarkReadProjectionDense/8192",
+      "unit": "allocs/op",
+      "value": 27128,
+      "samples": [
+        27129,
+        27129,
+        27128,
+        27128,
+        27128,
+        27128
+      ],
+      "better": "lower",
+      "noise": 0.00204942
+    },
+    {
+      "name": "indexus/BenchmarkCloneReadSet",
+      "unit": "ns/op",
+      "value": 23664.5,
+      "samples": [
+        24364,
+        23371,
+        23621,
+        23634,
+        25274,
+        23695
+      ],
+      "better": "lower",
+      "noise": 1.79335
+    },
+    {
+      "name": "indexus/BenchmarkCloneReadSet",
+      "unit": "B/op",
+      "value": 18024,
+      "samples": [
+        18024,
+        18024,
+        18024,
+        18024,
+        18024,
+        18024
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkCloneReadSet",
+      "unit": "allocs/op",
+      "value": 264,
+      "samples": [
+        264,
+        264,
+        264,
+        264,
+        264,
+        264
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSets/precision-8",
+      "unit": "ns/op",
+      "value": 2354650,
+      "samples": [
+        2173450,
+        2463950,
+        2998330,
+        2095510,
+        2245340,
+        2486760
+      ],
+      "better": "lower",
+      "noise": 9.86367
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSets/precision-8",
+      "unit": "bytes",
+      "value": 175009,
+      "samples": [
+        175009,
+        175009,
+        175009,
+        175009,
+        175009,
+        175009
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSets/precision-8",
+      "unit": "B/op",
+      "value": 1514960,
+      "samples": [
+        1514950,
+        1514960,
+        1514960,
+        1514960,
+        1514960,
+        1514950
+      ],
+      "better": "lower",
+      "noise": 0.000391457
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSets/precision-8",
+      "unit": "allocs/op",
+      "value": 40,
+      "samples": [
+        40,
+        40,
+        40,
+        40,
+        40,
+        40
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSets/precision-32",
+      "unit": "ns/op",
+      "value": 2797990,
+      "samples": [
+        2753240,
+        2292900,
+        3085460,
+        3041010,
+        2842750,
+        2515190
+      ],
+      "better": "lower",
+      "noise": 13.9312
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSets/precision-32",
+      "unit": "bytes",
+      "value": 175009,
+      "samples": [
+        175009,
+        175009,
+        175009,
+        175009,
+        175009,
+        175009
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSets/precision-32",
+      "unit": "B/op",
+      "value": 1516940,
+      "samples": [
+        1516940,
+        1516930,
+        1516940,
+        1516940,
+        1516940,
+        1516940
+      ],
+      "better": "lower",
+      "noise": 0.000146605
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSets/precision-32",
+      "unit": "allocs/op",
+      "value": 40,
+      "samples": [
+        40,
+        40,
+        40,
+        40,
+        40,
+        40
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSets/precision-96",
+      "unit": "ns/op",
+      "value": 2710300,
+      "samples": [
+        2339440,
+        2898440,
+        2534260,
+        2886340,
+        4498670,
+        2403130
+      ],
+      "better": "lower",
+      "noise": 13.5474
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSets/precision-96",
+      "unit": "bytes",
+      "value": 175009,
+      "samples": [
+        175009,
+        175009,
+        175009,
+        175009,
+        175009,
+        175009
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSets/precision-96",
+      "unit": "B/op",
+      "value": 1522440,
+      "samples": [
+        1522440,
+        1522440,
+        1522440,
+        1522440,
+        1522440,
+        1522440
+      ],
+      "better": "lower",
+      "noise": 0.0000486915
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSets/precision-96",
+      "unit": "allocs/op",
+      "value": 40,
+      "samples": [
+        40,
+        40,
+        40,
+        40,
+        40,
+        40
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSetsBlock",
+      "unit": "ns/op",
+      "value": 4881750,
+      "samples": [
+        5218370,
+        4872430,
+        4891070,
+        5182140,
+        4643210,
+        4851110
+      ],
+      "better": "lower",
+      "noise": 4.0874
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSetsBlock",
+      "unit": "bytes",
+      "value": 320036,
+      "samples": [
+        320036,
+        320036,
+        320036,
+        320036,
+        320036,
+        320036
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSetsBlock",
+      "unit": "B/op",
+      "value": 1630270,
+      "samples": [
+        1630270,
+        1630270,
+        1630270,
+        1630270,
+        1630280,
+        1630280
+      ],
+      "better": "lower",
+      "noise": 0.000284189
+    },
+    {
+      "name": "indexus/BenchmarkEncodeSetsBlock",
+      "unit": "allocs/op",
+      "value": 5,
+      "samples": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "indexus/BenchmarkCompactSummaryBuild",
+      "unit": "ns/op",
+      "value": 4564200,
+      "samples": [
+        5145420,
+        4686300,
+        6298660,
+        4118220,
+        3753350,
+        4442090
+      ],
+      "better": "lower",
+      "noise": 16.6834
+    },
+    {
+      "name": "indexus/BenchmarkCompactSummaryBuild",
+      "unit": "B/op",
+      "value": 2588570,
+      "samples": [
+        2588570,
+        2588560,
+        2588570,
+        2588570,
+        2588570,
+        2588570
+      ],
+      "better": "lower",
+      "noise": 0.0000859124
+    },
+    {
+      "name": "indexus/BenchmarkCompactSummaryBuild",
+      "unit": "allocs/op",
+      "value": 36027,
+      "samples": [
+        36027,
+        36027,
+        36027,
+        36027,
+        36027,
+        36027
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "internal/storage/BenchmarkInventoryPayloadProjection/metrics-only=false",
+      "unit": "ns/op",
+      "value": 4228170,
+      "samples": [
+        5309420,
+        4517290,
+        3939040,
+        4523950,
+        3841760,
+        3533570
+      ],
+      "better": "lower",
+      "noise": 11.9603
+    },
+    {
+      "name": "internal/storage/BenchmarkInventoryPayloadProjection/metrics-only=false",
+      "unit": "response-bytes",
+      "value": 531054,
+      "samples": [
+        531054,
+        531054,
+        531054,
+        531054,
+        531054,
+        531054
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "internal/storage/BenchmarkInventoryPayloadProjection/metrics-only=false",
+      "unit": "B/op",
+      "value": 676666,
+      "samples": [
+        679983,
+        680642,
+        675450,
+        677883,
+        674033,
+        675027
+      ],
+      "better": "lower",
+      "noise": 0.473832
+    },
+    {
+      "name": "internal/storage/BenchmarkInventoryPayloadProjection/metrics-only=false",
+      "unit": "allocs/op",
+      "value": 1025,
+      "samples": [
+        1025,
+        1025,
+        1025,
+        1025,
+        1024,
+        1025
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "internal/storage/BenchmarkInventoryPayloadProjection/metrics-only=true",
+      "unit": "ns/op",
+      "value": 240456,
+      "samples": [
+        302879,
+        237345,
+        230911,
+        243567,
+        219167,
+        255553
+      ],
+      "better": "lower",
+      "noise": 7.59686
+    },
+    {
+      "name": "internal/storage/BenchmarkInventoryPayloadProjection/metrics-only=true",
+      "unit": "response-bytes",
+      "value": 5358,
+      "samples": [
+        5358,
+        5358,
+        5358,
+        5358,
+        5358,
+        5358
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "internal/storage/BenchmarkInventoryPayloadProjection/metrics-only=true",
+      "unit": "B/op",
+      "value": 71381.5,
+      "samples": [
+        71372,
+        71383,
+        71382,
+        71381,
+        71382,
+        71372
+      ],
+      "better": "lower",
+      "noise": 0.0080483
+    },
+    {
+      "name": "internal/storage/BenchmarkInventoryPayloadProjection/metrics-only=true",
+      "unit": "allocs/op",
+      "value": 1088,
+      "samples": [
+        1088,
+        1088,
+        1088,
+        1088,
+        1088,
+        1088
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "internal/storage/BenchmarkRecordMetricsOpaqueProjection/full-json",
+      "unit": "ns/op",
+      "value": 2918950,
+      "samples": [
+        2785650,
+        2793830,
+        2986790,
+        3190650,
+        2851120,
+        3015220
+      ],
+      "better": "lower",
+      "noise": 5.62226
+    },
+    {
+      "name": "internal/storage/BenchmarkRecordMetricsOpaqueProjection/full-json",
+      "unit": "B/op",
+      "value": 304,
+      "samples": [
+        304,
+        304,
+        304,
+        304,
+        304,
+        304
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "internal/storage/BenchmarkRecordMetricsOpaqueProjection/full-json",
+      "unit": "allocs/op",
+      "value": 8,
+      "samples": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "internal/storage/BenchmarkRecordMetricsOpaqueProjection/header",
+      "unit": "ns/op",
+      "value": 1920.5,
+      "samples": [
+        1650,
+        2293,
+        1875,
+        1734,
+        2136,
+        1966
+      ],
+      "better": "lower",
+      "noise": 15.5169
+    },
+    {
+      "name": "internal/storage/BenchmarkRecordMetricsOpaqueProjection/header",
+      "unit": "B/op",
+      "value": 400,
+      "samples": [
+        400,
+        400,
+        400,
+        400,
+        400,
+        400
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "internal/storage/BenchmarkRecordMetricsOpaqueProjection/header",
+      "unit": "allocs/op",
+      "value": 9,
+      "samples": [
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "internal/storage/BenchmarkSnapshotSeal/64",
+      "unit": "ns/op",
+      "value": 179234,
+      "samples": [
+        181827,
+        158315,
+        163950,
+        176641,
+        219342,
+        222409
+      ],
+      "better": "lower",
+      "noise": 17.7183
+    },
+    {
+      "name": "internal/storage/BenchmarkSnapshotSeal/64",
+      "unit": "B/op",
+      "value": 33991,
+      "samples": [
+        33915,
+        33986,
+        33996,
+        33837,
+        34016,
+        34040
+      ],
+      "better": "lower",
+      "noise": 0.170651
+    },
+    {
+      "name": "internal/storage/BenchmarkSnapshotSeal/64",
+      "unit": "allocs/op",
+      "value": 394,
+      "samples": [
+        394,
+        394,
+        394,
+        394,
+        394,
+        394
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "internal/storage/BenchmarkSnapshotSeal/1024",
+      "unit": "ns/op",
+      "value": 2978700,
+      "samples": [
+        2762220,
+        2911230,
+        3037330,
+        2920070,
+        3247730,
+        3256190
+      ],
+      "better": "lower",
+      "noise": 7.06658
+    },
+    {
+      "name": "internal/storage/BenchmarkSnapshotSeal/1024",
+      "unit": "B/op",
+      "value": 587670,
+      "samples": [
+        565199,
+        602113,
+        598154,
+        577183,
+        587673,
+        587668
+      ],
+      "better": "lower",
+      "noise": 2.64533
+    },
+    {
+      "name": "internal/storage/BenchmarkSnapshotSeal/1024",
+      "unit": "allocs/op",
+      "value": 6155,
+      "samples": [
+        6155,
+        6155,
+        6155,
+        6155,
+        6155,
+        6155
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "internal/storage/BenchmarkStoredZoneKeyDecode",
+      "unit": "ns/op",
+      "value": 465.7,
+      "samples": [
+        497.8,
+        427.1,
+        470.5,
+        440.2,
+        460.9,
+        512.5
+      ],
+      "better": "lower",
+      "noise": 9.16875
+    },
+    {
+      "name": "internal/storage/BenchmarkStoredZoneKeyDecode",
+      "unit": "B/op",
+      "value": 24,
+      "samples": [
+        24,
+        24,
+        24,
+        24,
+        24,
+        24
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "internal/storage/BenchmarkStoredZoneKeyDecode",
+      "unit": "allocs/op",
+      "value": 5,
+      "samples": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "better": "lower",
+      "noise": 0
+    },
+    {
+      "name": "internal/storage/BenchmarkCausalInsert/same-zone/logical-update",
+      "unit": "ns/op",
+      "value": 131006,
+      "samples": [
+        128828,
+        133185,
+        154325,
+        126365,
+        133562,
+        125348
+      ],
+      "better": "lower",
+      "noise": 4.07242
+    },
+    {
+      "name": "internal/storage/BenchmarkCausalInsert/same-zone/logical-update",
+      "unit": "B/op",
+      "value": 72348,
+      "samples": [
+        72918,
+        78277,
+        74545,
+        70839,
+        71343,
+        71778
+      ],
+      "better": "lower",
+      "noise": 2.75263
+    },
+    {
+      "name": "internal/storage/BenchmarkCausalInsert/same-zone/logical-update",
+      "unit": "allocs/op",
+      "value": 460,
+      "samples": [
+        461,
+        497,
+        477,
+        449,
+        452,
+        459
+      ],
+      "better": "lower",
+      "noise": 3.10214
+    },
+    {
+      "name": "internal/storage/BenchmarkCausalInsert/same-zone/logical-batch",
+      "unit": "ns/op",
+      "value": 347476,
+      "samples": [
+        328217,
+        352280,
+        365340,
+        339822,
+        353266,
+        342673
+      ],
+      "better": "lower",
+      "noise": 2.86812
+    },
+    {
+      "name": "internal/storage/BenchmarkCausalInsert/same-zone/logical-batch",
+      "unit": "B/op",
+      "value": 14273.5,
+      "samples": [
+        14400,
+        14319,
+        13638,
+        14236,
+        13997,
+        14311
+      ],
+      "better": "lower",
+      "noise": 1.3516
+    },
+    {
+      "name": "internal/storage/BenchmarkCausalInsert/same-zone/logical-batch",
+      "unit": "allocs/op",
+      "value": 140,
+      "samples": [
+        141,
+        140,
+        137,
+        140,
+        139,
+        140
+      ],
+      "better": "lower",
+      "noise": 0.5295
+    },
+    {
+      "name": "internal/storage/BenchmarkCausalInsert/distinct-zones/logical-update",
+      "unit": "ns/op",
+      "value": 116078,
+      "samples": [
+        116419,
+        115738,
+        131971,
+        114417,
+        109651,
+        116900
+      ],
+      "better": "lower",
+      "noise": 1.58569
+    },
+    {
+      "name": "internal/storage/BenchmarkCausalInsert/distinct-zones/logical-update",
+      "unit": "B/op",
+      "value": 63934.5,
+      "samples": [
+        63297,
+        63756,
+        63983,
+        64195,
+        63886,
+        66241
+      ],
+      "better": "lower",
+      "noise": 0.509006
+    },
+    {
+      "name": "internal/storage/BenchmarkCausalInsert/distinct-zones/logical-update",
+      "unit": "allocs/op",
+      "value": 466,
+      "samples": [
+        457,
+        464,
+        466,
+        467,
+        466,
+        480
+      ],
+      "better": "lower",
+      "noise": 0.477232
+    },
+    {
+      "name": "internal/storage/BenchmarkCausalInsert/distinct-zones/logical-batch",
+      "unit": "ns/op",
+      "value": 338836,
+      "samples": [
+        323236,
+        338707,
+        338965,
+        344410,
+        335096,
+        339840
+      ],
+      "better": "lower",
+      "noise": 1.03788
+    },
+    {
+      "name": "internal/storage/BenchmarkCausalInsert/distinct-zones/logical-batch",
+      "unit": "B/op",
+      "value": 17007,
+      "samples": [
+        16858,
+        17006,
+        17066,
+        16814,
+        17008,
+        17075
+      ],
+      "better": "lower",
+      "noise": 0.682142
+    },
+    {
+      "name": "internal/storage/BenchmarkCausalInsert/distinct-zones/logical-batch",
+      "unit": "allocs/op",
+      "value": 180,
+      "samples": [
+        180,
+        180,
+        181,
+        179,
+        180,
+        181
+      ],
+      "better": "lower",
+      "noise": 0.411833
+    },
+    {
+      "name": "internal/mesh/BenchmarkKnowledgeFrameCopies/typed",
+      "unit": "ns/op",
+      "value": 570447,
+      "samples": [
+        652679,
+        567344,
+        545852,
+        553610,
+        573550,
+        588224
+      ],
+      "better": "lower",
+      "noise": 4.49811
+    },
+    {
+      "name": "internal/mesh/BenchmarkKnowledgeFrameCopies/typed",
+      "unit": "B/op",
+      "value": 824608,
+      "samples": [
+        824618,
+        824608,
+        824609,
+        824608,
+        824608,
+        824608
+      ],
+      "better": "lower",
+      "noise": 0.000067422
+    },
+    {
+      "name": "internal/mesh/BenchmarkKnowledgeFrameCopies/typed",
+      "unit": "allocs/op",
+      "value": 38,
+      "samples": [
+        38,
+        38,
+        38,
+        38,
+        38,
+        38
+      ],
+      "better": "lower",
+      "noise": 0
+    }
+  ]
+}

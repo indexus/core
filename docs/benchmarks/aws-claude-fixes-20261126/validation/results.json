@@ -1,0 +1,67 @@
+[
+  {
+    "step": "build",
+    "command": [
+      "go",
+      "build",
+      "./..."
+    ],
+    "exit_code": 0,
+    "seconds": 3.45
+  },
+  {
+    "step": "build-quic",
+    "command": [
+      "go",
+      "build",
+      "./..."
+    ],
+    "exit_code": 0,
+    "seconds": 0.91
+  },
+  {
+    "step": "test-all",
+    "command": [
+      "go",
+      "test",
+      "-count=1",
+      "./..."
+    ],
+    "exit_code": 0,
+    "seconds": 99.5
+  },
+  {
+    "step": "test-race",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "-count=1",
+      "./internal/storage",
+      "./internal/autoscale",
+      "./internal/adapter/provisioner",
+      "./internal/app/node",
+      "./internal/mesh"
+    ],
+    "exit_code": 0,
+    "seconds": 225.15
+  },
+  {
+    "step": "test-spawn",
+    "command": [
+      "python3",
+      "ops/experiment/elastic/test_spawn.py"
+    ],
+    "exit_code": 0,
+    "seconds": 20.23
+  },
+  {
+    "step": "test-deployment",
+    "command": [
+      "python3",
+      "test_deployment.py"
+    ],
+    "exit_code": 0,
+    "seconds": 0.08
+  }
+]

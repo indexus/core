@@ -1,0 +1,48 @@
+{
+ "A": {
+  "root_count_ok": true,
+  "root_max_rel": 1.1266650290402049e-14,
+  "root_bitwise_equal_fsum": 179,
+  "cols": 560,
+  "class_counts_ok": true,
+  "class_sum_max_rel": 0.0
+ },
+ "B": {
+  "root_count_ok": true,
+  "root_max_rel": 1.1266650290402049e-14,
+  "root_bitwise_equal_fsum": 179,
+  "cols": 560,
+  "class_counts_ok": true,
+  "class_sum_max_rel": 0.0
+ },
+ "C": {
+  "root_count_ok": true,
+  "root_max_rel": 5.113078476579225e-14,
+  "root_bitwise_equal_fsum": 192,
+  "cols": 560,
+  "class_counts_ok": true,
+  "class_sum_max_rel": 0.0
+ },
+ "D": {
+  "root_count_ok": true,
+  "root_max_rel": 5.113078476579225e-14,
+  "root_bitwise_equal_fsum": 192,
+  "cols": 560,
+  "class_counts_ok": true,
+  "class_sum_max_rel": 0.0
+ },
+ "E": {
+  "root_count_ok": true,
+  "root_max_rel": 1.1266650290402049e-14,
+  "root_bitwise_equal_fsum": 179,
+  "cols": 560,
+  "class_counts_ok": true,
+  "class_sum_max_rel": 0.0
+ },
+ "pred_equal": {
+  "A_vs_B": 1.0,
+  "C_vs_D": 1.0,
+  "E_vs_A": 1.0,
+  "C_vs_numpy": 1.0
+ }
+}

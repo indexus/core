@@ -1,0 +1,226 @@
+[
+  {
+    "url": "https://10.77.0.28:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 9.59,
+    "validation_seconds": 8.458,
+    "hold_by_kind": {
+      "collect": 8.952,
+      "control": 0.108,
+      "fence": 0.0,
+      "mount": 0.149,
+      "write": 0.382
+    },
+    "process_cores": 2.289
+  },
+  {
+    "url": "https://10.77.10.164:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 1.903,
+    "validation_seconds": 0.424,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.083,
+      "fence": 0.117,
+      "mount": 0.0,
+      "write": 1.702
+    },
+    "process_cores": 0.683
+  },
+  {
+    "url": "https://10.77.10.164:19101",
+    "seconds": 10.001,
+    "writer_hold_seconds": 2.1,
+    "validation_seconds": 0.56,
+    "hold_by_kind": {
+      "collect": 0.132,
+      "control": 0.084,
+      "fence": 0.141,
+      "mount": 0.0,
+      "write": 1.744
+    },
+    "process_cores": 0.734
+  },
+  {
+    "url": "https://10.77.10.164:19102",
+    "seconds": 10.001,
+    "writer_hold_seconds": 9.468,
+    "validation_seconds": 7.725,
+    "hold_by_kind": {
+      "collect": 8.398,
+      "control": 0.166,
+      "fence": 0.0,
+      "mount": 0.211,
+      "write": 0.693
+    },
+    "process_cores": 1.775
+  },
+  {
+    "url": "https://10.77.11.143:19100",
+    "seconds": 9.999,
+    "writer_hold_seconds": 2.922,
+    "validation_seconds": 2.546,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 1.235,
+      "fence": 0.0,
+      "mount": 1.468,
+      "write": 0.218
+    },
+    "process_cores": 0.819
+  },
+  {
+    "url": "https://10.77.11.64:19100",
+    "seconds": 9.999,
+    "writer_hold_seconds": 9.829,
+    "validation_seconds": 9.233,
+    "hold_by_kind": {
+      "collect": 9.511,
+      "control": 0.0,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 0.318
+    },
+    "process_cores": 1.566
+  },
+  {
+    "url": "https://10.77.15.51:19100",
+    "seconds": 9.999,
+    "writer_hold_seconds": 2.936,
+    "validation_seconds": 2.536,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 1.185,
+      "fence": 0.0,
+      "mount": 1.473,
+      "write": 0.278
+    },
+    "process_cores": 1.576
+  },
+  {
+    "url": "https://10.77.6.216:19100",
+    "seconds": 9.993,
+    "writer_hold_seconds": 3.484,
+    "validation_seconds": 1.398,
+    "hold_by_kind": {
+      "collect": 0.477,
+      "control": 0.476,
+      "fence": 0.716,
+      "mount": 0.0,
+      "write": 1.816
+    },
+    "process_cores": 1.448
+  },
+  {
+    "url": "https://10.77.6.216:19101",
+    "seconds": 10.001,
+    "writer_hold_seconds": 3.654,
+    "validation_seconds": 1.422,
+    "hold_by_kind": {
+      "collect": 0.71,
+      "control": 0.458,
+      "fence": 0.58,
+      "mount": 0.0,
+      "write": 1.907
+    },
+    "process_cores": 1.704
+  },
+  {
+    "url": "https://10.77.8.11:19100",
+    "seconds": 9.999,
+    "writer_hold_seconds": 1.444,
+    "validation_seconds": 0.368,
+    "hold_by_kind": {
+      "collect": 0.16,
+      "control": 0.006,
+      "fence": 0.006,
+      "mount": 0.0,
+      "write": 1.272
+    },
+    "process_cores": 0.278
+  },
+  {
+    "url": "https://10.77.8.11:19101",
+    "seconds": 10.0,
+    "writer_hold_seconds": 3.244,
+    "validation_seconds": 1.493,
+    "hold_by_kind": {
+      "collect": 0.966,
+      "control": 0.358,
+      "fence": 0.501,
+      "mount": 0.0,
+      "write": 1.419
+    },
+    "process_cores": 1.228
+  },
+  {
+    "url": "https://10.77.8.11:19102",
+    "seconds": 10.0,
+    "writer_hold_seconds": 9.851,
+    "validation_seconds": 9.155,
+    "hold_by_kind": {
+      "collect": 9.346,
+      "control": 0.038,
+      "fence": 0.0,
+      "mount": 0.047,
+      "write": 0.42
+    },
+    "process_cores": 1.439
+  },
+  {
+    "url": "https://10.77.8.201:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 3.973,
+    "validation_seconds": 3.518,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 1.67,
+      "fence": 0.0,
+      "mount": 1.941,
+      "write": 0.361
+    },
+    "process_cores": 1.268
+  },
+  {
+    "url": "https://10.77.8.224:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 1.408,
+    "validation_seconds": 0.414,
+    "hold_by_kind": {
+      "collect": 0.142,
+      "control": 0.0,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 1.266
+    },
+    "process_cores": 0.705
+  },
+  {
+    "url": "https://10.77.8.224:19101",
+    "seconds": 9.998,
+    "writer_hold_seconds": 1.901,
+    "validation_seconds": 0.79,
+    "hold_by_kind": {
+      "collect": 0.788,
+      "control": 0.001,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 1.112
+    },
+    "process_cores": 0.341
+  },
+  {
+    "url": "https://10.77.8.224:19102",
+    "seconds": 9.999,
+    "writer_hold_seconds": 9.782,
+    "validation_seconds": 8.831,
+    "hold_by_kind": {
+      "collect": 9.361,
+      "control": 0.0,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 0.421
+    },
+    "process_cores": 1.684
+  }
+]

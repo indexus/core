@@ -1,0 +1,28 @@
+{
+  "cutover_call_us_log2": {
+    "samples": 5823,
+    "p50_ms": 32.768,
+    "p95_ms": 65.536,
+    "p99_ms": 65.536,
+    "max_bucket_ms": 131.072
+  },
+  "freeze_return_to_install_ack_us_log2": {
+    "samples": 5823,
+    "p50_ms": 16.384,
+    "p95_ms": 32.768,
+    "p99_ms": 32.768,
+    "max_bucket_ms": 65.536
+  },
+  "install_to_first_write_us_log2": {
+    "samples": 0,
+    "p50_ms": null,
+    "p95_ms": null,
+    "p99_ms": null,
+    "max_bucket_ms": null
+  },
+  "running_phases": {
+    "copy-slot": 7,
+    "stage-region": 1
+  },
+  "running_not_started_attempts": 7
+}

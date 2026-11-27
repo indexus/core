@@ -1,0 +1,16 @@
+{
+  "source": "36e2b31",
+  "outputs": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/outputs/claude-copies-20261126",
+  "sha256": {
+    "audit.json": "17622a3807ed64188d073cc2ec0b6eb2cb15bf3e6709e6a8160f39fe973ad59f",
+    "audit.log": "da6a0c26fc2932126424c863c19239fbcea29be60be448711ec8b4183eca3f89",
+    "failure.json": "e1881bf01b00fcfa678d15c422ecc0b752abf2fc885d3dcc6902826131a4bde4",
+    "go-test.log": "0fd5f013198fa5eed7adf442770c4042aa09e6b10345d4bdc886e3f8dfa89f58",
+    "live.html": "271365dfc4ca302490294a3dfbd97c6adc5df7491430a905a5afa32a5ee2652f",
+    "live.jsonl": "87c930cdc5de88b7476085868deaa77cd15eef6749a007e2314234d4053bdb58",
+    "load.log": "d846a11ed604b2f8308785a90fd0d8bc1c2d2a1f3d964e3bbb315be8ce06ab45",
+    "race.log": "be2640ff1468bcaeb9a89a02298c4c9fb89d835d4715ba0bc8cbf39f11de0213",
+    "samples.jsonl.gz": "f7d89a2a4921f8584d3cf9aa7e2346ca00a71d185ee9c64f7b5fd0b042092e58",
+    "setup.json": "14d7b599b99f389fdcf10861a2c294d03568ebe44f6e398c5d85cd518a0ec07b"
+  }
+}

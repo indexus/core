@@ -1,0 +1,14 @@
+{
+  "production_go": {
+    "added": 1678,
+    "removed": 244
+  },
+  "test_go": {
+    "added": 2348,
+    "removed": 7
+  },
+  "other": {
+    "added": 696,
+    "removed": 48
+  }
+}

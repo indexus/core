@@ -1,0 +1,6 @@
+2026/11/26 19:49:45 INFO host pressure already handled machine=http://donor:22100 requester=R7d86NcNOZ9ZE2kw owner=eVl3WrnylwAS4fLz receiver_machine="" transfers_in_flight=0
+2026/11/26 19:49:45 INFO host pressure already handled machine=http://donor:22100 requester=_yUQM7uEYT8WWxpw owner=eVl3WrnylwAS4fLz receiver_machine="" transfers_in_flight=0
+2026/11/26 19:49:45 INFO host pressure already handled machine=http://donor:22100 requester=sbPdxb6G8M7RlXj0 owner=eVl3WrnylwAS4fLz receiver_machine="" transfers_in_flight=0
+2026/11/26 19:49:45 INFO host pressure already handled machine=http://donor:22100 requester=Brt2SC7RfVQqVa93 owner=eVl3WrnylwAS4fLz receiver_machine="" transfers_in_flight=0
+2026/11/26 19:49:46 INFO placement decided kind=new machine=http://reserve:22100 reason="empty machine: cpu 27% + receiver 22% <= 60%" applied=new requester=eVl3WrnylwAS4fLz prefer_near=eVY4cPFnu6j9L9zJ machines=2
+2026/11/26 19:49:46 INFO local process spawned instance=local-reserve-0

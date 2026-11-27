@@ -1,0 +1,74 @@
+[
+  {
+    "requester": "eVl3WrnylwAS4fLz",
+    "at": 15.021531833102927,
+    "answer": {
+      "action": "spawned",
+      "bootstrap_ips": [
+        "127.0.0.1"
+      ],
+      "instance_id": "local-reserve-0",
+      "instance_ids": [
+        "local-reserve-0"
+      ],
+      "local_inserts": 0,
+      "network_pubkey": "DlrzLFLVRQl7tTD6jp4VRLIo87NRWEHL0jUJHKBLdd8=",
+      "prefer_near": "eVl3WrnylwAS4fLz",
+      "prefer_nears": [
+        "eVY4cPFnu6j9L9zJ"
+      ],
+      "reason": "host_pressure",
+      "requester_id": "eVl3WrnylwAS4fLz",
+      "spawned": 1
+    },
+    "end": 15.360780916060321
+  },
+  {
+    "requester": "R7d86NcNOZ9ZE2kw",
+    "at": 15.02180554100778,
+    "answer": {
+      "coalesced": "host_pressure",
+      "machine": "http://donor:22100",
+      "prefer_near": "R7d86NcNOZ9ZE2kw",
+      "started": 0,
+      "status": "already_starting"
+    },
+    "end": 15.067032666062005
+  },
+  {
+    "requester": "_yUQM7uEYT8WWxpw",
+    "at": 15.022034458001144,
+    "answer": {
+      "coalesced": "host_pressure",
+      "machine": "http://donor:22100",
+      "prefer_near": "_yUQM7uEYT8WWxpw",
+      "started": 0,
+      "status": "already_starting"
+    },
+    "end": 15.06717804109212
+  },
+  {
+    "requester": "Brt2SC7RfVQqVa93",
+    "at": 15.022552041104063,
+    "answer": {
+      "coalesced": "host_pressure",
+      "machine": "http://donor:22100",
+      "prefer_near": "Brt2SC7RfVQqVa93",
+      "started": 0,
+      "status": "already_starting"
+    },
+    "end": 15.066963541088626
+  },
+  {
+    "requester": "sbPdxb6G8M7RlXj0",
+    "at": 15.02289770799689,
+    "answer": {
+      "coalesced": "host_pressure",
+      "machine": "http://donor:22100",
+      "prefer_near": "sbPdxb6G8M7RlXj0",
+      "started": 0,
+      "status": "already_starting"
+    },
+    "end": 15.067203416023403
+  }
+]

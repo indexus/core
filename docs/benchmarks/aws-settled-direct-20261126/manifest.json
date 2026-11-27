@@ -1,0 +1,31 @@
+{
+  "source": "c2f226a8a9ddb5ae231cdc02342e4adf98b90fc8",
+  "outputs": "/Users/remihenriot/Documents/Codex/2026-11-21/reg/outputs/aws-settled-direct-20261126",
+  "audit": "incomplete; diagnostic reader changes only after load stopped; no final pass claimed",
+  "sha256": {
+    "binary-hashes.json": "47b46c789ee6efb5a63c331525ac1a84b21c1e79b76f8f344d6406d04d1a05e5",
+    "campaign-plan.json": "752cf3070963ac541e7cfb77d5ee9a94ce40a328cdb3e8481e9b0aede8f28fc1",
+    "cleanup-verification.json": "d63392962c777409bd7cb7944bb46f8d4ce1f5619bdb2a7e2cf019f2012b5787",
+    "distribution-at-stop.json": "8cba69bfac4be41bf6ca505fd17d693f1c91e5960b66c54c21385f507281479e",
+    "donor-top-cumulative.txt": "20f85af3f5dc7ea5ea8c0455e5b53fb1b3d90b6b5c72beae2b9871b3121778cb",
+    "donor.pprof": "de42c14763c72384866175b7f5b22424731396d6611f294e019361b936d99a63",
+    "instance-prices-paris.json": "a939bd247d00f4be9013097f9c0c13fbfd3b32040e49af445788f8e0b4fb60c1",
+    "live.html": "c06034c035da079f914ae48533f559c02f7dd44d34f118dbb06666d1a70cdd8c",
+    "live.jsonl": "27465eb844f883e8aecd1a23b1fedee44ccad718f340965dcba514731481602e",
+    "load-summary.json": "2d5b174b52cff65a09353212fbaf001c6909ae79a1f8aff072e9bf81e9b2e83d",
+    "load.jsonl": "907092893b399b07a115e2349d317fc1a39c63dfc14a5b02faa2f28739c68518",
+    "load.log": "151244a9632023fc1308d8544d73f0e7f6fbf5ee1981f65ccca657cd219269ff",
+    "machines.jsonl.gz": "011a06f384550bf40692bac0ec300e4de23591ea0cc3d0cf195a28dfcc30dd04",
+    "metrics.jsonl.gz": "ad78ed4a65293bfaefe7159bdefcd2355bb4f8c8c634b94fcf00889690730309",
+    "node-and-placement-logs.tar.gz": "64748c02f64b4cd8947f73f61a658a9bb14b560936d405df9c50c659cbc47b24",
+    "partial-bounded-audit.log": "b6a3503cc3d1cea48d3d1dbcd7104c75485dca9acafaaef511dd5ef5acfc9b76",
+    "partial-full-audit.log": "d2c60a9c3860cd1a9fd3be77fd9a0a0b055aec4637d7dc0cd563b7bf21ac7c87",
+    "receiver-top-cumulative.txt": "913a4a7dd99148cc712ccc6eb07c28f5666b8e1678239f3ec74ba0b77e456bf5",
+    "receiver.pprof": "dc2fe9d68d33b73f30bd658f2d5b9120e0f99233204531a484705c28964e9a26",
+    "sentinel-reason.txt": "3118b802bdc2a9e4dd212967f1dcc72584770056e331a8c1993231f740a2e611",
+    "sentinel.log": "03c60f050fb3684dcb564e627a8495c3aee9f42ca7fcb4f7c3ee7ba48626a1f8",
+    "stock-drain-audit.log": "74e7d3d1d2cf6b1509ffb104631229182ebd2c29fdc20655a178553a68089879",
+    "summary.json": "9bc18f63962db0a4ee004635e65dd22c3fcc470b256777b90a86e548215b5b46",
+    "diagnostic-audit.patch.gz": "15b5567f8050849818d6157435f51168e5d1e61a1eb8b3bd67ec82aebf52c12a"
+  }
+}

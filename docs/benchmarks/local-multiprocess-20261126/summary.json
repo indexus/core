@@ -1,0 +1,1430 @@
+{
+  "calibrated": false,
+  "calibration_scope": "measured local writer wall time only; no CPU/IO split or EC2 validation",
+  "runs": [
+    {
+      "gomaxprocs": "1",
+      "copy_slots": 1,
+      "stress": false,
+      "source_commit": "4f6a61537bf276ffe832b603f5e4c65070f7943f",
+      "scope": "five processes, one Linux Docker VM; no EC2 throughput claim; no provisioning",
+      "run_name": "copy1-gmp1",
+      "audit": {
+        "acked_keys": 3500,
+        "checked_keys": 3500,
+        "missing": 0,
+        "read_errors": 0,
+        "oversized_locations": 0,
+        "items_match_acked": true,
+        "collections_checked": 8,
+        "zones": 3500,
+        "double_owned_zones": 0,
+        "ownership_retries": 0,
+        "moving_at_ownership": 0,
+        "items_held": 1406,
+        "items_before_run": 0,
+        "nodes_answering": 5,
+        "nodes_gone": 0,
+        "per_node_items": {
+          "http://127.0.0.1:19100": 748,
+          "http://127.0.0.1:19101": 381,
+          "http://127.0.0.1:19102": 277,
+          "http://127.0.0.1:19103": 0,
+          "http://127.0.0.1:19104": 0
+        },
+        "pass": true
+      },
+      "load": {
+        "acked": 3500,
+        "drain_completed": true,
+        "exhausted": 0,
+        "offered": 3500,
+        "queued_unfinished": 0,
+        "shed": 0
+      },
+      "latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 32.768
+      },
+      "intended_latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 32.768
+      },
+      "host_cpu_peak_pct": 19.082125603864736,
+      "process_cpu_peak_pct_of_host": 2.993317188171765,
+      "copy_budget": {
+        "copy_slot_waits": 0,
+        "copy_slot_timeouts": 0,
+        "copy_slot_shared": 52,
+        "copy_slot_busy": 0
+      },
+      "sampled_active_handoffs_peak": 1,
+      "first_taken_observed_s": {
+        "2": 6.2707909169839695,
+        "3": 7.2966984590748325,
+        "4": 7.2966984590748325,
+        "1": 8.337686625076458
+      },
+      "first_applied_observed_s": {
+        "0": 1.0453841669950634,
+        "2": 6.2707909169839695,
+        "3": 7.2966984590748325,
+        "4": 7.2966984590748325,
+        "1": 8.337686625076458
+      },
+      "scale_requests": [],
+      "writer_by_kind": {
+        "collect": {
+          "attempts": 78,
+          "commits": 75,
+          "errors": 0,
+          "hold_ns": 232183711,
+          "wait_ns": 4489877,
+          "max_hold_ns": 19450417,
+          "mean_hold_ms_per_attempt": 2.9767142435897433,
+          "p99_hold_ms_upper": 32.768
+        },
+        "control": {
+          "attempts": 217,
+          "commits": 216,
+          "errors": 0,
+          "hold_ns": 344761586,
+          "wait_ns": 2813833,
+          "max_hold_ns": 10581083,
+          "mean_hold_ms_per_attempt": 1.5887630691244239,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 45,
+          "commits": 45,
+          "errors": 0,
+          "hold_ns": 136588870,
+          "wait_ns": 5915,
+          "max_hold_ns": 8379541,
+          "mean_hold_ms_per_attempt": 3.035308222222222,
+          "p99_hold_ms_upper": 16.384
+        },
+        "mount": {
+          "attempts": 45,
+          "commits": 45,
+          "errors": 0,
+          "hold_ns": 254765540,
+          "wait_ns": 12915,
+          "max_hold_ns": 15687666,
+          "mean_hold_ms_per_attempt": 5.661456444444444,
+          "p99_hold_ms_upper": 16.384
+        },
+        "write": {
+          "attempts": 3489,
+          "commits": 3487,
+          "errors": 0,
+          "hold_ns": 8027519367,
+          "wait_ns": 51975225,
+          "max_hold_ns": 56349208,
+          "mean_hold_ms_per_attempt": 2.300808073086844,
+          "p99_hold_ms_upper": 16.384
+        }
+      },
+      "stress_first_observed_s": null,
+      "host_pressure_first_observed_s": null,
+      "pressure_delay_observed_s": null,
+      "max_periodic_sum_of_summary_deficits": 1418,
+      "read_missing_events": 0,
+      "read_failed_events": 0,
+      "final_observed_storage_items": 1406,
+      "notes": [
+        "Quantiles are upper bounds of base-2 buckets; periodic loader histograms exclude the final unreported fraction.",
+        "Taken is operation completion, not first installed right. Observation timestamps have about 1s resolution.",
+        "Active handoffs are not the maximum simultaneous copies; short phases can fall between samples.",
+        "Writer hold is wall time including fsync and scheduling; it must not be charged again as measured CPU or disk work."
+      ]
+    },
+    {
+      "gomaxprocs": "2",
+      "copy_slots": 1,
+      "stress": false,
+      "source_commit": "4f6a61537bf276ffe832b603f5e4c65070f7943f",
+      "scope": "five processes, one Linux Docker VM; no EC2 throughput claim; no provisioning",
+      "run_name": "copy1-gmp2",
+      "audit": {
+        "acked_keys": 3500,
+        "checked_keys": 3500,
+        "missing": 0,
+        "read_errors": 0,
+        "oversized_locations": 0,
+        "items_match_acked": true,
+        "collections_checked": 8,
+        "zones": 3500,
+        "double_owned_zones": 0,
+        "ownership_retries": 0,
+        "moving_at_ownership": 0,
+        "items_held": 1486,
+        "items_before_run": 0,
+        "nodes_answering": 5,
+        "nodes_gone": 0,
+        "per_node_items": {
+          "http://127.0.0.1:19100": 762,
+          "http://127.0.0.1:19101": 0,
+          "http://127.0.0.1:19102": 357,
+          "http://127.0.0.1:19103": 230,
+          "http://127.0.0.1:19104": 137
+        },
+        "pass": true
+      },
+      "load": {
+        "acked": 3500,
+        "drain_completed": true,
+        "exhausted": 0,
+        "offered": 3500,
+        "queued_unfinished": 0,
+        "shed": 0
+      },
+      "latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 16.384
+      },
+      "intended_latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 16.384
+      },
+      "host_cpu_peak_pct": 22.643818849449204,
+      "process_cpu_peak_pct_of_host": 3.8039989840273103,
+      "copy_budget": {
+        "copy_slot_waits": 1,
+        "copy_slot_timeouts": 0,
+        "copy_slot_shared": 46,
+        "copy_slot_busy": 0
+      },
+      "sampled_active_handoffs_peak": 1,
+      "first_taken_observed_s": {
+        "1": 7.279064167058095,
+        "2": 7.279064167058095,
+        "3": 7.279064167058095,
+        "4": 7.279064167058095
+      },
+      "first_applied_observed_s": {
+        "0": 1.0392827079631388,
+        "1": 7.279064167058095,
+        "2": 7.279064167058095,
+        "3": 7.279064167058095,
+        "4": 7.279064167058095
+      },
+      "scale_requests": [],
+      "writer_by_kind": {
+        "collect": {
+          "attempts": 69,
+          "commits": 69,
+          "errors": 0,
+          "hold_ns": 143133750,
+          "wait_ns": 6363461,
+          "max_hold_ns": 8437791,
+          "mean_hold_ms_per_attempt": 2.0744021739130436,
+          "p99_hold_ms_upper": 16.384
+        },
+        "control": {
+          "attempts": 210,
+          "commits": 205,
+          "errors": 4,
+          "hold_ns": 317811045,
+          "wait_ns": 36995129,
+          "max_hold_ns": 7853167,
+          "mean_hold_ms_per_attempt": 1.5133859285714286,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 39,
+          "commits": 39,
+          "errors": 0,
+          "hold_ns": 106910378,
+          "wait_ns": 6791,
+          "max_hold_ns": 7586209,
+          "mean_hold_ms_per_attempt": 2.7412917435897435,
+          "p99_hold_ms_upper": 8.192
+        },
+        "mount": {
+          "attempts": 39,
+          "commits": 39,
+          "errors": 0,
+          "hold_ns": 205133086,
+          "wait_ns": 517207,
+          "max_hold_ns": 15110292,
+          "mean_hold_ms_per_attempt": 5.259822717948718,
+          "p99_hold_ms_upper": 16.384
+        },
+        "write": {
+          "attempts": 3497,
+          "commits": 3496,
+          "errors": 0,
+          "hold_ns": 7541716595,
+          "wait_ns": 45193115,
+          "max_hold_ns": 17136542,
+          "mean_hold_ms_per_attempt": 2.1566247054618244,
+          "p99_hold_ms_upper": 16.384
+        }
+      },
+      "stress_first_observed_s": null,
+      "host_pressure_first_observed_s": null,
+      "pressure_delay_observed_s": null,
+      "max_periodic_sum_of_summary_deficits": 1418,
+      "read_missing_events": 0,
+      "read_failed_events": 0,
+      "final_observed_storage_items": 1486,
+      "notes": [
+        "Quantiles are upper bounds of base-2 buckets; periodic loader histograms exclude the final unreported fraction.",
+        "Taken is operation completion, not first installed right. Observation timestamps have about 1s resolution.",
+        "Active handoffs are not the maximum simultaneous copies; short phases can fall between samples.",
+        "Writer hold is wall time including fsync and scheduling; it must not be charged again as measured CPU or disk work."
+      ]
+    },
+    {
+      "gomaxprocs": "default",
+      "copy_slots": 1,
+      "stress": false,
+      "source_commit": "4f6a61537bf276ffe832b603f5e4c65070f7943f",
+      "scope": "five processes, one Linux Docker VM; no EC2 throughput claim; no provisioning",
+      "run_name": "copy1-gmpdefault",
+      "audit": {
+        "acked_keys": 3499,
+        "checked_keys": 3499,
+        "missing": 0,
+        "read_errors": 0,
+        "oversized_locations": 0,
+        "items_match_acked": true,
+        "collections_checked": 8,
+        "zones": 3499,
+        "double_owned_zones": 0,
+        "ownership_retries": 0,
+        "moving_at_ownership": 0,
+        "items_held": 1263,
+        "items_before_run": 0,
+        "nodes_answering": 5,
+        "nodes_gone": 0,
+        "per_node_items": {
+          "http://127.0.0.1:19100": 750,
+          "http://127.0.0.1:19101": 0,
+          "http://127.0.0.1:19102": 0,
+          "http://127.0.0.1:19103": 379,
+          "http://127.0.0.1:19104": 134
+        },
+        "pass": true
+      },
+      "load": {
+        "acked": 3499,
+        "drain_completed": true,
+        "exhausted": 0,
+        "offered": 3499,
+        "queued_unfinished": 0,
+        "shed": 0
+      },
+      "latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 32.768
+      },
+      "intended_latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 65.536
+      },
+      "host_cpu_peak_pct": 24.024390243902438,
+      "process_cpu_peak_pct_of_host": 4.400940748657694,
+      "copy_budget": {
+        "copy_slot_waits": 1,
+        "copy_slot_timeouts": 0,
+        "copy_slot_shared": 48,
+        "copy_slot_busy": 0
+      },
+      "sampled_active_handoffs_peak": 1,
+      "first_taken_observed_s": {
+        "1": 7.252259041997604,
+        "2": 7.252259041997604,
+        "4": 7.252259041997604,
+        "3": 8.28324216697365
+      },
+      "first_applied_observed_s": {
+        "0": 1.0376835839124396,
+        "1": 7.252259041997604,
+        "2": 7.252259041997604,
+        "4": 7.252259041997604,
+        "3": 8.28324216697365
+      },
+      "scale_requests": [],
+      "writer_by_kind": {
+        "collect": {
+          "attempts": 70,
+          "commits": 67,
+          "errors": 0,
+          "hold_ns": 252777293,
+          "wait_ns": 32328751,
+          "max_hold_ns": 36417959,
+          "mean_hold_ms_per_attempt": 3.611104185714286,
+          "p99_hold_ms_upper": 65.536
+        },
+        "control": {
+          "attempts": 198,
+          "commits": 196,
+          "errors": 1,
+          "hold_ns": 335083507,
+          "wait_ns": 11920960,
+          "max_hold_ns": 6326334,
+          "mean_hold_ms_per_attempt": 1.6923409444444446,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 42,
+          "commits": 42,
+          "errors": 0,
+          "hold_ns": 120754252,
+          "wait_ns": 1542705,
+          "max_hold_ns": 8205875,
+          "mean_hold_ms_per_attempt": 2.8751012380952377,
+          "p99_hold_ms_upper": 16.384
+        },
+        "mount": {
+          "attempts": 42,
+          "commits": 42,
+          "errors": 0,
+          "hold_ns": 224474338,
+          "wait_ns": 13588,
+          "max_hold_ns": 16275917,
+          "mean_hold_ms_per_attempt": 5.344627095238095,
+          "p99_hold_ms_upper": 16.384
+        },
+        "write": {
+          "attempts": 3481,
+          "commits": 3480,
+          "errors": 0,
+          "hold_ns": 7579156593,
+          "wait_ns": 91880913,
+          "max_hold_ns": 103208750,
+          "mean_hold_ms_per_attempt": 2.1772929023269176,
+          "p99_hold_ms_upper": 8.192
+        }
+      },
+      "stress_first_observed_s": null,
+      "host_pressure_first_observed_s": null,
+      "pressure_delay_observed_s": null,
+      "max_periodic_sum_of_summary_deficits": 1418,
+      "read_missing_events": 0,
+      "read_failed_events": 0,
+      "final_observed_storage_items": 1263,
+      "notes": [
+        "Quantiles are upper bounds of base-2 buckets; periodic loader histograms exclude the final unreported fraction.",
+        "Taken is operation completion, not first installed right. Observation timestamps have about 1s resolution.",
+        "Active handoffs are not the maximum simultaneous copies; short phases can fall between samples.",
+        "Writer hold is wall time including fsync and scheduling; it must not be charged again as measured CPU or disk work."
+      ]
+    },
+    {
+      "gomaxprocs": "1",
+      "copy_slots": 2,
+      "stress": false,
+      "source_commit": "4f6a61537bf276ffe832b603f5e4c65070f7943f",
+      "scope": "five processes, one Linux Docker VM; no EC2 throughput claim; no provisioning",
+      "run_name": "copy2-gmp1",
+      "audit": {
+        "acked_keys": 3499,
+        "checked_keys": 3499,
+        "missing": 0,
+        "read_errors": 0,
+        "oversized_locations": 0,
+        "items_match_acked": true,
+        "collections_checked": 8,
+        "zones": 3499,
+        "double_owned_zones": 0,
+        "ownership_retries": 0,
+        "moving_at_ownership": 0,
+        "items_held": 1257,
+        "items_before_run": 0,
+        "nodes_answering": 5,
+        "nodes_gone": 0,
+        "per_node_items": {
+          "http://127.0.0.1:19100": 762,
+          "http://127.0.0.1:19101": 170,
+          "http://127.0.0.1:19102": 0,
+          "http://127.0.0.1:19103": 0,
+          "http://127.0.0.1:19104": 325
+        },
+        "pass": true
+      },
+      "load": {
+        "acked": 3499,
+        "drain_completed": true,
+        "exhausted": 0,
+        "offered": 3499,
+        "queued_unfinished": 0,
+        "shed": 0
+      },
+      "latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 32.768
+      },
+      "intended_latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 65.536
+      },
+      "host_cpu_peak_pct": 21.28174123337364,
+      "process_cpu_peak_pct_of_host": 3.3610201147063137,
+      "copy_budget": {
+        "copy_slot_waits": 0,
+        "copy_slot_timeouts": 0,
+        "copy_slot_shared": 40,
+        "copy_slot_busy": 0
+      },
+      "sampled_active_handoffs_peak": 0,
+      "first_taken_observed_s": {
+        "2": 6.273146250052378,
+        "1": 7.308226249995641,
+        "3": 7.308226249995641,
+        "4": 7.308226249995641
+      },
+      "first_applied_observed_s": {
+        "0": 1.043349500047043,
+        "2": 6.273146250052378,
+        "1": 7.308226249995641,
+        "3": 7.308226249995641,
+        "4": 7.308226249995641
+      },
+      "scale_requests": [],
+      "writer_by_kind": {
+        "collect": {
+          "attempts": 71,
+          "commits": 71,
+          "errors": 0,
+          "hold_ns": 185611914,
+          "wait_ns": 12884,
+          "max_hold_ns": 14599292,
+          "mean_hold_ms_per_attempt": 2.614252309859155,
+          "p99_hold_ms_upper": 16.384
+        },
+        "control": {
+          "attempts": 182,
+          "commits": 181,
+          "errors": 0,
+          "hold_ns": 272820958,
+          "wait_ns": 4586707,
+          "max_hold_ns": 7836709,
+          "mean_hold_ms_per_attempt": 1.4990162527472528,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 34,
+          "commits": 34,
+          "errors": 0,
+          "hold_ns": 121944293,
+          "wait_ns": 11584,
+          "max_hold_ns": 9812167,
+          "mean_hold_ms_per_attempt": 3.5865968529411765,
+          "p99_hold_ms_upper": 16.384
+        },
+        "mount": {
+          "attempts": 34,
+          "commits": 34,
+          "errors": 0,
+          "hold_ns": 221572459,
+          "wait_ns": 9168,
+          "max_hold_ns": 15569125,
+          "mean_hold_ms_per_attempt": 6.516837029411765,
+          "p99_hold_ms_upper": 16.384
+        },
+        "write": {
+          "attempts": 3469,
+          "commits": 3468,
+          "errors": 0,
+          "hold_ns": 7489872693,
+          "wait_ns": 19744133,
+          "max_hold_ns": 102217292,
+          "mean_hold_ms_per_attempt": 2.1590869682905733,
+          "p99_hold_ms_upper": 16.384
+        }
+      },
+      "stress_first_observed_s": null,
+      "host_pressure_first_observed_s": null,
+      "pressure_delay_observed_s": null,
+      "max_periodic_sum_of_summary_deficits": 1418,
+      "read_missing_events": 0,
+      "read_failed_events": 0,
+      "final_observed_storage_items": 1257,
+      "notes": [
+        "Quantiles are upper bounds of base-2 buckets; periodic loader histograms exclude the final unreported fraction.",
+        "Taken is operation completion, not first installed right. Observation timestamps have about 1s resolution.",
+        "Active handoffs are not the maximum simultaneous copies; short phases can fall between samples.",
+        "Writer hold is wall time including fsync and scheduling; it must not be charged again as measured CPU or disk work."
+      ]
+    },
+    {
+      "gomaxprocs": "2",
+      "copy_slots": 2,
+      "stress": false,
+      "source_commit": "4f6a61537bf276ffe832b603f5e4c65070f7943f",
+      "scope": "five processes, one Linux Docker VM; no EC2 throughput claim; no provisioning",
+      "run_name": "copy2-gmp2",
+      "audit": {
+        "acked_keys": 3500,
+        "checked_keys": 3500,
+        "missing": 0,
+        "read_errors": 0,
+        "oversized_locations": 0,
+        "items_match_acked": true,
+        "collections_checked": 8,
+        "zones": 3500,
+        "double_owned_zones": 0,
+        "ownership_retries": 0,
+        "moving_at_ownership": 0,
+        "items_held": 1242,
+        "items_before_run": 0,
+        "nodes_answering": 5,
+        "nodes_gone": 0,
+        "per_node_items": {
+          "http://127.0.0.1:19100": 706,
+          "http://127.0.0.1:19101": 360,
+          "http://127.0.0.1:19102": 0,
+          "http://127.0.0.1:19103": 0,
+          "http://127.0.0.1:19104": 176
+        },
+        "pass": true
+      },
+      "load": {
+        "acked": 3500,
+        "drain_completed": true,
+        "exhausted": 0,
+        "offered": 3500,
+        "queued_unfinished": 0,
+        "shed": 0
+      },
+      "latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 32.768
+      },
+      "intended_latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 65.536
+      },
+      "host_cpu_peak_pct": 16,
+      "process_cpu_peak_pct_of_host": 3.7418528711100993,
+      "copy_budget": {
+        "copy_slot_waits": 0,
+        "copy_slot_timeouts": 0,
+        "copy_slot_shared": 51,
+        "copy_slot_busy": 0
+      },
+      "sampled_active_handoffs_peak": 1,
+      "first_taken_observed_s": {
+        "1": 7.322015207959339,
+        "2": 7.322015207959339,
+        "3": 7.322015207959339,
+        "4": 7.322015207959339
+      },
+      "first_applied_observed_s": {
+        "0": 1.0531197079690173,
+        "1": 7.322015207959339,
+        "2": 7.322015207959339,
+        "3": 7.322015207959339,
+        "4": 7.322015207959339
+      },
+      "scale_requests": [],
+      "writer_by_kind": {
+        "collect": {
+          "attempts": 74,
+          "commits": 74,
+          "errors": 0,
+          "hold_ns": 200962459,
+          "wait_ns": 1265168,
+          "max_hold_ns": 14531208,
+          "mean_hold_ms_per_attempt": 2.7157089054054055,
+          "p99_hold_ms_upper": 16.384
+        },
+        "control": {
+          "attempts": 205,
+          "commits": 203,
+          "errors": 1,
+          "hold_ns": 322303795,
+          "wait_ns": 27659249,
+          "max_hold_ns": 9375667,
+          "mean_hold_ms_per_attempt": 1.5722136341463413,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 45,
+          "commits": 45,
+          "errors": 0,
+          "hold_ns": 131861417,
+          "wait_ns": 392747,
+          "max_hold_ns": 7362791,
+          "mean_hold_ms_per_attempt": 2.930253711111111,
+          "p99_hold_ms_upper": 8.192
+        },
+        "mount": {
+          "attempts": 45,
+          "commits": 45,
+          "errors": 0,
+          "hold_ns": 235970249,
+          "wait_ns": 8917,
+          "max_hold_ns": 19157333,
+          "mean_hold_ms_per_attempt": 5.243783311111112,
+          "p99_hold_ms_upper": 32.768
+        },
+        "write": {
+          "attempts": 3417,
+          "commits": 3415,
+          "errors": 0,
+          "hold_ns": 7301364615,
+          "wait_ns": 45081291,
+          "max_hold_ns": 96875000,
+          "mean_hold_ms_per_attempt": 2.1367762993854256,
+          "p99_hold_ms_upper": 16.384
+        }
+      },
+      "stress_first_observed_s": null,
+      "host_pressure_first_observed_s": null,
+      "pressure_delay_observed_s": null,
+      "max_periodic_sum_of_summary_deficits": 1418,
+      "read_missing_events": 0,
+      "read_failed_events": 0,
+      "final_observed_storage_items": 1242,
+      "notes": [
+        "Quantiles are upper bounds of base-2 buckets; periodic loader histograms exclude the final unreported fraction.",
+        "Taken is operation completion, not first installed right. Observation timestamps have about 1s resolution.",
+        "Active handoffs are not the maximum simultaneous copies; short phases can fall between samples.",
+        "Writer hold is wall time including fsync and scheduling; it must not be charged again as measured CPU or disk work."
+      ]
+    },
+    {
+      "gomaxprocs": "default",
+      "copy_slots": 2,
+      "stress": false,
+      "source_commit": "4f6a61537bf276ffe832b603f5e4c65070f7943f",
+      "scope": "five processes, one Linux Docker VM; no EC2 throughput claim; no provisioning",
+      "run_name": "copy2-gmpdefault",
+      "audit": {
+        "acked_keys": 3500,
+        "checked_keys": 3500,
+        "missing": 0,
+        "read_errors": 0,
+        "oversized_locations": 0,
+        "items_match_acked": true,
+        "collections_checked": 8,
+        "zones": 3500,
+        "double_owned_zones": 0,
+        "ownership_retries": 0,
+        "moving_at_ownership": 0,
+        "items_held": 1390,
+        "items_before_run": 0,
+        "nodes_answering": 5,
+        "nodes_gone": 0,
+        "per_node_items": {
+          "http://127.0.0.1:19100": 750,
+          "http://127.0.0.1:19101": 156,
+          "http://127.0.0.1:19102": 303,
+          "http://127.0.0.1:19103": 181,
+          "http://127.0.0.1:19104": 0
+        },
+        "pass": true
+      },
+      "load": {
+        "acked": 3500,
+        "drain_completed": true,
+        "exhausted": 0,
+        "offered": 3500,
+        "queued_unfinished": 0,
+        "shed": 0
+      },
+      "latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 32.768
+      },
+      "intended_latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 32.768
+      },
+      "host_cpu_peak_pct": 10.989010989010989,
+      "process_cpu_peak_pct_of_host": 3.397576088851847,
+      "copy_budget": {
+        "copy_slot_waits": 0,
+        "copy_slot_timeouts": 0,
+        "copy_slot_shared": 40,
+        "copy_slot_busy": 0
+      },
+      "sampled_active_handoffs_peak": 2,
+      "first_taken_observed_s": {
+        "4": 6.259906250052154,
+        "1": 7.296108999988064,
+        "2": 7.296108999988064,
+        "3": 7.296108999988064
+      },
+      "first_applied_observed_s": {
+        "0": 1.0559572080383077,
+        "4": 6.259906250052154,
+        "1": 7.296108999988064,
+        "2": 7.296108999988064,
+        "3": 7.296108999988064
+      },
+      "scale_requests": [],
+      "writer_by_kind": {
+        "collect": {
+          "attempts": 59,
+          "commits": 59,
+          "errors": 0,
+          "hold_ns": 148626709,
+          "wait_ns": 2109541,
+          "max_hold_ns": 12999000,
+          "mean_hold_ms_per_attempt": 2.5190967627118646,
+          "p99_hold_ms_upper": 16.384
+        },
+        "control": {
+          "attempts": 183,
+          "commits": 182,
+          "errors": 0,
+          "hold_ns": 236736000,
+          "wait_ns": 7521541,
+          "max_hold_ns": 5276708,
+          "mean_hold_ms_per_attempt": 1.293639344262295,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 34,
+          "commits": 34,
+          "errors": 0,
+          "hold_ns": 90884582,
+          "wait_ns": 4517206,
+          "max_hold_ns": 6341000,
+          "mean_hold_ms_per_attempt": 2.6730759411764704,
+          "p99_hold_ms_upper": 8.192
+        },
+        "mount": {
+          "attempts": 34,
+          "commits": 34,
+          "errors": 0,
+          "hold_ns": 175735292,
+          "wait_ns": 5752,
+          "max_hold_ns": 18871458,
+          "mean_hold_ms_per_attempt": 5.16868505882353,
+          "p99_hold_ms_upper": 32.768
+        },
+        "write": {
+          "attempts": 3436,
+          "commits": 3436,
+          "errors": 0,
+          "hold_ns": 7380805568,
+          "wait_ns": 32752624,
+          "max_hold_ns": 49130709,
+          "mean_hold_ms_per_attempt": 2.148080782305006,
+          "p99_hold_ms_upper": 16.384
+        }
+      },
+      "stress_first_observed_s": null,
+      "host_pressure_first_observed_s": null,
+      "pressure_delay_observed_s": null,
+      "max_periodic_sum_of_summary_deficits": 1197,
+      "read_missing_events": 0,
+      "read_failed_events": 0,
+      "final_observed_storage_items": 1390,
+      "notes": [
+        "Quantiles are upper bounds of base-2 buckets; periodic loader histograms exclude the final unreported fraction.",
+        "Taken is operation completion, not first installed right. Observation timestamps have about 1s resolution.",
+        "Active handoffs are not the maximum simultaneous copies; short phases can fall between samples.",
+        "Writer hold is wall time including fsync and scheduling; it must not be charged again as measured CPU or disk work."
+      ]
+    },
+    {
+      "gomaxprocs": "2",
+      "copy_slots": 2,
+      "stress": true,
+      "source_commit": "4f6a61537bf276ffe832b603f5e4c65070f7943f",
+      "scope": "five processes, one Linux Docker VM; no EC2 throughput claim; no provisioning",
+      "run_name": "cpu-pressure",
+      "audit": {
+        "acked_keys": 7000,
+        "checked_keys": 7000,
+        "missing": 0,
+        "read_errors": 0,
+        "oversized_locations": 0,
+        "items_match_acked": true,
+        "collections_checked": 8,
+        "zones": 7000,
+        "double_owned_zones": 0,
+        "ownership_retries": 0,
+        "moving_at_ownership": 0,
+        "items_held": 5732,
+        "items_before_run": 0,
+        "nodes_answering": 5,
+        "nodes_gone": 0,
+        "per_node_items": {
+          "http://127.0.0.1:19100": 1475,
+          "http://127.0.0.1:19101": 573,
+          "http://127.0.0.1:19102": 1634,
+          "http://127.0.0.1:19103": 1189,
+          "http://127.0.0.1:19104": 861
+        },
+        "pass": true
+      },
+      "load": {
+        "acked": 7000,
+        "drain_completed": true,
+        "exhausted": 0,
+        "offered": 7000,
+        "queued_unfinished": 0,
+        "shed": 0
+      },
+      "latency": {
+        "samples": 6899,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 32.768
+      },
+      "intended_latency": {
+        "samples": 6899,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 32.768
+      },
+      "host_cpu_peak_pct": 82.75449101796407,
+      "process_cpu_peak_pct_of_host": 6.237657345058855,
+      "copy_budget": {
+        "copy_slot_waits": 0,
+        "copy_slot_timeouts": 0,
+        "copy_slot_shared": 55,
+        "copy_slot_busy": 0
+      },
+      "sampled_active_handoffs_peak": 1,
+      "first_taken_observed_s": {
+        "1": 6.2701012920588255,
+        "2": 7.308965625008568,
+        "3": 7.308965625008568,
+        "4": 7.308965625008568
+      },
+      "first_applied_observed_s": {
+        "0": 1.0573502919869497,
+        "1": 6.2701012920588255,
+        "2": 7.308965625008568,
+        "3": 7.308965625008568,
+        "4": 7.308965625008568
+      },
+      "scale_requests": [
+        {
+          "cpu_host_ok": true,
+          "cpu_host_pct": 81.0126582278481,
+          "cpu_process_pct": 0.33056071027821987,
+          "local_inserts": 406,
+          "owned_zones": 598,
+          "prefer_near": "SP00yLU9Jrgza8vx",
+          "prefer_nears": [
+            "SP00yLU9Jrgza8vx"
+          ],
+          "reason": "host_pressure",
+          "requester_id": "S900yLU9Jrgza8vx",
+          "role": "bootstrap",
+          "signal": "cpu",
+          "spawn_count": 1,
+          "transfers_in_flight": 0
+        },
+        {
+          "cpu_host_ok": true,
+          "cpu_host_pct": 80.72590738423028,
+          "cpu_process_pct": 0.30111942595781277,
+          "local_inserts": 419,
+          "owned_zones": 611,
+          "prefer_near": "SP00yLU9Jrgza8vx",
+          "prefer_nears": [
+            "SP00yLU9Jrgza8vx"
+          ],
+          "reason": "host_pressure",
+          "requester_id": "S900yLU9Jrgza8vx",
+          "role": "bootstrap",
+          "signal": "cpu",
+          "spawn_count": 1,
+          "transfers_in_flight": 0
+        },
+        {
+          "cpu_host_ok": true,
+          "cpu_host_pct": 80.88607594936708,
+          "cpu_process_pct": 0.22398523148518346,
+          "local_inserts": 428,
+          "owned_zones": 620,
+          "prefer_near": "SP00yLU9Jrgza8vx",
+          "prefer_nears": [
+            "SP00yLU9Jrgza8vx"
+          ],
+          "reason": "host_pressure",
+          "requester_id": "S900yLU9Jrgza8vx",
+          "role": "bootstrap",
+          "signal": "cpu",
+          "spawn_count": 1,
+          "transfers_in_flight": 0
+        },
+        {
+          "cpu_host_ok": true,
+          "cpu_host_pct": 79.92424242424242,
+          "cpu_process_pct": 0.29778475308108726,
+          "local_inserts": 437,
+          "owned_zones": 629,
+          "prefer_near": "SP00yLU9Jrgza8vx",
+          "prefer_nears": [
+            "SP00yLU9Jrgza8vx"
+          ],
+          "reason": "host_pressure",
+          "requester_id": "S900yLU9Jrgza8vx",
+          "role": "bootstrap",
+          "signal": "cpu",
+          "spawn_count": 1,
+          "transfers_in_flight": 0
+        },
+        {
+          "cpu_host_ok": true,
+          "cpu_host_pct": 80.53777208706786,
+          "cpu_process_pct": 0.33985448474690416,
+          "local_inserts": 1384,
+          "owned_zones": 1258,
+          "prefer_near": "fQ4x54zio0o90UOz",
+          "prefer_nears": [
+            "fQ4x54zio0o90UOz"
+          ],
+          "reason": "host_pressure",
+          "requester_id": "XQ4x54zio0o90UOz",
+          "role": "bootstrap",
+          "signal": "cpu",
+          "spawn_count": 1,
+          "transfers_in_flight": 0
+        },
+        {
+          "cpu_host_ok": true,
+          "cpu_host_pct": 80.28169014084507,
+          "cpu_process_pct": 0.1894740440309399,
+          "local_inserts": 446,
+          "owned_zones": 638,
+          "prefer_near": "SP00yLU9Jrgza8vx",
+          "prefer_nears": [
+            "SP00yLU9Jrgza8vx"
+          ],
+          "reason": "host_pressure",
+          "requester_id": "S900yLU9Jrgza8vx",
+          "role": "bootstrap",
+          "signal": "cpu",
+          "spawn_count": 1,
+          "transfers_in_flight": 0
+        },
+        {
+          "cpu_host_ok": true,
+          "cpu_host_pct": 79.90135635018495,
+          "cpu_process_pct": 0.502885473645314,
+          "local_inserts": 1409,
+          "owned_zones": 1283,
+          "prefer_near": "fQ4x54zio0o90UOz",
+          "prefer_nears": [
+            "fQ4x54zio0o90UOz"
+          ],
+          "reason": "host_pressure",
+          "requester_id": "XQ4x54zio0o90UOz",
+          "role": "bootstrap",
+          "signal": "cpu",
+          "spawn_count": 1,
+          "transfers_in_flight": 0
+        },
+        {
+          "cpu_host_ok": true,
+          "cpu_host_pct": 81.00628930817611,
+          "cpu_process_pct": 0.39773920825096803,
+          "local_inserts": 463,
+          "owned_zones": 655,
+          "prefer_near": "SP00yLU9Jrgza8vx",
+          "prefer_nears": [
+            "SP00yLU9Jrgza8vx"
+          ],
+          "reason": "host_pressure",
+          "requester_id": "S900yLU9Jrgza8vx",
+          "role": "bootstrap",
+          "signal": "cpu",
+          "spawn_count": 1,
+          "transfers_in_flight": 0
+        },
+        {
+          "cpu_host_ok": true,
+          "cpu_host_pct": 77.0012706480305,
+          "cpu_process_pct": 0.43337758684699257,
+          "local_inserts": 477,
+          "owned_zones": 669,
+          "prefer_near": "SP00yLU9Jrgza8vx",
+          "prefer_nears": [
+            "SP00yLU9Jrgza8vx"
+          ],
+          "reason": "host_pressure",
+          "requester_id": "S900yLU9Jrgza8vx",
+          "role": "bootstrap",
+          "signal": "cpu",
+          "spawn_count": 1,
+          "transfers_in_flight": 0
+        }
+      ],
+      "writer_by_kind": {
+        "collect": {
+          "attempts": 85,
+          "commits": 83,
+          "errors": 0,
+          "hold_ns": 283663002,
+          "wait_ns": 34795495,
+          "max_hold_ns": 19745834,
+          "mean_hold_ms_per_attempt": 3.3372117882352943,
+          "p99_hold_ms_upper": 32.768
+        },
+        "control": {
+          "attempts": 229,
+          "commits": 227,
+          "errors": 1,
+          "hold_ns": 399693670,
+          "wait_ns": 26760426,
+          "max_hold_ns": 15325083,
+          "mean_hold_ms_per_attempt": 1.7453872052401747,
+          "p99_hold_ms_upper": 16.384
+        },
+        "fence": {
+          "attempts": 48,
+          "commits": 48,
+          "errors": 0,
+          "hold_ns": 163076791,
+          "wait_ns": 3337288,
+          "max_hold_ns": 12983000,
+          "mean_hold_ms_per_attempt": 3.3974331458333333,
+          "p99_hold_ms_upper": 16.384
+        },
+        "mount": {
+          "attempts": 48,
+          "commits": 48,
+          "errors": 0,
+          "hold_ns": 282813332,
+          "wait_ns": 10045,
+          "max_hold_ns": 14193833,
+          "mean_hold_ms_per_attempt": 5.891944416666667,
+          "p99_hold_ms_upper": 16.384
+        },
+        "write": {
+          "attempts": 6970,
+          "commits": 6969,
+          "errors": 0,
+          "hold_ns": 18523849894,
+          "wait_ns": 132073247,
+          "max_hold_ns": 81423875,
+          "mean_hold_ms_per_attempt": 2.6576542172166424,
+          "p99_hold_ms_upper": 16.384
+        }
+      },
+      "stress_first_observed_s": 14.708638667012565,
+      "host_pressure_first_observed_s": 48.63352795899846,
+      "pressure_delay_observed_s": 33.92488929198589,
+      "max_periodic_sum_of_summary_deficits": 2912,
+      "read_missing_events": 0,
+      "read_failed_events": 0,
+      "final_observed_storage_items": 5732,
+      "notes": [
+        "Quantiles are upper bounds of base-2 buckets; periodic loader histograms exclude the final unreported fraction.",
+        "Taken is operation completion, not first installed right. Observation timestamps have about 1s resolution.",
+        "Active handoffs are not the maximum simultaneous copies; short phases can fall between samples.",
+        "Writer hold is wall time including fsync and scheduling; it must not be charged again as measured CPU or disk work."
+      ]
+    },
+    {
+      "gomaxprocs": "2",
+      "copy_slots": 2,
+      "stress": false,
+      "source_commit": "4f6a61537bf276ffe832b603f5e4c65070f7943f",
+      "scope": "five processes, one Linux Docker VM; no EC2 throughput claim; no provisioning",
+      "run_name": "quiet-counts-fixed",
+      "audit": {
+        "acked_keys": 3500,
+        "checked_keys": 3500,
+        "missing": 0,
+        "read_errors": 0,
+        "oversized_locations": 0,
+        "items_match_acked": true,
+        "collections_checked": 8,
+        "zones": 3500,
+        "double_owned_zones": 0,
+        "ownership_retries": 0,
+        "moving_at_ownership": 0,
+        "items_held": 3500,
+        "items_before_run": 0,
+        "nodes_answering": 5,
+        "nodes_gone": 0,
+        "per_node_items": {
+          "http://127.0.0.1:19100": 838,
+          "http://127.0.0.1:19101": 895,
+          "http://127.0.0.1:19102": 440,
+          "http://127.0.0.1:19103": 892,
+          "http://127.0.0.1:19104": 435
+        },
+        "pass": true
+      },
+      "load": {
+        "acked": 3500,
+        "drain_completed": true,
+        "exhausted": 0,
+        "offered": 3500,
+        "queued_unfinished": 0,
+        "shed": 0
+      },
+      "latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 16.384
+      },
+      "intended_latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 16.384
+      },
+      "host_cpu_peak_pct": 17.869822485207102,
+      "process_cpu_peak_pct_of_host": 3.298880595291689,
+      "copy_budget": {
+        "copy_slot_waits": 0,
+        "copy_slot_timeouts": 0,
+        "copy_slot_shared": 48,
+        "copy_slot_busy": 0
+      },
+      "sampled_active_handoffs_peak": 1,
+      "first_taken_observed_s": {
+        "1": 7.318448666948825,
+        "2": 7.318448666948825,
+        "3": 7.318448666948825,
+        "4": 7.318448666948825
+      },
+      "first_applied_observed_s": {
+        "0": 1.0435001250589266,
+        "1": 7.318448666948825,
+        "2": 7.318448666948825,
+        "3": 7.318448666948825,
+        "4": 7.318448666948825
+      },
+      "scale_requests": [],
+      "writer_by_kind": {
+        "collect": {
+          "attempts": 74,
+          "commits": 74,
+          "errors": 0,
+          "hold_ns": 148568665,
+          "wait_ns": 3561964,
+          "max_hold_ns": 8187458,
+          "mean_hold_ms_per_attempt": 2.0076846621621622,
+          "p99_hold_ms_upper": 8.192
+        },
+        "control": {
+          "attempts": 198,
+          "commits": 197,
+          "errors": 0,
+          "hold_ns": 291824257,
+          "wait_ns": 8625627,
+          "max_hold_ns": 10500917,
+          "mean_hold_ms_per_attempt": 1.4738598838383838,
+          "p99_hold_ms_upper": 16.384
+        },
+        "fence": {
+          "attempts": 42,
+          "commits": 42,
+          "errors": 0,
+          "hold_ns": 127060210,
+          "wait_ns": 8170,
+          "max_hold_ns": 13718375,
+          "mean_hold_ms_per_attempt": 3.0252430952380953,
+          "p99_hold_ms_upper": 16.384
+        },
+        "mount": {
+          "attempts": 42,
+          "commits": 42,
+          "errors": 0,
+          "hold_ns": 224015001,
+          "wait_ns": 8165,
+          "max_hold_ns": 18317875,
+          "mean_hold_ms_per_attempt": 5.3336905,
+          "p99_hold_ms_upper": 32.768
+        },
+        "write": {
+          "attempts": 3495,
+          "commits": 3494,
+          "errors": 0,
+          "hold_ns": 6811516633,
+          "wait_ns": 43550948,
+          "max_hold_ns": 14143000,
+          "mean_hold_ms_per_attempt": 1.9489317977110157,
+          "p99_hold_ms_upper": 8.192
+        }
+      },
+      "stress_first_observed_s": null,
+      "host_pressure_first_observed_s": null,
+      "pressure_delay_observed_s": null,
+      "max_periodic_sum_of_summary_deficits": 1422,
+      "read_missing_events": 0,
+      "read_failed_events": 0,
+      "final_observed_storage_items": 3500,
+      "notes": [
+        "Quantiles are upper bounds of base-2 buckets; periodic loader histograms exclude the final unreported fraction.",
+        "Taken is operation completion, not first installed right. Observation timestamps have about 1s resolution.",
+        "Active handoffs are not the maximum simultaneous copies; short phases can fall between samples.",
+        "Writer hold is wall time including fsync and scheduling; it must not be charged again as measured CPU or disk work."
+      ]
+    },
+    {
+      "gomaxprocs": "2",
+      "copy_slots": 2,
+      "stress": false,
+      "quiet_seconds": 35,
+      "source_commit": "4f6a61537bf276ffe832b603f5e4c65070f7943f",
+      "scope": "five processes, one Linux Docker VM; no EC2 throughput claim; no provisioning",
+      "run_name": "routed-totals",
+      "audit": {
+        "acked_keys": 3499,
+        "checked_keys": 3499,
+        "missing": 0,
+        "read_errors": 0,
+        "oversized_locations": 0,
+        "items_match_acked": true,
+        "collections_checked": 8,
+        "zones": 3499,
+        "double_owned_zones": 0,
+        "ownership_retries": 0,
+        "moving_at_ownership": 0,
+        "items_held": 3499,
+        "items_before_run": 0,
+        "nodes_answering": 5,
+        "nodes_gone": 0,
+        "per_node_items": {
+          "http://127.0.0.1:19100": 875,
+          "http://127.0.0.1:19101": 892,
+          "http://127.0.0.1:19102": 406,
+          "http://127.0.0.1:19103": 894,
+          "http://127.0.0.1:19104": 432
+        },
+        "pass": true
+      },
+      "load": {
+        "acked": 3499,
+        "drain_completed": true,
+        "exhausted": 0,
+        "offered": 3499,
+        "queued_unfinished": 0,
+        "shed": 0
+      },
+      "latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 16.384
+      },
+      "intended_latency": {
+        "samples": 3399,
+        "p50_ms_upper": 8.192,
+        "p95_ms_upper": 16.384,
+        "p99_ms_upper": 32.768
+      },
+      "host_cpu_peak_pct": 10.240963855421686,
+      "process_cpu_peak_pct_of_host": 3.018273221121527,
+      "copy_budget": {
+        "copy_slot_waits": 0,
+        "copy_slot_timeouts": 0,
+        "copy_slot_shared": 52,
+        "copy_slot_busy": 0
+      },
+      "sampled_active_handoffs_peak": 1,
+      "first_taken_observed_s": {
+        "3": 6.262661334010772,
+        "1": 7.303329874994233,
+        "2": 7.303329874994233,
+        "4": 8.339583083987236
+      },
+      "first_applied_observed_s": {
+        "0": 1.0601051249541342,
+        "3": 6.262661334010772,
+        "1": 7.303329874994233,
+        "2": 7.303329874994233,
+        "4": 8.339583083987236
+      },
+      "scale_requests": [],
+      "writer_by_kind": {
+        "collect": {
+          "attempts": 83,
+          "commits": 80,
+          "errors": 0,
+          "hold_ns": 219495455,
+          "wait_ns": 25465254,
+          "max_hold_ns": 37400166,
+          "mean_hold_ms_per_attempt": 2.6445235542168675,
+          "p99_hold_ms_upper": 65.536
+        },
+        "control": {
+          "attempts": 218,
+          "commits": 216,
+          "errors": 1,
+          "hold_ns": 287834700,
+          "wait_ns": 8842165,
+          "max_hold_ns": 6190625,
+          "mean_hold_ms_per_attempt": 1.320342660550459,
+          "p99_hold_ms_upper": 8.192
+        },
+        "fence": {
+          "attempts": 45,
+          "commits": 45,
+          "errors": 0,
+          "hold_ns": 120034918,
+          "wait_ns": 598000,
+          "max_hold_ns": 7112541,
+          "mean_hold_ms_per_attempt": 2.6674426222222225,
+          "p99_hold_ms_upper": 8.192
+        },
+        "mount": {
+          "attempts": 45,
+          "commits": 45,
+          "errors": 0,
+          "hold_ns": 222534254,
+          "wait_ns": 8706,
+          "max_hold_ns": 15281375,
+          "mean_hold_ms_per_attempt": 4.945205644444444,
+          "p99_hold_ms_upper": 16.384
+        },
+        "write": {
+          "attempts": 3492,
+          "commits": 3492,
+          "errors": 0,
+          "hold_ns": 6971026958,
+          "wait_ns": 44230741,
+          "max_hold_ns": 30961959,
+          "mean_hold_ms_per_attempt": 1.996284924971363,
+          "p99_hold_ms_upper": 16.384
+        }
+      },
+      "stress_first_observed_s": null,
+      "host_pressure_first_observed_s": null,
+      "pressure_delay_observed_s": null,
+      "max_periodic_sum_of_summary_deficits": 14,
+      "read_missing_events": 0,
+      "read_failed_events": 0,
+      "final_observed_storage_items": 3499,
+      "notes": [
+        "Quantiles are upper bounds of base-2 buckets; periodic loader histograms exclude the final unreported fraction.",
+        "Taken is operation completion, not first installed right. Observation timestamps have about 1s resolution.",
+        "Active handoffs are not the maximum simultaneous copies; short phases can fall between samples.",
+        "Writer hold is wall time including fsync and scheduling; it must not be charged again as measured CPU or disk work."
+      ]
+    }
+  ]
+}

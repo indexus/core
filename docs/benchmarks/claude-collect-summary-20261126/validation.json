@@ -1,0 +1,62 @@
+[
+  {
+    "name": "build",
+    "command": [
+      "go",
+      "build",
+      "./..."
+    ],
+    "exit_code": 0,
+    "seconds": 1.5
+  },
+  {
+    "name": "quic-build",
+    "command": [
+      "go",
+      "build",
+      "./..."
+    ],
+    "exit_code": 0,
+    "seconds": 0.64
+  },
+  {
+    "name": "all-tests",
+    "command": [
+      "go",
+      "test",
+      "-count=1",
+      "./..."
+    ],
+    "exit_code": 0,
+    "seconds": 86.43
+  },
+  {
+    "name": "race",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "-count=1",
+      "./internal/storage",
+      "./internal/summary",
+      "./cmd/experiment"
+    ],
+    "exit_code": 0,
+    "seconds": 123.19
+  },
+  {
+    "name": "lab8",
+    "command": [
+      "go",
+      "test",
+      "./indexus",
+      "-run",
+      "^Test64NodeDurableHTTPRecovery$",
+      "-count=1",
+      "-timeout=4m",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 31.46
+  }
+]

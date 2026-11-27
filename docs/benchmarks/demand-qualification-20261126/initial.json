@@ -1,0 +1,42 @@
+{
+  "donor": {
+    "machine": "",
+    "running": 5,
+    "free": 0,
+    "receiving": 5,
+    "vnodes": [
+      "OMXhkot1MsfKht5z",
+      "nd-qznRMpIFDRT-R",
+      "7JS5uWuq43tvJiPy",
+      "efFC326BnmtpygmC",
+      "a_arJ7StfVs5R0g7"
+    ],
+    "cores": 8,
+    "cpu_pct": 25,
+    "cpu_ok": true,
+    "host_cpu_pct": 25,
+    "host_cpu_ok": true,
+    "receiver_ready": false,
+    "mem_free_pct": 77.95292757046715,
+    "mem_ok": true,
+    "disk_free_pct": 42.54621774979362,
+    "disk_ok": true
+  },
+  "reserve": {
+    "machine": "",
+    "running": 0,
+    "free": 5,
+    "receiving": 0,
+    "vnodes": null,
+    "cores": 8,
+    "cpu_pct": 3.8198403648802737,
+    "cpu_ok": true,
+    "host_cpu_pct": 3.8198403648802737,
+    "host_cpu_ok": true,
+    "receiver_ready": true,
+    "mem_free_pct": 77.95297678367106,
+    "mem_ok": true,
+    "disk_free_pct": 42.54621774979362,
+    "disk_ok": true
+  }
+}

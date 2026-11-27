@@ -1,0 +1,8 @@
+{
+  "gomaxprocs": "2",
+  "copy_slots": 2,
+  "stress": false,
+  "quiet_seconds": 35,
+  "source_commit": "4f6a61537bf276ffe832b603f5e4c65070f7943f",
+  "scope": "five processes, one Linux Docker VM; no EC2 throughput claim; no provisioning"
+}

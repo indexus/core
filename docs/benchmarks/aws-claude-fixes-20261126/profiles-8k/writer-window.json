@@ -1,0 +1,366 @@
+[
+  {
+    "url": "https://10.77.0.16:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 0.913,
+    "validation_seconds": 0.619,
+    "hold_by_kind": {
+      "collect": 0.789,
+      "control": 0.001,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 0.123
+    },
+    "process_cores": 0.255
+  },
+  {
+    "url": "https://10.77.0.28:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 1.005,
+    "validation_seconds": 0.419,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.0,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 1.005
+    },
+    "process_cores": 0.715
+  },
+  {
+    "url": "https://10.77.0.28:19101",
+    "seconds": 10.0,
+    "writer_hold_seconds": 0.014,
+    "validation_seconds": 0.004,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.0,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 0.014
+    },
+    "process_cores": 0.028
+  },
+  {
+    "url": "https://10.77.10.164:19100",
+    "seconds": 10.005,
+    "writer_hold_seconds": 2.33,
+    "validation_seconds": 0.749,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.0,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 2.33
+    },
+    "process_cores": 0.793
+  },
+  {
+    "url": "https://10.77.10.164:19101",
+    "seconds": 10.0,
+    "writer_hold_seconds": 1.791,
+    "validation_seconds": 0.443,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.001,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 1.79
+    },
+    "process_cores": 0.709
+  },
+  {
+    "url": "https://10.77.10.164:19102",
+    "seconds": 10.0,
+    "writer_hold_seconds": 1.916,
+    "validation_seconds": 0.512,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.0,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 1.916
+    },
+    "process_cores": 1.024
+  },
+  {
+    "url": "https://10.77.10.251:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 0.705,
+    "validation_seconds": 0.533,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.228,
+      "fence": 0.0,
+      "mount": 0.353,
+      "write": 0.124
+    },
+    "process_cores": 0.256
+  },
+  {
+    "url": "https://10.77.10.68:19100",
+    "seconds": 9.999,
+    "writer_hold_seconds": 2.0,
+    "validation_seconds": 1.52,
+    "hold_by_kind": {
+      "collect": 1.802,
+      "control": 0.011,
+      "fence": 0.0,
+      "mount": 0.017,
+      "write": 0.17
+    },
+    "process_cores": 0.729
+  },
+  {
+    "url": "https://10.77.11.143:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 0.808,
+    "validation_seconds": 0.371,
+    "hold_by_kind": {
+      "collect": 0.249,
+      "control": 0.001,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 0.558
+    },
+    "process_cores": 0.462
+  },
+  {
+    "url": "https://10.77.11.64:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 0.91,
+    "validation_seconds": 0.36,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.0,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 0.91
+    },
+    "process_cores": 0.315
+  },
+  {
+    "url": "https://10.77.11.64:19101",
+    "seconds": 10.0,
+    "writer_hold_seconds": 0.153,
+    "validation_seconds": 0.085,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.028,
+      "fence": 0.0,
+      "mount": 0.055,
+      "write": 0.07
+    },
+    "process_cores": 0.096
+  },
+  {
+    "url": "https://10.77.15.51:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 1.133,
+    "validation_seconds": 0.614,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.156,
+      "fence": 0.0,
+      "mount": 0.261,
+      "write": 0.716
+    },
+    "process_cores": 1.012
+  },
+  {
+    "url": "https://10.77.15.96:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 0.014,
+    "validation_seconds": 0.007,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.005,
+      "fence": 0.0,
+      "mount": 0.008,
+      "write": 0.001
+    },
+    "process_cores": 0.026
+  },
+  {
+    "url": "https://10.77.2.24:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 0.249,
+    "validation_seconds": 0.173,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.089,
+      "fence": 0.0,
+      "mount": 0.121,
+      "write": 0.039
+    },
+    "process_cores": 0.109
+  },
+  {
+    "url": "https://10.77.5.75:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 1.871,
+    "validation_seconds": 1.523,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.713,
+      "fence": 0.0,
+      "mount": 0.851,
+      "write": 0.307
+    },
+    "process_cores": 0.625
+  },
+  {
+    "url": "https://10.77.6.216:19100",
+    "seconds": 10.001,
+    "writer_hold_seconds": 6.522,
+    "validation_seconds": 3.052,
+    "hold_by_kind": {
+      "collect": 2.02,
+      "control": 0.644,
+      "fence": 1.008,
+      "mount": 0.0,
+      "write": 2.85
+    },
+    "process_cores": 1.545
+  },
+  {
+    "url": "https://10.77.6.216:19101",
+    "seconds": 10.0,
+    "writer_hold_seconds": 6.51,
+    "validation_seconds": 3.162,
+    "hold_by_kind": {
+      "collect": 2.054,
+      "control": 0.665,
+      "fence": 0.709,
+      "mount": 0.0,
+      "write": 3.082
+    },
+    "process_cores": 1.797
+  },
+  {
+    "url": "https://10.77.8.11:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 2.603,
+    "validation_seconds": 0.543,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.0,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 2.603
+    },
+    "process_cores": 1.24
+  },
+  {
+    "url": "https://10.77.8.11:19101",
+    "seconds": 10.0,
+    "writer_hold_seconds": 3.815,
+    "validation_seconds": 1.773,
+    "hold_by_kind": {
+      "collect": 0.956,
+      "control": 0.292,
+      "fence": 0.431,
+      "mount": 0.0,
+      "write": 2.136
+    },
+    "process_cores": 1.743
+  },
+  {
+    "url": "https://10.77.8.11:19102",
+    "seconds": 10.0,
+    "writer_hold_seconds": 2.471,
+    "validation_seconds": 0.526,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.0,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 2.471
+    },
+    "process_cores": 0.538
+  },
+  {
+    "url": "https://10.77.8.183:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 0.27,
+    "validation_seconds": 0.189,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.088,
+      "fence": 0.0,
+      "mount": 0.154,
+      "write": 0.028
+    },
+    "process_cores": 0.113
+  },
+  {
+    "url": "https://10.77.8.201:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 0.88,
+    "validation_seconds": 0.344,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.001,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 0.879
+    },
+    "process_cores": 0.629
+  },
+  {
+    "url": "https://10.77.8.224:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 3.642,
+    "validation_seconds": 1.938,
+    "hold_by_kind": {
+      "collect": 1.272,
+      "control": 0.343,
+      "fence": 0.569,
+      "mount": 0.0,
+      "write": 1.458
+    },
+    "process_cores": 1.683
+  },
+  {
+    "url": "https://10.77.8.224:19101",
+    "seconds": 10.0,
+    "writer_hold_seconds": 1.602,
+    "validation_seconds": 0.371,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.0,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 1.602
+    },
+    "process_cores": 0.354
+  },
+  {
+    "url": "https://10.77.8.224:19102",
+    "seconds": 10.0,
+    "writer_hold_seconds": 1.726,
+    "validation_seconds": 0.407,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.0,
+      "fence": 0.0,
+      "mount": 0.0,
+      "write": 1.726
+    },
+    "process_cores": 0.554
+  },
+  {
+    "url": "https://10.77.9.252:19100",
+    "seconds": 10.0,
+    "writer_hold_seconds": 1.993,
+    "validation_seconds": 1.683,
+    "hold_by_kind": {
+      "collect": 0.0,
+      "control": 0.798,
+      "fence": 0.0,
+      "mount": 1.101,
+      "write": 0.094
+    },
+    "process_cores": 0.537
+  }
+]

@@ -1,0 +1,5 @@
+{
+  "trigger": "demand",
+  "source": "0b4ddb43100b25de39d917f68ce7fe4a8c3cdd25",
+  "scope": "shared Linux VM; demand thresholds fixed before startup; no independent host CPU qualification"
+}

@@ -1,0 +1,8 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/indexus/go-indexus-core/internal/summary
+cpu: Apple M1 Pro
+BenchmarkBoundaryBatchExtension/16-8         	       3	     22139 ns/op	  159208 B/op	     130 allocs/op
+BenchmarkBoundaryBatchExtension/128-8        	       3	    609333 ns/op	 1542344 B/op	     928 allocs/op
+PASS
+ok  	github.com/indexus/go-indexus-core/internal/summary	0.849s

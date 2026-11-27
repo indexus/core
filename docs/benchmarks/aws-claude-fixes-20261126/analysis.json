@@ -1,0 +1,803 @@
+{
+  "windows": {
+    "2k": {
+      "before": {
+        "from_s": 5,
+        "until_s": 120,
+        "samples": 115,
+        "offered": 230000,
+        "acked": 230000,
+        "acked_share": 1.0,
+        "shed": 0,
+        "service_ms": {
+          "0.5": 4.096,
+          "0.95": 4.096,
+          "0.99": 16.384
+        },
+        "intended_ms": {
+          "0.5": 16.384,
+          "0.95": 16.384,
+          "0.99": 16.384
+        },
+        "max_queue": 0
+      },
+      "after": {
+        "from_s": 5,
+        "until_s": 120,
+        "samples": 115,
+        "offered": 230000,
+        "acked": 230000,
+        "acked_share": 1.0,
+        "shed": 0,
+        "service_ms": {
+          "0.5": 4.096,
+          "0.95": 4.096,
+          "0.99": 8.192
+        },
+        "intended_ms": {
+          "0.5": 16.384,
+          "0.95": 16.384,
+          "0.99": 16.384
+        },
+        "max_queue": 0
+      }
+    },
+    "4k": {
+      "before": {
+        "from_s": 240,
+        "until_s": 360,
+        "samples": 120,
+        "offered": 479992,
+        "acked": 479957,
+        "acked_share": 0.9999270821180353,
+        "shed": 0,
+        "service_ms": {
+          "0.5": 8.192,
+          "0.95": 32.768,
+          "0.99": 131.072
+        },
+        "intended_ms": {
+          "0.5": 16.384,
+          "0.95": 65.536,
+          "0.99": 131.072
+        },
+        "max_queue": 0
+      },
+      "after": {
+        "from_s": 240,
+        "until_s": 360,
+        "samples": 120,
+        "offered": 479992,
+        "acked": 479890,
+        "acked_share": 0.9997874964582742,
+        "shed": 0,
+        "service_ms": {
+          "0.5": 8.192,
+          "0.95": 65.536,
+          "0.99": 131.072
+        },
+        "intended_ms": {
+          "0.5": 16.384,
+          "0.95": 65.536,
+          "0.99": 131.072
+        },
+        "max_queue": 0
+      }
+    },
+    "8k_common": {
+      "before": {
+        "from_s": 480,
+        "until_s": 515,
+        "samples": 35,
+        "offered": 279984,
+        "acked": 125782,
+        "acked_share": 0.44924709983427624,
+        "shed": 154202,
+        "service_ms": {
+          "0.5": 2097.152,
+          "0.95": 2097.152,
+          "0.99": 2097.152
+        },
+        "intended_ms": {
+          "0.5": 8388.608,
+          "0.95": 8388.608,
+          "0.99": 8388.608
+        },
+        "max_queue": 16384
+      },
+      "after": {
+        "from_s": 480,
+        "until_s": 515,
+        "samples": 35,
+        "offered": 279984,
+        "acked": 252167,
+        "acked_share": 0.9006478941653808,
+        "shed": 8630,
+        "service_ms": {
+          "0.5": 524.288,
+          "0.95": 1048.576,
+          "0.99": 1048.576
+        },
+        "intended_ms": {
+          "0.5": 4194.304,
+          "0.95": 4194.304,
+          "0.99": 4194.304
+        },
+        "max_queue": 16384
+      }
+    },
+    "8k": {
+      "before": {
+        "from_s": 480,
+        "until_s": 600,
+        "samples": 38,
+        "offered": 303984,
+        "acked": 136069,
+        "acked_share": 0.4476189536291384,
+        "shed": 167915,
+        "service_ms": {
+          "0.5": 2097.152,
+          "0.95": 2097.152,
+          "0.99": 2097.152
+        },
+        "intended_ms": {
+          "0.5": 8388.608,
+          "0.95": 8388.608,
+          "0.99": 8388.608
+        },
+        "max_queue": 16384
+      },
+      "after": {
+        "from_s": 480,
+        "until_s": 600,
+        "samples": 120,
+        "offered": 959984,
+        "acked": 844504,
+        "acked_share": 0.8797063284388074,
+        "shed": 95636,
+        "service_ms": {
+          "0.5": 1048.576,
+          "0.95": 1048.576,
+          "0.99": 1048.576
+        },
+        "intended_ms": {
+          "0.5": 4194.304,
+          "0.95": 4194.304,
+          "0.99": 4194.304
+        },
+        "max_queue": 16384
+      }
+    },
+    "last_ramp": {
+      "before": {
+        "from_s": 600,
+        "until_s": 634,
+        "samples": 0,
+        "offered": 0,
+        "acked": 0,
+        "acked_share": null,
+        "shed": 0,
+        "service_ms": {
+          "0.5": null,
+          "0.95": null,
+          "0.99": null
+        },
+        "intended_ms": {
+          "0.5": null,
+          "0.95": null,
+          "0.99": null
+        },
+        "max_queue": 0
+      },
+      "after": {
+        "from_s": 600,
+        "until_s": 634,
+        "samples": 34,
+        "offered": 308311,
+        "acked": 184367,
+        "acked_share": 0.5979903409219911,
+        "shed": 123944,
+        "service_ms": {
+          "0.5": 1048.576,
+          "0.95": 1048.576,
+          "0.99": 2097.152
+        },
+        "intended_ms": {
+          "0.5": 4194.304,
+          "0.95": 8388.608,
+          "0.99": 8388.608
+        },
+        "max_queue": 16384
+      }
+    }
+  },
+  "ledger": {
+    "lines": 2829479,
+    "main": 2827818,
+    "probe": 1661,
+    "bytes": 177139974
+  },
+  "demand_peaks": {
+    "in_flight": 337,
+    "oldest_wait_ms": 564
+  },
+  "copy_slot_counters": {
+    "copy_slot_waits": 369,
+    "copy_slot_timeouts": 0,
+    "copy_slot_shared": 6490,
+    "copy_slot_busy": 0
+  },
+  "max_running_donor_jobs_bucket": {
+    "wall": 1795713902,
+    "host": "10.77.6.216",
+    "count": 3,
+    "note": "running donor jobs, excluding copy-slot phase; asynchronous 2-second bucket, not an exact CPU-copy concurrency gauge"
+  },
+  "last_placement": {
+    "wall": 1795714091.470961,
+    "agents": [
+      "http://10.77.6.216:22100",
+      "http://10.77.0.16:22100",
+      "http://10.77.0.167:22100",
+      "http://10.77.0.248:22100",
+      "http://10.77.0.28:22100",
+      "http://10.77.1.235:22100",
+      "http://10.77.10.164:22100",
+      "http://10.77.10.251:22100",
+      "http://10.77.10.68:22100",
+      "http://10.77.11.143:22100",
+      "http://10.77.11.58:22100",
+      "http://10.77.11.64:22100",
+      "http://10.77.15.103:22100",
+      "http://10.77.15.51:22100",
+      "http://10.77.15.96:22100",
+      "http://10.77.2.24:22100",
+      "http://10.77.5.75:22100",
+      "http://10.77.6.221:22100",
+      "http://10.77.6.57:22100",
+      "http://10.77.7.234:22100",
+      "http://10.77.7.50:22100",
+      "http://10.77.8.105:22100",
+      "http://10.77.8.11:22100",
+      "http://10.77.8.183:22100",
+      "http://10.77.8.201:22100",
+      "http://10.77.8.224:22100",
+      "http://10.77.9.252:22100"
+    ],
+    "placement": {
+      "applied": {
+        "existing": 2,
+        "local": 7,
+        "new": 18
+      },
+      "decided": {
+        "existing": 2,
+        "local": 7,
+        "new": 18,
+        "new_wait": 40
+      },
+      "last": [
+        {
+          "at": "2026-11-26T17:24:16.535435976Z",
+          "requester_id": "SCNfX6OKU6ebSXiQ",
+          "prefer_near": "SCNvX6OKU6ebSXiQ",
+          "machines": 12,
+          "kind": "new",
+          "machine": "http://10.77.10.251:22100",
+          "reason": "empty machine: cpu 0% + receiver 44% <= 60%",
+          "applied": "new",
+          "reserve": {
+            "floor": 2,
+            "pending": 0,
+            "ready": 1,
+            "warming": 0
+          }
+        },
+        {
+          "at": "2026-11-26T17:24:18.42389223Z",
+          "requester_id": "S4NfX6OKU6fBvcQw",
+          "prefer_near": "S4NjX6OKU6fBvcQw",
+          "machines": 12,
+          "kind": "existing",
+          "machine": "http://10.77.11.64:22100",
+          "reason": "least loaded machine with headroom: cpu 6% + receiver 44% <= 60%",
+          "applied": "existing",
+          "reserve": {
+            "floor": 2,
+            "pending": 0,
+            "ready": 0,
+            "warming": 0
+          }
+        },
+        {
+          "at": "2026-11-26T17:24:36.540930222Z",
+          "requester_id": "SCNfX6OKU6ebSXiQ",
+          "prefer_near": "SCNfb6OKU6ebSXiQ",
+          "machines": 13,
+          "kind": "existing",
+          "machine": "http://10.77.0.28:22100",
+          "reason": "least loaded machine with headroom: cpu 12% + receiver 44% <= 60%",
+          "applied": "existing",
+          "reserve": {
+            "floor": 2,
+            "pending": 0,
+            "ready": 0,
+            "warming": 1
+          }
+        },
+        {
+          "at": "2026-11-26T17:24:38.438332052Z",
+          "requester_id": "S4NfX6OKU6fBvcQw",
+          "prefer_near": "S4NeX6OKU6fBvcQw",
+          "machines": 13,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 1,
+            "ready": 0,
+            "warming": 1
+          }
+        },
+        {
+          "at": "2026-11-26T17:24:43.34731331Z",
+          "requester_id": "S4NfX6OKU6fBvcQw",
+          "prefer_near": "S4NeX6OKU6fBvcQw",
+          "machines": 14,
+          "kind": "new",
+          "machine": "http://10.77.2.24:22100",
+          "reason": "empty machine: cpu 0% + receiver 44% <= 60%",
+          "applied": "new",
+          "reserve": {
+            "floor": 2,
+            "pending": 0,
+            "ready": 0,
+            "warming": 1
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:03.176256487Z",
+          "requester_id": "sop3VDw5jWbIvpa8",
+          "prefer_near": "spp3VDw5jWbIvpa8",
+          "machines": 15,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 1,
+            "ready": 0,
+            "warming": 2
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:07.325320986Z",
+          "requester_id": "sop3VDw5jWbIvpa8",
+          "prefer_near": "spp3VDw5jWbIvpa8",
+          "machines": 15,
+          "kind": "new",
+          "machine": "http://10.77.5.75:22100",
+          "reason": "empty machine: cpu 0% + receiver 44% <= 60%",
+          "applied": "new",
+          "reserve": {
+            "floor": 2,
+            "pending": 0,
+            "ready": 0,
+            "warming": 1
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:07.929560425Z",
+          "requester_id": "S4NfX6OKU6fBvcQw",
+          "prefer_near": "S4Nf16OKU6fBvcQw",
+          "machines": 15,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 1,
+            "ready": 0,
+            "warming": 1
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:10.100928336Z",
+          "requester_id": "SCNfX6OKU6ebSXiQ",
+          "prefer_near": "SCNfXcOKU6ebSXiQ",
+          "machines": 15,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 2,
+            "ready": 0,
+            "warming": 1
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:14.457176815Z",
+          "requester_id": "S4NfX6OKU6fBvcQw",
+          "prefer_near": "S4Nf16OKU6fBvcQw",
+          "machines": 15,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 2,
+            "ready": 0,
+            "warming": 1
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:14.459550206Z",
+          "requester_id": "SCNfX6OKU6ebSXiQ",
+          "prefer_near": "SCNfXcOKU6ebSXiQ",
+          "machines": 15,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 2,
+            "ready": 0,
+            "warming": 1
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:30.213822185Z",
+          "requester_id": "S4NfX6OKU6fBvcQw",
+          "prefer_near": "S4Nf16OKU6fBvcQw",
+          "machines": 16,
+          "kind": "new",
+          "machine": "http://10.77.15.96:22100",
+          "reason": "empty machine: cpu 0% + receiver 44% <= 60%",
+          "applied": "new",
+          "reserve": {
+            "floor": 2,
+            "pending": 0,
+            "ready": 0,
+            "warming": 1
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:30.465426372Z",
+          "requester_id": "SCNfX6OKU6ebSXiQ",
+          "prefer_near": "SCNfXcOKU6ebSXiQ",
+          "machines": 16,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 1,
+            "ready": 0,
+            "warming": 1
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:35.95029541Z",
+          "requester_id": "7qHpvWJY9FtF7y-l",
+          "prefer_near": "7yHpvWJY9FtF7y-l",
+          "machines": 17,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 3,
+            "ready": 0,
+            "warming": 2
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:37.308165496Z",
+          "requester_id": "6qHpvWJY9FtUwDC6",
+          "prefer_near": "6yHpvWJY9FtUwDC6",
+          "machines": 18,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 9,
+            "ready": 0,
+            "warming": 2
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:36.287761459Z",
+          "requester_id": "EqHpvWJY9Fq-JD1U",
+          "prefer_near": "EmHpvWJY9Fq-JD1U",
+          "machines": 18,
+          "kind": "new",
+          "machine": "http://10.77.9.252:22100",
+          "reason": "empty machine: cpu 6% + receiver 44% <= 60%",
+          "applied": "new",
+          "reserve": {
+            "floor": 2,
+            "pending": 5,
+            "ready": 0,
+            "warming": 2
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:37.106004495Z",
+          "requester_id": "EaHpvWJY9FrQ45wH",
+          "prefer_near": "EiHpvWJY9FrQ45wH",
+          "machines": 18,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 8,
+            "ready": 0,
+            "warming": 2
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:36.034050987Z",
+          "requester_id": "bynTnYq3XYKm2ONn",
+          "prefer_near": "b-nTnYq3XYKm2ONn",
+          "machines": 17,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 4,
+            "ready": 0,
+            "warming": 2
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:36.144675439Z",
+          "requester_id": "aqnTnYq3XYN8nyhc",
+          "prefer_near": "amnTnYq3XYN8nyhc",
+          "machines": 18,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 5,
+            "ready": 0,
+            "warming": 3
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:35.725295016Z",
+          "requester_id": "aynTnYq3XYL7OXjx",
+          "prefer_near": "a-nTnYq3XYL7OXjx",
+          "machines": 17,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 2,
+            "ready": 0,
+            "warming": 2
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:36.583873241Z",
+          "requester_id": "oop3VDw5jWanVgGT",
+          "prefer_near": "pop3VDw5jWanVgGT",
+          "machines": 18,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 6,
+            "ready": 0,
+            "warming": 2
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:37.361581108Z",
+          "requester_id": "bqnTnYq3XYLZwlhw",
+          "prefer_near": "bmnTnYq3XYLZwlhw",
+          "machines": 18,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 3,
+            "pending": 10,
+            "ready": 0,
+            "warming": 2
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:36.765039922Z",
+          "requester_id": "mop3VDw5jWb6eG6F",
+          "prefer_near": "nop3VDw5jWb6eG6F",
+          "machines": 18,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 2,
+            "pending": 7,
+            "ready": 0,
+            "warming": 2
+          }
+        },
+        {
+          "at": "2026-11-26T17:25:51.860436282Z",
+          "requester_id": "SCNfX6OKU6ebSXiQ",
+          "prefer_near": "SCNfXcOKU6ebSXiQ",
+          "machines": 18,
+          "kind": "new",
+          "machine": "http://10.77.8.183:22100",
+          "reason": "empty machine: cpu 16% + receiver 44% <= 60%",
+          "applied": "new",
+          "reserve": {
+            "floor": 2,
+            "pending": 3,
+            "ready": 1,
+            "warming": 1
+          }
+        },
+        {
+          "at": "2026-11-26T17:26:09.759914205Z",
+          "requester_id": "6qHpvWJY9FtUwDC6",
+          "prefer_near": "6yHpvWJY9FtUwDC6",
+          "machines": 23,
+          "kind": "new",
+          "machine": "http://10.77.8.105:22100",
+          "reason": "empty machine: cpu 1% + receiver 44% <= 60%",
+          "applied": "new",
+          "reserve": {
+            "floor": 2,
+            "pending": 0,
+            "ready": 1,
+            "warming": 4
+          }
+        },
+        {
+          "at": "2026-11-26T17:26:10.160328049Z",
+          "requester_id": "ssp3VDw5jWbsp6RC",
+          "prefer_near": "sqp3VDw5jWbsp6RC",
+          "machines": 25,
+          "kind": "new",
+          "machine": "http://10.77.7.234:22100",
+          "reason": "empty machine: cpu 13% + receiver 44% <= 60%",
+          "applied": "new",
+          "reserve": {
+            "floor": 3,
+            "pending": 0,
+            "ready": 1,
+            "warming": 5
+          }
+        },
+        {
+          "at": "2026-11-26T17:26:12.707640027Z",
+          "requester_id": "SCNfX6OKU6ebSXiQ",
+          "prefer_near": "SCNfX4OKU6ebSXiQ",
+          "machines": 27,
+          "kind": "new",
+          "machine": "http://10.77.6.221:22100",
+          "reason": "empty machine: cpu 16% + receiver 44% <= 60%",
+          "applied": "new",
+          "reserve": {
+            "floor": 3,
+            "pending": 0,
+            "ready": 0,
+            "warming": 7
+          }
+        },
+        {
+          "at": "2026-11-26T17:26:19.739359762Z",
+          "requester_id": "7qHpvWJY9FtF7y-l",
+          "prefer_near": "7yHpvWJY9FtF7y-l",
+          "machines": 27,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 3,
+            "pending": 1,
+            "ready": 0,
+            "warming": 7
+          }
+        },
+        {
+          "at": "2026-11-26T17:26:20.346169804Z",
+          "requester_id": "S4NfX6OKU6fBvcQw",
+          "prefer_near": "S4Nfn6OKU6fBvcQw",
+          "machines": 27,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 3,
+            "pending": 2,
+            "ready": 0,
+            "warming": 7
+          }
+        },
+        {
+          "at": "2026-11-26T17:26:25.247178239Z",
+          "requester_id": "S4NfX6OKU6fBvcQw",
+          "prefer_near": "S4Nfn6OKU6fBvcQw",
+          "machines": 27,
+          "kind": "new",
+          "machine": "",
+          "reason": "no machine has headroom for a receiver: wait for a new machine",
+          "applied": "",
+          "reserve": {
+            "floor": 3,
+            "pending": 2,
+            "ready": 0,
+            "warming": 7
+          }
+        },
+        {
+          "at": "2026-11-26T17:26:29.259800549Z",
+          "requester_id": "S4NfX6OKU6fBvcQw",
+          "prefer_near": "S4Nfn6OKU6fBvcQw",
+          "machines": 27,
+          "kind": "new",
+          "machine": "http://10.77.7.50:22100",
+          "reason": "empty machine: cpu 0% + receiver 44% <= 60%",
+          "applied": "new",
+          "reserve": {
+            "floor": 3,
+            "pending": 1,
+            "ready": 5,
+            "warming": 1
+          }
+        },
+        {
+          "at": "2026-11-26T17:26:49.931795214Z",
+          "requester_id": "S4NfX6OKU6fBvcQw",
+          "prefer_near": "S4Nfb6OKU6fBvcQw",
+          "machines": 27,
+          "kind": "new",
+          "machine": "http://10.77.0.167:22100",
+          "reason": "empty machine: cpu 0% + receiver 44% <= 60%",
+          "applied": "new",
+          "reserve": {
+            "floor": 2,
+            "pending": 0,
+            "ready": 5,
+            "warming": 0
+          }
+        }
+      ]
+    }
+  },
+  "load_summary": {
+    "acked": 2827818,
+    "drain_completed": true,
+    "exhausted": 4125,
+    "offered": 3066166,
+    "queued_unfinished": 12283,
+    "shed": 221940
+  }
+}

@@ -1,0 +1,5 @@
+ok  	github.com/indexus/go-indexus-core/internal/storage	93.700s
+ok  	github.com/indexus/go-indexus-core/internal/autoscale	7.020s
+ok  	github.com/indexus/go-indexus-core/internal/adapter/provisioner	7.117s
+ok  	github.com/indexus/go-indexus-core/internal/app/node	30.130s
+ok  	github.com/indexus/go-indexus-core/internal/mesh	220.437s

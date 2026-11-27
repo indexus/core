@@ -1,0 +1,33 @@
+✔ demand has real ramps and unannounced doublings, independent of packing (1.139875ms)
+✔ rate is conserved through local/remote split and progressive installation (1.785125ms)
+✔ dirty work can prevent progress without returning installed ownership (0.228792ms)
+✔ incoming reservation respects all projected resource ceilings and slot limits (108.031042ms)
+✔ fixed receiver budget excludes a host that a bounded stream can use (0.755542ms)
+✔ co-resident split does not relieve the physical foreground CPU (0.813584ms)
+✔ unpredicted bursts are recorded, never presented as a hard 60% guarantee (176.293875ms)
+✔ large stored volumes enforce disk limits even with spare CPU and vnode slots (3.988166ms)
+✔ the experiment is deterministic and records its artificial scope bounds (81.355709ms)
+✔ zone metadata is not inferred solely from stored byte volume (0.481958ms)
+✔ forecast never peeks at a future hotspot or instantaneous doubling (13.455542ms)
+✔ granular GC releases copied data before the whole vnode finishes (0.649542ms)
+✔ warm reserve grows with observed resource demand, not a fixed host count (9.191708ms)
+✔ shared dashboard conserves vnode rates through split and copy (0.957875ms)
+✔ interactive trace samples transient transfers instead of hiding all moves (108.079875ms)
+✔ bounded workers report loss, unfinished work and intended latency (3.517333ms)
+✔ an atomic maintenance commit blocks writes even on an otherwise idle multicore host (0.447833ms)
+✔ ready machines provide no relief until an installed routing share moves (12.857084ms)
+✔ separate vnode writers still share the same physical CPU (14.430833ms)
+✔ shared disk service can bottleneck independent writers with spare CPU (11.362083ms)
+✔ maintenance debt is preserved, not discarded when a periodic job is late (1.043541ms)
+✔ summary work outside the writer consumes shared CPU (4.052ms)
+✔ 64 vnodes are deterministic and retain demand/ACK accounting (13.0865ms)
+✔ configuration rejects vacuous or unbounded work instead of hiding it (0.593709ms)
+✔ AWS workload clock has 120-second ramps, not the fluid example’s 60-second ramps (0.378708ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 580.319083

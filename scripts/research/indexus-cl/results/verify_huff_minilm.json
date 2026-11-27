@@ -1,0 +1,1 @@
+{"ridge_test_acc": 0.5528218589667104, "lda_test_acc_sklearn_shrinkage": 0.5617468082567713, "unlearn_check_ridge_keep_acc": 0.552678677962057, "subtraction_vs_sklearn_retrain_pred_agree": 1.0, "logreg_C1_maxiter1000_test_acc": 0.6153680944994631, "logreg_n_iter": 374, "seconds": 190.52621507644653}

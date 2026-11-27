@@ -1,0 +1,14 @@
+# The only Python requirements of core: the builders of tools/prep (lidar/,
+# weather/, commune/; scenes/ needs the standard library only). Python 3.12+.
+# Tested with numpy 2.5.3 (Linux) and 2.5.4 (the LiDAR venv on macOS),
+# Pillow 12.3.0, laspy 2.7.0.
+#   python3 -m venv .venv && .venv/bin/pip install -r tools/prep/requirements.txt
+# HTTP (commune/web.py, urllib) and Lambert-93 (commune/lambert.py) are written
+# against the standard library and numpy: no requests, pyproj or shapely.
+# Not listed: matplotlib, needed only by experiences' buildings.py, which
+# commune.py runs with --buildings (scripts/local/prep-commune.sh checks it).
+numpy>=2.5,<3
+# lidar/returns.py, commune/fetch.py: JPEG orthophotos, WebP tiles.
+Pillow>=12.3,<13
+# commune/fetch.py only: COPC tiles of LiDAR HD (lazrs decodes LAZ).
+laspy[lazrs]>=2.7,<3

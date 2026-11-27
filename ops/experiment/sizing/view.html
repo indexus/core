@@ -1,0 +1,189 @@
+<div id="ix-sizing">
+  <style>
+/*__DASHBOARD_CSS__*/
+    #ix-sizing { color:var(--foreground);display:flex;flex-direction:column;gap:calc(var(--font-size-base)*1); }
+    #ix-sizing .ix-dashboard {--series-1:var(--viz-series-1);--series-2:var(--viz-series-2);--series-3:var(--viz-series-3);--grid:var(--border);font:inherit;}
+    #ix-sizing .ix-dashboard .tiles {display:none;}
+    #ix-sizing .ix-dashboard .machine,#ix-sizing .ix-dashboard figure {border:0;border-radius:0;background:transparent;padding:0;}
+    #ix-sizing .ix-dashboard .note {color:var(--muted-foreground);}
+    #ix-sizing .top { display:flex;flex-direction:column;gap:calc(var(--font-size-base)*.25);padding-inline-end:90px; }
+    #ix-sizing .fields {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:calc(var(--font-size-base)*.75);}
+    #ix-sizing label {display:flex;flex-direction:column;gap:calc(var(--font-size-base)*.25);min-width:0;}
+    #ix-sizing .control-title {display:flex;justify-content:space-between;gap:calc(var(--font-size-base)*.25);}
+    #ix-sizing .timeline {display:flex;flex-direction:column;gap:calc(var(--font-size-base)*.4);}
+    #ix-sizing .actions {display:flex;flex-wrap:wrap;align-items:center;gap:calc(var(--font-size-base)*.5);}
+    #ix-sizing details>.fields {margin-block-start:calc(var(--font-size-base)*.75);}
+    @media(max-width:650px){#ix-sizing .fields{grid-template-columns:repeat(2,minmax(0,1fr));}}
+    @media(max-width:380px){#ix-sizing .fields{grid-template-columns:minmax(0,1fr);}#ix-sizing .fleet{grid-template-columns:minmax(0,1fr);}}
+  </style>
+  <div class="top">
+    <h2>Vnodes et ressources partagées</h2>
+    <span class="text-small">Simulation de dimensionnement · hypothèses modifiables · pas un benchmark AWS</span>
+  </div>
+  <div class="fields">
+    <label class="form-label">Charge
+      <select class="form-select" data-k="scenario" id="ix-scenario">
+        <option value="ramp">Montée progressive 2k → 16k/s</option>
+        <option value="hotspot">Pic sur quatre sous-zones voisines</option>
+        <option value="double">Doublements instantanés</option>
+        <option value="volume">64 Gio/vnode, zones plus denses</option>
+      </select>
+    </label>
+    <label class="form-label">Politique comparée
+      <select class="form-select" data-k="policy" id="ix-policy">
+        <option value="adaptive">Budget partagé de copie et placement</option>
+        <option value="fixed">Réserve fixe de réception : 1,75 cœur</option>
+        <option value="items">Ajout d'un seuil en nombre d'items</option>
+      </select>
+    </label>
+    <label class="form-label"><span class="control-title">Plafond vnodes/machine <output for="ix-slots" data-out="slots">5</output></span>
+      <input class="form-range" type="range" id="ix-slots" data-k="slots" min="1" max="8" step="1" value="5">
+    </label>
+    <label class="form-label"><span class="control-title">Anticiper à <output for="ix-trigger" data-out="trigger">45 %</output></span>
+      <input class="form-range" type="range" id="ix-trigger" data-k="trigger" min="35" max="55" step="5" value="45">
+    </label>
+    <label class="form-label"><span class="control-title">CPU de copie par machine <output for="ix-copy" data-out="copyCpuPct">10 %</output></span>
+      <input class="form-range" type="range" id="ix-copy" data-k="copyCpuPct" min="5" max="20" step="1" value="10">
+    </label>
+    <label class="form-label"><span class="control-title">Capacité CPU chaude / CPU utilisé <output for="ix-warm" data-out="reservePct">15 %</output></span>
+      <input class="form-range" type="range" id="ix-warm" data-k="reservePct" min="0" max="50" step="5" value="15">
+    </label>
+  </div>
+  <details id="ix-assumptions">
+    <summary>Hypothèses de machine, données et transfert</summary>
+    <div class="fields">
+      <label class="form-label">Vnodes initiaux
+        <select class="form-select" data-k="initialVnodes"><option>16</option><option selected>64</option><option>256</option></select>
+      </label>
+      <label class="form-label">Données par vnode, Gio
+        <select class="form-select" data-k="dataGiB"><option>0.125</option><option selected>0.25</option><option>1</option><option>8</option><option>32</option><option>64</option><option>128</option></select>
+      </label>
+      <label class="form-label">Items par zone
+        <select class="form-select" data-k="itemsPerZone"><option selected>1</option><option>32</option><option>128</option><option>512</option></select>
+      </label>
+      <label class="form-label"><span class="control-title">Coût CPU, µs/écriture <output data-out="cpuUsPerWrite" for="ix-cpu">1300</output></span>
+        <input class="form-range" id="ix-cpu" data-k="cpuUsPerWrite" type="range" min="650" max="2600" step="50" value="1300">
+      </label>
+      <label class="form-label"><span class="control-title">Démarrage machine, s <output data-out="bootSeconds" for="ix-boot">45</output></span>
+        <input class="form-range" id="ix-boot" data-k="bootSeconds" type="range" min="0" max="120" step="5" value="45">
+      </label>
+      <label class="form-label">Débit maximal de copie, Mio/s
+        <select class="form-select" data-k="bandwidthMiB"><option>25</option><option>50</option><option selected>100</option><option>200</option></select>
+      </label>
+      <label class="form-label">RAM par machine, Gio
+        <select class="form-select" data-k="ramGiB"><option>8</option><option selected>16</option><option>32</option><option>64</option></select>
+      </label>
+      <label class="form-label">Disque par machine, Gio
+        <select class="form-select" data-k="diskGiB"><option>250</option><option>500</option><option selected>900</option><option>1800</option></select>
+      </label>
+      <label class="form-label">Cœurs par machine
+        <select class="form-select" data-k="cores"><option>2</option><option selected>4</option><option>8</option><option>16</option></select>
+      </label>
+      <label class="form-label">Seuil d'items, si activé
+        <select class="form-select" data-k="itemLimit"><option>20000</option><option selected>500000</option><option>2000000</option></select>
+      </label>
+      <label class="form-label">RAM estimée par zone, octets
+        <select class="form-select" data-k="zoneMemoryBytes"><option>512</option><option>1024</option><option selected>2048</option><option>4096</option></select>
+      </label>
+      <label class="form-label">Libération sur la source
+        <select class="form-select" data-k="gcMode"><option value="granular">Après chaque portion copiée</option><option value="end">Après le vnode entier</option></select>
+      </label>
+      <label class="form-label">Délai de collecte, s
+        <select class="form-select" data-k="gcSeconds"><option>0</option><option selected>20</option><option>60</option></select>
+      </label>
+      <label class="form-label">Ordre des données copiées
+        <select class="form-select" data-k="hotFirst"><option value="false">Charge uniforme</option><option value="true">50 % de charge dans les premiers 10 %</option></select>
+      </label>
+    </div>
+  </details>
+  <div class="viz-row text-small"><span>Cible : 60 % CPU, RAM, stockage et débit disque</span><span>CPU : besoin estimé · RAM et disque : occupation estimée</span></div>
+  <div id="ix-error" role="alert" class="text-destructive" hidden></div>
+  <div class="viz-grid" aria-live="polite" id="ix-summary">
+    <div class="card viz-stat"><span>Machines, maximum simulé</span><div class="viz-stat-value tabular-nums" id="ix-hosts">—</div></div>
+    <div class="card viz-stat"><span>Consommation, machine·min</span><div class="viz-stat-value tabular-nums" id="ix-cost">—</div></div>
+    <div class="card viz-stat"><span>Au-delà de la cible, hôte·s</span><div class="viz-stat-value tabular-nums" id="ix-over">—</div><span class="text-small tabular-nums" id="ix-excess"></span></div>
+  </div>
+  <div class="timeline">
+    <div class="actions"><button class="btn" type="button" id="ix-play">Lire l’évolution</button><span class="tabular-nums" id="ix-time">0 s</span><span class="tabular-nums" id="ix-demand">2 000 écritures/s</span><button class="btn" type="button" id="ix-compare">Comparer 4 et 5</button></div>
+    <label class="form-label sr-only" for="ix-timeline">Temps simulé</label>
+    <input class="form-range" id="ix-timeline" type="range" min="0" max="120" step="1" value="0">
+  </div>
+  <div id="ix-fleet" role="group" aria-label="Répartition des vnodes et ressources des machines"></div>
+  <div id="ix-copy-status" class="text-small"></div>
+  <div id="ix-comparison" hidden class="table-responsive" aria-live="polite"></div>
+  <script>
+/*__DASHBOARD_JS__*/
+  (()=>{
+    /*__SIZING_MODEL__*/
+    const root=document.getElementById('ix-sizing');
+    const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false;
+    const q=s=>root.querySelector(s);
+    const fields=[...root.querySelectorAll('[data-k]')];
+    let cfg={...DEFAULTS,trigger:45},result=null,frames=[],position=300,timer=null,debounce=null;
+    const fmt=(x,d=0)=>Number.isFinite(x)?x.toLocaleString('fr-FR',{maximumFractionDigits:d}):'—';
+    const time=t=>`${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`;
+    function restore(state) {
+      if(!state)return;
+      for(const f of fields)if(state[f.dataset.k]!==undefined)cfg[f.dataset.k]=state[f.dataset.k];
+      if(Number.isFinite(state.timeSeconds))position=Math.round(state.timeSeconds/cfg.traceEvery);
+    }
+    function syncFields(){
+      for(const f of fields)f.value=String(cfg[f.dataset.k]);
+      for(const o of root.querySelectorAll('[data-out]'))o.textContent=fmt(cfg[o.dataset.out])+(['trigger','copyCpuPct','reservePct'].includes(o.dataset.out)?' %':'');
+    }
+    function save(){
+      const state=Object.fromEntries(fields.map(f=>[f.dataset.k,cfg[f.dataset.k]]));
+      window.openai?.setWidgetState?.({modelContent:{...state,timeSeconds:result?.snapshots[position]?.t??0},privateContent:{assumptionsOpen:q('#ix-assumptions').open}})?.catch(()=>{});
+    }
+    function stop(){if(timer){clearInterval(timer);timer=null;}q('#ix-play').textContent=reduced?'Avancer d’un instant':'Lire l’évolution';}
+    function compute(){
+      stop();q('#ix-error').hidden=true;q('#ix-comparison').hidden=true;
+      try {
+        cfg.cold=Math.min(35,cfg.trigger-10);
+        cfg.maxHosts=Math.max(96,Math.ceil(cfg.initialVnodes/cfg.slots)+8);
+        result=simulate(cfg);frames=dashboardPoints(result);q('#ix-timeline').max=result.snapshots.length-1;
+        position=Math.min(position,result.snapshots.length-1);q('#ix-timeline').value=position;
+        q('#ix-hosts').textContent=fmt(result.summary.peakHosts);
+        q('#ix-cost').textContent=fmt(result.summary.machineMinutes,1);
+        q('#ix-over').textContent=fmt(result.summary.overAnySeconds);
+        q('#ix-excess').textContent=`Dépassement maximal : +${fmt(result.summary.peakExcessPct,2)} points`;
+        draw();
+      } catch(e){q('#ix-error').textContent=e.message;q('#ix-error').hidden=false;q('#ix-fleet').replaceChildren();result=null;}
+    }
+    function draw(){
+      if(!result)return;
+      const snap=result.snapshots[position];
+      q('#ix-time').textContent=`${time(snap.t)} / ${time(cfg.seconds)}`;
+      q('#ix-demand').textContent=`${fmt(snap.demand)} écritures/s`;
+      IndexusDashboard.render(q('#ix-fleet'),frames,position);
+      q('#ix-copy-status').textContent=`Réserve chaude cible : ${cfg.reservePct} % du CPU utilisé, en capacité de réception sur machines vides. Les démarrages ne sont pas encore disponibles.`;
+    }
+    for(const f of fields)f.addEventListener('input',()=>{
+      const key=f.dataset.k,old=cfg[key],raw=f.value;
+      cfg[key]=typeof DEFAULTS[key]==='number'?Number(raw):typeof DEFAULTS[key]==='boolean'?raw==='true':raw;
+      if(key==='scenario'&&(raw==='volume'||old==='volume')){
+        cfg.dataGiB=raw==='volume'?64:.25;cfg.itemsPerZone=raw==='volume'?128:1;
+      }
+      syncFields();clearTimeout(debounce);debounce=setTimeout(()=>{compute();save();},120);
+    });
+    window.addEventListener('resize',()=>{clearTimeout(debounce);debounce=setTimeout(draw,120);});
+    q('#ix-timeline').addEventListener('input',e=>{stop();position=Number(e.target.value);draw();save();});
+    q('#ix-play').onclick=()=>{
+      if(timer){stop();return;}if(!result)return;
+      if(reduced){position=(position+1)%result.snapshots.length;q('#ix-timeline').value=position;draw();save();return;}
+      if(position>=result.snapshots.length-1)position=0;
+      q('#ix-play').textContent='Pause';
+      timer=setInterval(()=>{position++;q('#ix-timeline').value=position;draw();if(position>=result.snapshots.length-1){stop();save();}},180);
+    };
+    q('#ix-compare').onclick=()=>{
+      if(!result)return;
+      const outcomes=[4,5].map(slots=>({slots,r:simulate({...cfg,slots,trace:false})}));
+      q('#ix-comparison').innerHTML='<table class="table table-sm"><thead><tr><th>Plafond</th><th class="text-end">Machine·min</th><th class="text-end">Hôte·s hors cible</th><th class="text-end">Déplacements</th></tr></thead><tbody>'+outcomes.map(({slots,r})=>`<tr><td>${slots} vnodes/machine</td><td class="text-end">${fmt(r.summary.machineMinutes,1)}</td><td class="text-end">${fmt(r.summary.overAnySeconds)}</td><td class="text-end">${r.summary.moves}</td></tr>`).join('')+'</tbody></table>';
+      q('#ix-comparison').hidden=false;
+    };
+    restore(window.openai?.widgetState?.modelContent??window.openai?.widgetState);
+    syncFields();compute();
+    window.addEventListener('openai:set_globals',e=>{const s=e.detail?.globals?.widgetState;if(s){restore(s.modelContent??s);syncFields();compute();}});
+  })();
+  </script>
+</div>

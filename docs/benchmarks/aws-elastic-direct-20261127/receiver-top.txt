@@ -1,0 +1,26 @@
+File: node
+Build ID: 548075c5da823c834cc5c4130b017d453449366f
+Type: cpu
+Time: 2026-11-27 05:28:55 CET
+Duration: 10s, Total samples = 380ms ( 3.80%)
+Showing nodes accounting for 230ms, 60.53% of 380ms total
+Showing top 18 nodes out of 273
+      flat  flat%   sum%        cum   cum%
+      20ms  5.26%  5.26%       20ms  5.26%  internal/runtime/syscall/linux.Syscall6
+      20ms  5.26% 10.53%       20ms  5.26%  runtime.futex
+      20ms  5.26% 15.79%       20ms  5.26%  runtime.scanObject
+      20ms  5.26% 21.05%       20ms  5.26%  runtime.spanClass.sizeclass
+      20ms  5.26% 26.32%       20ms  5.26%  runtime.spanSetScans
+      10ms  2.63% 28.95%       10ms  2.63%  aeshashbody
+      10ms  2.63% 31.58%       10ms  2.63%  crypto/internal/fips140/edwards25519/field.feMul
+      10ms  2.63% 34.21%       40ms 10.53%  encoding/json.(*decodeState).array
+      10ms  2.63% 36.84%       40ms 10.53%  encoding/json.(*decodeState).literalStore
+      10ms  2.63% 39.47%       10ms  2.63%  encoding/json.arrayEncoder.encode
+      10ms  2.63% 42.11%       10ms  2.63%  fmt.(*pp).printArg
+      10ms  2.63% 44.74%       10ms  2.63%  github.com/indexus/go-indexus-core/internal/metrics.Handled
+      10ms  2.63% 47.37%       10ms  2.63%  github.com/indexus/go-indexus-core/internal/storage.sealKey
+      10ms  2.63% 50.00%       10ms  2.63%  github.com/indexus/go-indexus-core/internal/storage.stagedZone
+      10ms  2.63% 52.63%       10ms  2.63%  github.com/indexus/go-indexus-core/internal/zonelog.addSkiplistSpans
+      10ms  2.63% 55.26%       10ms  2.63%  p256SqrInternal
+      10ms  2.63% 57.89%       10ms  2.63%  reflect.(*rtype).Name
+      10ms  2.63% 60.53%       10ms  2.63%  reflect.(*rtype).NumMethod

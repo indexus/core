@@ -1,0 +1,9 @@
+--- FAIL: TestPressureLevelSurvivesIntermittentRise (0.00s)
+    pressure_hold_test.go:16: CPU always >=70% for 30s, signal=cpu held=0s need=30s
+--- FAIL: TestMaturePressureLevelWinsOverFreshRise (0.00s)
+    pressure_hold_test.go:31: fresh rise hid a mature level: cpu_rise held=0s need=12s
+--- FAIL: TestDifferentPressureResourcesDoNotShareAge (0.00s)
+    pressure_hold_test.go:44: memory inherited CPU age: mem_filling 20s
+FAIL
+FAIL	github.com/indexus/go-indexus-core/internal/autoscale	0.496s
+FAIL

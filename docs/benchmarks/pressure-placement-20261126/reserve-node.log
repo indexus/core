@@ -1,0 +1,18 @@
+
+
+██╗███╗   ██╗██████╗ ███████╗██╗  ██╗██╗   ██╗███████╗
+██║████╗  ██║██╔══██╗██╔════╝╚██╗██╔╝██║   ██║██╔════╝
+██║██╔██╗ ██║██║  ██║█████╗   ╚███╔╝ ██║   ██║███████╗
+██║██║╚██╗██║██║  ██║██╔══╝   ██╔██╗ ██║   ██║╚════██║
+██║██║ ╚████║██████╔╝███████╗██╔╝ ██╗╚██████╔╝███████║
+╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+
+Indexus dev (none, go1.26.0)
+
+time=2026-11-26T19:49:45.773Z level=INFO msg="starting node" component=node name=eVY4cPFnu6k7fVHk monitoring_port=19100 p2p_port=21100 bootstraps=donor:21100 advertise=172.25.0.4 storage=/data/slots/0/backup issuer=http://controller:22000 require_auth=true
+time=2026-11-26T19:49:45.773Z level=INFO msg="autoscale enabled" component=node role="" pressure_hold=0s cooldown=0s window=0s
+time=2026-11-26T19:49:45.783Z level=INFO msg="p2p server listening" component=node addr=[::]:21100 tls=false auth=true
+time=2026-11-26T19:49:45.787Z level=INFO msg="monitoring server listening" component=node addr=[::]:19100 tls=false
+time=2026-11-26T19:49:45.788Z level=WARN msg="join continues in the background" component=node err="join unfinished at startup: donor no longer needs a peer"
+time=2026-11-26T19:49:45.788Z level=INFO msg="background jobs started" component=node interval=10s
+time=2026-11-26T19:50:00.791Z level=INFO msg="join not needed any more, leaving" component=node attempts=2

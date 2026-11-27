@@ -1,0 +1,233 @@
+{
+  "instances": 28,
+  "all_terminated": true,
+  "ec2_estimate_to_transition_usd": 1.3554,
+  "ec2_upper_until_verification_usd": 1.7955,
+  "excludes": "EBS, S3, transfer, API, taxes; not an invoice",
+  "timings": [
+    {
+      "instance": "i-0467949011359d5a8",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:16:10+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 778.0
+    },
+    {
+      "instance": "i-0259604dee5359a18",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:16:20+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 768.0
+    },
+    {
+      "instance": "i-05dc23898d956327f",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:21:37+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 451.0
+    },
+    {
+      "instance": "i-03c79716a1228f800",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:24:02+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 306.0
+    },
+    {
+      "instance": "i-0dc033d7b38cd64fd",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:24:22+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 286.0
+    },
+    {
+      "instance": "i-07356373acc8fac47",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:16:14+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 774.0
+    },
+    {
+      "instance": "i-02578357ed4fe4430",
+      "type": "c6i.4xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:16:22+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 766.0
+    },
+    {
+      "instance": "i-0231898586c3dae03",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:25:47+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 201.0
+    },
+    {
+      "instance": "i-080e40206ed55af9e",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:25:47+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 201.0
+    },
+    {
+      "instance": "i-0b4f68158e6be5f62",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:21:32+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 456.0
+    },
+    {
+      "instance": "i-06d1ffd943770a315",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:21:34+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 454.0
+    },
+    {
+      "instance": "i-0aa34b9e91fb336bb",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:21:34+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 454.0
+    },
+    {
+      "instance": "i-018940a12e91eb2a8",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:21:26+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 462.0
+    },
+    {
+      "instance": "i-0f6848c19c72cd8b3",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:25:07+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 241.0
+    },
+    {
+      "instance": "i-0b4fc6fc8aaf7ec08",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:16:15+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 773.0
+    },
+    {
+      "instance": "i-070a6d4d622764e32",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:25:13+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 235.0
+    },
+    {
+      "instance": "i-02b43fc3a9bcc2969",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:25:15+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 233.0
+    },
+    {
+      "instance": "i-01fdd20aac35fa7bc",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:25:46+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 202.0
+    },
+    {
+      "instance": "i-0c71cf1fee1be12ea",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:25:49+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 199.0
+    },
+    {
+      "instance": "i-08494c60a5c2e6b47",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:25:49+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 199.0
+    },
+    {
+      "instance": "i-062dd3cd66b1a150b",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:25:49+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 199.0
+    },
+    {
+      "instance": "i-0e81766219d2e07b5",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:25:49+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 199.0
+    },
+    {
+      "instance": "i-0351df801d19f2f0a",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:25:49+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 199.0
+    },
+    {
+      "instance": "i-0c3d3e2bfe4175f2d",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:25:49+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 199.0
+    },
+    {
+      "instance": "i-0f470fa53015ee3d1",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:16:17+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 771.0
+    },
+    {
+      "instance": "i-0055fa87ac3aa7f97",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:16:19+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 769.0
+    },
+    {
+      "instance": "i-0cab731d809de65d6",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:24:42+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 266.0
+    },
+    {
+      "instance": "i-054c37a8cae0df4d2",
+      "type": "i4i.xlarge",
+      "state": "terminated",
+      "launch": "2026-11-26T17:21:58+00:00",
+      "transition_reason": "User initiated (2026-11-26 17:29:08 GMT)",
+      "seconds_to_transition_or_check": 430.0
+    }
+  ]
+}
