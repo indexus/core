@@ -64,83 +64,8 @@
   font-size:12px;
   min-height:20px
 }
-.ix-dashboard .fleet {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));
-  gap:12px
-}
-.ix-dashboard .machine {
-  border:1px solid var(--grid,#8885);
-  padding:12px;
-  border-radius:8px;
-  min-width:0
-}
-.ix-dashboard h3 {
-  font-size:14px;
-  margin:0;
-  overflow-wrap:anywhere
-}
-.ix-dashboard .hot {
-  border-color:#c85c35;
-  background:#c85c350b
-}
-.ix-dashboard .resource {
-  display:grid;
-  grid-template-columns:74px minmax(20px,1fr) 60px;
-  gap:8px;
-  align-items:center;
-  font-size:12px
-}
-.ix-dashboard .resource>span:last-child {
-  text-align:right
-}
-.ix-dashboard .track {
-  background:#8882;
-  height:7px;
-  position:relative
-}
-.ix-dashboard .track:after {
-  content:'';
-  position:absolute;
-  left:60%;
-  height:11px;
-  top:-2px;
-  border-left:1px dashed currentColor
-}
-.ix-dashboard .track i {
-  display:block;
-  height:100%;
-  background:var(--series-1)
-}
-.ix-dashboard .track .danger {
-  background:var(--series-2)
-}
-.ix-dashboard .vnodes {
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-  margin-top:12px
-}
-.ix-dashboard button {
-  font:inherit;
-  font-size:12px;
-  color:inherit;
-  background:#8881;
-  border:1px solid #8885;
-  border-radius:5px;
-  padding:5px 8px;
-  cursor:pointer
-}
-.ix-dashboard button:focus-visible {
-  outline:2px solid var(--series-1)
-}
-.ix-dashboard small {
-  display:block
-}
-.ix-dashboard .stale {
-  opacity:.55;
-  border-style:dashed
-}
+.ix-dashboard .topology [role=button] {cursor:pointer}
+.ix-dashboard .topology [role=button]:focus-visible {outline:2px solid var(--series-1)}
 .ix-dashboard .detail {
   overflow-wrap:anywhere;
   min-height:42px

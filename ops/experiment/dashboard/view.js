@@ -29,6 +29,9 @@
       for(const k of ['cpu','ram','disk']){
         const vs=hs.map(h=>h[k]).filter(Number.isFinite);out[k+'_max']=vs.length?Math.max(...vs):null;
       }
+      const stock=itemSum(p.fleet?.vnodes||[],p.metrics_stale);
+      out.stock=stock.value??(!p.metrics_stale&&!p.fleet?.vnodes?.length?p.items:null);
+      out.coverage=stock;
       return Object.assign(out,growthMetrics(p));
     });
     if(!points.length){root.append(el('p','Aucune mesure disponible.'));return;}
@@ -42,13 +45,14 @@
     const unknown=machines.filter(h=>h.cpu==null||h.ram==null||h.disk==null).length;
     const hasResources=machines.some(h=>[h.cpu,h.ram,h.disk].some(Number.isFinite));
     const hasReadiness=sim||machines.some(h=>h.ready_offer!=null);
-    const stats=[['Demande /s',p.load_stale?null:p.offered],['ACK client /s',p.load_stale?null:p.acked],['Vnodes prêts / observés',fmt(p.ready_count)+' / '+fmt(p.observed_count)],['Machines observées',p.machine_count],['Chaudes / démarrage',`${hasReadiness?warm:'?'} / ${sim?boot:'?'}`],['Réceptions admissibles',machines.some(h=>h.ready_offer!=null)?machines.filter(h=>h.ready_offer).length:null],['Machines observées > 60 %',hasResources?bad:null],['Transferts',p.metrics_stale?null:p.open??transfers.length],['p99 écriture, ms',p.load_stale?null:p.p99_ms]];
+    const stats=[['Demande /s',p.load_stale?null:p.offered],['ACK client /s',p.load_stale?null:p.acked],['Items observés',p.stock],['Vnodes comptés / inventoriés',p.coverage.total?fmt(p.coverage.count)+' / '+fmt(p.coverage.total):'—'],['Vnodes prêts / observés',fmt(p.ready_count)+' / '+fmt(p.observed_count)],['Machines observées',p.machine_count],['Chaudes / démarrage',`${hasReadiness?warm:'?'} / ${sim?boot:'?'}`],['Réceptions admissibles',machines.some(h=>h.ready_offer!=null)?machines.filter(h=>h.ready_offer).length:null],['Machines observées > 60 %',hasResources?bad:null],['Transferts',p.metrics_stale?null:p.open??transfers.length],['p99 écriture, ms',p.load_stale?null:p.p99_ms]];
     for(const [label,value] of stats){const t=el('div',null,'tile');t.append(el('span',label),el('strong',typeof value==='string'?value:fmt(value,1)));tiles.append(t);}root.append(tiles);
     const charts=el('div',null,'charts'),unmeasured=[];
     for(const [title,series,stepped] of [
       ['Écritures /s',[['offered','demandées'],['acked','ACK client'],['estimated_s','besoin réparti (simulation)']]],
       ['Lectures client /s',[['reads_s','tentatives'],['read_failed_s','échecs']]],
       ['Latence écriture, ms',[['p50_ms','p50'],['p95_ms','p95'],['p99_ms','p99']]],
+      ['Items observés dans le réseau',[['stock','somme des compteurs disponibles']]],
       ['Croissance du réseau',[['ready_count','vnodes prêts'],['machine_count','machines observées']],true],
       ['Densité du réseau',[['ready_per_machine','vnodes prêts par machine']],true],
       ['Transferts ouverts',[['open','ouverts'],['frozen','gelés']]],
@@ -71,30 +75,9 @@
       ['Remontée des totaux',[['flush_s','temps le plus long (s)'],['pending_k','arêtes en attente (milliers)']]]
     ])more.append(chart(points.slice(0,index+1),title,series,chartWidth));diagnostics.append(more);root.append(diagnostics);
     root.append(el('h2','Machines et vnodes'));
-    root.append(el('p',`${unknown} machine(s) avec ressources inconnues. Cliquer un vnode pour son détail. Les liens ci-dessous montrent les transferts observés, pas toutes les connexions P2P.`, 'note'));
+    root.append(el('p',`${unknown} machine(s) avec ressources inconnues. Chaque cercle regroupe les vnodes d’une machine. Les flèches suivent les transferts du donneur vers le receveur. Sélectionner un rond pour ses mesures. La somme des compteurs disponibles peut être partielle et n’est pas un audit des clés uniques.`, 'note'));
     const detail=el('p','Sélectionner un vnode.','detail');detail.setAttribute('aria-live','polite');
-    const grid=el('div',null,'fleet');
-    for(const h of [...machines].sort((a,b)=>pressure(b)-pressure(a)||String(a.id).localeCompare(String(b.id)))){
-      const card=el('section',null,'machine '+(pressure(h)>60?'hot':''));
-      card.append(el('h3',h.label||h.id),el('p',`${h.state||'unknown'} · CPU : ${h.cpu_scope||'estimé'}`,'note'));
-      for(const [key,label] of [['cpu','CPU'],['ram','RAM'],['disk','Disque'],['io','Débit disque']]){
-        if(key==='io'&&h[key]==null)continue;
-        const row=el('div',null,'resource'),track=el('div',null,'track'),fill=el('i');
-        fill.style.width=Math.min(100,Math.max(0,h[key]||0))+'%';if(h[key]>60)fill.className='danger';
-        track.append(fill);row.append(el('span',label),track,el('span',fmt(h[key],1)+' %'));card.append(row);
-      }
-      const strip=el('div',null,'vnodes');
-      for(const n of nodes.filter(n=>n.machine===h.id)){
-        const b=el('button',String(n.label).slice(0,10),n.state==='stale'?'stale':'');b.type='button';
-        const rate=n.applied_s??n.estimated_s;
-        b.title=`${n.label} · ${n.state} · ${fmt(rate,1)} ${sim?'requises':'applications'}/s`;
-        b.onclick=()=>{detail.textContent=`${n.label} · machine ${h.label||h.id} · ${n.state} · ${fmt(rate,1)} ${sim?'écritures/s requises':'nouvelles applications/s'} · ${fmt(n.items)} items · ${n.monitor||'modèle de ressources'}`;};
-        b.append(el('small',fmt(rate,1)+'/s'));strip.append(b);
-      }
-      card.append(strip);grid.append(card);
-    }
-    if(!machines.length)grid.append(el('p','Cette archive contient uniquement les agrégats globaux ; aucun inventaire machine n’a été enregistré.'));
-    root.append(grid,detail,el('h2','Transferts et délégations'));
+    root.append(detail,topology(machines,nodes,transfers,detail,sim,p.metrics_stale,root.clientWidth),el('h2','Transferts et délégations'));
     const list=el('div',null,'transfers');
     if(!transfers.length)list.append(el('p',p.metrics_stale?'État des transferts inconnu.':'Aucun transfert observé à cet instant.'));
     for(const tr of transfers){
@@ -103,6 +86,74 @@
         el('span',`${tr.phase||'copie'}${tr.stale?' · état périmé':''} · âge ${fmt(tr.age_s,1)} s · ${tr.progress==null?'progression non mesurée':fmt(tr.progress*100,1)+' % copiés'}${tr.share==null?'':' · '+fmt(tr.share*100,1)+' % de charge déplacée'}${tr.frozen?' · gel observé':''}`));list.append(row);
     }
     root.append(list);
+  }
+  function itemSum(nodes,stale){
+    const counted=stale?[]:nodes.filter(n=>n.state!=='stale'&&n.items_counted!==false&&Number.isFinite(n.items));
+    return {value:counted.length?counted.reduce((sum,n)=>sum+n.items,0):null,count:counted.length,total:nodes.length};
+  }
+  function topology(machines,nodes,transfers,detail,sim,stale,width){
+    const wrap=el('div',null,'topology');
+    if(!machines.length){wrap.append(el('p','Aucun inventaire machine enregistré.'));return wrap;}
+    const colors={ready:'#16856a',receiving:'#347cca',joining:'#347cca',unknown:'#888'};
+    wrap.append(el('p','Vnode vert = prêt · bleu = en cours de join · gris = inconnu ou périmé. Contour orange = ressource au-dessus de 60 %. Flèche orange = gel observé.','note'));
+    const canvas=svg('svg',{'aria-label':'Machines, vnodes et sens des transferts',role:'group'});
+    const defs=svg('defs',{});
+    for(const [id,color] of [['flow','#588fc2'],['fence','#ce663e']]){
+      const marker=svg('marker',{id,viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:6,markerHeight:6,orient:'auto'});
+      marker.append(svg('path',{d:'M0 0 L10 5 L0 10 Z',fill:color}));defs.append(marker);
+    }
+    const links=svg('g',{}),glyphs=svg('g',{});
+    canvas.append(defs,glyphs,links);
+    const hosts=new Map(),ends=new Map(),ordered=[...machines].sort((a,b)=>String(a.id).localeCompare(String(b.id),undefined,{numeric:true}));
+    const members=new Map(ordered.map(h=>[h.id,[]]));
+    for(const n of nodes)members.get(n.machine)?.push(n);
+    const widest=Math.max(1,...Array.from(members.values(),ns=>Math.ceil(Math.sqrt(ns.length))));
+    const radius=Math.max(38,widest*11),cell=radius*2+62,step=cell+36,cols=Math.max(1,Math.min(ordered.length,Math.floor(width/cell)));
+    canvas.setAttribute('viewBox',`0 0 ${cols*cell} ${Math.ceil(ordered.length/cols)*step}`);
+    function label(group,x,y,value){
+      const t=svg('text',{x,y,'text-anchor':'middle'});t.textContent=value;group.append(t);
+    }
+    function select(group,description){
+      group.setAttribute('tabindex',0);group.setAttribute('role','button');group.setAttribute('aria-label',description);
+      const title=svg('title',{});title.textContent=description;group.append(title);
+      group.onclick=()=>{detail.textContent=description;};
+      group.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();group.onclick();}};
+    }
+    ordered.forEach((h,i)=>{
+      const ns=members.get(h.id),x=(i%cols+.5)*cell,y=Math.floor(i/cols)*step+radius+12;
+      hosts.set(h.id,{x,y,r:radius});
+      const g=svg('g',{}),sum=itemSum(ns,stale);
+      g.append(svg('circle',{cx:x,cy:y,r:radius,fill:'#8881',stroke:pressure(h)>60?'#ce663e':'#888','stroke-width':2}));
+      const observed=fmt(sum.value)+' items';
+      const resources=[['cpu','CPU'],['ram','RAM'],['disk','Disque']];
+      label(g,x,y+radius+17,h.label||h.id);label(g,x,y+radius+34,observed);
+      for(const [j,[k]] of resources.entries()){
+        const left=x-34+24*j,top=y+radius+43;
+        g.append(svg('rect',{x:left,y:top,width:19,height:4,fill:'#8884'}));
+        if(Number.isFinite(h[k]))g.append(svg('rect',{x:left,y:top,width:19*Math.min(100,Math.max(0,h[k]))/100,height:4,fill:h[k]>60?'#ce663e':'#347cca'}));
+      }
+      select(g,`${h.label||h.id} · ${observed} · ${sum.count}/${ns.length} vnodes comptés · ${resources.map(([k,l])=>l+' '+fmt(h[k],1)+' %').join(' · ')}`);
+      glyphs.append(g);
+      const side=Math.ceil(Math.sqrt(ns.length));
+      ns.forEach((n,j)=>{
+        const nx=x+((j%side)-(Math.min(side,ns.length-Math.floor(j/side)*side)-1)/2)*16,ny=y+(Math.floor(j/side)-(Math.ceil(ns.length/side)-1)/2)*16;
+        const point={x:nx,y:ny,r:6};ends.set(n.id,point);if(n.monitor)ends.set(n.monitor,point);
+        const dot=svg('g',{});dot.append(svg('circle',{cx:nx,cy:ny,r:6,fill:stale?colors.unknown:colors[n.state]||colors.unknown}));
+        select(dot,`${n.label||n.id} · ${h.label||h.id} · ${n.state} · ${fmt(itemSum([n],stale).value)} items · ${fmt(stale?null:n.applied_s??n.estimated_s,1)} ${sim?'requises':'applications'}/s`);glyphs.append(dot);
+      });
+    });
+    let unresolved=0;
+    for(const tr of transfers){
+      const a=ends.get(tr.source)||hosts.get(tr.source_machine),b=ends.get(tr.target)||hosts.get(tr.target_machine);
+      if(!a||!b){unresolved++;continue;}
+      const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),color=tr.frozen?'#ce663e':'#588fc2';
+      const path=d>a.r+b.r?`M${a.x+dx*a.r/d} ${a.y+dy*a.r/d} L${b.x-dx*(b.r+2)/d} ${b.y-dy*(b.r+2)/d}`:
+        `M${a.x} ${a.y-a.r} Q${a.x+55} ${a.y-55} ${b.x+b.r} ${b.y}`;
+      links.append(svg('path',{d:path,fill:'none',stroke:color,opacity:(tr.stale||stale) ? 0.25 : 0.72,'stroke-dasharray':tr.stale||stale?'4 4':'none','marker-end':'url(#'+(tr.frozen?'fence':'flow')+')','pointer-events':'none'}));
+    }
+    wrap.append(canvas);
+    if(unresolved)wrap.append(el('p',fmt(unresolved)+' transfert(s) avec extrémité inconnue.','note'));
+    return wrap;
   }
   function pressure(h){return Math.max(...['cpu','ram','disk','io'].map(k=>Number.isFinite(h[k])?h[k]:-1));}
   function chart(points,title,series,width,stepped=false){
@@ -128,5 +179,5 @@
     }
     for(const [x,label] of [[l,first],[w-r,last]]){const n=svg('text',{x,y:h-5,'text-anchor':x===l?'start':'end'});n.textContent=fmt(label)+' s';g.append(n);}figure.append(g);return figure;
   }
-  global.IndexusDashboard={render,growthMetrics};
+  global.IndexusDashboard={render,growthMetrics,itemSum};
 })(typeof window==='undefined'?globalThis:window);

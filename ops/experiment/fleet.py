@@ -80,6 +80,8 @@ class Fleet:
             n = dict(id=ident, label=m.get('name', monitor), machine=machine,
                      state='receiving' if m.get('joining') else (('ready' if m['client_ready'] else 'joining') if 'client_ready' in m else 'unknown'),
                      applied_s=rate, items=(m.get('storage') or {}).get('items'), monitor=monitor, wall=wall)
+            storage = m.get('storage') or {}
+            n['items_counted'] = storage.get('items_counted')
             self.nodes[ident] = n
             self.transfers[ident] = []
             for tr in ((m.get('handoffs') or {}).get('open') or {}).get('list') or []:

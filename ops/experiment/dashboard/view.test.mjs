@@ -17,3 +17,10 @@ test('a simulated receiver can already serve some writes during its copy',()=>{
     {state:'ready'}, {state:'receiving',estimated_s:12}, {state:'receiving',estimated_s:0}]};
   assert.equal(growthMetrics({fleet}).ready_per_machine,2);
 });
+test('stock sums reporting vnodes, preserving measured zero and missing coverage',()=>{
+  const {itemSum}=globalThis.IndexusDashboard;
+  const nodes=[{items:17},{items:0},{state:'stale',items:99},{items:0,items_counted:false},{}];
+  assert.deepEqual(itemSum(nodes,false),{value:17,count:2,total:5});
+  assert.equal(itemSum(nodes,true).value,null);
+  assert.equal(itemSum([{items:0}],false).value,0);
+});
