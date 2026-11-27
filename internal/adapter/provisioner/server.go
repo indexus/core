@@ -34,6 +34,7 @@ type Server struct {
 	// (spawn.sh / terminate.sh / count.sh). LaunchTemplateID may be "local".
 	LocalDir string
 
+	dispatch      placementQueue
 	survey        fleetSurvey
 	mu            sync.Mutex
 	lastScale     time.Time
@@ -116,11 +117,12 @@ func (s *Server) Serve(ctx context.Context, addr string, authorize func(*http.Re
 }
 
 type scaleReq struct {
-	RequesterID  string `json:"requester_id"`
-	LocalInserts int64  `json:"local_inserts"`
-	OwnedZones   int    `json:"owned_zones"`
-	Reason       string `json:"reason"`
-	Role         string `json:"role"`
+	WriteRate    float64 `json:"write_rate"`
+	RequesterID  string  `json:"requester_id"`
+	LocalInserts int64   `json:"local_inserts"`
+	OwnedZones   int     `json:"owned_zones"`
+	Reason       string  `json:"reason"`
+	Role         string  `json:"role"`
 	// SpawnCount requests up to N parallel instances in one scale call
 	// (capped by remaining SpawnMaxExtra capacity). Default 1.
 	SpawnCount int    `json:"spawn_count"`
@@ -172,8 +174,8 @@ func (s *Server) scale(w http.ResponseWriter, r *http.Request) {
 	if preferNear == "" {
 		preferNear = req.RequesterID
 	}
-	ids, tags, firstErr := s.launchNear(scaleTargets(req, preferNear, n), req.RequesterID)
-	s.settleScale(req, donor, n, len(ids))
+	ids, tags, firstErr := s.launchNear(r.Context(), scaleTargets(req, preferNear, n), req)
+	s.settleScale(req, donor, n, len(ids), n == 1 && errors.Is(firstErr, errWaitingForCapacity))
 
 	if len(ids) == 0 {
 		// Multi-target hooks can have mixed outcomes. Only a single hook
@@ -247,7 +249,13 @@ func (s *Server) admitScale(req scaleReq, donor string, machines []autoscale.Mac
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if donor != "" && s.coalescedLocked(req, donor, machines, time.Now()) {
-		return 0, &scaleRefusal{http.StatusOK, map[string]any{"status": "already_starting", "prefer_near": req.PreferNear, "started": 0, "coalesced": reasonHostPressure, "machine": donor}}
+		body := map[string]any{"status": "already_starting", "prefer_near": req.PreferNear, "started": 0, "coalesced": reasonHostPressure, "machine": donor}
+		// A sibling is relieving this host. Unless our exact target was also
+		// dispatched, there is no landing at our address to wait for.
+		if at, ok := s.asked[req.PreferNear]; !ok || time.Since(at) >= targetPatience {
+			body["retry_after_ms"] = (reliefWait / 2).Milliseconds()
+		}
+		return 0, &scaleRefusal{http.StatusOK, body}
 	}
 	if req.PreferNear != "" {
 		if t, ok := s.asked[req.PreferNear]; ok && time.Since(t) < targetPatience {
@@ -282,7 +290,7 @@ func (s *Server) admitScale(req scaleReq, donor string, machines []autoscale.Mac
 	}
 	s.scaleReserved += n
 	if donor != "" {
-		s.relief[donor] = &hostRelief{owner: req.RequesterID, asking: true, at: time.Now()}
+		s.relief[donor] = &hostRelief{owner: req.RequesterID, rate: req.WriteRate, asking: true, at: time.Now()}
 	}
 	return n, nil
 }
@@ -349,7 +357,7 @@ func scaleTargets(req scaleReq, preferNear string, n int) []string {
 // launchNear starts one instance per target in parallel. It returns the ids
 // started with their targets, in target order, and the first error in that
 // order.
-func (s *Server) launchNear(targets []string, requester string) (ids, tags []string, firstErr error) {
+func (s *Server) launchNear(ctx context.Context, targets []string, req scaleReq) (ids, tags []string, firstErr error) {
 	type spawnResult struct {
 		id  string
 		tag string
@@ -363,7 +371,7 @@ func (s *Server) launchNear(targets []string, requester string) (ids, tags []str
 		go func(i int) {
 			defer wg.Done()
 			tag := targets[i]
-			id, err := s.runInstancesNear(tag, requester)
+			id, err := s.runInstancesNear(ctx, tag, req)
 			results[i] = spawnResult{id: id, tag: tag, err: err}
 		}(i)
 	}
@@ -388,11 +396,12 @@ func (s *Server) launchNear(targets []string, requester string) (ids, tags []str
 
 // settleScale gives back the n reserved launches and records what started:
 // the cooldowns start only when at least one instance did.
-func (s *Server) settleScale(req scaleReq, donor string, n, started int) {
+func (s *Server) settleScale(req scaleReq, donor string, n, started int, unplaced bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if r := s.relief[donor]; r != nil && r.owner == req.RequesterID {
 		r.asking, r.placed, r.at = false, started > 0, time.Now()
+		r.unplaced = unplaced
 	}
 	s.scaleReserved -= n
 	if s.scaleReserved < 0 {
@@ -421,9 +430,9 @@ func (s *Server) localMode() bool {
 	return s.LocalDir != "" || s.LaunchTemplateID == "local"
 }
 
-func (s *Server) runInstancesNear(preferNear, requester string) (string, error) {
+func (s *Server) runInstancesNear(ctx context.Context, preferNear string, req scaleReq) (string, error) {
 	if s.localMode() {
-		return s.runLocalSpawnNear(preferNear, requester)
+		return s.runLocalSpawnNear(ctx, preferNear, req)
 	}
 	region := s.Region
 	if region == "" {
@@ -464,14 +473,34 @@ func (s *Server) runInstancesNear(preferNear, requester string) (string, error) 
 // A fleet boot can be in progress independently.
 var errWaitingForCapacity = errors.New("waiting for receiver capacity")
 
-func (s *Server) runLocalSpawnNear(preferNear, requester string) (string, error) {
+func (s *Server) runLocalSpawnNear(ctx context.Context, preferNear string, req scaleReq) (string, error) {
 	dir := s.LocalDir
 	if dir == "" {
 		dir = "ops/local"
 	}
 	// The machine is chosen here from the agents' resource facts; the hook
 	// applies it, or keeps its slot-count rule when there is no decision.
-	decision, place := s.decidePlacement(s.machineFacts(dir), requester, preferNear)
+	answer, err := s.awaitPlacement(ctx, dir, req.RequesterID, preferNear, req.WriteRate, false)
+	if err != nil {
+		return "", err
+	}
+	id, err := s.applySpawn(dir, preferNear, answer)
+	if !errors.Is(err, errWaitingForCapacity) || answer.record.Kind != autoscale.PlaceNew || answer.record.Machine != "" {
+		return id, err
+	}
+	// The hook explicitly confirmed no dispatch. Keep this exact target
+	// available to the next resource survey while the caller is still here.
+	wait, cancel := context.WithTimeout(ctx, waitingMemory/3)
+	defer cancel()
+	answer, err = s.awaitPlacement(wait, dir, req.RequesterID, preferNear, req.WriteRate, true)
+	if err != nil {
+		return "", errWaitingForCapacity
+	}
+	return s.applySpawn(dir, preferNear, answer)
+}
+
+func (s *Server) applySpawn(dir, preferNear string, answer placementAnswer) (string, error) {
+	decision, place := answer.record, answer.env
 	script := filepath.Join(dir, "spawn.sh")
 	cmd := exec.Command(script)
 	cmd.Env = append(os.Environ(),
@@ -490,6 +519,8 @@ func (s *Server) runLocalSpawnNear(preferNear, requester string) (string, error)
 	if err != nil {
 		var exit *exec.ExitError
 		if errors.As(err, &exit) && exit.ExitCode() == 75 && strings.HasPrefix(string(out), "INDEXUS_NO_RECEIVER\n") {
+			// The hook confirms that even its at-cap fallback was not dispatched.
+			s.releaseFallback(decision)
 			return "", fmt.Errorf("%w: %s", errWaitingForCapacity, strings.TrimSpace(string(out)))
 		}
 		return "", fmt.Errorf("local spawn: %v (%s)", err, strings.TrimSpace(string(out)))

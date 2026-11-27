@@ -331,6 +331,8 @@ func TestReserveCanBootWhenOnlyDonorHasAReadySlot(t *testing.T) {
 		if i == 1 && !strings.Contains(envOf(env, "INDEXUS_RESERVE_DETAIL"), "backlog_vnodes=2,source_lanes=1") {
 			t.Fatal("coalescing not visible in hook log")
 		}
+		// The simulated hook elected to boot and confirmed no fallback dispatch.
+		s.releaseFallback(r)
 	}
 	warm := h
 	warm.Machine = "starting"

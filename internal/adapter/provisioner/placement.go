@@ -73,6 +73,9 @@ const placementHistory = 32
 
 // placementRecord is one decision as GET /v1/placement shows it.
 type placementRecord struct {
+	WriteRate  float64   `json:"write_rate,omitempty"`
+	Recheck    bool      `json:"from_wait,omitempty"`
+	capMachine string    // reserved while the hook determines whether the machine cap is reached
 	At         time.Time `json:"at"`
 	Requester  string    `json:"requester_id"`
 	PreferNear string    `json:"prefer_near"`
@@ -167,6 +170,10 @@ func parseMachineFacts(out []byte) []autoscale.MachineFacts {
 // environment is nil when there is nothing to hand over: no resource-aware hook is available. A resource refusal is explicit so the
 // hook cannot replace it with an unchecked free slot.
 func (s *Server) decidePlacement(machines []autoscale.MachineFacts, requester, preferNear string) (placementRecord, []string) {
+	return s.planPlacement(machines, requester, preferNear, false)
+}
+
+func (s *Server) planPlacement(machines []autoscale.MachineFacts, requester, preferNear string, readyOnly bool) (placementRecord, []string) {
 	record := placementRecord{At: time.Now(), Requester: requester, PreferNear: preferNear, Machines: len(machines)}
 	if len(machines) == 0 {
 		record.Placement = autoscale.Placement{Kind: autoscale.PlaceSlots, Reason: "no resource facts: slot-count rule of the hook"}
@@ -183,6 +190,11 @@ func (s *Server) decidePlacement(machines []autoscale.MachineFacts, requester, p
 		}
 	}
 	record.Placement = autoscale.Place(machines, requester, true)
+	// A recheck only consumes an offer. Advancing bootWave or renewing the
+	// backlog on each poll would turn one request into many capacity signals.
+	if readyOnly && (record.Machine == "" || record.Kind == autoscale.PlaceSlots) {
+		return record, nil
+	}
 	var atCap autoscale.Placement
 	if record.Kind == autoscale.PlaceNew && record.Machine == "" {
 		atCap = autoscale.Place(machines, requester, false)
@@ -195,11 +207,16 @@ func (s *Server) decidePlacement(machines []autoscale.MachineFacts, requester, p
 			atCap = autoscale.Placement{Reason: "machine cap reached: host pressure needs a remote receiver"}
 		}
 	}
-	if record.Machine != "" {
+	record.capMachine = atCap.Machine
+	reserved := record.Machine
+	if reserved == "" {
+		reserved = record.capMachine
+	}
+	if reserved != "" {
 		if s.placed == nil {
 			s.placed = map[string]time.Time{}
 		}
-		s.placed[record.Machine] = record.At
+		s.placed[reserved] = record.At
 	}
 	if record.Kind == autoscale.PlaceSlots {
 		return record, nil
@@ -238,6 +255,16 @@ func (s *Server) decidePlacement(machines []autoscale.MachineFacts, requester, p
 			"INDEXUS_BOOT_ALLOWANCE="+strconv.Itoa(max(0, record.BootWindow-reserve.Warming)))
 	}
 	return record, env
+}
+
+// A fallback is held while the shell checks the actual machine cap. Only a
+// definitive pre-dispatch answer may release it before facts catch up.
+func (s *Server) releaseFallback(record placementRecord) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if record.capMachine != "" && s.placed[record.capMachine] == record.At {
+		delete(s.placed, record.capMachine)
+	}
 }
 
 // pendingLocked notes whether the request found a machine and returns how

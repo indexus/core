@@ -319,11 +319,13 @@ copy, per vnode. The provisioner coalesces them by donor machine
 1. The requester's machine is read from the facts (`/facts` lists the vnodes
    of each machine). Unknown machine, no facts hook, or another reason: the
    request is handled by vnode, as before.
-2. The first admitted request owns the *relief* of its machine.
+2. The first admitted request owns the *relief* of its machine. After a
+   confirmed capacity wait with no dispatch, a sibling with a higher holder
+   arrival rate can take over on its next request.
 3. While the relief is in flight, the other host-pressure requests of the
    machine get `200 {"status":"already_starting","coalesced":"host_pressure"}`,
-   the answer a target asked twice already gets: no failure for the vnode,
-   which then waits its own `scaleUpPatience`.
+   with a retry hint if their own address has no outstanding dispatch. A donor
+   waits for landing only when its exact target was requested.
 
 "In flight" is one of:
 
@@ -446,9 +448,15 @@ longer needed leaves without having run a job.
 3. **The donor's cost is bounded in count, not in CPU.** The copy budget
    limits the outgoing grains of a host; it reserves no cores and does not
    pace a copy. Placement still ignores the donor's cost.
-4. **Waiting requests still poll.** A donor without a machine asks again
-   about every second. Concurrent requests to the same provisioner share an in-flight
-   survey. A later request needs another survey.
+4. **A short wait for a receiver.** After the local spawn hook confirms that it
+   sent no launch, the provisioner keeps the original target for up to five seconds
+   within the caller's request. Waiting calls share a fleet survey about once per
+   second. On each survey it serves eligible requests in descending order of
+   holder arrivals/s. This estimates the relief of a half split for uniform writes.
+   Equal rates keep arrival order within the batch. A recheck can consume a
+   concrete offer without running another boot hook while supply is absent.
+   After the window the donor retries with fresh demand. This scheduling window
+   imposes no bound on EC2 boot time or the wait for the first installed right.
 5. **Demand and traffic skew.** Holder arrivals, in-flight writes and the age
    of the oldest write expose demand during a slowdown. Predicting how much
    of this traffic will follow a specific set of transferred zones remains

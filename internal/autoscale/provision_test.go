@@ -117,3 +117,25 @@ func TestOverlappingTicksReserveOnePlanner(t *testing.T) {
 		t.Fatal("second tick blocked on the first one's plan")
 	}
 }
+
+func TestHostReliefDoesNotWaitForASiblingsAddress(t *testing.T) {
+	for _, tc := range []struct {
+		body string
+		own  bool
+	}{
+		{`{"status":"already_starting","started":0,"coalesced":"host_pressure","retry_after_ms":7500}`, false},
+		{`{"status":"already_starting","started":0,"coalesced":"host_pressure"}`, true},
+	} {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.Write([]byte(tc.body)) }))
+		a := New(Config{})
+		now := time.Now()
+		a.pendingSince = now
+		a.requestScaleUp(Request{}, func(Request) error {
+			return a.PostScale(server.URL, "donor", 0, 0, "target", "writes", 1, []string{"target"})
+		})
+		server.Close()
+		if a.pendingSince.IsZero() == tc.own || (a.scaleUpsDone == 1) != tc.own || (!tc.own && !a.retryAt.After(now)) {
+			t.Fatalf("own=%v pending=%v done=%d retry=%v", tc.own, a.pendingSince, a.scaleUpsDone, a.retryAt)
+		}
+	}
+}

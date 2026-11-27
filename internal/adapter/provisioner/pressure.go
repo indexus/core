@@ -25,11 +25,13 @@ const reliefWait = placementMemory
 
 // hostRelief is the host-pressure spawn in flight for one donor machine.
 type hostRelief struct {
-	owner  string    // the vnode whose request carries it
-	asking bool      // that request is being served now
-	placed bool      // its receiver was started
-	at     time.Time // the last answer to the owner
-	dest   string    // the receiver's machine, once decided
+	rate     float64   // holder arrivals/s when the owner asked
+	unplaced bool      // hook confirmed a single launch was never dispatched
+	owner    string    // the vnode whose request carries it
+	asking   bool      // that request is being served now
+	placed   bool      // its receiver was started
+	at       time.Time // the last answer to the owner
+	dest     string    // the receiver's machine, once decided
 }
 
 // active reports the relief still in flight: asked, waiting for a machine to
@@ -90,7 +92,7 @@ func (s *Server) coalescedLocked(req scaleReq, donor string, machines []autoscal
 		delete(s.relief, donor)
 		return false
 	}
-	if !r.placed && !r.asking && r.owner == req.RequesterID {
+	if !r.placed && !r.asking && (r.owner == req.RequesterID || r.unplaced && req.WriteRate > r.rate) {
 		return false
 	}
 	if s.placementDecided == nil {

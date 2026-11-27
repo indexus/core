@@ -158,6 +158,7 @@ func (w *Window) rotateLocked() {
 const ReasonHostPressure = "host_pressure"
 
 type Request struct {
+	WriteRate  float64 // arrivals/s at the requesting holder
 	PreferNear string
 
 	PreferNears []string
@@ -685,7 +686,7 @@ func (a *Controller) Tick(in Input, scaleUp func(Request) error) {
 			"reason", reason, "self", in.SelfName)
 		return
 	}
-	req := Request{PreferNear: nears[0], PreferNears: nears, Reason: reason, Signal: signal, SpawnCount: len(nears),
+	req := Request{WriteRate: in.WriteRate, PreferNear: nears[0], PreferNears: nears, Reason: reason, Signal: signal, SpawnCount: len(nears),
 		TransfersInFlight: in.TransfersOut, Resources: in.Resources}
 	a.recordPending(req, in.Members, now)
 	go a.requestScaleUp(req, scaleUp)
@@ -839,6 +840,7 @@ func (a *Controller) PostRequest(provisionerURL, requesterID string, inserts int
 		"spawn_count":   spawnCount,
 
 		"signal":              req.Signal,
+		"write_rate":          req.WriteRate,
 		"transfers_in_flight": req.TransfersInFlight,
 		"cpu_process_pct":     req.Resources.ProcessCPUPct,
 		"cpu_host_pct":        req.Resources.HostCPUPct,
@@ -870,17 +872,19 @@ func postJSONContext(ctx context.Context, url string, body []byte) error {
 	if len(answer) > 1<<20 {
 		return fmt.Errorf("issuer response exceeds 1 MiB")
 	}
+	var reply struct {
+		RetryMS   int64  `json:"retry_after_ms"`
+		Coalesced string `json:"coalesced"`
+	}
+	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusTooManyRequests {
+		_ = json.Unmarshal(answer, &reply)
+	}
+	if (resp.StatusCode == http.StatusTooManyRequests || reply.Coalesced == ReasonHostPressure) &&
+		reply.RetryMS > 0 && reply.RetryMS <= (time.Duration(1<<63-1)).Milliseconds() {
+		return &scaleCooldown{fmt.Errorf("scale deferred: %s", answer), time.Duration(reply.RetryMS) * time.Millisecond}
+	}
 	if resp.StatusCode >= 300 {
-		rejection := fmt.Errorf("status %d: %s", resp.StatusCode, answer)
-		if resp.StatusCode == http.StatusTooManyRequests {
-			var reason struct {
-				RetryMS int64 `json:"retry_after_ms"`
-			}
-			if json.Unmarshal(answer, &reason) == nil && reason.RetryMS > 0 && reason.RetryMS <= (time.Duration(1<<63-1)).Milliseconds() {
-				return &scaleCooldown{rejection, time.Duration(reason.RetryMS) * time.Millisecond}
-			}
-		}
-		return rejection
+		return fmt.Errorf("status %d: %s", resp.StatusCode, answer)
 	}
 	slog.Debug("issuer answered", "url", url, "answer", string(answer))
 	return nil
