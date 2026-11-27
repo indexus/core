@@ -128,10 +128,11 @@ var Handoffs struct {
 	// It excludes source freeze preparation and all unsuccessful attempts.
 	FreezeReturnToInstallACK Histogram
 	// The host copy budget (mesh.CopyBudget). Waits: sources that found no
-	// slot at first. Timeouts: those that copied without one after their
+	// slot at first. Timeouts: attempts that exhausted their
 	// bounded wait. Shared: receivers that used their source's slot. Busy:
 	// callers that may not wait (receivers, resumed grains) and found none.
 	CopySlotWaits, CopySlotTimeouts, CopySlotShared, CopySlotBusy atomic.Int64
+	CopySlotWaiting, CopySlotWaitNanos                            atomic.Int64
 	CopyPacedNanos, CopyPacedLots                                 atomic.Int64
 }
 
@@ -302,6 +303,7 @@ func Snapshot() map[string]any {
 			"folds": Handoffs.Folds.Load(), "folds_aborted": Handoffs.FoldsAborted.Load(),
 			"busy": Handoffs.Busy.Load(), "open": openSnapshot(),
 			"copy_slot_waits": Handoffs.CopySlotWaits.Load(), "copy_slot_timeouts": Handoffs.CopySlotTimeouts.Load(),
+			"copy_slot_waiting": Handoffs.CopySlotWaiting.Load(), "copy_slot_wait_ms": Handoffs.CopySlotWaitNanos.Load() / int64(time.Millisecond),
 			"copy_slot_shared": Handoffs.CopySlotShared.Load(), "copy_slot_busy": Handoffs.CopySlotBusy.Load(),
 			"copy_paced_lots": Handoffs.CopyPacedLots.Load(), "copy_paced_ms": Handoffs.CopyPacedNanos.Load() / int64(time.Millisecond),
 			"install_to_first_write_us_log2":       Handoffs.InstallToFirstWrite.snapshot(),

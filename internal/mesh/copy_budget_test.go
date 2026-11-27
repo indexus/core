@@ -289,7 +289,7 @@ func TestCopyPressurePacesOnlyBetweenUnfrozenLots(t *testing.T) {
 	}
 }
 
-func TestDeferredWarmHandoffKeepsSourceWritableAndResumesSameDecision(t *testing.T) {
+func TestUnadmittedHandoffKeepsRightUnpinnedAndWritable(t *testing.T) {
 	_, nodes := meshFixture(t, 2)
 	source, target := nodes[0], nodes[1]
 	budgets := hostBudgets(t, 1, 2)
@@ -298,10 +298,22 @@ func TestDeferredWarmHandoffKeepsSourceWritableAndResumesSameDecision(t *testing
 	shrinkCopyWait(t, 5*time.Millisecond)
 	state, _ := source.Store.CausalState()
 	request := Request{Kind: "handoff", Input: state.Genesis.Right().ID, Region: tree.Region{}, Target: target.Self}
-	err := source.handoff(context.Background(), request)
-	if !errors.Is(err, storage.ErrNotReady) {
-		held.Close()
-		t.Fatal("budget exhaustion did not defer warm handoff", err)
+	for _, subdivide := range []bool{true, false} {
+		request.Subdivide = subdivide
+		err := source.handoff(context.Background(), request)
+		if !errors.Is(err, storage.ErrNotReady) {
+			held.Close()
+			t.Fatal("budget exhaustion did not defer warm handoff", err)
+		}
+		after, err := source.Store.CausalState()
+		if err != nil || len(after.Transfers) != 0 {
+			held.Close()
+			t.Fatalf("unadmitted proposal pinned a durable transfer: %v, %v", after.Transfers, err)
+		}
+		if _, ok := after.Permissions.Find(request.Input); !ok {
+			held.Close()
+			t.Fatal("unadmitted proposal partitioned its input")
+		}
 	}
 	if frozen, err := source.Store.FrozenOutgoing(); err != nil || len(frozen) != 0 {
 		held.Close()
@@ -321,5 +333,62 @@ func TestDeferredWarmHandoffKeepsSourceWritableAndResumesSameDecision(t *testing
 	}
 	if _, _, _, err := source.Store.ApplyRecord("old-source", row); !errors.Is(err, storage.ErrNotOwner) {
 		t.Fatal("source kept write authority", err)
+	}
+}
+
+// Reproduce recovery on a donor with one warm operation, one sealed operation
+// and a busy host lane. The sealed receiver must be contacted before recovery
+// spends any admission interval on the other operation.
+func TestRecoveryFinishesSealedBeforeWaitingForWarmCopy(t *testing.T) {
+	net, nodes := meshFixture(t, 4)
+	source, seed, warm, sealed := nodes[0], nodes[1], nodes[2], nodes[3]
+	ctx := context.Background()
+	state, err := source.Store.CausalState()
+	if err != nil {
+		t.Fatal(err)
+	}
+	quarter := tree.Region{Mask: tree.ID{192}, Value: tree.ID{64}}
+	if err := source.handoff(ctx, Request{Input: state.Genesis.Right().ID, Target: seed.Self, Region: quarter}); err != nil {
+		t.Fatal(err)
+	}
+	state, err = source.Store.CausalState()
+	if err != nil {
+		t.Fatal(err)
+	}
+	a, okA := state.Permissions.At(tree.ID{160, 1})
+	b, okB := state.Permissions.At(tree.ID{24, 1})
+	if !okA || !okB || a.ID == b.ID {
+		t.Fatal("need two independent rights")
+	}
+	confirmedTransfer(t, source, warm, a.ID, a.Region)
+	op := confirmedTransfer(t, source, sealed, b.ID, b.Region)
+	if _, err := source.Store.ForceFreezeRegion(op.Cession.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := source.Store.SealCausalRegion(op.Cession.ID); err != nil {
+		t.Fatal(err)
+	}
+	budgets := hostBudgets(t, 1, 2)
+	source.SetCopyBudget(budgets[0])
+	held, _ := budgets[1].take("unrelated")
+	defer held.Close()
+	shrinkCopyWait(t, 5*time.Millisecond)
+	waits := metrics.Handoffs.CopySlotWaits.Load()
+	reached := false
+	source.Peers = transportFunc(func(ctx context.Context, host string, r Request) (Response, error) {
+		if host == sealed.Self.Host && r.Kind == "install" {
+			reached = true
+			if metrics.Handoffs.CopySlotWaits.Load() != waits {
+				t.Error("warm recovery waited before sealed install")
+			}
+		}
+		return net.Exchange(ctx, host, r)
+	})
+	if err := source.Resume(ctx); !errors.Is(err, storage.ErrNotReady) {
+		t.Fatalf("expected deferred warm transfer, got %v", err)
+	}
+	state, err = source.Store.CausalState()
+	if err != nil || !reached || state.Transfers[op.Cession.ID].Phase != causal.TransferInstalled {
+		t.Fatalf("sealed transfer did not finish: %v", err)
 	}
 }

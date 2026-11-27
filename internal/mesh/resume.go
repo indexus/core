@@ -26,8 +26,15 @@ func (s *Service) Resume(ctx context.Context) error {
 		return err
 	}
 	var failures []error
-	for id, tr := range state.Transfers {
-		failures = append(failures, s.resumeTransfer(ctx, id, tr))
+	// Finish irreversible outgoing work first. A warm attempt can spend its
+	// entire admission interval waiting for another vnode on this host.
+	for _, urgent := range []bool{true, false} {
+		for id, tr := range state.Transfers {
+			needsFinish := tr.Cession.Source.Owner == s.Self.Owner && tr.Phase >= causal.TransferMoving && tr.Phase < causal.TransferInstalled
+			if needsFinish == urgent {
+				failures = append(failures, s.resumeTransfer(ctx, id, tr))
+			}
+		}
 	}
 	failures = append(failures, s.resumeLocal(ctx, state)...)
 	// An unavailable incoming source must never suppress an independent

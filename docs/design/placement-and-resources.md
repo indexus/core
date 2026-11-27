@@ -360,7 +360,7 @@ experiment agent gives every slot of a machine `<dir>/copy-budget`
 | a dead process frees its slot | the kernel closes its files; the name left on the slot is taken over |
 | source and receiver cannot wait for each other | a transfer holds at most one slot and nobody holds one while waiting for another; the receiver never waits |
 | one transfer, one slot | the slot carries the transfer's id: a co-resident receiver finds it and takes none (`copy_slot_shared`) |
-| admission before any fence | an unfenced source waits at most `copySlotWait`, then defers the same durable operation with `ErrNotReady`; exhaustion never starts an extra warm copy (`copy_slot_timeouts`) |
+| admission before any fence | an unfenced source waits at most `copySlotWait`, then returns `ErrNotReady`. A new proposal takes its slot before partitioning or pinning the input. A previously durable warm operation keeps its identity on retry; exhaustion never starts an extra warm copy (`copy_slot_timeouts`) |
 | no freeze is lengthened | only a grain with nothing fenced yet (phase before `TransferMoving`) waits; a resumed grain and a receiver's preload take a free slot or proceed at once (`copy_slot_busy`) |
 | writes | never look at the budget |
 
@@ -369,6 +369,15 @@ experiment agent gives every slot of a machine `<dir>/copy-budget`
 | slots | `max(1, cores/4)` | a conservative concurrency budget for background work; measured pressure also paces completed lots | assumed |
 | `copySlotWait` | 10 s | longer than a grain usually lasts, shorter than `handoffWait` (20 s) | assumed |
 | poll | 20 ms | `flock` has no queue; a waiter retries | assumed |
+
+A new proposal has no durable transfer while it waits for host capacity.
+During admission, `copy_slot_waiting` counts current waiters on this vnode
+and `copy_slot_wait_ms` accumulates time across completed waits, including
+expired or cancelled attempts. Once the store allocates its operation ID, the donor names the same locked
+slot before contacting its receiver. During recovery the source visits its
+irreversible transfers before warm operations that may wait for capacity.
+An unavailable receiver can still delay installation after a fence. A timer
+cannot safely give the source its old right back after a lost install reply.
 
 After a completed lot has been installed and acknowledged, the source may
 pause before the next lot when sampled CPU exceeds its configured target.

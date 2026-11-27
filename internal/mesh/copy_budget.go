@@ -145,7 +145,7 @@ func (b *CopyBudget) take(transfer string) (held *os.File, shared bool) {
 		}
 		locked := syscall.Flock(int(f.Fd()), syscall.LOCK_EX|syscall.LOCK_NB) == nil
 		switch {
-		case !locked && slotName(f) == transfer:
+		case !locked && transfer != "" && slotName(f) == transfer:
 			f.Close()
 			if held != nil {
 				held.Close()
@@ -184,38 +184,57 @@ func (b *CopyBudget) acquire(ctx context.Context, transfer string, wait time.Dur
 // reserve admits an unfenced grain strictly, or makes immediate progress on
 // already fenced work. Exhausted warm admission never bypasses the lane limit.
 func (b *CopyBudget) reserve(ctx context.Context, transfer string, wait time.Duration, warm bool) (func(), error) {
-	nothing := func() {}
+	held, err := b.reserveFile(ctx, transfer, wait, warm)
+	return func() { releaseCopyFile(held) }, err
+}
+
+func releaseCopyFile(held *os.File) {
+	if held != nil {
+		_ = held.Truncate(0)
+		_ = held.Close()
+	}
+}
+
+// An unnamed slot admits a proposal before the disk allocates its operation ID.
+// Only a named slot may be shared by a co-resident receiver.
+func (b *CopyBudget) reserveFile(ctx context.Context, transfer string, wait time.Duration, warm bool) (*os.File, error) {
 	if b == nil {
-		return nothing, ctx.Err()
+		return nil, ctx.Err()
 	}
 	deadline := time.Now().Add(wait)
 	for waited := false; ; waited = true {
 		if err := ctx.Err(); err != nil {
-			return nothing, err
+			return nil, err
 		}
 		held, shared := b.take(transfer)
 		switch {
 		case shared:
 			metrics.Handoffs.CopySlotShared.Add(1)
-			return nothing, nil
+			return nil, nil
 		case held != nil:
-			return func() { _ = held.Truncate(0); _ = held.Close() }, nil
+			return held, nil
 		case wait <= 0:
 			metrics.Handoffs.CopySlotBusy.Add(1)
-			return nothing, nil
+			return nil, nil
 		case !waited:
 			metrics.Handoffs.CopySlotWaits.Add(1)
+			metrics.Handoffs.CopySlotWaiting.Add(1)
+			started := time.Now()
+			defer func() {
+				metrics.Handoffs.CopySlotWaiting.Add(-1)
+				metrics.Handoffs.CopySlotWaitNanos.Add(int64(time.Since(started)))
+			}()
 		}
 		if !time.Now().Before(deadline) {
 			metrics.Handoffs.CopySlotTimeouts.Add(1)
 			if warm {
-				return nothing, fmt.Errorf("%w: host copy budget busy", storage.ErrNotReady)
+				return nil, fmt.Errorf("%w: host copy budget busy", storage.ErrNotReady)
 			}
-			return nothing, nil
+			return nil, nil
 		}
 		select {
 		case <-ctx.Done():
-			return nothing, ctx.Err()
+			return nil, ctx.Err()
 		case <-time.After(copySlotPoll):
 		}
 	}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"os"
 	"time"
 
 	"github.com/indexus/go-indexus-core/internal/causal"
@@ -26,6 +27,7 @@ func handoffKey(r Request) string {
 
 // A gate protects one installed input, not membership or unrelated rights.
 func (s *Service) handoff(ctx context.Context, r Request) error {
+	var lane *os.File
 	originalKey := handoffKey(r)
 	state, err := s.Store.CausalState()
 	if err != nil {
@@ -69,6 +71,11 @@ func (s *Service) handoff(ctx context.Context, r Request) error {
 			return storage.ErrConflict
 		}
 		if r.Subdivide {
+			lane, err = s.jobs.copies.reserveFile(ctx, "", copySlotWait, true)
+			if err != nil {
+				return err
+			}
+			defer releaseCopyFile(lane)
 			budget := s.grainBudget()
 			var held int64
 			r.Region, held, err = s.Store.HandoffGrainBytes(ctx, r.Region, handoffGrainZones, int64(budget.Current())<<10)
@@ -92,7 +99,7 @@ func (s *Service) handoff(ctx context.Context, r Request) error {
 		return err
 	}
 	defer release()
-	return s.handoffLocked(ctx, r)
+	return s.handoffLocked(ctx, r, lane)
 }
 
 // handoffLocked runs one transfer from wherever its durable phase left it:
@@ -107,7 +114,7 @@ func (s *Service) handoff(ctx context.Context, r Request) error {
 //	consolidateRegion seal, stage, emit, install, complete
 //
 // Every phase is durable before the next begins, so a crash resumes here.
-func (s *Service) handoffLocked(ctx context.Context, r Request) (err error) {
+func (s *Service) handoffLocked(ctx context.Context, r Request, lane *os.File) (err error) {
 	state, err := s.Store.CausalState()
 	if err != nil {
 		return err
@@ -118,13 +125,21 @@ func (s *Service) handoffLocked(ctx context.Context, r Request) (err error) {
 		if id, pending, found := s.pendingFrom(state, r.Input); found {
 			c := pending.Cession
 			if c.Target != r.Target || c.Region != r.Region {
-				if e := s.handoffLocked(ctx, Request{Kind: "handoff", Operation: id, Input: c.Input.ID, Target: c.Target, Region: c.Region}); e != nil {
+				if e := s.handoffLocked(ctx, Request{Kind: "handoff", Operation: id, Input: c.Input.ID, Target: c.Target, Region: c.Region}, nil); e != nil {
 					return e
 				}
 				return storage.ErrConflict
 			}
 			r.Operation = id
 		}
+	}
+	// A full host defers proposals while their rights are still unpinned.
+	if !r.Operation.Valid() {
+		lane, err = s.jobs.copies.reserveFile(ctx, "", copySlotWait, true)
+		if err != nil {
+			return err
+		}
+		defer releaseCopyFile(lane)
 	}
 	offer, err := s.transferOffer(ctx, state, r)
 	if err != nil {
@@ -142,7 +157,12 @@ func (s *Service) handoffLocked(ctx context.Context, r Request) (err error) {
 		metrics.HandoffPhase(id.String(), "collect")
 		return s.Store.CollectTransferred(id)
 	}
-	if offer.Phase < causal.TransferIssued {
+	if lane != nil {
+		// Name the already-held lane before the first preload to a local receiver.
+		if _, err = lane.WriteAt([]byte(id.String()), 0); err != nil {
+			return err
+		}
+	} else if offer.Phase < causal.TransferIssued {
 		// One slot of the host for the whole grain, taken before admission
 		// and before any fence (HOST-COPY-1).
 		release, e := s.copySlot(ctx, offer)
