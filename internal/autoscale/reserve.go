@@ -8,7 +8,7 @@ const reuseCPUPercent = 30.0
 
 // ReceiverOffer is one immediately admissible incoming join, not a slot count.
 func ReceiverOffer(m MachineFacts) (ready, known bool) {
-	if !m.CPUOK || m.Cores <= 0 || !m.MemOK || !m.DiskOK || m.AddressSlots > 0 && !m.HostCPUOK {
+	if !m.CPUOK || m.Cores <= 0 || !m.MemOK || !m.DiskOK || (m.ResourceManaged || m.AddressSlots > 0) && !m.HostCPUOK {
 		return false, false
 	}
 	return refusal(m) == "", true

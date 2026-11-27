@@ -126,17 +126,16 @@ are sized for `RAMP_MAX` (5 000 writes/s per vnode at the largest size;
 
 ## Machines on demand (AWS)
 
-`HOSTS` sets the initial machine count. In `MODE=steps`, the default
+`HOSTS` sets the initial machine count. The default
 `SLOTS=auto` lets a machine host additional vnodes as CPU, memory and disk
 allow. The agent offers one new receiver at a time and checks the offer again
 when starting it. An explicit positive `SLOTS` selects the fixed layout.
 
 In auto mode `/facts.receiver_ready` and the second field of `/count` report
-the current offer (zero or one). `/facts.free` counts unoccupied addresses,
-including on a machine still warming, and `address_slots` is the address limit. AWS reserves 100 monitor ports (19100–19199) before the
-diagnostic range at 19200. P2P uses the corresponding offsets from 21100.
-An unused address has no process, listener or metrics poll. In the capacity
-plan `max_vnodes` is the fleet's address limit when `resource_slots` is true.
+the current offer (zero or one). the agent allocates slots and network endpoints on demand. Slot zero retains
+the configured bootstrap ports. Other endpoints are discoverable through
+`/slots` and remain stable when restarting the slot. The dynamic capacity
+plan records `max_vnodes: null`. Machine quota and budget still apply.
 The observed density depends on workload, headroom and incoming transfers.
 An explicit `GOMEMLIMIT` takes precedence. Otherwise each new process receives
 a soft Go memory limit based on the larger of its host's CPU count and the

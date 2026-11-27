@@ -2,7 +2,7 @@
 # One-command AWS campaign with the AWS CLI alone (no Terraform), run from the
 # operator's shell:
 #
-#   ops/experiment/aws/run.sh                                   # 4 hosts x 8 slots, sizes 8 16 32
+#   ops/experiment/aws/run.sh                                   # 4 hosts, resource-based admission, sizes 8 16 32
 #   MODE=push HOSTS=8 SIZES="8 16 32 64" LOADERS=2 ops/experiment/aws/run.sh
 #                                                               # ladder: raise writes/s per size until saturation
 #   MODE=passes PASSES=3 RATES_PER_VNODE="1000 2500" SIZES=16 HOSTS=16 SLOTS=1 LOADERS=2 ops/experiment/aws/run.sh
@@ -42,17 +42,17 @@ HOSTS="${HOSTS:-4}"
 # BUDGET (dollars, default 5) pays for TTL minutes at HOST_PRICE per hour,
 # and the account's on-demand vCPU quota. HOSTS_MAX, when given, lowers it.
 # The step workload admits each new vnode from live machine facts. An explicit
-# integer keeps the fixed experiment layout. The 100 port positions end just
-# before 19200, the profiling base adjacent to monitors starting at 19100.
+# integer requests a fixed experiment layout. In auto mode the agent
+# allocates addresses on demand.
 MODE="${MODE:-all}"
-if [[ "$MODE" == steps ]]; then SLOTS="${SLOTS:-auto}"; else SLOTS="${SLOTS:-5}"; fi
+SLOTS="${SLOTS:-auto}"
 resource_slots=false
 if [[ "$SLOTS" == auto ]]; then
   resource_slots=true
-  SLOTS=$((19200 - 19100))
+  SLOTS=0
   SPARE="${SPARE:-1}" # one immediately admissible receiver per machine
 fi
-[[ "$SLOTS" =~ ^[1-9][0-9]*$ ]] || { echo "SLOTS must be auto or a positive integer" >&2; exit 2; }
+[[ "$resource_slots" == true || "$SLOTS" =~ ^[1-9][0-9]*$ ]] || { echo "SLOTS must be auto or a positive integer" >&2; exit 2; }
 SIZES="${SIZES:-8 16 32}"
 ITEMS="${ITEMS:-500000}"
 TTL="${TTL:-120}"
@@ -177,7 +177,7 @@ fi
 
 largest=${SIZES##* }
 if [[ "$MODE" == steps ]]; then largest=$STEP_VNODES; fi
-if ((largest > HOSTS * SLOTS)); then
+if [[ "$resource_slots" != true ]] && ((largest > HOSTS * SLOTS)); then
   echo "SIZES up to $largest need at least $largest slots; HOSTS x SLOTS = $((HOSTS * SLOTS))" >&2
   exit 2
 fi
@@ -257,7 +257,7 @@ cp "$ROOT/ops/experiment/elastic/boot_supply.py" "$BIN/elastic/"
 # Nodes run TLS under a throwaway CA for this run only (HTTP/3 with NET=h3).
 (cd "$ROOT" && go run ./cmd/experiment ca -dir "$BIN/ca")
 
-echo "==> $RUN: $HOSTS x $HOST_TYPE ($SLOTS slots each) + $LOADERS x $LOADER_TYPE, sizes $SIZES, mode $MODE, net $NET, region $REGION"
+echo "==> $RUN: $HOSTS x $HOST_TYPE (slots=$SLOTS, resource admission=$resource_slots) + $LOADERS x $LOADER_TYPE, sizes $SIZES, mode $MODE, net $NET, region $REGION"
 if [[ $REGION == us-east-1 ]]; then
   cli s3api create-bucket --bucket "$bucket" >/dev/null
 else

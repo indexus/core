@@ -23,7 +23,7 @@ import (
 	"github.com/indexus/go-indexus-core/internal/autoscale"
 )
 
-// agent owns a fixed number of node slots on one machine, so one machine can
+// agent manages node slots on one machine, so one machine can
 // host several vnodes and a cluster is rebuilt without recreating machines:
 //
 //	POST /spawn[?genesis=1&wait=ready&prefer_near=&compaction=&items=&provisioner=&bootstrap=]
@@ -38,6 +38,7 @@ import (
 // scale-up is bounded by the slots paid for. A slot is free again once its
 // process exits: a retired vnode leaving (retired_exit_seconds) or a crash.
 type slot struct {
+	ports    nodePorts
 	options  spawnOptions
 	cmd      *exec.Cmd
 	started  time.Time
@@ -141,8 +142,8 @@ func (s *slot) recordItems(items *int64, counted bool, ageMS int64, now time.Tim
 // machineFacts sums the slots into what placement reads. A live node whose
 // CPU is not known yet (just started, or an old node that does not answer
 // while it joins) counts as receiving: its machine is paying for a join.
-func machineFacts(slots []*slot, cores int, host autoscale.ResourceSample, addressSlots int) autoscale.MachineFacts {
-	f := autoscale.MachineFacts{Cores: cores, CPUOK: true, AddressSlots: addressSlots}
+func machineFacts(slots []*slot, cores int, host autoscale.ResourceSample, addressSlots int, dynamic bool) autoscale.MachineFacts {
+	f := autoscale.MachineFacts{Cores: cores, CPUOK: true, AddressSlots: addressSlots, ResourceManaged: dynamic}
 	used := 0.0
 	now := time.Now()
 	rate := autoscale.AppliedRate{AsOf: now}
@@ -174,11 +175,13 @@ func machineFacts(slots []*slot, cores int, host autoscale.ResourceSample, addre
 		used += c
 		// In resource mode a process that stopped answering is an unknown
 		// receiver until a fresh observation arrives.
-		if s.joining || !measured || addressSlots > 0 && now.Sub(s.cpu[len(s.cpu)-1].at) > cpuSamples*factsEvery {
+		if s.joining || !measured || (dynamic || addressSlots > 0) && now.Sub(s.cpu[len(s.cpu)-1].at) > cpuSamples*factsEvery {
 			f.Receiving++
 		}
 	}
-	if addressSlots > 0 {
+	if dynamic {
+		f.Free = 1
+	} else if addressSlots > 0 {
 		f.Free = addressSlots - f.Running
 	}
 	if complete && f.Running > 0 {
@@ -194,7 +197,7 @@ func machineFacts(slots []*slot, cores int, host autoscale.ResourceSample, addre
 // An address may be unoccupied while its machine cannot accept a receiver.
 // Resource mode exposes at most one immediately admissible slot through /count.
 func offeredSlots(f autoscale.MachineFacts) int {
-	if f.AddressSlots == 0 {
+	if f.AddressSlots == 0 && !f.ResourceManaged {
 		return f.Free
 	}
 	if ready, _ := autoscale.ReceiverOffer(f); ready {
@@ -239,8 +242,8 @@ func agent(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("agent", flag.ExitOnError)
 	listen := fs.String("listen", ":22100", "agent HTTP address")
 	var c agentConfig
-	fs.BoolVar(&c.resourceSlots, "resource-slots", false, "admit new processes by machine resources; -slots bounds the address range")
-	fs.IntVar(&c.slots, "slots", 4, "node processes this machine may run")
+	fs.BoolVar(&c.resourceSlots, "resource-slots", false, "admit new processes by machine resources; -slots=0 grows with demand")
+	fs.IntVar(&c.slots, "slots", 4, "fixed address positions, or zero for dynamic endpoints in resource mode")
 	idleExit := fs.Duration("idle-exit", 0, "stop the agent (release the machine) once it has run nodes and none has been alive for this long; 0 never")
 	fs.StringVar(&c.node, "node", "node", "node binary")
 	fs.StringVar(&c.dir, "dir", "/tmp/indexus-slots", "slot data directory")
@@ -267,8 +270,19 @@ func agent(ctx context.Context, args []string) error {
 	fs.IntVar(&c.copySlots, "copy-slots", 0, "transfer copies at once on this machine, shared by its nodes (HOST-COPY-1); 0 is a quarter of cores, negative no budget")
 	fs.StringVar(&c.ca, "ca", "", "CA directory from `experiment ca`; slots then serve TLS and HTTP/3 (NET-1)")
 	_ = fs.Parse(args)
-	if c.slots < 1 {
-		return fmt.Errorf("slots must be positive")
+	if c.resourceSlots {
+		explicitSlots := false
+		fs.Visit(func(f *flag.Flag) {
+			if f.Name == "slots" {
+				explicitSlots = true
+			}
+		})
+		if !explicitSlots {
+			c.slots = 0
+		}
+	}
+	if c.slots < 0 || (c.slots == 0 && !c.resourceSlots) {
+		return fmt.Errorf("zero slots requires resource admission; fixed slots must be positive")
 	}
 	if !(c.cpuTarget >= 0 && c.cpuTarget <= 100) {
 		return fmt.Errorf("agent -cpu-target must be between 0 and 100")
@@ -306,10 +320,11 @@ func agent(ctx context.Context, args []string) error {
 		addressSlots, listed = c.slots, 0
 	}
 	var mu sync.Mutex
+	resetting := false
 	alive := func(s *slot) bool { return s != nil && s.exited.IsZero() }
 
-	writeConfig := func(dir string, i int, o spawnOptions) (string, error) {
-		network := map[string]any{"listen": fmt.Sprintf("0.0.0.0:%d", c.p2pBase+i), "monitoring": fmt.Sprintf("0.0.0.0:%d", c.monBase+i), "advertise": []string{c.advertise}}
+	writeConfig := func(dir string, ports nodePorts, o spawnOptions) (string, error) {
+		network := map[string]any{"listen": fmt.Sprintf("0.0.0.0:%d", ports.p2p), "monitoring": fmt.Sprintf("0.0.0.0:%d", ports.monitor), "advertise": []string{c.advertise}}
 		if !o.Genesis {
 			network["bootstrap"] = []string{o.Bootstrap}
 		}
@@ -370,6 +385,16 @@ func agent(ctx context.Context, args []string) error {
 
 	// start runs slot i's node; the caller holds mu. fresh wipes the disk.
 	start := func(i int, o spawnOptions, fresh bool) error {
+		var ports nodePorts
+		if !fresh && slots[i] != nil {
+			ports = slots[i].ports
+		} else {
+			var err error
+			ports, err = c.portsFor(i, slots)
+			if err != nil {
+				return err
+			}
+		}
 		dir := filepath.Join(c.dir, strconv.Itoa(i))
 		if fresh {
 			keepLog(i)
@@ -378,7 +403,7 @@ func agent(ctx context.Context, args []string) error {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return err
 		}
-		path, err := writeConfig(dir, i, o)
+		path, err := writeConfig(dir, ports, o)
 		if err != nil {
 			return err
 		}
@@ -413,15 +438,19 @@ func agent(ctx context.Context, args []string) error {
 			cmd.Env = append(cmd.Env, fmt.Sprintf("GOMEMLIMIT=%d", autoscale.HeapShareOfHost(peers)))
 		}
 		if c.debugBase > 0 {
-			cmd.Env = append(cmd.Env, fmt.Sprintf("INDEXUS_LOCAL_DEBUG_PORT=%d", c.debugBase+i))
+			cmd.Env = append(cmd.Env, fmt.Sprintf("INDEXUS_LOCAL_DEBUG_PORT=%d", ports.debug))
 		}
 		cmd.Stdout, cmd.Stderr = logf, logf
 		if err := cmd.Start(); err != nil {
 			logf.Close()
 			return err
 		}
-		s := &slot{options: o, cmd: cmd, started: time.Now(), done: make(chan struct{})}
-		slots[i] = s
+		s := &slot{ports: ports, options: o, cmd: cmd, started: time.Now(), done: make(chan struct{})}
+		if i == len(slots) {
+			slots = append(slots, s)
+		} else {
+			slots[i] = s
+		}
 		listed = max(listed, i+1)
 		go func() {
 			err := cmd.Wait()
@@ -438,18 +467,25 @@ func agent(ctx context.Context, args []string) error {
 
 	// wait polls slot i's status: up, or client ready so that the next
 	// joiner's JOIN-1 hint already sees it.
-	wait := func(i int, ready bool) {
-		url := fmt.Sprintf("%s://127.0.0.1:%d/status", scheme, c.monBase+i)
+	wait := func(s *slot, ready bool) error {
+		ports := s.ports
+		url := fmt.Sprintf("%s://127.0.0.1:%d/status", scheme, ports.monitor)
 		for t := 0; t < 720; t++ {
+			select {
+			case <-s.done:
+				return fmt.Errorf("node exited before becoming available (exit %d)", s.exitCode)
+			default:
+			}
 			if res, err := client.Get(url); err == nil {
 				body, _ := io.ReadAll(res.Body)
 				res.Body.Close()
-				if !ready || strings.Contains(string(body), `"client_ready":true`) {
-					return
+				if !ready || res.StatusCode == http.StatusOK && strings.Contains(string(body), `"client_ready":true`) {
+					return nil
 				}
 			}
 			time.Sleep(250 * time.Millisecond)
 		}
+		return fmt.Errorf("node status timed out")
 	}
 
 	crash := func(i int) (*slot, error) {
@@ -467,8 +503,10 @@ func agent(ctx context.Context, args []string) error {
 	}
 
 	slotArg := func(r *http.Request) (int, error) {
+		mu.Lock()
+		defer mu.Unlock()
 		i, err := strconv.Atoi(r.URL.Query().Get("slot"))
-		if err != nil || i < 0 || i >= c.slots {
+		if err != nil || i < 0 || i >= len(slots) {
 			return 0, fmt.Errorf("bad slot")
 		}
 		return i, nil
@@ -498,7 +536,7 @@ func agent(ctx context.Context, args []string) error {
 		return capacity, measured
 	}
 	factsLocked := func(host autoscale.ResourceSample, cpu hostCPUObservation) autoscale.MachineFacts {
-		facts := machineFacts(slots[:listed], runtime.NumCPU(), host, addressSlots)
+		facts := machineFacts(slots[:listed], runtime.NumCPU(), host, addressSlots, c.slots == 0)
 		facts.CopySlots = max(0, c.copySlots)
 		if cpu.valid {
 			facts.HostCPUPct, facts.HostCPUOK = cpu.busyPct, true
@@ -537,7 +575,7 @@ func agent(ctx context.Context, args []string) error {
 			host, cpu = readHost()
 		}
 		mu.Lock()
-		if c.resourceSlots && offeredSlots(factsLocked(host, cpu)) == 0 {
+		if resetting || c.resourceSlots && offeredSlots(factsLocked(host, cpu)) == 0 {
 			mu.Unlock()
 			http.Error(w, "no receiver capacity on this machine", http.StatusServiceUnavailable)
 			return
@@ -549,16 +587,26 @@ func agent(ctx context.Context, args []string) error {
 				break
 			}
 		}
+		if i < 0 && c.slots == 0 {
+			i = len(slots)
+		}
+		var spawned *slot
 		err := fmt.Errorf("no free slot")
 		if i >= 0 {
 			err = start(i, o, true)
+			if err == nil {
+				spawned = slots[i]
+			}
 		}
 		mu.Unlock()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusServiceUnavailable)
 			return
 		}
-		wait(i, q.Get("wait") == "ready" && !o.Genesis)
+		if err := wait(spawned, q.Get("wait") == "ready" && !o.Genesis); err != nil {
+			http.Error(w, err.Error(), http.StatusServiceUnavailable)
+			return
+		}
 		fmt.Fprintf(w, "local-%s-%d\n", c.host, i)
 	})
 	mux.HandleFunc("/restart", func(w http.ResponseWriter, r *http.Request) {
@@ -570,7 +618,11 @@ func agent(ctx context.Context, args []string) error {
 		s, err := crash(i)
 		if err == nil {
 			mu.Lock()
-			err = start(i, s.options, false) // same disk: a genesis is not initialized again
+			if resetting || slots[i] != s {
+				err = fmt.Errorf("slot changed during restart")
+			} else {
+				err = start(i, s.options, false)
+			} // same disk: a genesis is not initialized again
 			mu.Unlock()
 		}
 		if err != nil {
@@ -591,20 +643,30 @@ func agent(ctx context.Context, args []string) error {
 		fmt.Fprintln(w, "killed", i)
 	})
 	mux.HandleFunc("/reset", func(w http.ResponseWriter, r *http.Request) {
-		for i := range slots {
+		mu.Lock()
+		if resetting {
+			mu.Unlock()
+			http.Error(w, "reset in progress", http.StatusConflict)
+			return
+		}
+		resetting = true
+		n := listed
+		mu.Unlock()
+		for i := 0; i < n; i++ {
 			_, _ = crash(i)
 		}
 		mu.Lock()
 		for i := range slots {
 			slots[i] = nil
 		}
-		for i := range slots {
+		for i := 0; i < n; i++ {
 			keepLog(i)
 		}
 		_ = os.RemoveAll(c.dir)
 		if c.resourceSlots {
 			listed = 0
 		}
+		resetting = false
 		mu.Unlock()
 		fmt.Fprintln(w, "reset")
 	})
@@ -659,7 +721,7 @@ func agent(ctx context.Context, args []string) error {
 			// One second: an old node does not answer while it joins, and
 			// must not delay the reading of the other slots.
 			call, cancel := context.WithTimeout(ctx, time.Second)
-			req, _ := http.NewRequestWithContext(call, http.MethodGet, fmt.Sprintf("%s://127.0.0.1:%d/metrics", scheme, c.monBase+i), nil)
+			req, _ := http.NewRequestWithContext(call, http.MethodGet, fmt.Sprintf("%s://127.0.0.1:%d/metrics", scheme, s.ports.monitor), nil)
 			res, err := client.Do(req)
 			if err == nil {
 				err = json.NewDecoder(res.Body).Decode(&m)
@@ -682,7 +744,14 @@ func agent(ctx context.Context, args []string) error {
 		}
 	}()
 	mux.HandleFunc("/profile", func(w http.ResponseWriter, r *http.Request) {
-		relayProfile(w, r, c.debugBase, c.slots, "http://127.0.0.1")
+		relayProfile(w, r, c.debugBase > 0, func(i int) int {
+			mu.Lock()
+			defer mu.Unlock()
+			if i >= len(slots) || slots[i] == nil {
+				return 0
+			}
+			return slots[i].ports.debug
+		}, "http://127.0.0.1")
 	})
 	mux.HandleFunc("/facts", func(w http.ResponseWriter, r *http.Request) {
 		host, cpu := readHost()
@@ -702,7 +771,11 @@ func agent(ctx context.Context, args []string) error {
 			if c.resourceSlots && s == nil {
 				continue
 			}
-			row := map[string]any{"slot": i, "p2p": fmt.Sprintf("%s://%s:%d", scheme, c.advertise, c.p2pBase+i), "monitor": fmt.Sprintf("%s://%s:%d", scheme, c.advertise, c.monBase+i)}
+			ports := nodePorts{p2p: c.p2pBase + i, monitor: c.monBase + i}
+			if s != nil {
+				ports = s.ports
+			}
+			row := map[string]any{"slot": i, "p2p": fmt.Sprintf("%s://%s:%d", scheme, c.advertise, ports.p2p), "monitor": fmt.Sprintf("%s://%s:%d", scheme, c.advertise, ports.monitor)}
 			if s != nil {
 				row["alive"], row["started"], row["options"] = alive(s), s.started, s.options
 				if !alive(s) {
@@ -747,7 +820,7 @@ func agent(ctx context.Context, args []string) error {
 		}()
 	}
 	go func() { <-ctx.Done(); _ = server.Close() }()
-	log.Printf("agent: %d slots on %s", c.slots, *listen)
+	log.Printf("agent: listening on %s (resource admission=%t, fixed slots=%d)", *listen, c.resourceSlots, c.slots)
 	err = server.Serve(listener)
 	mu.Lock()
 	for _, s := range slots {
@@ -769,13 +842,18 @@ const profileSecondsMax = 60
 // I's node, read from its loopback profiling port. The node only listens on
 // loopback (internal/diagnostics), so the agent is the way to profile a
 // receiver from another machine of the experiment. 404 when profiling is off.
-func relayProfile(w http.ResponseWriter, r *http.Request, debugBase, slots int, origin string) {
-	if debugBase <= 0 {
+func relayProfile(w http.ResponseWriter, r *http.Request, enabled bool, portFor func(int) int, origin string) {
+	if !enabled {
 		http.Error(w, "profiling is off: start the agent with -debug-base and a node built with -tags diagnostic", http.StatusNotFound)
 		return
 	}
 	i, err := strconv.Atoi(r.URL.Query().Get("slot"))
-	if err != nil || i < 0 || i >= slots {
+	if err != nil || i < 0 {
+		http.Error(w, "slot out of range", http.StatusBadRequest)
+		return
+	}
+	port := portFor(i)
+	if port == 0 {
 		http.Error(w, "slot out of range", http.StatusBadRequest)
 		return
 	}
@@ -788,7 +866,7 @@ func relayProfile(w http.ResponseWriter, r *http.Request, debugBase, slots int, 
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), time.Duration(seconds+10)*time.Second)
 	defer cancel()
-	request, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s:%d/debug/pprof/profile?seconds=%d", origin, debugBase+i, seconds), nil)
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s:%d/debug/pprof/profile?seconds=%d", origin, port, seconds), nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

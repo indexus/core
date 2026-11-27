@@ -17,7 +17,7 @@ func TestResourceSlotsGrowPastFiveAndDeferOnPressure(t *testing.T) {
 			slots, ceiling = make([]*slot, addressSlots), 0
 			copy(slots, used)
 		}
-		f := machineFacts(slots, 4, host, ceiling)
+		f := machineFacts(slots, 4, host, ceiling, false)
 		f.HostCPUOK = true
 		f.CPUPct = max(f.CPUPct, cpu)
 		ready, _ := autoscale.ReceiverOffer(f)
@@ -83,4 +83,47 @@ func TestResourceSlotsGrowPastFiveAndDeferOnPressure(t *testing.T) {
 		t.Fatal("unknown CPU used to compute global reserve")
 	}
 
+}
+
+// Real kernel port selection with a simulated healthy fleet. The old address
+// window exhausted at slot 100 even with CPU, disk and RAM headroom.
+func TestDynamicAdmissionPastHundred(t *testing.T) {
+	c := agentConfig{resourceSlots: true, p2pBase: 21100, monBase: 19100, debugBase: 19200}
+	var slots []*slot
+	seen := map[int]bool{}
+	host := autoscale.ResourceSample{MemTotal: 1 << 30, DiskOK: true, DiskFreePct: 90}
+	now := time.Now()
+	for i := 0; i < 128; i++ {
+		f := machineFacts(slots, 4, host, 0, true)
+		f.HostCPUOK = true
+		if offeredSlots(f) != 1 || f.Running != i {
+			t.Fatalf("slot %d refused: %+v", i, f)
+		}
+		p, err := c.portsFor(i, slots)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if i == 0 && p != (nodePorts{21100, 19100, 19200}) {
+			t.Fatal("bootstrap endpoints changed", p)
+		}
+		for _, port := range []int{p.p2p, p.monitor, p.debug} {
+			if port <= 0 || seen[port] {
+				t.Fatal("invalid or reused port", port)
+			}
+			seen[port] = true
+		}
+		s := &slot{ports: p}
+		s.record("vnode", false, 0, nil, now.Add(-time.Second))
+		s.record("vnode", false, 0, nil, now)
+		slots = append(slots, s)
+	}
+	f := machineFacts(slots, 4, host, 0, true)
+	if offeredSlots(f) != 0 {
+		t.Fatal("admitted with unknown host CPU")
+	}
+	f.HostCPUOK = true
+	f.CPUPct = 95
+	if offeredSlots(f) != 0 {
+		t.Fatal("admitted with saturated host CPU")
+	}
 }

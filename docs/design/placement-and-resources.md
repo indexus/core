@@ -217,9 +217,11 @@ In the direct 16k experiment a vnode asks for relief at 50 writes/s. The
 physical host target is 50% CPU. Additional processes share that host while
 the receiver admission test allows another copy. Each host offers one incoming
 join at a time. Stale measurements of a live process, missing host CPU,
-insufficient memory or disk headroom suspend that offer. The experimental
-agent has 100 independently addressable ports available in automatic mode.
-An unused port needs no vnode process, monitor request or data directory.
+insufficient memory or disk headroom suspend that offer. In automatic mode
+the agent creates its process table and allocates network endpoints on demand.
+The bootstrap slot retains its configured address. Other slots keep their assigned
+ports across process restarts. The host OS must have ports and file descriptors
+available for each admitted node.
 
 For an evenly loaded fleet, writes/s per host at the CPU target divided by
 the split rate gives a reference number of vnodes per host. The operating

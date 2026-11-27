@@ -25,7 +25,12 @@ func TestAgentRelaysTheProfileOfOneSlot(t *testing.T) {
 
 	get := func(debugBase int, query string) *httptest.ResponseRecorder {
 		w := httptest.NewRecorder()
-		relayProfile(w, httptest.NewRequest(http.MethodGet, "/profile?"+query, nil), debugBase, 2, origin)
+		relayProfile(w, httptest.NewRequest(http.MethodGet, "/profile?"+query, nil), debugBase > 0, func(i int) int {
+			if i >= 2 {
+				return 0
+			}
+			return debugBase + i
+		}, origin)
 		return w
 	}
 	// Slot 1 listens on debug-base+1.

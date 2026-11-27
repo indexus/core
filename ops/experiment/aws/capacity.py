@@ -27,8 +27,11 @@ def positive(value):
 
 def bound(config, host_cpus, loader_cpus, quota, other_cpus, host_price, loader_price):
     """One machine ceiling; there is no second lifetime/vnode ceiling."""
-    for key in ('hosts', 'slots', 'loaders', 'ttl'):
+    for key in ('hosts', 'loaders', 'ttl'):
         positive(config[key])
+    dynamic = config.get('resource_slots') and config['slots'] == 0
+    if not dynamic:
+        positive(config['slots'])
     hours = Decimal(str(config['ttl'])) / 60
     budget = Decimal(str(config['budget']))
     host_price, loader_price = Decimal(str(host_price)), Decimal(str(loader_price))
@@ -45,7 +48,7 @@ def bound(config, host_cpus, loader_cpus, quota, other_cpus, host_price, loader_
     ceiling = min(limits.values())
     if ceiling < config['hosts']:
         raise ValueError(f"initial fleet exceeds capacity: hosts={config['hosts']}, limits={limits}")
-    return dict(config, max_machines=ceiling, max_vnodes=ceiling * config['slots'],
+    return dict(config, max_machines=ceiling, max_vnodes=None if dynamic else ceiling * config['slots'],
                 limits=limits, reason='+'.join(k for k, v in limits.items() if v == ceiling),
                 host_vcpus=host_cpus, loader_vcpus=loader_cpus, quota_vcpus=quota,
                 other_vcpus=other_cpus, host_price=str(host_price), loader_price=str(loader_price))
@@ -94,8 +97,9 @@ def main():
     initial = commands.add_parser('plan')
     for name in ('run', 'region', 'bucket', 'host-type', 'loader-type'):
         initial.add_argument('--' + name, required=True)
-    for name in ('hosts', 'slots', 'loaders', 'ttl'):
+    for name in ('hosts', 'loaders', 'ttl'):
         initial.add_argument('--' + name, required=True, type=positive)
+    initial.add_argument('--slots', type=int, required=True)
     initial.add_argument('--budget', required=True)
     initial.add_argument('--resource-slots', action='store_true',
                          help='slots is the address range; live machine resources admit each vnode')

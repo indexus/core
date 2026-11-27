@@ -23,7 +23,7 @@ func TestMachineFactsSumsSlots(t *testing.T) {
 	gone.record("gone", false, 100, nil, start.Add(time.Second))
 
 	host := autoscale.ResourceSample{MemTotal: 1 << 30, MemPct: 25, DiskOK: true, DiskFreePct: 60}
-	got := machineFacts([]*slot{steady, joining, started, gone, nil}, 4, host, 0)
+	got := machineFacts([]*slot{steady, joining, started, gone, nil}, 4, host, 0, false)
 	if got.Running != 3 || got.Free != 2 || got.Receiving != 2 {
 		t.Fatalf("running, free, receiving = %d, %d, %d; want 3, 2, 2", got.Running, got.Free, got.Receiving)
 	}
@@ -45,14 +45,14 @@ func TestMachineFactsCarriesOwnedItems(t *testing.T) {
 	counted, silent := &slot{items: 89_815, itemsOK: true, itemsAt: time.Now()}, &slot{}
 	counted.record("counted", false, 0, nil, at)
 	silent.record("silent", false, 0, nil, at)
-	got := machineFacts([]*slot{counted, silent}, 4, autoscale.ResourceSample{}, 0)
+	got := machineFacts([]*slot{counted, silent}, 4, autoscale.ResourceSample{}, 0, false)
 	if len(got.Items) != 1 || got.Items["counted"] != 89_815 {
 		t.Fatalf("items = %v, want only counted=89815", got.Items)
 	}
 }
 
 func TestMachineFactsWithoutHostReadings(t *testing.T) {
-	got := machineFacts([]*slot{nil, nil}, 8, autoscale.ResourceSample{}, 0)
+	got := machineFacts([]*slot{nil, nil}, 8, autoscale.ResourceSample{}, 0, false)
 	if got.Running != 0 || got.Free != 2 || got.CPUPct != 0 || !got.CPUOK || got.MemOK || got.DiskOK {
 		t.Fatalf("empty machine without host readings: %+v", got)
 	}
@@ -85,15 +85,15 @@ func TestMachineFactsForgetsStaleAndUncountedItems(t *testing.T) {
 	n := int64(42)
 	s := &slot{name: "n"}
 	s.recordItems(&n, false, 0, now)
-	if got := machineFacts([]*slot{s}, 4, autoscale.ResourceSample{}, 0); len(got.Items) != 0 {
+	if got := machineFacts([]*slot{s}, 4, autoscale.ResourceSample{}, 0, false); len(got.Items) != 0 {
 		t.Fatal("uncounted value became known", got.Items)
 	}
 	s.recordItems(&n, true, 0, now)
-	if got := machineFacts([]*slot{s}, 4, autoscale.ResourceSample{}, 0); got.Items["n"] != 42 {
+	if got := machineFacts([]*slot{s}, 4, autoscale.ResourceSample{}, 0, false); got.Items["n"] != 42 {
 		t.Fatal("fresh count omitted", got.Items)
 	}
 	s.itemsAt = now.Add(-autoscale.ItemsCountMaxAge - time.Second)
-	if got := machineFacts([]*slot{s}, 4, autoscale.ResourceSample{}, 0); len(got.Items) != 0 {
+	if got := machineFacts([]*slot{s}, 4, autoscale.ResourceSample{}, 0, false); len(got.Items) != 0 {
 		t.Fatal("failed observation kept stale count", got.Items)
 	}
 	s.recordItems(&n, true, autoscale.ItemsCountMaxAge.Milliseconds()+1, now)
@@ -117,11 +117,11 @@ func TestAppliedRateCompleteFreshWindow(t *testing.T) {
 	}
 	measured := window("owner", 20)
 	idle := window("idle", 0)
-	got := machineFacts([]*slot{measured, idle, nil}, 4, autoscale.ResourceSample{}, 0)
+	got := machineFacts([]*slot{measured, idle, nil}, 4, autoscale.ResourceSample{}, 0, false)
 	if got.AppliedRate == nil || got.AppliedRate.PerSecond != 10 || !got.AppliedRate.AsOf.Equal(now) {
 		t.Fatalf("rate = %+v", got.AppliedRate)
 	}
-	if got := machineFacts([]*slot{measured, {}}, 4, autoscale.ResourceSample{}, 0); got.AppliedRate != nil {
+	if got := machineFacts([]*slot{measured, {}}, 4, autoscale.ResourceSample{}, 0, false); got.AppliedRate != nil {
 		t.Fatalf("unknown slot became zero: %+v", got.AppliedRate)
 	}
 	if _, ok := measured.appliedRate(now.Add(autoscale.AppliedRateMaxAge + 1)); ok {

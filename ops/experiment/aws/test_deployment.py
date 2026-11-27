@@ -40,7 +40,7 @@ PROVISIONER=fake STEP_VNODES=16 STEP_SEED=009 STEP_TAG=replay STEP_PASSES=3 step
         ])
 
     def test_dynamic_slot_policy_reaches_host_loader_and_capacity(self):
-        self.assertIn('SLOTS=$((19200 - 19100))', RUN)
+        self.assertIn('SLOTS=0', RUN)
         self.assertIn('policy_args+=(--resource-slots)', RUN)
         self.assertIn('-slots ${slots} -resource-slots=${resource_slots}', HOST)
         self.assertIn('Environment=RESOURCE_SLOTS=${resource_slots}', HOST)

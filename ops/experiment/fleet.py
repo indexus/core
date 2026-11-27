@@ -50,7 +50,7 @@ class Fleet:
                          ram=100-f['mem_free_pct'] if f.get('mem_ok') else None,
                          disk=100-f['disk_free_pct'] if f.get('disk_ok') else None,
                          cores=f.get('cores'), receiving=f.get('receiving'),
-                         slots=f.get('running', 0)+f.get('free', 0))
+                         slots=None if f.get('resource_managed') else f.get('running', 0)+f.get('free', 0))
                 h['ready_offer'] = f.get('receiver_ready')
                 if h['state'] == 'warm' and not h['ready_offer']:
                     h['state'] = 'unavailable'

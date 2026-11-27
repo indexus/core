@@ -16,10 +16,11 @@ import (
 // MachineFacts is what one machine agent reports about its host.
 type MachineFacts struct {
 	// Machine names the host for whoever applies the decision (agent URL).
-	Machine      string `json:"machine"`
-	Running      int    `json:"running"`                 // vnode processes alive
-	Free         int    `json:"free"`                    // unoccupied address slots
-	AddressSlots int    `json:"address_slots,omitempty"` // resource-admitted agent, total port positions
+	Machine         string `json:"machine"`
+	Running         int    `json:"running"` // vnode processes alive
+	Free            int    `json:"free"`    // unoccupied address slots
+	ResourceManaged bool   `json:"resource_managed,omitempty"`
+	AddressSlots    int    `json:"address_slots,omitempty"` // resource-admitted agent, total port positions
 	// Receiving counts the vnodes still joining: each is receiving a transfer.
 	Receiving int `json:"receiving"`
 	// CopySlots is the configured shared source-copy budget. Without a
@@ -139,7 +140,7 @@ func Place(machines []MachineFacts, donorVNode string, canBoot bool) Placement {
 	// Keep the slots-only compatibility path for fleets with no telemetry.
 	// One unknown host must never disable the admission checks of its peers.
 	if !slices.ContainsFunc(machines, func(m MachineFacts) bool {
-		return m.AddressSlots > 0 || m.CPUOK || m.DiskOK || m.MemOK || m.Receiving > 0
+		return m.ResourceManaged || m.AddressSlots > 0 || m.CPUOK || m.DiskOK || m.MemOK || m.Receiving > 0
 	}) {
 		return placeBySlots(machines, "no machine reports resources")
 	}
@@ -238,7 +239,7 @@ func (m MachineFacts) load() (int64, bool) {
 // refusal is why a machine is not a target, or "" when it is one.
 func refusal(m MachineFacts) string {
 	switch {
-	case m.AddressSlots > 0 && (!m.HostCPUOK || !m.MemOK || !m.DiskOK || m.Cores <= 0):
+	case (m.ResourceManaged || m.AddressSlots > 0) && (!m.HostCPUOK || !m.MemOK || !m.DiskOK || m.Cores <= 0):
 		return "waiting for machine resource measurements"
 	case !m.CPUOK:
 		return "unknown machine CPU"

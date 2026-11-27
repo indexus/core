@@ -35,6 +35,13 @@ class CapacityTests(unittest.TestCase):
     def test_no_hidden_128_machine_limit(self):
         self.assertEqual(self.bound(self.config(budget='1000'), quota=4096)['max_machines'], 1020)
 
+    def test_resource_admission_has_no_vnode_count_limit(self):
+        result = self.bound(self.config(slots=0, resource_slots=True))
+        self.assertIsNone(result['max_vnodes'])
+        self.assertGreater(result['max_machines'], 0)
+        with self.assertRaises(ValueError):
+            self.bound(self.config(slots=0, resource_slots=False))
+
     def test_initial_fleet_must_fit_all_bounds(self):
         for config, quota in [(self.config(budget='.01'), 512), (self.config(), 16),
                               (self.config(max_hosts=1), 512)]:
