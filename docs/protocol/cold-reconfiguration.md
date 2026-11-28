@@ -294,41 +294,42 @@ search while preserving the exact same transition and safety rules.
 `internal/mesh.Service.Compact` selects a known survivor deterministically by ID.
 Symmetric pairs fold from the larger ID into the smaller; the pinned genesis
 vnode ranks first. This orients attempts acyclically without a global arbiter.
-It admits a fold only when that survivor's post-remove XOR cell contains the
-source's entire current cell and every installed native grant it holds. The
-source must cover its whole cell, including empty keyspace, with installed native
-permissions. The genesis vnode stays active. The planner never grants authority.
+At the donor's deepest XOR branching bit, the opposite branch must contain
+one live vnode. That sibling would inherit the donor's entire placement cell,
+including empty addresses. When the opposite branch has children, a single
+survivor cannot cover the cell. This check chooses a candidate. The donor's
+installed native rights determine which pieces move, including delegated
+exceptions outside its placement cell.
 
-`internal/storage/cold.go` persists the drain, a single survivor pin, the source
-activity counter and stable piece identities. A disk cannot be both a drain and
-a survivor pin. Sealing intake blocks new acquisitions and physical MOVE; it does
-not grant or revoke ordinary writes. Existing handoff transactions transfer the
-whole native tokens, exact zone snapshots, mutation sequences and retry receipts.
-Only durable install ACKs allow retirement publication. Zone identity remains
-`(collection, canonical path)`, including parent/child paths with identical XOR IDs.
+At admission the donor records its cell (a 96-bit mask and value), both
+endpoints, the item limit and the piece identities. The receiver durably pins
+one operation. A disk can participate as a donor or as a pinned survivor.
+Normal handoffs transfer the native rights, snapshots, mutation sequences
+and retry receipts. Zone identity remains `(collection, canonical path)`,
+including parent and child paths whose XOR IDs are identical.
 
-A retirement shares the activation dot/frontier clock and carries outgoing grant
-proofs covering the historical source cell. It is accepted only after the source
-has no known native or provisional zone authority. Historical dependency views
-still include earlier activations; the current view applies the tombstone. Old
-activation replay cannot resurrect the identity, and growth skips retired IDs.
-The survivor persists the retirement and a witness receipt before releasing its
-pin. The source records the witness ACK and keeps serving as a forwarding endpoint.
-Neither process nor disk is deleted.
+Before an unstarted piece, the donor checks its recorded cell, the sibling
+and both endpoint epochs against its current routing snapshot. Splitting a
+distant branch can therefore proceed alongside the fold. Splitting the donor's
+cell, splitting its sibling or moving either participant invalidates the plan.
+The donor checks the same conditions again **inside the transaction that
+publishes retirement**. An older durable operation whose record contains only
+a view digest resumes with its original digest guard.
 
-Heat or topology drift cancels remaining work, but only before a piece starts
-(COLD-2). A fold tolerates `HeatBudget` writes (default 1024) on the source and
-on the survivor; the source checks both before each unstarted piece. A started
-handoff is finished even under heat. Once every piece is installed, heat no
-longer cancels the fold: aborting would only send the data back through
-reconciliation, the ping-pong a tepid shelf would otherwise repeat forever. A
-topology drift still cancels it. Completed permissions are never rolled back. This is weaker hot preemption than
-the reference reversible planner above, and is not a latency isolation guarantee.
-Writes during a started copy can increase its final size, with transactional
-disk capacity still enforced. The normal reconciliation path can return grants
-to an active source after an
-aborted fold. A later trial uses a fresh operation identity. No clock expiry
-unseals a pending transfer or clears a survivor pin: a crashed source must resume.
+A fold tolerates `HeatBudget` writes (default 1024) on each participant.
+Heat beyond the budget cancels remaining work before the next piece starts.
+A started piece finishes even if either peer becomes hot. After all pieces
+are installed, the donor delivers its referral directory and publishes its
+retirement with a redirect to the survivor. Publication requires a confirmed
+pin, an empty set of native rights and completed outstanding transfers.
+The survivor persists its witness before releasing the pin. The donor records
+the witness ACK and can forward stale requests. Replaying an activation
+cannot resurrect a retired identity.
+
+Aborting preserves already installed permissions. The normal reconciliation
+path can return grants to an active source. Each new attempt uses a fresh
+operation identity. A crashed source resumes its durable operation to clear
+the pin. Physical shutdown is a separate step.
 
 The node binary enables it unless its config sets `"compaction": false`; a
 library `Node` calls `EnableCausalCompaction(CausalCompactionConfig{...})`.
@@ -362,6 +363,11 @@ delayed messages have separate tests in `internal/mesh/cold_test.go` and `cmd/no
 `TestColdFoldSingleWriterAtTransferBoundaries` probes four canonical paths at
 45 paused message boundaries, including a new key during copying: no duplicate
 applied write, with explicit zero-writer windows while frozen.
+`TestColdFoldOnlyDependsOnPairTopology` injects a membership change before the
+first piece or just before retirement and checks the data after completion or
+preemption. In `TestIndependentColdPairsSurviveConcurrentRetirements`, 32
+pairs plan against one 64-vnode snapshot. Each remaining plan still passes
+its local topology check after every preceding retirement has been announced.
 These are finite local fault tests, not a proof for arbitrary partitions or
 Byzantine peers. No global validator or global topology oracle participates.
 Geometric admission uses the peer's causal knowledge; convergence requires

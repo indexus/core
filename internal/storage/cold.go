@@ -3,11 +3,11 @@ package storage
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/indexus/go-indexus-core/internal/tree"
 	"sort"
 
 	"github.com/indexus/go-indexus-core/internal/causal"
 	"github.com/indexus/go-indexus-core/internal/protocol"
+	"github.com/indexus/go-indexus-core/internal/tree"
 )
 
 var coldDrainKey = []byte("cold-drain-v1")
@@ -25,7 +25,8 @@ type ColdPiece struct {
 type ColdDrain struct {
 	Operation      string
 	Source, Target causal.Endpoint
-	BaseDigest     [32]byte
+	BaseDigest     [32]byte     `json:",omitzero"` // replay guard for drains persisted before the pair-scoped check
+	SourceCell     *tree.Region `json:",omitempty"`
 	Activity       uint64
 	// COLD-2: owned bytes at admission, the survivor's admission fraction and
 	// the writes tolerated before a new piece starts.
@@ -79,6 +80,12 @@ func coldStatus(tx *Tx) (ColdStatus, error) {
 	}
 	return out, nil
 }
+
+// ColdActivity reads the heat counter without decoding the durable piece list.
+func (s *Store) ColdActivity() (uint64, error) {
+	return read(s, func(tx *Tx) (uint64, error) { return coldActivity(tx), nil })
+}
+
 func (s *Store) ColdStatus() (ColdStatus, error) { return read(s, coldStatus) }
 
 // updateCold is update with the cold status it reads first.
@@ -145,27 +152,36 @@ func (s *Store) BeginColdDrain(operation string, target causal.Endpoint, limits 
 		if status.Pin != nil || state.Moving != nil || pendingCausal(state, tx) {
 			return ErrNotReady
 		}
-		replica, err := state.MembershipReplica()
+		membership, err := s.pureMembership(state)
 		if err != nil {
 			return err
 		}
-		view := replica.Current()
-		if !view.HasName(s.node) || !view.HasName(target.VNode) {
+		view := membership.view
+		sourceID, active := view.IDOf(s.node)
+		if !active || !view.HasName(target.VNode) {
 			return ErrNotReady
 		}
-		from, err := replica.Endpoint(s.node)
+		from, err := membership.membership.Endpoint(s.node)
 		if err != nil {
 			return err
 		}
-		currentTarget, err := replica.Endpoint(target.VNode)
+		currentTarget, err := membership.membership.Endpoint(target.VNode)
 		if err != nil {
 			return err
 		}
 		if from.Storage != storageID(tx) || currentTarget != target {
 			return ErrNotOwner
 		}
-		base := view.Digest
-		out = ColdDrain{Operation: operation, Source: from, Target: target, BaseDigest: base, Activity: status.Activity, MaxCombinedFraction: limits.MaxCombinedFraction, HeatBudget: limits.HeatBudget, MaxItems: limits.MaxItems}
+		// The view used by the caller to choose a peer may already be stale.
+		sibling, ok := view.FoldSibling(sourceID)
+		if !ok || sibling.Name != target.VNode {
+			return protocol.ErrColdPlanPreempted
+		}
+		cell, err := tree.Cell(view, s.node)
+		if err != nil {
+			return err
+		}
+		out = ColdDrain{Operation: operation, Source: from, Target: target, SourceCell: &cell, Activity: status.Activity, MaxCombinedFraction: limits.MaxCombinedFraction, HeatBudget: limits.HeatBudget, MaxItems: limits.MaxItems}
 		// Placement chooses a survivor; only actual installed local rights
 		// determine what is ceded. Sparse delegated exceptions migrate through
 		// the current directory, not through a false Native==XOR-cell test.
@@ -217,18 +233,18 @@ func (s *Store) PinColdSurvivor(operation string, source causal.Endpoint, offer 
 		if state.Moving != nil || pendingCausal(state, tx) {
 			return ErrNotReady
 		}
-		replica, err := state.MembershipReplica()
+		membership, err := s.pureMembership(state)
 		if err != nil {
 			return err
 		}
-		if !source.Valid() || source.VNode == s.node || operation == "" || offer.Bytes < 0 || !replica.Current().HasName(s.node) || !replica.Current().HasName(source.VNode) {
+		if !source.Valid() || source.VNode == s.node || operation == "" || offer.Bytes < 0 || !membership.view.HasName(s.node) || !membership.view.HasName(source.VNode) {
 			return ErrNotReady
 		}
-		self, err := replica.Endpoint(s.node)
+		self, err := membership.membership.Endpoint(s.node)
 		if err != nil {
 			return err
 		}
-		other, err := replica.Endpoint(source.VNode)
+		other, err := membership.membership.Endpoint(source.VNode)
 		if err != nil {
 			return err
 		}
@@ -292,6 +308,44 @@ func (s *Store) AbortColdDrain() error {
 		return tx.del(meta(coldDrainKey))
 	})
 }
+
+// TransferPhase reads a single local operation without copying its snapshots.
+func (r RoutingSnapshot) TransferPhase(id causal.TransferID) (causal.TransferPhase, bool) {
+	tr, ok := r.snapshot.state.Transfers[id]
+	return tr.Phase, ok
+}
+
+// ColdPairCurrent checks only the two participants and their shared branching
+// decision. Endpoint epochs bind their disks. Membership is routing evidence;
+// a successful check never installs a right or authorizes an ACK.
+func (r RoutingSnapshot) ColdPairCurrent(work *ColdDrain) bool {
+	return work.matchesPair(r.snapshot.view, r.snapshot.membership)
+}
+
+func (work *ColdDrain) matchesPair(view *tree.View, members *causal.Membership) bool {
+	if work.SourceCell == nil {
+		return view.Digest == work.BaseDigest
+	}
+	sourceID, ok := view.IDOf(work.Source.VNode)
+	if !ok {
+		return false
+	}
+	sibling, ok := view.FoldSibling(sourceID)
+	if !ok || sibling.Name != work.Target.VNode {
+		return false
+	}
+	cell, err := tree.Cell(view, work.Source.VNode)
+	if err != nil || cell != *work.SourceCell {
+		return false
+	}
+	from, err := members.Endpoint(work.Source.VNode)
+	if err != nil || from != work.Source {
+		return false
+	}
+	to, err := members.Endpoint(work.Target.VNode)
+	return err == nil && to == work.Target
+}
+
 func (s *Store) PublishColdRetirement() (causal.Member, error) {
 	var out causal.Member
 	err := s.updateCold(func(tx *Tx, status ColdStatus) error {
@@ -313,19 +367,17 @@ func (s *Store) PublishColdRetirement() (causal.Member, error) {
 		if err != nil {
 			return err
 		}
-		replica, err := state.MembershipReplica()
+		membership, err := s.pureMembership(state)
 		if err != nil {
 			return err
 		}
-		// Every piece is installed by now (checked below): heat no longer
-		// preempts, since aborting would only send the data back (COLD-2).
-		if replica.Current().Digest != work.BaseDigest {
+		if !work.matchesPair(membership.view, membership.membership) {
 			return protocol.ErrColdPlanPreempted
 		}
 		if pendingCausal(state, tx) {
 			return ErrNotReady
 		}
-		id, ok := replica.Current().IDOf(s.node)
+		id, ok := membership.view.IDOf(s.node)
 		if !ok {
 			return ErrNotReady
 		}
@@ -338,6 +390,7 @@ func (s *Store) PublishColdRetirement() (causal.Member, error) {
 			}
 		}
 		out = causal.Member{VNode: tree.VNodeDescriptor{Name: s.node, ID: id}, Endpoint: work.Source, Retired: true, Redirect: work.Target}
+		replica := membership.membership.Clone()
 		if err := replica.Merge(causal.MembershipDelta{Members: []causal.Member{out}}); err != nil {
 			return err
 		}

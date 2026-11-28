@@ -107,7 +107,7 @@ func (s *Service) compact(ctx context.Context, config ColdConfig, resumeOnly boo
 			}
 			defer release()
 		}
-		if work, err = s.beginColdDrain(config, status.Activity); err != nil {
+		if work, err = s.beginColdDrain(config); err != nil {
 			return err
 		}
 	}
@@ -143,7 +143,7 @@ func (s *Service) compact(ctx context.Context, config ColdConfig, resumeOnly boo
 // beginColdDrain chooses the survivor and records the drain towards it.
 // Geometry stays deterministic; a fresh persisted operation identity prevents
 // a delayed release from an aborted trial from unpinning its successor.
-func (s *Service) beginColdDrain(config ColdConfig, activity uint64) (*storage.ColdDrain, error) {
+func (s *Service) beginColdDrain(config ColdConfig) (*storage.ColdDrain, error) {
 	snapshot, err := s.Store.CausalRouting()
 	if err != nil {
 		return nil, err
@@ -156,12 +156,7 @@ func (s *Service) beginColdDrain(config ColdConfig, activity uint64) (*storage.C
 	if _, err := rand.Read(nonce[:]); err != nil {
 		return nil, err
 	}
-	operation := fmt.Sprintf("cold:%x", causal.Hash(struct {
-		Nonce          [16]byte
-		Source, Target causal.Endpoint
-		Base           [32]byte
-		Activity       uint64
-	}{nonce, s.Self, target, snapshot.ViewDigest(), activity}))
+	operation := fmt.Sprintf("cold:%x", nonce)
 	work, err := s.Store.BeginColdDrain(operation, target, storage.ColdLimits{MaxCombinedFraction: config.MaxCombinedFraction, HeatBudget: config.HeatBudget, MaxItems: config.MaxItems})
 	if err != nil {
 		return nil, err
@@ -254,20 +249,20 @@ func (s *Service) pinSurvivor(ctx context.Context, proposal *ColdProposal, targe
 }
 
 // drainPieces hands every piece of the drain to the survivor. It reports
-// false when heat or a view change calls the fold off before a piece
+// false when heat or a change to the pair calls the fold off before a piece
 // started. A started piece is completed even then: rolling back its point
 // flips or its emitted certificate would revoke acknowledged writes.
 func (s *Service) drainPieces(ctx context.Context, work *storage.ColdDrain, proposal *ColdProposal, dirty bool) (drained bool, err error) {
 	for _, piece := range work.Pieces {
-		state, err := s.Store.CausalState()
+		snapshot, err := s.Store.CausalRouting()
 		if err != nil {
 			return false, err
 		}
-		tr, started := state.Transfers[piece.Operation]
-		if started && tr.Phase == causal.TransferInstalled {
+		phase, started := snapshot.TransferPhase(piece.Operation)
+		if started && phase == causal.TransferInstalled {
 			continue
 		}
-		if dirty, err = s.coldDirty(ctx, work, proposal, dirty, started); err != nil {
+		if dirty, err = s.coldDirty(ctx, snapshot, work, proposal, dirty, started); err != nil {
 			return false, err
 		}
 		if dirty && !started {
@@ -281,19 +276,15 @@ func (s *Service) drainPieces(ctx context.Context, work *storage.ColdDrain, prop
 }
 
 // coldDirty says whether the fold should be called off: it already was, or
-// this disk took writes beyond its heat budget, or the view changed, or,
+// this disk took writes beyond its heat budget, or the pair changed, or,
 // before a piece starts, the survivor reports heat (COLD-2 skips the final
 // heat check, so the survivor is asked before each piece instead).
-func (s *Service) coldDirty(ctx context.Context, work *storage.ColdDrain, proposal *ColdProposal, dirty, started bool) (bool, error) {
-	status, err := s.Store.ColdStatus()
+func (s *Service) coldDirty(ctx context.Context, snapshot storage.RoutingSnapshot, work *storage.ColdDrain, proposal *ColdProposal, dirty, started bool) (bool, error) {
+	activity, err := s.Store.ColdActivity()
 	if err != nil {
 		return dirty, err
 	}
-	snapshot, err := s.Store.CausalRouting()
-	if err != nil {
-		return dirty, err
-	}
-	dirty = dirty || hot(status.Activity, work.Activity, work.HeatBudget) || snapshot.ViewDigest() != work.BaseDigest
+	dirty = dirty || hot(activity, work.Activity, work.HeatBudget) || !snapshot.ColdPairCurrent(work)
 	if dirty || started {
 		return dirty, nil
 	}

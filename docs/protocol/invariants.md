@@ -379,7 +379,17 @@ Applying `(zone, seq)` twice has the same result as applying it once. Reconnect 
 
 ## COLD-2 — opportunistic folds are hysteretic
 
-A pair fold is admitted when the source has stayed under the cool write rate for the quiet period, and the survivor's owned bytes plus the source's stay under a fraction (45%) of the survivor's capacity. Splits fire near 90%, so a freshly split pair cannot refold, and a fold cannot trigger an immediate split. Heat beyond the budget cancels a fold only before a piece starts; once every piece is installed the fold completes. Safety is unchanged: every piece is an ordinary durable handoff, and no permission is rolled back.
+An automatic fold requires a donor that has remained below the cool write rate
+for the quiet period. The survivor admits the pair if their combined owned
+bytes fit the configured fraction of its capacity (45% by default) and the
+configured item limit permits the move. These thresholds leave room before
+the next capacity-driven split.
+
+A pinned fold records the donor cell and both endpoints. Changes outside the
+pair's XOR branch can proceed concurrently. Heat or a change to the pair can
+cancel the remaining plan before a piece starts. Each started piece follows
+the normal durable handoff. Retirement requires the pair to pass its topology
+check again after all rights have moved. See [durable pair folds](cold-reconfiguration.md#durable-pair-fold-local-core).
 
 ## GOS-1 — bounded anti-entropy reaches everyone
 
