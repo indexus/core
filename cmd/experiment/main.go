@@ -260,10 +260,13 @@ type second struct {
 	// load machine included (no coordinated omission, as wrk2 and YCSB's
 	// intended latency). Latency above starts when a worker takes the write.
 	Intended []int64 `json:"intended_latency_us_log2,omitempty"`
-	Entries  int     `json:"entries,omitempty"`
-	InFlight int64   `json:"in_flight"`
-	Queued   int     `json:"queued"`
-	Workers  int     `json:"workers"`
+	// Terminal failures are client jobs, while Failed counts HTTP attempts.
+	Exhausted        int64   `json:"exhausted,omitempty"`
+	ExhaustedLatency []int64 `json:"exhausted_latency_us_log2,omitempty"`
+	Entries          int     `json:"entries,omitempty"`
+	InFlight         int64   `json:"in_flight"`
+	Queued           int     `json:"queued"`
+	Workers          int     `json:"workers"`
 	// SlowByNode counts, per target node index, acknowledged writes that
 	// took 250 ms or more: one index holding them all is one slow node.
 	SlowByNode map[int]int64 `json:"slow_by_node,omitempty"`
@@ -416,17 +419,17 @@ func load(ctx context.Context, args []string) error {
 	}
 	jobs := make(chan job, *workers*4)
 	var (
-		offered, shed, ackedN, hotAcked, inFlight, exhausted atomic.Int64
-		latency, intended, httpAttempt, routeLearn           histogram
-		mu                                                   sync.Mutex
-		failed                                               = map[int]int64{}
-		errs                                                 = map[string]int{}
-		seen                                                 recent
-		reads, readFailed, readMiss, readOver                atomic.Int64
-		totals, totalsExact, totalsDeficit                   atomic.Int64
-		readLatency, totalLatency                            histogram
-		freshLag                                             histogram
-		freshTimeouts                                        atomic.Int64
+		offered, shed, ackedN, hotAcked, inFlight, exhausted         atomic.Int64
+		latency, intended, httpAttempt, routeLearn, exhaustedLatency histogram
+		mu                                                           sync.Mutex
+		failed                                                       = map[int]int64{}
+		errs                                                         = map[string]int{}
+		seen                                                         recent
+		reads, readFailed, readMiss, readOver                        atomic.Int64
+		totals, totalsExact, totalsDeficit                           atomic.Int64
+		readLatency, totalLatency                                    histogram
+		freshLag                                                     histogram
+		freshTimeouts                                                atomic.Int64
 	)
 	slow := make([]atomic.Int64, maxEntries)
 	fail := func(status int, err error) {
@@ -524,6 +527,7 @@ func load(ctx context.Context, args []string) error {
 				}
 				inFlight.Add(-1)
 				if !ok {
+					exhaustedLatency.observe(time.Since(started))
 					exhausted.Add(1)
 				}
 				if ok {
@@ -698,8 +702,8 @@ func load(ctx context.Context, args []string) error {
 	defer tick.Stop()
 	nextReport := start.Add(time.Second)
 	var last struct {
-		offered, shed, acked, hot int64
-		cpu                       float64
+		offered, shed, acked, hot, exhausted int64
+		cpu                                  float64
 	}
 	current := *rate
 	stop := &knee{below: *stopBelow, window: int(*stopFor / time.Second)}
@@ -754,9 +758,10 @@ loop:
 				f, e := failed, errs
 				failed, errs = map[int]int64{}, map[string]int{}
 				mu.Unlock()
-				o, s, a, h := offered.Load(), shed.Load(), ackedN.Load(), hotAcked.Load()
+				o, s, a, h, x := offered.Load(), shed.Load(), ackedN.Load(), hotAcked.Load(), exhausted.Load()
 				cpu := processCPU()
 				line := second{CPU: cpu - last.cpu, Cores: runtime.NumCPU(), T: t.Seconds(), Rate: current, Offered: o - last.offered, Shed: s - last.shed, Acked: a - last.acked, HotAcked: h - last.hot, Failed: f, Errors: e, Latency: latency.drain(), HTTPAttempt: httpAttempt.drain(), RouteLearn: routeLearn.drain(), Intended: intended.drain(), InFlight: inFlight.Load(), Queued: len(jobs), Workers: *workers,
+					Exhausted: x - last.exhausted, ExhaustedLatency: exhaustedLatency.drain(),
 					Reads: reads.Swap(0), ReadFailed: readFailed.Swap(0), ReadMiss: readMiss.Swap(0), ReadOversized: readOver.Swap(0), ReadLatency: readLatency.drain(),
 					Totals: totals.Swap(0), TotalsExact: totalsExact.Swap(0), TotalsDeficit: totalsDeficit.Swap(0), TotalLatency: totalLatency.drain(),
 					FreshLag: freshLag.drain(), FreshTimeouts: freshTimeouts.Swap(0), Entries: pool.count()}
@@ -769,7 +774,7 @@ loop:
 					}
 				}
 				_ = enc.Encode(line)
-				last.offered, last.shed, last.acked, last.hot, last.cpu = o, s, a, h, cpu
+				last.offered, last.shed, last.acked, last.hot, last.exhausted, last.cpu = o, s, a, h, x, cpu
 				if stop.add(line.Offered, line.Acked) {
 					fmt.Fprintf(os.Stderr, "knee: fewer than %.0f%% of the writes offered over %s acknowledged at %.0f/s, stopping at t=%.0fs\n", 100**stopBelow, *stopFor, current, t.Seconds())
 					_ = os.WriteFile(filepath.Join(*out, "knee.json"), fmt.Appendf(nil, `{"t":%.1f,"offered_rate":%.0f,"stop_below":%g,"stop_for_s":%.0f}`+"\n", t.Seconds(), current, *stopBelow, stopFor.Seconds()), 0o644)

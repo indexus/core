@@ -3,11 +3,14 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math/rand/v2"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -78,5 +81,40 @@ func TestFreshnessProbeRetriesIdenticalPayload(t *testing.T) {
 	defer mu.Unlock()
 	if len(attempts) < 2 || !bytes.Equal(attempts[0], attempts[1]) {
 		t.Fatalf("expected an identical probe following ambiguous failure, got %q", attempts)
+	}
+}
+
+func TestLoadReportsTerminalWriteFailuresSeparately(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v1/issue/token":
+			fmt.Fprint(w, `{"token":"fixture"}`)
+		case "/item":
+			http.Error(w, "unsupported", http.StatusBadRequest)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+	dir := t.TempDir()
+	err := load(context.Background(), []string{
+		"-targets", server.URL, "-issuer", server.URL, "-out", dir,
+		"-duration", "1200ms", "-workers", "2", "-rate", "20",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	stream, err := os.Open(filepath.Join(dir, "load.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer stream.Close()
+	var sample second
+	if err := json.NewDecoder(stream).Decode(&sample); err != nil {
+		t.Fatal(err)
+	}
+	if sample.Acked != 0 || sample.Exhausted == 0 || len(sample.ExhaustedLatency) == 0 ||
+		sample.Failed[http.StatusBadRequest] == 0 {
+		t.Fatalf("missing terminal failure telemetry: %+v", sample)
 	}
 }
