@@ -23,8 +23,6 @@ func (n *Node) ReadLocalFingerprintContext(ctx context.Context, collection, loca
 	if n.mesh == nil {
 		return SubtreeFingerprint{}, ErrNotReady
 	}
-	ctx, done := n.mesh.clientActivity.Begin(ctx)
-	defer done()
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 	select {
