@@ -83,6 +83,7 @@
     const active=p.metrics_stale?[]:transfers.filter(tr=>!tr.stale);
     const unknownLinks=transfers.length-active.length;
     const departures=departedTransfers(points[index-1],p);
+    const waiting=active.filter(tr=>tr.phase==='copy-slot').length;
     choices.setAttribute('aria-label','Vue du réseau');
     for(const [key,title] of [['hosts','Par machine'],['radial','Vnodes indépendants']]){
       const b=el('button',title);b.type='button';b.dataset.mode=key;
@@ -95,11 +96,17 @@
         drawTopology();
       };choices.append(b);
     }
+    if(waiting){
+      const label=el('label'),box=el('input');box.type='checkbox';box.checked=root.dataset.showWaiting==='true';
+      box.onchange=()=>{root.dataset.showWaiting=String(box.checked);drawTopology();};
+      label.append(box,document.createTextNode(' Afficher les attentes de créneau ('+fmt(waiting)+')'));choices.append(label);
+    }
     function drawTopology(){
       const mode=root.dataset.mode||(global.location.hash==='#vnodes'?'radial':'hosts');
-      for(const b of choices.children)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));
+      for(const b of choices.querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.mode===mode));
       detail.textContent='Sélectionner un vnode.';
-      plot.replaceChildren(topology(machines,nodes,active,detail,sim,p.metrics_stale,root.clientWidth,mode));
+      const shown=root.dataset.showWaiting==='true'?active:active.filter(tr=>tr.phase!=='copy-slot');
+      plot.replaceChildren(topology(machines,nodes,shown,detail,sim,p.metrics_stale,root.clientWidth,mode));
     }
     drawTopology();
     root.append(choices,detail,plot,el('h2','Transferts et délégations'));
