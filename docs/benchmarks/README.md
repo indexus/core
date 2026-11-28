@@ -1,5 +1,7 @@
 # Indexus benchmarks: reference documents
 
+La [campagne de recherche comparative](search-campaign.md) décrit les paliers de 100 k à 10 M, les oracles et le pilote local sur deux pairs.
+
 Le [passage AWS du 27 novembre avec un seuil de 100 écritures/s par vnode](aws-placement-100-2026-11-27.md)
 atteint le palier de 16 000/s. Les cartes de trafic, le coût d’un déplacement
 et le rejeu du placement expliquent où subsiste la pression physique.

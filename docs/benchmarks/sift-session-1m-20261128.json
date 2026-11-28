@@ -1,0 +1,96 @@
+{
+  "rows": 1000000,
+  "eligible": 62500,
+  "queries": 64,
+  "centers": 64,
+  "dimensions": 128,
+  "metric": "squared L2",
+  "node": "v22.22.2",
+  "ioDecodeAndChecksumMs": 598.361,
+  "buildMs": 13777.389,
+  "prefilterMs": 9.11,
+  "subsetBuildMs": 1281.623,
+  "processPeakRssKiB": 929104,
+  "hashes": {
+    "sift_base.fvecs": "21f66e2975057b5728ba56de1c825bac4f4d89d596609ae985741c6242631816",
+    "sift_learn.fvecs": "6a13878cd8e8ec50cab169626454847f096bc4bdd71bcfec663735356c5e9fd0",
+    "sift_query.fvecs": "3fc35c983128d393c8ea4b4349e63befacdcbf8153042fc5432c43765c2ed595"
+  },
+  "results": [
+    {
+      "method": "exact",
+      "recallAt10": 1,
+      "meanDistances": 62500,
+      "meanVisits": 62500,
+      "p50Ms": 55.248,
+      "p95Ms": 88.791,
+      "p99Ms": 145.785,
+      "queryMsBySession": {
+        "1": 60.042,
+        "4": 263.802,
+        "16": 1103.015,
+        "64": 3846.875
+      }
+    },
+    {
+      "method": 4,
+      "recallAt10": 0.8296875,
+      "meanDistances": 6050.5,
+      "meanVisits": 96647.40625,
+      "p50Ms": 14.43,
+      "p95Ms": 22.552,
+      "p99Ms": 39.256,
+      "queryMsBySession": {
+        "1": 10.59,
+        "4": 52.407,
+        "16": 269.767,
+        "64": 916.289
+      }
+    },
+    {
+      "method": 16,
+      "recallAt10": 0.9953125,
+      "meanDistances": 18183.703125,
+      "meanVisits": 290654.078125,
+      "p50Ms": 39.966,
+      "p95Ms": 74.452,
+      "p99Ms": 109.302,
+      "queryMsBySession": {
+        "1": 42.6,
+        "4": 204.475,
+        "16": 739.926,
+        "64": 2812.078
+      }
+    },
+    {
+      "method": 64,
+      "recallAt10": 1,
+      "meanDistances": 62500,
+      "meanVisits": 1000000,
+      "p50Ms": 137.044,
+      "p95Ms": 229.789,
+      "p99Ms": 299.615,
+      "queryMsBySession": {
+        "1": 206.003,
+        "4": 801.326,
+        "16": 2841.896,
+        "64": 9700.72
+      }
+    },
+    {
+      "method": "subset16",
+      "recallAt10": 0.9953125,
+      "meanDistances": 18183.703125,
+      "meanVisits": 18183.703125,
+      "p50Ms": 20.238,
+      "p95Ms": 32.587,
+      "p99Ms": 72.13,
+      "queryMsBySession": {
+        "1": 37.276,
+        "4": 108.427,
+        "16": 381.377,
+        "64": 1404.002
+      }
+    }
+  ]
+}

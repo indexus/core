@@ -29,6 +29,7 @@ The current mechanisms, step by step, are in [../architecture/](../architecture/
 - [cold-reconfiguration.md](cold-reconfiguration.md): balloon → DesiredTopology → transition planner (design; only the quiet pair fold is code)
 - [priorities.md](priorities.md): recovery > hot > cold > background
 - [query.md](query.md): derived client tree and cache
+- [Local subtree fingerprint](subtree-fingerprint.md) covers guarded reuse, local scope, the portable monoid encoding and interoperability vectors.
 - [ixr1.md](ixr1.md): the IXR1 record value stored by zonelog, and the design note that led to it
 - [wire-block.md](wire-block.md): the client wire: IXB2 blocks of `/sets`, IXRB records of `/records`
 - [handoff-reliability.md](handoff-reliability.md): seeded real-storage fault schedules, replay, fuzzing and local qualification

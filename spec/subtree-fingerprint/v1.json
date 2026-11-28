@@ -1,0 +1,67 @@
+{
+  "rows": [
+    {
+      "collection": "Collection000000",
+      "location": "@",
+      "id": "empty",
+      "weight": 0,
+      "metrics": [],
+      "binary": false,
+      "storedPayloadHex": "",
+      "sha256": "0b12a7ec2fd5af79357631682c060bf0d68e7dfed3d155185fea847fee238411"
+    },
+    {
+      "collection": "Collection000000",
+      "location": "a",
+      "id": "nul",
+      "weight": 1,
+      "metrics": [
+        0,
+        2.5
+      ],
+      "binary": false,
+      "storedPayloadHex": "6e756c6c",
+      "sha256": "9bbf26d584c4bca36b305a353fffe012b4a10640d679ea03cce7be0df9ea5fce"
+    },
+    {
+      "collection": "Collection000000",
+      "location": "a0",
+      "id": "bât🏠",
+      "weight": -2,
+      "metrics": [
+        -1.5
+      ],
+      "binary": false,
+      "storedPayloadHex": "7b2273223a225c7530303363222c2262223a34327d",
+      "sha256": "712fcb9767bd408b26970f7b45c47155be88b6f6caeeb3cc795e9a4e0ac3baea"
+    },
+    {
+      "collection": "Collection000000",
+      "location": "a9",
+      "id": "raw",
+      "weight": 1,
+      "metrics": [
+        0.25,
+        -4
+      ],
+      "binary": true,
+      "storedPayloadHex": "222f77413d22",
+      "sha256": "e7943f0c8d0b90a5c2e2d1b410d9b4ce30696d22807255b35d3e3c0f10935aaa"
+    },
+    {
+      "collection": "Collection000000",
+      "location": "a9",
+      "id": "zero-binary",
+      "weight": 0,
+      "metrics": [],
+      "binary": true,
+      "storedPayloadHex": "2222",
+      "sha256": "dfb9b607e53d92a275923579c4a74b9a4ca6f3db379fcbc4c45b530878fe96fa"
+    }
+  ],
+  "monoid": {
+    "algorithm": "sha256-add256-v1",
+    "sum": "df4f8f6d8ea0cfefffb2a246874b5dc1c6c89c342d4c1460c7ca6bf37c63906d",
+    "count": "5"
+  }
+}
