@@ -401,3 +401,27 @@ func TestPreferExistingBelowThirtyWithoutBypassingCopyBudget(t *testing.T) {
 		t.Fatalf("29%% plus copy would exceed admission: %+v", got)
 	}
 }
+
+func TestMeasuredSecondReceiverHasTwoBudgetsAndOneWarmLane(t *testing.T) {
+	cold := MachineFacts{ResourceManaged: true, HostCPUOK: true, CPUOK: true, MemOK: true, DiskOK: true, MemFreePct: 60, DiskFreePct: 60, Free: 1, Cores: 4, CPUPct: 25, Receiving: 1, CopySlots: 1, WarmReceiverLane: true, ReceiverReserveCores: 0.5}
+	if ready, known := ReceiverOffer(cold); !ready || !known {
+		t.Fatal("expected offer at exactly 50% projected CPU")
+	}
+	for label, change := range map[string]func(*MachineFacts){
+		"third join":          func(m *MachineFacts) { m.Receiving++ },
+		"unobserved":          func(m *MachineFacts) { m.UnobservedSlots++ },
+		"no serialized lane":  func(m *MachineFacts) { m.WarmReceiverLane = false },
+		"unbounded copies":    func(m *MachineFacts) { m.CopySlots = 0 },
+		"projected CPU":       func(m *MachineFacts) { m.CPUPct = 25.1 },
+		"30% host":            func(m *MachineFacts) { m.CPUPct = 30; m.Cores = 8 },
+		"memory":              func(m *MachineFacts) { m.MemFreePct = 39 },
+		"disk":                func(m *MachineFacts) { m.DiskFreePct = 39 },
+		"unknown machine CPU": func(m *MachineFacts) { m.HostCPUOK = false },
+	} {
+		candidate := cold
+		change(&candidate)
+		if ready, _ := ReceiverOffer(candidate); ready {
+			t.Errorf("%s advertised an offer", label)
+		}
+	}
+}

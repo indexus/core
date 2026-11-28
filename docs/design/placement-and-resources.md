@@ -164,7 +164,7 @@ skipped. This is the case of a local run on a laptop with a full disk.
 | Instrumented receiver forecast | At least 0.50 cores | The agent uses the largest recent joining-process estimate among its live slots. A sample uses six CPU readings and expires after one minute. | policy to qualify |
 | `receiverCores` (fallback and reserve-floor sizing) | 1.75 cores | two receivers on 4 vCPU used 87-89 %, about 1.75 cores each. It includes the writes the new vnode takes over, which land on the target too. | one measurement |
 | `targetCPUMaxPct` | 60 % | retain burst and transfer headroom | control target, not a hard cap |
-| `maxReceiversPerMachine` | 1 | two at once is what saturated the machines | one measurement |
+| Concurrent joins | 1 normally, 2 on a measured cold host with serialized warm preloads | reuse a host waiting on another donor | local qualification |
 | `targetDiskMinFreePct` | 40 % | the node's own `DiskMinFreePct`: lower, the new vnode would ask for a scale-up at once | aligned with the node |
 | `targetMemMinFreePct` | 40 % | 100 minus the node's `MemRefusePct`: lower, the new vnode would refuse writes | aligned with the node |
 | `placementMemory` | 15 s | a machine just chosen counts as receiving until its agent shows the vnode | assumed |
@@ -172,7 +172,10 @@ skipped. This is the case of a local run on a laptop with a full disk.
 
 On a four-core host the initial forecast of 0.50 cores admits a receiver up to
 47.5% measured CPU. A recent 1.5-core observation lowers that threshold to
-22.5%. Only one receiver is admitted at once. The reserve-floor formula still
+22.5%. Once the first join is measured, a resource-managed host may advertise
+one further offer if its CPU is below 30%, the observed CPU plus two receiver
+forecasts is at most 50%, and the host has a single shared warm-preload lane.
+A pending spawn or an unobserved process cannot grant this second offer. The reserve-floor formula still
 uses the original 1.75-core unit so this change alone does not multiply spare
 boots. Agents export the forecast and refusal reason in their machine facts.
 
@@ -239,8 +242,7 @@ consumed write right. See the [timer and provisioner qualification](../benchmark
 
 In the direct 16k experiment a vnode asks for relief at 50 writes/s. The
 physical host target is 50% CPU. Additional processes share that host while
-the receiver admission test allows another copy. Each host offers one incoming
-join at a time. Stale measurements of a live process, missing host CPU,
+the receiver admission test allows another copy. Each survey advertises at most one further join per host. Stale measurements of a live process, missing host CPU,
 insufficient memory or disk headroom suspend that offer. In automatic mode
 the agent creates its process table and allocates network endpoints on demand.
 The bootstrap slot retains its configured address. Other slots keep their assigned
@@ -255,8 +257,7 @@ shows how much this estimate changes while a fleet is growing.
 
 ### Ready capacity during a wave of splits
 
-The provisioner sizes the reserve in *receiver offers*. One machine can admit
-one incoming join at a time, even when it has several free vnode slots.
+The provisioner sizes the reserve in *receiver offers*. Each machine contributes at most one offer to the reserve, including a cold host eligible for its second join.
 `-readyReservePct` (AWS `READY_RESERVE_PCT`, initially 15) sets the spare
 capacity to keep for the next requests. The calculation also accounts for
 the splits queued on the source machines.
@@ -422,9 +423,11 @@ autoscale is held by a transfer. Unknown samples clear the pacing estimate.
 These are scheduling choices to qualify, **not** a hard CPU quota or a
 maximum freeze-time guarantee. No write path waits on this pacing timer.
 
-Limits: reception is throttled only indirectly (a preload occupies a slot,
-which a source then waits for; the bound on receivers stays
-`maxReceiversPerMachine`). Collection of an installed transfer takes no slot.
+On a single-lane host, unfenced incoming snapshot pages share one additional
+host-local lock across vnode processes. They hold it only during a page's
+local staging call. Separate source and receiver lanes allow reciprocal
+transfers. A sealed region, a pass with an unfinished zone fence, and the
+header-only admission proceed immediately. Collection takes no slot.
 `flock` gives no fairness. The budget counts copies, not bytes or CPU.
 
 ### Shared experiment view

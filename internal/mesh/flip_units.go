@@ -268,7 +268,7 @@ func (s *Service) flipUnit(ctx context.Context, transfer storage.CausalTransfer,
 		began := time.Now()
 		local := known.ofKeys(unit[start:])
 		metrics.HandoffPhase(transfer.Cession.ID.String(), "warm-copy")
-		keys, err := s.copyLot(ctx, transfer, unit[start:], local)
+		keys, err := s.copyLot(ctx, transfer, unit[start:], local, !known.urgent)
 		known.merge(local)
 		if err != nil {
 			return fmt.Errorf("warm-lot: %w", err)

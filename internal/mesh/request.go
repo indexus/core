@@ -40,6 +40,8 @@ type Request struct {
 	// Iterative means the caller conducts fallback discovery. Targets still
 	// follow durable routing hints but do not recursively scan membership.
 	Iterative bool `json:",omitempty"`
+	// WarmPage permits waiting for host admission before any fence needs this page.
+	WarmPage bool `json:",omitempty"`
 
 	Directory          []storage.RegionReferral `json:",omitempty"`
 	Locations          []string                 `json:",omitempty"`

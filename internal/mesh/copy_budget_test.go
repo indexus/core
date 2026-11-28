@@ -409,3 +409,89 @@ func TestRecoveryFinishesSealedBeforeWaitingForWarmCopy(t *testing.T) {
 		t.Fatalf("sealed transfer did not finish: %v", err)
 	}
 }
+
+// Two local vnode processes use the same directory. Block one receiver's
+// warm lane, then replay both sides of a regional fence on the other.
+func TestBusyWarmReceiverLeavesFencedRecoveryFree(t *testing.T) {
+	for _, fence := range []string{"region", "zone"} {
+		t.Run(fence, func(t *testing.T) { exerciseBusyWarmReceiver(t, fence) })
+	}
+}
+func exerciseBusyWarmReceiver(t *testing.T, fence string) {
+	t.Helper()
+	ctx := context.Background()
+	net, nodes := meshFixture(t, 2)
+	source, target := nodes[0], nodes[1]
+	budgets := hostBudgets(t, 1, 2)
+	target.SetCopyBudget(budgets[1])
+	shrinkCopyWait(t, 5*time.Millisecond)
+	held, _ := budgets[0].receiver.take("")
+	if held == nil {
+		t.Fatal("could not occupy host warm receiver")
+	}
+	defer held.Close()
+	row := storage.Record{Collection: "Demo000000000000", Location: "a", ID: "initial"}
+	if _, err := source.Store.Write("initial", row); err != nil {
+		t.Fatal(err)
+	}
+	state, _ := source.Store.CausalState()
+	request := Request{Kind: "handoff", Input: state.Genesis.Right().ID, Region: tree.Region{}, Target: target.Self}
+	warm, urgent, headers := 0, 0, 0
+	source.Peers = transportFunc(func(ctx context.Context, host string, r Request) (Response, error) {
+		if r.Kind == "preload" {
+			switch {
+			case len(r.Transfer.Snapshots) == 0:
+				headers++
+				if r.WarmPage {
+					t.Fatal("header asked to wait")
+				}
+			case r.WarmPage:
+				warm++
+			default:
+				urgent++
+			}
+		}
+		return net.Exchange(ctx, host, r)
+	})
+	if err := source.handoff(ctx, request); !errors.Is(err, storage.ErrNotReady) {
+		t.Fatalf("warm copy not deferred: %v", err)
+	}
+	if headers == 0 || warm == 0 {
+		t.Fatalf("missing preloads: header=%d warm=%d", headers, warm)
+	}
+	row.ID = "while-warm"
+	if _, _, ok, err := source.Store.ApplyRecord("while-warm", row); err != nil || !ok {
+		t.Fatalf("unfenced source write %t, %v", ok, err)
+	}
+	state, _ = source.Store.CausalState()
+	if len(state.Transfers) != 1 {
+		t.Fatalf("expected pending operation: %d", len(state.Transfers))
+	}
+	for id := range state.Transfers {
+		switch fence {
+		case "region":
+			if _, err := source.Store.ForceFreezeRegion(id); err != nil {
+				t.Fatal(err)
+			}
+		case "zone":
+			z, err := tree.NewZoneKey(row.Collection, row.Location)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := source.Store.FreezeZones(id, []tree.ZoneKey{z}); err != nil {
+				t.Fatal(err)
+			}
+		}
+		request.Operation = id
+	}
+	if err := source.handoff(ctx, request); err != nil {
+		t.Fatal(err)
+	}
+	if urgent == 0 {
+		t.Fatal("recovery never sent a data page")
+	}
+	row.ID = "after"
+	if _, _, ok, err := target.Store.ApplyRecord("after", row); err != nil || !ok {
+		t.Fatalf("new owner write %t, %v", ok, err)
+	}
+}

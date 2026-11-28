@@ -23,7 +23,7 @@ import (
 // is a directory they share: one file per slot, held with flock. A process
 // that dies releases its slots with its file descriptors.
 //
-// Rules:
+// Source-lane rules (the independent warm receiver lane is used in preload):
 //
 //   - A transfer holds at most one slot, named after it. A source and a
 //     receiver of the same transfer on one host share that slot: the receiver
@@ -40,6 +40,8 @@ type CopyBudget struct {
 	dir      string
 	slots    int
 	pressure atomic.Pointer[copyPressure]
+	// Independent of the outgoing slots: reciprocal senders can both receive.
+	receiver *CopyBudget
 }
 
 type copyPressure struct{ used, target float64 }
@@ -82,7 +84,15 @@ func NewCopyBudget(dir string, slots int) (*CopyBudget, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, err
 	}
-	return &CopyBudget{dir: dir, slots: slots}, nil
+	b := &CopyBudget{dir: dir, slots: slots}
+	if slots == 1 {
+		incoming := filepath.Join(dir, "incoming")
+		if err := os.MkdirAll(incoming, 0o755); err != nil {
+			return nil, err
+		}
+		b.receiver = &CopyBudget{dir: incoming, slots: 1}
+	}
+	return b, nil
 }
 
 // SetCopyBudget gives the service its host's budget, before it serves.
@@ -293,10 +303,19 @@ func (s *Service) copySlot(ctx context.Context, offer storage.CausalTransfer) (f
 	return s.jobs.copies.reserve(ctx, id, wait, wait > 0)
 }
 
-// preload stages one page of an incoming transfer. It occupies a slot of the
-// host when one is free, or shares its source's, and never waits: a page can
-// arrive while its region is frozen.
-func (s *Service) preload(ctx context.Context, transfer storage.CausalTransfer) (map[string]uint64, error) {
+// preload queues only explicitly unfenced snapshot pages on single-lane hosts.
+// Recovery and admission headers bypass that queue. The outgoing slot probe
+// remains nonblocking in both cases.
+func (s *Service) preload(ctx context.Context, transfer storage.CausalTransfer, warm bool) (map[string]uint64, error) {
+	if budget := s.jobs.copies; warm && len(transfer.Snapshots) > 0 && budget != nil && budget.receiver != nil {
+		// Serialize only this local write. The receiver holds no incoming
+		// lane while waiting on a remote peer or another transfer.
+		release, err := budget.receiver.reserve(ctx, "", copySlotWait, true)
+		if err != nil {
+			return nil, err
+		}
+		defer release()
+	}
 	defer s.jobs.copies.acquire(ctx, transfer.Cession.ID.String(), 0)()
 	return s.Store.PreloadCausal(transfer)
 }

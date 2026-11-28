@@ -27,6 +27,8 @@ type MachineFacts struct {
 	// CopySlots is the configured shared source-copy budget. Without a
 	// positive known limit each waiting requester is counted individually.
 	CopySlots int `json:"copy_slots,omitempty"`
+	// WarmReceiverLane serializes incoming unfenced snapshot pages across processes.
+	WarmReceiverLane bool `json:"warm_receiver_lane,omitempty"`
 	// ReceiverReserveCores is this agent's forecast for the next join.
 	ReceiverReserveCores float64 `json:"receiver_reserve_cores,omitempty"`
 	ReceiverRefusal      string  `json:"receiver_refusal,omitempty"`
@@ -128,9 +130,8 @@ const (
 	// 100 minus Config.MemRefusePct: lower, the new vnode would refuse writes.
 	targetMemMinFreePct = 40.0
 
-	// maxReceiversPerMachine: joins a machine pays for at the same time. Two
-	// at once is what saturated the machines of the 2026-11-26 run.
-	maxReceiversPerMachine = 1
+	// A second join must leave half the measured host available for bursts.
+	secondReceiverTargetPct = 50
 )
 
 // Place chooses the host of a vnode asked for by donorVNode. Prefer known
@@ -275,7 +276,7 @@ func ReceiverRefusal(m MachineFacts) string {
 		return fmt.Sprintf("disk free %.0f%% < %.0f%%", m.DiskFreePct, targetDiskMinFreePct)
 	case m.MemOK && m.MemFreePct < targetMemMinFreePct:
 		return fmt.Sprintf("memory free %.0f%% < %.0f%%", m.MemFreePct, targetMemMinFreePct)
-	case m.Receiving >= maxReceiversPerMachine:
+	case m.Receiving > 0 && !admitsSecondReceiver(m):
 		if m.UnobservedSlots > 0 {
 			return fmt.Sprintf("%d observed joining, %d awaiting vnode CPU sample", m.Receiving-m.UnobservedSlots, m.UnobservedSlots)
 		}
@@ -284,6 +285,14 @@ func ReceiverRefusal(m MachineFacts) string {
 		return fmt.Sprintf("cpu %.0f%% + receiver %.0f%% > %.0f%%", m.CPUPct, receiverCost(m), targetCPUMaxPct)
 	}
 	return ""
+}
+
+// Only a measured, resource-managed receiver can advertise this extra offer.
+// Budget both joins in full even when some of their CPU is already measured.
+func admitsSecondReceiver(m MachineFacts) bool {
+	return (m.ResourceManaged || m.AddressSlots > 0) && m.WarmReceiverLane && m.CopySlots == 1 &&
+		m.Receiving == 1 && m.UnobservedSlots == 0 && m.CPUPct < reuseCPUPercent &&
+		m.CPUPct+2*receiverCost(m) <= secondReceiverTargetPct
 }
 
 // receiverCost is receiverCores in percent of the machine. An unknown core
