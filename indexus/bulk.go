@@ -19,6 +19,8 @@ func (n *Node) IngestBulk(ctx context.Context, body io.Reader, replace bool) (Bu
 	if n.mesh == nil {
 		return BulkResult{}, ErrNotReady
 	}
+	ctx, done := n.mesh.clientActivity.Begin(ctx)
+	defer done()
 	result, err := n.mesh.service.Store.IngestBulkStream(ctx, body, replace)
 	if err != nil || result.Already {
 		return result, err

@@ -146,3 +146,34 @@ func TestInboundInstallsDeferCPURiseOnce(t *testing.T) {
 		clock.advance(time.Second)
 	}
 }
+
+func TestKnownClientQuiescenceSuppressesOnlyCPU(t *testing.T) {
+	for _, process := range []float64{2, 85} {
+		clock := clockAt(time.Unix(1_800_000_000, 0))
+		a := New(Config{Enabled: true, Now: clock.now, PressureHold: time.Second, MemRefusePct: 90, ItemsLimit: 500, WritesLimit: 50})
+		in := Input{ClientDemand: ClientQuiet, Resources: sharedHostSample(process, 90)}
+		a.evaluatePressure(in)
+		clock.advance(time.Minute)
+		if sig, _ := a.evaluatePressure(in); sig != "" {
+			t.Fatalf("maintenance CPU triggered %s", sig)
+		}
+		tests := []struct {
+			change func(*Input)
+			signal string
+		}{
+			{func(i *Input) { i.InboundLots = 3; i.ClientDemand = ClientActive; i.ClientInFlight = 1 }, "cpu"},
+			{func(i *Input) { i.OwnedItems = 500 }, "items"},
+			{func(i *Input) { i.Queue = 1000 }, "queue"},
+			{func(i *Input) { i.WriteRate = 200 }, "writes"},
+			{func(i *Input) { i.Resources.DiskFreePct = 1 }, "disk"},
+			{func(i *Input) { i.Resources.MemPct = 99 }, "mem"},
+		}
+		for _, tc := range tests {
+			copy := in
+			tc.change(&copy)
+			if got, _ := a.evaluatePressure(copy); got != tc.signal {
+				t.Fatalf("process=%.0f got %q want %q", process, got, tc.signal)
+			}
+		}
+	}
+}

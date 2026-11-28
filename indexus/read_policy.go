@@ -128,6 +128,8 @@ func (n *Node) ReadContext(ctx context.Context, collection, location string, opt
 	if n.mesh == nil {
 		return ReadResult{}, ErrNotReady
 	}
+	ctx, done := n.mesh.clientActivity.Begin(ctx)
+	defer done()
 	if err := ctx.Err(); err != nil {
 		return ReadResult{}, err
 	}

@@ -218,6 +218,8 @@ func (n *Node) DegradedRead(ctx context.Context, collection, location, id string
 	if n.mesh == nil {
 		return nil, false, fmt.Errorf("causal runtime required")
 	}
+	ctx, done := n.mesh.clientActivity.Begin(ctx)
+	defer done()
 	z, err := tree.NewZoneKey(collection, location)
 	if err != nil {
 		return nil, false, err

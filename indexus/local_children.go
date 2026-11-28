@@ -18,6 +18,8 @@ func (n *Node) GetLocalChildrenContext(ctx context.Context, collection, location
 	if n.mesh == nil {
 		return nil, ErrNotReady
 	}
+	ctx, done := n.mesh.clientActivity.Begin(ctx)
+	defer done()
 	if len(location) == BASE64.IDLength() {
 		return []string{}, nil
 	}

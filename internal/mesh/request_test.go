@@ -251,7 +251,7 @@ const requestLayout = "" +
 	"Hops,omitempty Subdivide,omitempty Spawned,omitempty " +
 	"Contributions,omitempty SummaryPage,omitempty Zones,omitempty " +
 	"FallbackEntries,omitempty RecordID,omitempty Collection,omitempty " +
-	"Description,omitempty Descriptions,omitempty Host:-"
+	"Description,omitempty Descriptions,omitempty Host:- ClientWork,omitempty"
 
 const responseLayout = "ColdUsage,omitempty " +
 	"SummaryStatus,omitempty Directory,omitempty Endpoint,omitzero " +

@@ -121,42 +121,51 @@ func (n *Node) AutoscaleTick() {
 	}
 	// Keep sampling through handoffs: averaging an entire multi-minute join
 	// hides the current demand when the controller resumes.
-	rate := n.writeDemandRate(time.Now())
-	resources := n.autoscale.Sample()
-	var installed int64
+	in := n.sampleAutoscaleDemand()
+	in.Resources = n.autoscale.Sample()
 	if n.mesh != nil {
-		installed = n.mesh.installedLots.Swap(0)
-		n.mesh.service.ObserveCopyPressure(resources.CPUPct, n.autoscale.Config().CPULimitPct, resources.CPUOK)
+		n.mesh.service.ObserveCopyPressure(in.Resources.CPUPct, n.autoscale.Config().CPULimitPct, in.Resources.CPUOK)
 	}
 	if n.holdAutoscaleForTransfers() {
 		return
 	}
 	zones, items := n.retainedOwnedMetrics()
-	in := n.autoscaleInput(zones, items, rate)
-	in.Resources = resources
-	in.InboundLots = installed
+	in.OwnedZones, in.OwnedItems = zones, items
+	if view := n.topologyView(); view != nil {
+		in.Members = view.Active
+	}
 	n.autoscale.Tick(in, func(req autoscale.Request) error {
 		return n.askForPeers(req, in, zones)
 	})
 }
 
-// autoscaleInput is what this vnode measures for one tick.
-func (n *Node) autoscaleInput(zones, items int, rate float64) autoscale.Input {
-	in := autoscale.Input{
-		OwnedZones: zones,
-		OwnedItems: items,
-		WriteRate:  rate,
-		SelfName:   n.Name(),
+// sampleAutoscaleDemand takes one coherent local sample, including when a
+// handoff prevents the placement tick. The lock covers only in-memory counters.
+func (n *Node) sampleAutoscaleDemand() autoscale.Input {
+	in := autoscale.Input{SelfName: n.Name()}
+	m := n.mesh
+	if m == nil {
+		return in
 	}
-	if n.mesh != nil {
-		demand := &n.mesh.service.Writes
-		in.Queue = int(max(0, demand.InFlight.Load()))
-		in.OldestWait = demand.OldestWait(time.Now())
-		in.TransfersOut = n.mesh.service.OutgoingHandoffs()
+	m.sampleMu.Lock()
+	defer m.sampleMu.Unlock()
+	now := time.Now()
+	in.WriteRate = n.writeDemandRate(now)
+	in.InboundLots = m.installedLots.Swap(0)
+	in.ClientOps, in.ClientInFlight = m.clientActivity.Sample()
+	if in.ClientOps > 0 || in.ClientInFlight > 0 || in.WriteRate > 0 {
+		m.lastClientSample = now
 	}
-	if view := n.topologyView(); view != nil {
-		in.Members = view.Active
+	cfg := n.autoscale.Config()
+	lookback := max(cfg.PressureHold, cfg.RiseHold)
+	in.ClientDemand = autoscale.ClientQuiet
+	if now.Sub(m.lastClientSample) <= lookback || now.Sub(time.Unix(0, m.lastWrite.Load())) <= lookback {
+		in.ClientDemand = autoscale.ClientActive
 	}
+	demand := &m.service.Writes
+	in.Queue = int(max(0, demand.InFlight.Load()))
+	in.OldestWait = demand.OldestWait(now)
+	in.TransfersOut = m.service.OutgoingHandoffs()
 	return in
 }
 

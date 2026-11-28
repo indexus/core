@@ -33,6 +33,8 @@ func (n *Node) AdmitCollection(ctx context.Context, name string, ixc1 []byte) (i
 	if n.mesh == nil {
 		return 0, ErrNotReady
 	}
+	ctx, done := n.mesh.clientActivity.Begin(ctx)
+	defer done()
 	return n.mesh.service.AdmitEverywhere(ctx, name, ixc1)
 }
 
@@ -41,6 +43,8 @@ func (n *Node) CollectionDescription(name string) ([]byte, error) {
 	if n.mesh == nil {
 		return nil, ErrNotReady
 	}
+	_, done := n.mesh.clientActivity.Begin(context.Background())
+	defer done()
 	c, err := n.mesh.service.Store.CollectionOf(name)
 	if err != nil {
 		return nil, err

@@ -10,7 +10,7 @@ func (a *Controller) holdLocked(in Input, memRise, cpuRise, projected float64, n
 	if in.InboundLots == 0 {
 		a.inboundCPUUntil = time.Time{}
 	}
-	deferred := false
+	deferred, idleCPU := false, false
 	candidates := [...]struct {
 		name   string
 		active bool
@@ -38,7 +38,12 @@ func (a *Controller) holdLocked(in Input, memRise, cpuRise, projected float64, n
 			continue
 		}
 		cpu := c.name == "cpu" || c.name == "cpu_rise"
-		if cpu && in.InboundLots > 0 && in.WriteRate == 0 && in.Queue == 0 && in.OldestWait == 0 && a.hostDriven(c.name, res) {
+		writeDemand := in.WriteRate > 0 || in.Queue > 0 || in.OldestWait > 0
+		if cpu && in.ClientDemand == ClientQuiet && !writeDemand {
+			idleCPU = true
+			continue
+		}
+		if cpu && in.ClientOps == 0 && in.ClientInFlight == 0 && in.InboundLots > 0 && !writeDemand && a.hostDriven(c.name, res) {
 			// A receiving disk briefly amplifies shared CPU. Extend the first
 			// mature signal once per run of samples with successful installs.
 			// Continued copies cannot renew the deadline for a read-heavy host.
@@ -57,7 +62,7 @@ func (a *Controller) holdLocked(in Input, memRise, cpuRise, projected float64, n
 	if mature >= 0 {
 		first = mature
 	}
-	if first < 0 || mature < 0 && deferred {
+	if first < 0 || mature < 0 && (deferred || idleCPU) {
 		return "", 0, a.cfg.PressureHold, deferred
 	}
 	return candidates[first].name, now.Sub(a.pressureSince[first]), candidates[first].hold, deferred

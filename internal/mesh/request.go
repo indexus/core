@@ -78,6 +78,7 @@ type Request struct {
 	Description          []byte                  `json:",omitempty"`
 	Descriptions         [][]byte                `json:",omitempty"`
 	Host                 string                  `json:"-"`
+	ClientWork           bool                    `json:",omitempty"`
 }
 
 type Contribution struct {

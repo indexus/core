@@ -44,6 +44,8 @@ func (n *Node) GetSetContext(ctx context.Context, collection, location string, d
 	if n.mesh == nil {
 		return nil, nil, ErrNotReady
 	}
+	ctx, done := n.mesh.clientActivity.Begin(ctx)
+	defer done()
 	if err := ctx.Err(); err != nil {
 		return nil, nil, err
 	}
@@ -64,6 +66,8 @@ func (n *Node) GetAggregates(collection string, locations []string) (map[string]
 	if n.mesh == nil {
 		return nil, ErrNotReady
 	}
+	ctx, done := n.mesh.clientActivity.Begin(context.Background())
+	defer done()
 	out := make(map[string]*Abelian, len(locations))
 	snapshot, err := n.mesh.service.Store.CausalRouting()
 	if err != nil {
@@ -96,7 +100,7 @@ func (n *Node) GetAggregates(collection string, locations []string) (map[string]
 		if n.mesh.summary.ReadyFor(collection, location) {
 			out[location] = n.mesh.summary.Owned(collection, location)
 		} else {
-			_, set, err := n.meshGet(context.Background(), collection, location, true, true)
+			_, set, err := n.meshGet(ctx, collection, location, true, true)
 			if err != nil {
 				return nil, err
 			}
@@ -122,6 +126,11 @@ func (n *Node) GetSetsBlockContext(parent context.Context, collection string, lo
 		}
 		deep, via, refresh = true, nil, true
 	}
+	if n.mesh == nil {
+		return nil, ErrNotReady
+	}
+	parent, done := n.mesh.clientActivity.Begin(parent)
+	defer done()
 	resolved, locations, redirects, err := n.resolveSets(parent, collection, locations, deep, via, refresh, true, options)
 	if err != nil {
 		return nil, err
