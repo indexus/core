@@ -109,7 +109,6 @@
     prepared.set(raw,points);
     if(!points.length){root.replaceChildren(el('p','Aucune mesure disponible.'));return;}
     const p=points[index],f=p.fleet||{},sim=f.source==='simulation';
-    if(p.metrics_stale||p.load_stale)frame.append(el('p','Télémétrie périmée : '+[p.metrics_stale?'nœuds':'',p.load_stale?'charge':''].filter(Boolean).join(', '),'alert'));
     const machines=f.machines||[],nodes=f.vnodes||[],transfers=f.transfers||[];
     const tiles=el('div',null,'tiles');
     const warm=machines.filter(h=>h.state==='warm').length,boot=machines.filter(h=>h.state==='booting').length;
@@ -188,42 +187,49 @@
       });
       diagnostics.append(more);
     }
-    const choices=el('div',null,'legend'), plot=el('div',null,'network-pane');
+    const choices=el('div',null,'scene-options'), plot=el('div',null,'network-pane');
     const active=p.metrics_stale?[]:transfers.filter(tr=>!tr.stale);
     const unknownLinks=transfers.length-active.length;
 
     const waiting=active.filter(tr=>tr.phase==='copy-slot').length;
-    choices.setAttribute('aria-label','Vue du réseau');
-    for(const [key,title] of [['hosts','Par machine'],['radial','Arbre radial'],['space','Réseau 3D'],['shares','Plages d’adresses']]){
-      const b=el('button',title);b.type='button';b.dataset.mode=key;
-      b.onclick=()=>{
-        root.dataset.mode=key;delete root.dataset.selection;
-        if(global.location.hash===''||['#vnodes','#plages','#reseau-3d'].includes(global.location.hash)){
-          const url=new URL(global.location.href);url.hash=key==='radial'?'vnodes':key==='shares'?'plages':key==='space'?'reseau-3d':'';
-          global.history.replaceState(global.history.state,'',url);
-        }
-        drawTopology();
-      };choices.append(b);
+    const modes=[['hosts','Par machine',''],['radial','Arbre radial','#vnodes'],['space','Réseau 3D','#reseau-3d'],['shares','Plages d’adresses','#plages']];
+    const picker=el('select',null,'scene-mode');picker.setAttribute('aria-label','Vue du réseau');
+    for(const [key,title] of modes){
+      const option=el('option',title);option.value=key;picker.append(option);
     }
-    const clear=el('button',filtered?'Vue globale · effacer la sélection ('+scope.ids.size+')':'Vue globale');
-    clear.type='button';clear.disabled=!filtered;clear.title=[...scope.ids].join(', ');
-    clear.onclick=()=>{scope.ids.clear();scope.refresh();};choices.append(clear);
+    picker.value=root.dataset.mode||modes.find(([, ,hash])=>hash===global.location.hash)?.[0]||'hosts';
+    picker.onchange=()=>{
+      root.dataset.mode=picker.value;
+      if(modes.some(([, ,hash])=>hash===global.location.hash)){
+        const url=new URL(global.location.href);url.hash=modes.find(([key])=>key===picker.value)[2];
+        global.history.replaceState(global.history.state,'',url);
+      }
+      drawTopology();
+    };
+    if(filtered){
+      const clear=el('button','Vue globale · effacer la sélection ('+scope.ids.size+')');
+      clear.type='button';clear.title=[...scope.ids].join(', ');
+      clear.onclick=()=>{scope.ids.clear();scope.refresh();};choices.append(clear);
+    }
     if(waiting){
       const label=el('label'),box=el('input');box.type='checkbox';box.checked=root.dataset.showWaiting==='true';
       box.onchange=()=>{root.dataset.showWaiting=String(box.checked);drawTopology();};
-      label.append(box,document.createTextNode(' Afficher les attentes de créneau ('+fmt(waiting)+')'));choices.append(label);
+      label.append(box,document.createTextNode(' Attentes de créneau ('+fmt(waiting)+')'));choices.append(label);
     }
     function drawTopology(){
-      const mode=root.dataset.mode||(global.location.hash==='#vnodes'?'radial':global.location.hash==='#plages'?'shares':global.location.hash==='#reseau-3d'?'space':'hosts');
-      for(const b of choices.querySelectorAll('button')){if(b.dataset.mode)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));};
+      const mode=picker.value;
       const shown=root.dataset.showWaiting==='true'?active:active.filter(tr=>tr.phase!=='copy-slot');
       const visible=filtered?shown.filter(tr=>nodes.some(n=>scope.ids.has(n.label)&&touchesNode(tr,n))):shown;
-      plot.replaceChildren(topology(machines,nodes,visible,sim,p.metrics_stale,mode,root));installTips(plot);
+      const scene=topology(machines,nodes,visible,sim,p.metrics_stale,mode,root);
+      const viewport=scene.querySelector('.network-frame')||scene;
+      viewport.prepend(picker);
+      if(choices.childElementCount)viewport.append(choices);
+      plot.replaceChildren(scene);installTips(plot);
     }
     drawTopology();
     const workspace=el('div',null,'network-workspace');
     workspace.append(plot,charts);
-    frame.append(choices,workspace);
+    frame.append(workspace);
     if(!filtered){
       const extra=el('div',null,'tiles');
       for(const [label,value] of stats.filter((_,i)=>![0,1,2,5,9,10].includes(i))){

@@ -163,9 +163,10 @@ body:has(> nav.timeline):not(:has(.diagnostics[open])) {height:100dvh;padding-bo
 .ix-dashboard .outside-scope[role=button]:hover {opacity:1}
 .ix-dashboard {container-type:inline-size}
 .ix-dashboard .network-workspace {
-  --network-side:min(47%, max(260px, calc(100dvh - 285px)));
+  --network-side:min(47%, max(260px, calc(100dvh - 208px)));
   display:grid;
   grid-template-columns:var(--network-side) minmax(0,1fr);
+  margin-top:8px;
   gap:14px;
   align-items:start
 }
@@ -205,3 +206,18 @@ dialog.chart-dialog .chart-field {height:min(50vh,380px)}
 }
 .ix-dashboard .overview figcaption select:hover {border-color:#8997a066}
 .ix-dashboard .overview figcaption select option {background:Canvas;color:CanvasText}
+
+.ix-dashboard .scene-mode,.ix-dashboard .scene-options {
+  color-scheme:light dark;background:Canvas;color:CanvasText;
+  border:1px solid #8997a052;border-radius:7px;font:13px system-ui;padding:6px
+}
+.ix-dashboard .scene-options {display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.ix-dashboard .scene-options button {font:inherit;cursor:pointer}
+.ix-dashboard .scene-options label {display:inline-flex;align-items:center;cursor:pointer}
+.ix-dashboard .network-frame > .scene-mode {position:absolute;z-index:1;top:10px;left:10px;max-width:48%}
+.ix-dashboard .network-frame > .scene-options {position:absolute;bottom:10px;left:10px;max-width:calc(100% - 20px)}
+@container (max-width:820px) {
+  .ix-dashboard .network-frame .camera-bar {top:auto;bottom:10px}
+  .ix-dashboard .network-frame:has(.scene-options) .camera-bar {bottom:auto;top:10px}
+  .ix-dashboard .network-frame .camera-bar button {padding:4px}
+}
