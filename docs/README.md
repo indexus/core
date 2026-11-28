@@ -1,5 +1,7 @@
 # Indexus Core — documentation
 
+[Objectif produit et trajectoire Rust](design/objectif-produit.md) — cluster managé, collections, vues clientes et intégrations graphiques et 3D.
+
 La géométrie, la connaissance de topologie et le droit d'écriture sont
 distincts : `owner(z) = argmin XOR(z, V_active)` dit qui *devrait* tenir une
 zone ; seuls des droits installés et les fences du disque autorisent le commit.
