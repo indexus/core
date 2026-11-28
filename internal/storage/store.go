@@ -63,6 +63,7 @@ var (
 // transactions. Open uses fsynced commits; benchmark-only options may relax
 // physical durability without changing transaction contents.
 type Store struct {
+	fingerprints        fingerprintCache
 	controlCache        [2]atomic.Pointer[decodedControl]
 	membershipCache     [4]atomic.Pointer[decodedMembership]
 	membershipSnapshots [4]atomic.Pointer[membershipSnapshot]
