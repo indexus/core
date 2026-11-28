@@ -7,6 +7,52 @@ import (
 
 const childSegmentLimit = 8
 
+// A zone's half-open bounds consist of just the fixed collection/location/depth
+// head. For comparisons against those bounds, the variable-length document ID
+// cannot change membership, including when a head equals either endpoint.
+type childKeyRange struct{ first, last [headLen]byte }
+
+type omittedChildRanges struct {
+	ranges    []childKeyRange
+	unbounded bool
+}
+
+// Called under the snapshot's store lock. Copy heads only: no segment page
+// access or long-lived references to omitted segments and their document IDs.
+func boundOmittedChildren(older []*segment) omittedChildRanges {
+	if len(older) > childSegmentLimit {
+		return omittedChildRanges{unbounded: true}
+	}
+	var result omittedChildRanges
+	for _, g := range older {
+		if g.pages == 0 {
+			continue
+		}
+		if len(g.blocks) == 0 || len(g.blocks[0].first) < headLen || len(g.last) < headLen {
+			return omittedChildRanges{unbounded: true}
+		}
+		if result.ranges == nil {
+			result.ranges = make([]childKeyRange, 0, len(older))
+		}
+		result.ranges = append(result.ranges, childKeyRange{
+			first: [headLen]byte(g.blocks[0].first), last: [headLen]byte(g.last),
+		})
+	}
+	return result
+}
+
+func (r omittedChildRanges) mayOverlap(lo, hi []byte) bool {
+	if r.unbounded {
+		return true
+	}
+	for _, span := range r.ranges {
+		if bytes.Compare(span.last[:], lo) >= 0 && bytes.Compare(span.first[:], hi) < 0 {
+			return true
+		}
+	}
+	return false
+}
+
 type childObservation byte
 
 const (
@@ -28,7 +74,7 @@ func (s *Store) ObserveChildPresence(ctx context.Context, collection, location s
 	return sn.observeChildPresence(ctx, collection, location, omitted)
 }
 
-func (sn *Snapshot) observeChildPresence(ctx context.Context, collection, location string, omitted bool) (seen, unknown uint64, err error) {
+func (sn *Snapshot) observeChildPresence(ctx context.Context, collection, location string, omitted omittedChildRanges) (seen, unknown uint64, err error) {
 	if err := ctx.Err(); err != nil {
 		return 0, 0, err
 	}
@@ -57,7 +103,7 @@ func (sn *Snapshot) observeChildPresence(ctx context.Context, collection, locati
 		if err != nil {
 			return 0, 0, err
 		}
-		if status == childEmpty && omitted {
+		if status == childEmpty && omitted.mayOverlap(lo, hi) {
 			status = childUnknown
 		}
 		switch status {

@@ -211,7 +211,14 @@ eight recent immutable segments, stopping on the first source with a
 physical candidate. It reads key heads and flags. It does not advance to the
 next document, chase MVCC version chains, decode metrics, or fetch payloads.
 The pinned view copies at most eight segment references. Across 64 children
-there are at most 512 segment range checks and as many indexed seeks.
+there are at most 512 checks of recent segments and as many indexed seeks.
+With 9–16 segments the snapshot also copies the resident first and last key
+heads of up to eight older segments (at most 240 bytes of key data). A child
+outside every older range needs no additional uncertainty from that backlog.
+This adds at most 512 in-memory interval checks and zero disk reads. With
+more than 16 segments, the snapshot skips all older metadata and a child
+without a recent witness remains uncertain. Inconclusive recent probes
+continue to report uncertainty in both cases.
 Skiplist navigation, segment indexes, compressed page sizes, cache misses
 and snapshot registration/reclamation affect elapsed time. Cancellation is
 checked between child ranges and segments; an I/O already in progress can
@@ -251,6 +258,5 @@ inconclusive. A successful reply echoes `"include_uncertain":true` and
 keeps `"complete":false`, including for an empty leaf. The default and
 `include_uncertain=false` return witnessed children only and omit the marker.
 Callers relying on uncertain candidates must verify the echo. A tombstone
-before a live key is one cause of uncertainty. If older segments were omitted
-to respect the storage probe budget, all 64 immediate children can be
-candidates. Client traversal must budget the resulting expansion.
+before a live key is one cause of uncertainty. An older segment spanning many child ranges, or a backlog
+of more than 16 segments, can make all 64 immediate children candidates. Client traversal must budget the resulting expansion.
