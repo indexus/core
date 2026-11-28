@@ -84,6 +84,21 @@ store's group commit (`disk.commit_us_log2`: one transaction and its fsync;
 microseconds; `push.jsonl` gives their p99 per step (`write_p99_ms`,
 `commit_p99_ms`, `commit_wait_p99_ms`).
 
+During settlement, `experiment settlement MONITORS_FILE` reports the sum of
+observable joins, open handoffs and frozen transfers across live monitor slots.
+It queries `/metrics?view=settlement`. An operation may contribute to several
+indicators. Only zero certifies a quiet sample. A timeout leaves the final audit
+incomplete. Read `checked_keys`, `collections_checked` and `pass` in
+`audit.json` to see which checks finished. The pre-audit observations in
+`quiet.log` are advisory.
+
+For membership traffic, `mesh_sent.membership` counts the request and reply
+at the initiator. The `gossip` block also reports emitted JSON bytes for full
+inventories, deltas and references. These counters overlap. Compare equivalent
+load windows using counter differences for continuously observed vnodes.
+First sightings, departures and restarts can change a fleet-wide sum even
+when no message is sent.
+
 When a collection's exact total differs from what was acknowledged, the audit
 reads back every acknowledged key of that collection through every node
 (AUDIT-2): `mismatch_keys_lost` counts the keys found on none, i.e. lost writes;
