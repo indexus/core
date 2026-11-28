@@ -17,6 +17,11 @@ sets **all three fields to JSON null**, including for a budget refusal or a
 migration. A pending regional transfer makes the observation inconclusive
 when its XOR region intersects the requested prefix envelope. The envelope
 includes every collection with that prefix, so this is a conservative test.
+At maximum depth the request observes exactly one canonical zone. During
+a regional transfer its current unfrozen writer may supply an observation
+as soon as the zone is durably installed, using the same snapshot for the
+permission and the data. Shorter prefixes can still span uninstalled zones,
+even when their XOR address equals that of an installed maximum-depth zone.
 During a whole-store move or cold consolidation, all scopes can be unknown.
 Clients discard cached reuse on an unknown result, changed scope
 or peer roster, unrecognized algorithm, or unavailable endpoint. An older

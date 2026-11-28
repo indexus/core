@@ -135,8 +135,21 @@ func (s *Store) LocalSubtreeFingerprint(ctx context.Context, collection, locatio
 		if e != nil {
 			return e
 		}
-		if c.state.Moving != nil || coldBusy(tx) || pendingFingerprintTransfer(c.state, zone) {
+		if c.state.Moving != nil || coldBusy(tx) {
 			return zonelog.ErrContentScanLimit
+		}
+		if pendingFingerprintTransfer(c.state, zone) {
+			// At maximum depth the scan covers just this canonical zone.
+			// An installed point can already serve it while its region moves.
+			if len(zone.Location) != tree.Width {
+				return zonelog.ErrContentScanLimit
+			}
+			if e = s.writableIn(tx, c, zone); e != nil {
+				if errors.Is(e, ErrNotOwner) || errors.Is(e, ErrFrozen) {
+					return zonelog.ErrContentScanLimit
+				}
+				return e
+			}
 		}
 		e = sn.ScanContent(ctx, collection, location, 32768, 8<<20, func(z zonelog.Record) error {
 			if z.Binary && !z.Opaque && len(z.Payload) == 0 {
