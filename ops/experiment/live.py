@@ -52,47 +52,55 @@ def latest_metrics(path, span=4 << 20, elapsed=None):
         except ValueError:
             continue
         if "metrics" in r:
-            m = dict(r["metrics"] or {}, took_ms=r.get("took_ms", 0))
+            m = dict(r["metrics"] or {}, took_ms=r.get("took_ms", 0), sample_t=r["t"])
             last[r["monitor"]] = (r["t"], m)
             newest = max(newest, r["t"])
     return {m: v for m, (t, v) in last.items() if t >= (newest if elapsed is None else elapsed) - 10}
 
 
 def network(ms, prev, at):
-    """Cumulative counters of every node, and their rates since prev."""
-    now = {"at": at, "bytes": 0, "relayed": 0, "received": 0, "applied": 0, "relayed_successes": 0, "gossip": 0, "value_ms": 0, "push_ms": 0}
-    for m in ms.values():
-        for kind, c in (m.get("mesh_sent") or {}).items():
-            now["bytes"] += c["request_bytes"] + c["response_bytes"]
-            if kind in {"exchange", "membership"}:
-                now["gossip"] += c["request_bytes"] + c["response_bytes"]
-        now["relayed"] += m["writes"]["relayed"]
-        now["received"] += m["writes"]["received"]
+    """Compare counters only across two fresh observations of the same vnode."""
+    now = {}
+    delta = dict.fromkeys(("bytes", "relayed", "received", "applied", "relayed_successes", "gossip"), 0)
+    vnode_seconds = value_load = push_load = 0
+    for endpoint, m in ms.items():
+        mesh = m.get("mesh_sent") or {}
+        sent = {kind: c["request_bytes"] + c["response_bytes"] for kind, c in mesh.items()}
         hops = m["writes"].get("hops") or []
-        now["applied"] += sum(hops)
-        now["relayed_successes"] += sum(hops[1:])
         summary = m.get("summary") or {}
-        now["value_ms"] += summary.get("value_ms", 0)
-        now["push_ms"] += summary.get("push_ms", 0)
+        counters = dict(bytes=sum(sent.values()), gossip=sent.get("exchange", 0) + sent.get("membership", 0),
+                        relayed=m["writes"]["relayed"], received=m["writes"]["received"],
+                        applied=sum(hops), relayed_successes=sum(hops[1:]),
+                        value_ms=summary.get("value_ms", 0), push_ms=summary.get("push_ms", 0))
+        key = (endpoint, m.get("name"), m.get("id"))
+        sample = m.get("sample_t", at)
+        uptime = m.get("uptime_seconds", 0)
+        now[key] = (sample, uptime, counters)
+        if not prev or key not in prev:
+            continue
+        old_sample, old_uptime, old = prev[key]
+        dt = sample - old_sample
+        if dt <= 0 or uptime < old_uptime or any(counters[k] < old[k] for k in counters):
+            continue
+        vnode_seconds += dt
+        for k in delta:
+            delta[k] += counters[k] - old[k]
+        value_load += (counters["value_ms"] - old["value_ms"]) / dt / 1000
+        push_load += (counters["push_ms"] - old["push_ms"]) / dt / 1000
     out = {"pending_k": round(max((m.get("summary") or {}).get("pending_edges", 0) for m in ms.values()) / 1000, 1),
            "flush_s": round(max((m.get("summary") or {}).get("flush_last_ms", 0) for m in ms.values()) / 1000, 1),
            "versions": len({m["gossip"]["version"] for m in ms.values() if m["gossip"].get("version")}) or None,
            "membership_kb": round(max(m["gossip"]["membership_bytes"] for m in ms.values()) / 1024, 1)}
-    dt = now["at"] - prev["at"] if prev else 0
-    if dt > 0 and now["bytes"] >= prev["bytes"]:  # a restarted node resets its counters
-        n = max(len(ms), 1)
-        out["mesh_kb_s"] = round((now["bytes"] - prev["bytes"]) / dt / n / 1024, 1)
-        out["gossip_kb_s"] = round((now["gossip"] - prev["gossip"]) / dt / n / 1024, 2)
-        got = now["received"] - prev["received"]
-        out["forward_attempts_per_entry"] = round((now["relayed"] - prev["relayed"]) / got, 3) if got > 0 else None
-        successes = now["applied"] - prev.get("applied", now["applied"])
-        forwarded = now["relayed_successes"] - prev.get("relayed_successes", now["relayed_successes"])
-        out["relayed_pct"] = round(100 * forwarded / successes, 1) if successes > 0 and 0 <= forwarded <= successes else None
-        # Seconds per second, summed over the nodes: how busy the summary
-        # flushes are valuing edges and pushing them.
-        if "value_ms" in prev:
-            out["value_load"] = round((now["value_ms"] - prev["value_ms"]) / 1000 / dt, 2)
-            out["push_load"] = round((now["push_ms"] - prev["push_ms"]) / 1000 / dt, 2)
+    if vnode_seconds:
+        out["mesh_kb_s"] = round(delta["bytes"] / vnode_seconds / 1024, 1)
+        out["gossip_kb_s"] = round(delta["gossip"] / vnode_seconds / 1024, 2)
+        got = delta["received"]
+        out["forward_attempts_per_entry"] = round(delta["relayed"] / got, 3) if got else None
+        successes = delta["applied"]
+        forwarded = delta["relayed_successes"]
+        out["relayed_pct"] = round(100 * forwarded / successes, 1) if successes and forwarded <= successes else None
+        out["value_load"] = round(value_load, 2)
+        out["push_load"] = round(push_load, 2)
     return out, now
 
 
