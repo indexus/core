@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 
 	"github.com/indexus/go-indexus-core/internal/tree"
@@ -14,6 +15,12 @@ var ErrDirectRecordBudget = errors.New("direct record or metadata budget exceede
 // disk. The right to serve that point and its rows belong to the same snapshot.
 // A frozen source and an uninstalled destination both refuse the read.
 func (s *Store) DirectRecords(ctx context.Context, zone tree.ZoneKey, maxRecords, maxBytes int) ([]Record, error) {
+	return s.ReadDirectRecords(ctx, zone, maxRecords, maxBytes, false)
+}
+
+// ReadDirectRecords optionally includes the stored bodies, charging their
+// size before loading them on the same snapshot as the address permission.
+func (s *Store) ReadDirectRecords(ctx context.Context, zone tree.ZoneKey, maxRecords, maxBytes int, includePayloads bool) ([]Record, error) {
 	if maxRecords < 1 || maxBytes < 1 {
 		return nil, ErrDirectRecordBudget
 	}
@@ -49,25 +56,30 @@ func (s *Store) DirectRecords(ctx context.Context, zone tree.ZoneKey, maxRecords
 			if z.Uncounted {
 				return true
 			}
-			if z.Opaque {
-				// Only this older representation needs its body to decode the
-				// projection. The physical scan provides its length without
-				// fetching it. A point read on this snapshot sees the same row.
-				if payloadBytes > remaining {
+			if z.Opaque || (includePayloads && payloadBytes > 0) {
+				size := payloadBytes
+				if includePayloads && z.Binary && !z.Opaque {
+					size = base64.StdEncoding.EncodedLen(payloadBytes) + 2
+				}
+				if size > remaining {
 					visitErr = ErrDirectRecordBudget
 					return false
 				}
-				remaining -= payloadBytes
+				remaining -= size
 				full, ok, err := tx.reader.Get(z.Collection, z.Location, z.ID)
 				if err != nil {
 					visitErr = err
 					return false
 				}
 				if !ok {
-					visitErr = errors.New("opaque record missing from pinned snapshot")
+					visitErr = errors.New("direct record missing from pinned snapshot")
 					return false
 				}
 				z = full
+			}
+			if includePayloads && z.Binary && !z.Opaque && payloadBytes == 0 {
+				// A zero-length binary value is the empty base64 string.
+				z.Payload = []byte{}
 			}
 			row, err := fromLog(z)
 			if err != nil {
@@ -84,8 +96,11 @@ func (s *Store) DirectRecords(ctx context.Context, zone tree.ZoneKey, maxRecords
 				visitErr = ErrDirectRecordBudget
 				return false
 			}
-			row.Payload = nil
-			row.Binary = false
+			if !includePayloads {
+				row.Payload = nil
+				row.Binary = false
+			}
+
 			rows = append(rows, row)
 			return true
 		})

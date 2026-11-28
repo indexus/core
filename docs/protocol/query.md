@@ -235,3 +235,12 @@ other peers, and a reported child can reflect a stale copy during handoff.
 An empty array also carries `complete:false`. Exact readers need a separate
 coverage mechanism. The request never fans out, follows referrals, warms the
 summary cache or retains a cursor. The response sets `Cache-Control: no-store`.
+
+A client reading `/records/direct` can opt into document bodies with
+`payloads=true`. A successful response to that request includes the top-level
+marker `"payloads":true`, even for an empty address. The SDK requires the
+marker so an older peer cannot silently answer a text query with metadata
+alone. A document can omit its payload. Binary values use the existing item
+representation (base64 with `binary:true`). The same read authorization,
+local snapshot and record limit apply. Body lengths count against the read
+budget before the per-record fetch, including base64 expansion for binary.

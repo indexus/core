@@ -121,7 +121,15 @@ func (h *Handler) GetDirectRecords(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "collection, location and valid record limit are required"})
 		return
 	}
-	rows, err := h.Service.GetDirectRecordsContext(r.Context(), q.Get("collection"), q.Get("location"), limit)
+	includePayloads := false
+	if values, ok := q["payloads"]; ok {
+		if len(values) != 1 || (values[0] != "true" && values[0] != "false") {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid payloads flag"})
+			return
+		}
+		includePayloads = values[0] == "true"
+	}
+	rows, err := h.Service.ReadDirectRecordsContext(r.Context(), q.Get("collection"), q.Get("location"), limit, includePayloads)
 	if err != nil {
 		status := http.StatusServiceUnavailable
 		switch {
@@ -135,5 +143,9 @@ func (h *Handler) GetDirectRecords(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, status, map[string]string{"error": err.Error()})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"records": rows})
+	reply := map[string]any{"records": rows}
+	if includePayloads {
+		reply["payloads"] = true
+	}
+	writeJSON(w, http.StatusOK, reply)
 }

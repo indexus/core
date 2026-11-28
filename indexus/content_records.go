@@ -73,6 +73,11 @@ func (n *Node) GetRecordsContext(ctx context.Context, collection, prefix string,
 // GetDirectRecordsContext reads live document IDs, weights and metrics at one
 // exact address from this disk, or refuses if its local right cannot serve it.
 func (n *Node) GetDirectRecordsContext(ctx context.Context, collection, location string, limit int) ([]Item, error) {
+	return n.ReadDirectRecordsContext(ctx, collection, location, limit, false)
+}
+
+// ReadDirectRecordsContext serves one exact address, optionally including bodies.
+func (n *Node) ReadDirectRecordsContext(ctx context.Context, collection, location string, limit int, includePayloads bool) ([]Item, error) {
 	if n.mesh == nil {
 		return nil, ErrNotReady
 	}
@@ -94,7 +99,7 @@ func (n *Node) GetDirectRecordsContext(ctx context.Context, collection, location
 		return nil, ctx.Err()
 	}
 	defer func() { <-n.mesh.readSlots }()
-	rows, err := n.mesh.service.Store.DirectRecords(ctx, z, limit, wire.MaxContentBytes)
+	rows, err := n.mesh.service.Store.ReadDirectRecords(ctx, z, limit, wire.MaxContentBytes, includePayloads)
 	if errors.Is(err, storage.ErrDirectRecordBudget) {
 		return nil, ErrQueryBudget
 	}
@@ -106,7 +111,7 @@ func (n *Node) GetDirectRecordsContext(ctx context.Context, collection, location
 		if r.Metrics == nil {
 			r.Metrics = []float64{}
 		}
-		out[i] = Item{Collection: r.Collection, Location: r.Location, Id: r.ID, Weight: r.Weight, Metrics: r.Metrics}
+		out[i] = Item{Collection: r.Collection, Location: r.Location, Id: r.ID, Weight: r.Weight, Metrics: r.Metrics, Payload: r.Payload, Binary: r.Binary}
 	}
 	return out, nil
 }

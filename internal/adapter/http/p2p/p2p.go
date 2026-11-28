@@ -64,7 +64,7 @@ type Service interface {
 	GetSetsBlockContext(context.Context, string, []string, bool, indexus.Visited, bool, *indexus.ReadOptions, wire.SetsBlockMetrics, []int) ([]byte, error)
 	GetRecordsContext(context.Context, string, string, int) ([]indexus.Item, error)
 	GetLocalChildrenContext(context.Context, string, string) ([]string, error)
-	GetDirectRecordsContext(context.Context, string, string, int) ([]indexus.Item, error)
+	ReadDirectRecordsContext(context.Context, string, string, int, bool) ([]indexus.Item, error)
 	New(*indexus.Item, string, indexus.Visited) error
 	Delete(*indexus.Item, string, indexus.Visited) error
 	IngestBulk(context.Context, io.Reader, bool) (indexus.BulkResult, error)
