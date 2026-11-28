@@ -1,0 +1,227 @@
+{
+  "plateaus": [
+    {
+      "scheduled": 2000,
+      "offered": 90000,
+      "acked": 89973,
+      "shed": 0,
+      "reads": 22464,
+      "read_failed": 4,
+      "read_miss": 0,
+      "read_oversized": 0,
+      "samples": 45,
+      "write_ms": [
+        8.192,
+        16.384,
+        16.384
+      ],
+      "read_ms": [
+        1.024,
+        2.048,
+        4.096
+      ],
+      "scheduled_write_ms": [
+        16.384,
+        16.384,
+        32.768
+      ],
+      "read_percentiles_ms": {
+        "p50": 1.024,
+        "p90": 2.048,
+        "p95": 2.048,
+        "p99": 4.096
+      }
+    },
+    {
+      "scheduled": 4000,
+      "offered": 180000,
+      "acked": 180001,
+      "shed": 0,
+      "reads": 22464,
+      "read_failed": 1,
+      "read_miss": 0,
+      "read_oversized": 0,
+      "samples": 45,
+      "write_ms": [
+        8.192,
+        16.384,
+        16.384
+      ],
+      "read_ms": [
+        1.024,
+        2.048,
+        4.096
+      ],
+      "scheduled_write_ms": [
+        16.384,
+        32.768,
+        32.768
+      ],
+      "read_percentiles_ms": {
+        "p50": 1.024,
+        "p90": 2.048,
+        "p95": 2.048,
+        "p99": 4.096
+      }
+    },
+    {
+      "scheduled": 8000,
+      "offered": 360000,
+      "acked": 359995,
+      "shed": 0,
+      "reads": 22512,
+      "read_failed": 2,
+      "read_miss": 0,
+      "read_oversized": 0,
+      "samples": 45,
+      "write_ms": [
+        8.192,
+        16.384,
+        16.384
+      ],
+      "read_ms": [
+        1.024,
+        2.048,
+        8.192
+      ],
+      "scheduled_write_ms": [
+        16.384,
+        32.768,
+        32.768
+      ],
+      "read_percentiles_ms": {
+        "p50": 1.024,
+        "p90": 2.048,
+        "p95": 2.048,
+        "p99": 8.192
+      }
+    }
+  ],
+  "sampled_totals": {
+    "offered": 900030,
+    "acked": 899942,
+    "shed": 0,
+    "reads": 97488,
+    "read_failed": 12,
+    "read_miss": 0,
+    "read_oversized": 0,
+    "samples": 195,
+    "write_ms": [
+      8.192,
+      16.384,
+      16.384
+    ],
+    "read_ms": [
+      1.024,
+      2.048,
+      4.096
+    ],
+    "scheduled_write_ms": [
+      16.384,
+      32.768,
+      32.768
+    ]
+  },
+  "load_final": {
+    "acked": 908164,
+    "drain_completed": true,
+    "exhausted": 0,
+    "offered": 908164,
+    "queued_unfinished": 0,
+    "shed": 0
+  },
+  "fleet": {
+    "peak_vnodes_observed": 102,
+    "peak_open_sum_reported": 5,
+    "peak_frozen_sum_reported": 5,
+    "last_fresh_observation": {
+      "t": 283,
+      "vnodes": 102,
+      "open": 0,
+      "frozen": 0,
+      "items": 908214
+    },
+    "max_no_writer_ms_in_transfer_logs": 116.0
+  },
+  "ec2": {
+    "types": {
+      "i4i.xlarge": 10,
+      "c7i.2xlarge": 1
+    },
+    "instances_priced": 11,
+    "compute_usd_range": [
+      0.4174,
+      0.4193
+    ]
+  },
+  "audit": {
+    "acked_keys": 908214,
+    "checked_keys": 512,
+    "missing": 0,
+    "read_errors": 0,
+    "oversized_locations": 0,
+    "items_match_acked": true,
+    "collections_checked": 257,
+    "settlement_polls": 2,
+    "settlement_wait_ms": 6734,
+    "zones": 908214,
+    "double_owned_zones": 0,
+    "ownership_retries": 0,
+    "moving_at_ownership": 0,
+    "items_held": 908214,
+    "items_before_run": 0,
+    "nodes_answering": 102,
+    "nodes_gone": 0,
+    "pass": true
+  },
+  "run": "aws-8k-point-1128-174915",
+  "tested_commit": "70680f80dfb57e359a0f9b88e4676d845588ca4d",
+  "config": {
+    "RUN": "aws-8k-point-1128-174915",
+    "MODE": "steps",
+    "STEP_ROUTE": "direct",
+    "NET": "h3",
+    "REGION": "eu-west-3",
+    "HOST_TYPE": "i4i.xlarge",
+    "LOADER_TYPE": "c7i.2xlarge",
+    "HOSTS": "4",
+    "HOSTS_MAX": "10",
+    "SLOTS": "auto",
+    "SIZES": "16",
+    "STEP_VNODES": "16",
+    "LOADERS": "1",
+    "DATA_STORAGE": "ebs",
+    "STEP_RATE": "2000",
+    "STEP_LEVELS": "3",
+    "STEP_RAMP": "30",
+    "STEP_PLATEAU": "45",
+    "STEP_TAIL": "25",
+    "STEP_WORKERS": "4096",
+    "STEP_READERS": "48",
+    "STEP_READ_RATE": "500",
+    "STEP_TOTAL_SHARE": "0",
+    "SCALING_WRITES": "50",
+    "CPU_TARGET_PCT": "50",
+    "READY_RESERVE_PCT": "15",
+    "TTL": "14",
+    "BUDGET": "1.80",
+    "SAMPLE": "512",
+    "QUIET_MAX": "45",
+    "AUDIT_SECONDS": "100",
+    "OPEN_LIVE": "1"
+  },
+  "cleanup": {
+    "EC2 restantes": 0,
+    "VPC": true,
+    "IGW": true,
+    "SUBNET": true,
+    "RTB": true,
+    "SG": true,
+    "TEMPLATE": true,
+    "ROLE": true,
+    "PROFILE": true,
+    "BUCKET": true,
+    "EBS disparus": true,
+    "interfaces disparues": true
+  }
+}

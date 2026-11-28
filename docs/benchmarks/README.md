@@ -2,6 +2,10 @@
 
 La [campagne de recherche comparative](search-campaign.md) décrit les paliers de 100 k à 10 M, les oracles et le pilote local sur deux pairs.
 
+Le [banc AWS mixte du 28 novembre](aws-direct-reads-8k-2026-11-28.md)
+a tenu 8 000 écritures/s et environ 500 lectures directes/s sur EBS, avec
+un p99 de 16,384 ms en écriture et de 8,192 ms en lecture au dernier palier.
+
 Le [passage AWS du 27 novembre avec un seuil de 100 écritures/s par vnode](aws-placement-100-2026-11-27.md)
 atteint le palier de 16 000/s. Les cartes de trafic, le coût d’un déplacement
 et le rejeu du placement expliquent où subsiste la pression physique.
