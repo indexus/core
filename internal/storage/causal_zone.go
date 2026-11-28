@@ -45,10 +45,11 @@ func restageSnapshot(tx *Tx, operation, source string, snap Snapshot) error {
 // Prepared bytes belong to one immutable MVCC snapshot. Sequence and state
 // revalidation below precede all writes; a conflict rolls the entire lot back.
 type preparedFence struct {
-	snap  Snapshot
-	seal  ZoneSeal
-	raw   []byte
-	state []byte
+	snap     Snapshot
+	seal     ZoneSeal
+	raw      []byte
+	state    []byte
+	original ZoneState
 }
 
 var errFenceChanged = errors.New("zone changed during fence preparation")
@@ -76,12 +77,13 @@ func (s *Store) prepareFence(operation causal.TransferID, zones []tree.ZoneKey) 
 			if !covers(transfer.Cession, zone.ID) {
 				return nil, ErrConflict
 			}
-			st, _, err := zoneStateOf(tx, state, operation, zone)
-			if err != nil {
-				return nil, err
-			}
 			out[i].state = bytes.Clone(tx.value(zoneStatePath(operation, zone)))
-			if st.Frozen {
+			if out[i].state != nil {
+				if err := json.Unmarshal(out[i].state, &out[i].original); err != nil {
+					return nil, err
+				}
+			}
+			if out[i].original.Frozen {
 				out[i].snap, err = fencedSnapshot(tx, operation, zone)
 			} else {
 				out[i].snap, err = s.liveSnapshot(context.Background(), tx, zone, true)
@@ -121,10 +123,9 @@ func (s *Store) freezePreparedTx(tx *Tx, state CausalState, operation causal.Tra
 		if !bytes.Equal(tx.value(zoneStatePath(operation, zone)), p.state) || liveZone(zone).seq(tx) != p.snap.Seq {
 			return errFenceChanged
 		}
-		st, _, err := zoneStateOf(tx, state, operation, zone)
-		if err != nil {
-			return err
-		}
+		// Raw state and sequence were just revalidated under the writer.
+		// Reuse the state decoded during preparation in the read transaction.
+		st := p.original
 		if st.Frozen {
 			continue
 		}
@@ -138,6 +139,11 @@ func (s *Store) freezePreparedTx(tx *Tx, state CausalState, operation causal.Tra
 		if err := tx.put(transferRows(operation)+element(zoneBytes(zone)), p.raw); err != nil {
 			return err
 		}
+	}
+	// The first fence persists the phase transition. Later lots change
+	// only their own rows; their authority metadata is already durable.
+	if transfer.Phase == causal.TransferMoving && len(transfer.Snapshots) == 0 {
+		return nil
 	}
 	transfer.PermissionTransfer, err = causal.StartMoving(transfer.PermissionTransfer)
 	if err != nil {
