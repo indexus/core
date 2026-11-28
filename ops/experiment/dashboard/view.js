@@ -27,7 +27,15 @@
     const complete=!p.metrics_stale&&fresh.length===ids.size&&new Set(fresh.map(n=>n.label)).size===ids.size;
     const sum=get=>complete&&fresh.every(n=>Number.isFinite(get(n)))?fresh.reduce((s,n)=>s+get(n),0):null;
     const incident=(p.fleet?.transfers||[]).filter(tr=>!tr.stale&&fresh.some(n=>touchesNode(tr,n)));
-    return {x:p.x,t:p.t,rate:sum(n=>n.applied_s??n.estimated_s),stock:sum(n=>n.items_counted===false?null:n.items),
+    const hosts=new Set(fresh.map(n=>n.machine));
+    const machines=(p.fleet?.machines||[]).filter(h=>hosts.has(h.id));
+    const peak=key=>complete&&machines.length===hosts.size&&machines.every(h=>Number.isFinite(h[key]))?
+      Math.max(...machines.map(h=>h[key])):null;
+    return {ready:p.metrics_stale?null:fresh.filter(n=>n.state==='ready').length,
+      reporting:p.metrics_stale?null:fresh.length,cpu:peak('cpu'),ram:peak('ram'),disk:peak('disk'),
+      peakRate:complete&&fresh.every(n=>Number.isFinite(n.applied_s??n.estimated_s))?
+        Math.max(...fresh.map(n=>n.applied_s??n.estimated_s)):null,
+      x:p.x,t:p.t,rate:sum(n=>n.applied_s??n.estimated_s),stock:sum(n=>n.items_counted===false?null:n.items),
       open:complete?incident.length:null,frozen:complete?incident.filter(tr=>tr.frozen).length:null};
   }
   function bindPick(root,element,labels,text){
@@ -84,8 +92,6 @@
     });
     const offset=anchor&&root.querySelector(anchor).getBoundingClientRect().top;
     root.classList.add('ix-dashboard');
-    const cols=Math.max(1,Math.floor((root.clientWidth+12)/322));
-    const chartWidth=Math.max(160,Math.min(600,(root.clientWidth-12*(cols-1))/cols-22));
     const raw=points;
     const scope=scopes.get(root)||{ids:new Set()};
     scopes.set(root,scope);scope.refresh=()=>render(root,raw,index);
@@ -121,16 +127,19 @@
     const diagnostics=el('details',null,'diagnostics'),more=el('div',null,'charts');diagnostics.open=Boolean(wasOpen);
     diagnostics.append(el('summary','Autres mesures du réseau'));
     if(filtered){
-      for(const [title,series] of [[sim?'Demande estimée /s':'Écritures appliquées /s',[['rate','sélection']]],['Items détenus',[['stock','sélection']]],['Transferts observés',[['open','ouverts'],['frozen','fence franchie']]]]){
-        charts.append(chart(scoped,title,series,chartWidth));
+      for(const [title,series] of [[sim?'Demande estimée /s':'Écritures appliquées /s',[['rate','sélection']]],['Items détenus',[['stock','sélection']]],['Transferts observés',[['open','ouverts'],['frozen','fence franchie']]],
+        ['Vnodes de la sélection',[['ready','prêts'],['reporting','observés']]],
+        ['Débit maximal par vnode /s',[['peakRate','maximum']]],
+        ['Ressources des hôtes, max. %',[['cpu','CPU'],['ram','RAM'],['disk','disque']]]]){
+        charts.append(chart(scoped,title,series));
       }
     }
     for(const [title,series,stepped] of [
       ['Écritures /s',[['offered','demandées'],['acked','ACK client'],['estimated_s','besoin réparti (simulation)']]],
       ['Lectures client /s',[['reads_s','tentatives'],['read_failed_s','échecs']]],
       ['Latence écriture, ms',[['p50_ms','p50'],['p95_ms','p95'],['p99_ms','p99']]],
-      ['Items observés dans le réseau',[['stock','somme des compteurs disponibles']]],
-      ['Croissance du réseau',[['ready_count','vnodes prêts'],['machine_count','machines observées']],true],
+      ['Items observés dans le réseau',[['stock','items comptés']]],
+      ['Croissance du réseau',[['ready_count','vnodes prêts'],['machine_count','machines']],true],
       ['Écritures/s par machine active',[['hostRateLow','minimum'],['hostRateMedian','médiane'],['hostRateHigh','maximum']]],
       ['Items par machine active',[['hostItemsLow','minimum'],['hostItemsMedian','médiane'],['hostItemsHigh','maximum']]],
       ['Densité du réseau',[['ready_per_machine','vnodes prêts par machine']],true],
@@ -140,7 +149,10 @@
       ['Lectures et fraîcheur, p99 ms',[['read_p99_ms','lecture'],['fresh_p99_ms','total racine']]]
     ]){
       const past=points.slice(0,index+1);
-      if(past.some(p=>series.some(([k])=>Number.isFinite(p[k])))){if(!filtered)(['Écritures /s','Latence écriture, ms','Transferts ouverts'].includes(title)?charts:more).append(chart(past,title,series,chartWidth,stepped));}else unmeasured.push(title);
+      const primary=['Écritures /s','Latence écriture, ms','Items observés dans le réseau','Croissance du réseau','Transferts ouverts','Ressources : maximum observé, %'].includes(title);
+      if(primary||past.some(p=>series.some(([k])=>Number.isFinite(p[k])))){
+        if(!filtered)(primary?charts:more).append(chart(past,title,series,stepped));
+      }else unmeasured.push(title);
     }
     for(const [title,series] of [
       ['Écritures réussies avec relais, %',[['relayed_pct','avec relais']]],
@@ -149,7 +161,7 @@
       ['Latence depuis l’arrivée prévue, ms',[['intended_p50_ms','p50'],['intended_p95_ms','p95'],['intended_p99_ms','p99']]],
       ['Générateur de charge, % CPU',[['loader_pct','CPU']]],
       ['Remontée des totaux',[['flush_s','temps le plus long (s)'],['pending_k','arêtes en attente (milliers)']]]
-    ])if(!filtered)more.append(chart(points.slice(0,index+1),title,series,chartWidth));diagnostics.append(more);
+    ])if(!filtered)more.append(chart(points.slice(0,index+1),title,series));diagnostics.append(more);
     const choices=el('div',null,'legend'), plot=el('div',null,'network-pane');
     const active=p.metrics_stale?[]:transfers.filter(tr=>!tr.stale);
     const unknownLinks=transfers.length-active.length;
@@ -589,7 +601,7 @@
     function update(){
       count=Math.max(Math.min(2,points.length),Math.min(points.length,count));
       start=Math.max(0,Math.min(points.length-count,start));
-      body.replaceChildren(chart(points.slice(start,start+count),title,series,Math.max(260,modal.clientWidth-46),stepped,true));
+      body.replaceChildren(chart(points.slice(start,start+count),title,series,stepped,true));
       level.textContent=fmt(points[start].x??points[start].t)+' – '+fmt(points[start+count-1].x??points[start+count-1].t)+' s';
     }
     for(const [text,label,action] of [
@@ -603,7 +615,7 @@
     header.append(level);modal.append(header,body);document.body.append(modal);
     modal.onclose=()=>modal.remove();modal.showModal();update();
   }
-  function chart(points,title,series,width,stepped=false,expanded=false){
+  function chart(points,title,series,stepped=false,expanded=false){
     const figure=el('figure'),caption=el('figcaption',title),legend=el('div',null,'legend');figure.append(caption,legend);
     const values=series.flatMap(([k])=>points.map(p=>p[k]).filter(Number.isFinite));
     if(!values.length){figure.append(el('p','Non mesuré.','note'));return figure;}
@@ -612,11 +624,18 @@
       expand.onclick=()=>exploreChart(points,title,series,stepped);
       caption.append(expand);
     }
-    const w=width,h=expanded?330:135,l=55,r=12,t=12,b=28,top=Math.max(...values,1)*1.08;
+    const top=Math.max(...values,1)*1.08;
+    // Scale the data surface to its actual box; the ticks remain native-size text.
+    const field=el('div',null,'chart-field'),surface=el('div',null,'chart-surface');
+    field.append(surface);figure.append(field);surface.append(legend);
     const first=points[0].x??points[0].t??0,last=Math.max(first+1,points.at(-1).x??points.at(-1).t??0);
-    const sx=p=>l+((p.x??p.t??0)-first)/(last-first)*(w-l-r),sy=v=>t+(1-v/top)*(h-t-b);
-    const g=svg('svg',{viewBox:`0 0 ${w} ${h}`,role:'img','aria-label':title});
-    for(const f of [0,.5,1]){g.append(svg('line',{x1:l,x2:w-r,y1:sy(top*f),y2:sy(top*f),class:'gridline'}));const label=svg('text',{x:l-5,y:sy(top*f)+4,'text-anchor':'end'});label.textContent=fmt(top*f,1);g.append(label);}
+    const sx=p=>((p.x??p.t??0)-first)/(last-first)*100,sy=v=>(1-v/top)*100;
+    const g=svg('svg',{viewBox:'0 0 100 100',preserveAspectRatio:'none',role:'img','aria-label':title});
+    surface.append(g);
+    for(const f of [0,.5,1]){
+      g.append(svg('line',{x1:0,x2:100,y1:sy(top*f),y2:sy(top*f),class:'gridline','vector-effect':'non-scaling-stroke'}));
+      const label=el('span',fmt(top*f,1),'y-tick');label.style.top=sy(top*f)+'%';surface.append(label);
+    }
     for(const [i,[key,label]] of series.entries()){
       if(!points.some(p=>Number.isFinite(p[key])))continue;
       const color=`var(--series-${i+1})`;const leg=el('span',label);leg.style.color=color;legend.append(leg);
@@ -627,13 +646,15 @@
         if(stepped&&previous!=null)path+=`${sx(p)},${sy(previous)} `;
         path+=`${sx(p)},${sy(p[key])} `;previous=p[key];
       }
-      for(const segment of path.split('|').filter(s=>s.trim()))g.append(svg('polyline',{points:segment,fill:'none',stroke:color,'stroke-width':2}));
+      for(const segment of path.split('|').filter(s=>s.trim()))g.append(svg('polyline',{points:segment,fill:'none',stroke:color,'stroke-width':2.2,'vector-effect':'non-scaling-stroke','stroke-linejoin':'round'}));
     }
-    for(const [x,label] of [[l,first],[w-r,last]]){const n=svg('text',{x,y:h-5,'text-anchor':x===l?'start':'end'});n.textContent=fmt(label)+' s';g.append(n);}figure.append(g);
+    for(const [side,value] of [['left',first],['right',last]]){
+      const tick=el('span',fmt(value)+' s','x-tick');tick.style[side]='0';surface.append(tick);
+    }
     g.addEventListener('pointermove',e=>{
       const m=g.getScreenCTM();if(!m)return;
       const pos=new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse());
-      const time=first+(pos.x-l)/(w-l-r)*(last-first);
+      const time=first+pos.x/100*(last-first);
       let nearest=points[0];
       for(const p of points)if(Math.abs((p.x??p.t)-time)<Math.abs((nearest.x??nearest.t)-time))nearest=p;
       g.dataset.tip=[fmt(nearest.x??nearest.t)+' s',...series.filter(([key])=>Number.isFinite(nearest[key])).map(([key,name])=>name+' '+fmt(nearest[key],2))].join(' · ');

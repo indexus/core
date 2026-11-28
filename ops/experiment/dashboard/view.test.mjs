@@ -55,7 +55,7 @@ test('vnode scope sums observed applications and counts an internal transfer onc
   const {selectedPoint}=globalThis.IndexusDashboard;
   const p={x:5,fleet:{vnodes:[{id:'a',label:'A',applied_s:4,items:5},{id:'b',label:'B',monitor:'dst',applied_s:0,items:2}],transfers:[{source:'a',target:'dst',frozen:true}]}};
   const ids=new Set(['A','B']);
-  assert.deepEqual(selectedPoint(p,ids),{x:5,t:undefined,rate:4,stock:7,open:1,frozen:1});
+  assert.deepEqual(selectedPoint(p,ids),{x:5,t:undefined,rate:4,stock:7,open:1,frozen:1,ready:0,reporting:2,cpu:null,ram:null,disk:null,peakRate:4});
   p.fleet.vnodes[1].state='stale';
   assert.equal(selectedPoint(p,ids).rate,null);
   assert.equal(selectedPoint(p,ids).open,null);
