@@ -55,7 +55,7 @@ func (n *network) Exchange(ctx context.Context, host string, request Request) (R
 	}
 	return response, err
 }
-func meshFixture(t testing.TB, count int) (*network, []*Service) {
+func meshFixture(t testing.TB, count int, endpoints ...string) (*network, []*Service) {
 	t.Helper()
 	net := &network{nodes: map[string]*Service{}, blocked: map[string]bool{}}
 	var nodes []*Service
@@ -66,10 +66,14 @@ func meshFixture(t testing.TB, count int) (*network, []*Service) {
 			t.Fatal(err)
 		}
 		t.Cleanup(func() { store.Close() })
-		holder, _ := store.Endpoint(name)
+		host := name
+		if len(endpoints) > 0 {
+			host = endpoints[i]
+		}
+		holder, _ := store.Endpoint(host)
 		s := &Service{Store: store, Self: holder, VNode: tree.VNodeDescriptor{Name: name, ID: tree.ID{byte(1 + i*80), 1}}, Peers: net}
 		t.Cleanup(s.Close)
-		net.nodes[name] = s
+		net.nodes[host] = s
 		nodes = append(nodes, s)
 	}
 	genesis := causal.Genesis{Cluster: "test", Holder: nodes[0].Self}

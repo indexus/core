@@ -5,6 +5,7 @@ import (
 	"github.com/indexus/go-indexus-core/internal/replication/convergent"
 	"github.com/indexus/go-indexus-core/internal/storage"
 	"github.com/indexus/go-indexus-core/internal/tree"
+	"slices"
 )
 
 // replicas is R(z) on a routing view (docs/design/convergent-replication.md
@@ -28,4 +29,21 @@ func replicas(routing storage.RoutingSnapshot, zone tree.ZoneKey, machine func(c
 		out[i] = holders[id]
 	}
 	return out
+}
+
+// replicaPeers excludes the actual writer's failure domain even when a
+// granular transfer puts the installed writer away from its nominal XOR owner.
+func (s *Service) replicaPeers(routing storage.RoutingSnapshot, zone tree.ZoneKey) []causal.Endpoint {
+	machine := s.ReplicaMachine
+	if machine == nil {
+		machine = machineOf
+	}
+	source := machine(s.Self)
+	if source == "" {
+		return nil
+	}
+	return slices.DeleteFunc(replicas(routing, zone, machine), func(member causal.Endpoint) bool {
+		domain := machine(member)
+		return member.Owner == s.Self.Owner || domain == "" || domain == source
+	})
 }

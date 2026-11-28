@@ -74,15 +74,11 @@ func (s *Service) SendHeartbeats(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	machine := s.ReplicaMachine
-	if machine == nil {
-		machine = machineOf
-	}
 	seen := map[causal.Endpoint]bool{}
 	var failures []error
 	for _, zs := range owned {
-		for _, member := range replicas(routing, zs.Zone, machine) {
-			if member.Owner == s.Self.Owner || seen[member] {
+		for _, member := range s.replicaPeers(routing, zs.Zone) {
+			if seen[member] {
 				continue
 			}
 			seen[member] = true

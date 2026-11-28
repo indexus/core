@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net"
+	"net/netip"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/indexus/go-indexus-core/internal/causal"
@@ -25,13 +27,29 @@ const (
 	KindShadowMirror  = "shadow-mirror"
 )
 
-// machineOf names a holder's machine for R(z): the host without its port. A
-// holder named without a port is its own machine (tests, local agents).
+// machineOf names the advertised host independently of scheme and slot port.
+// Tests and local agents may advertise a bare host. Unknown URI forms cannot
+// establish an independent replication domain.
 func machineOf(h causal.Endpoint) string {
-	if host, _, err := net.SplitHostPort(h.Host); err == nil {
-		return host
+	raw := h.Host
+	if ip, err := netip.ParseAddr(raw); err == nil {
+		return ip.Unmap().String()
 	}
-	return h.Host
+	if !strings.Contains(raw, "://") {
+		if strings.ContainsAny(raw, "/?#@") {
+			return ""
+		}
+		raw = "http://" + raw
+	}
+	u, err := url.Parse(raw)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.User != nil {
+		return ""
+	}
+	host := u.Hostname()
+	if ip, err := netip.ParseAddr(host); err == nil {
+		return ip.Unmap().String()
+	}
+	return strings.TrimSuffix(strings.ToLower(host), ".")
 }
 
 // shadowBatchZones bounds one shadow preload/mirror round to match the live
@@ -86,18 +104,11 @@ func (s *Service) Replicate(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	machine := s.ReplicaMachine
-	if machine == nil {
-		machine = machineOf
-	}
 	byMember := map[causal.Endpoint][]storage.ZoneSeq{}
 	var maxLag uint64
 	for _, zs := range owned {
 		zk := zoneKeyOf(zs.Zone)
-		for _, member := range replicas(routing, zs.Zone, machine) {
-			if member.Owner == s.Self.Owner {
-				continue
-			}
+		for _, member := range s.replicaPeers(routing, zs.Zone) {
 			known := s.shadowKnownSeq(member, zk)
 			if zs.Seq > known {
 				if lag := zs.Seq - known; lag > maxLag {
@@ -248,16 +259,7 @@ func (s *Service) replicateWrite(ctx context.Context, zone tree.ZoneKey, seq uin
 	if err != nil {
 		return DurabilityLocal
 	}
-	machine := s.ReplicaMachine
-	if machine == nil {
-		machine = machineOf
-	}
-	var members []causal.Endpoint
-	for _, m := range replicas(routing, zone, machine) {
-		if m.Owner != s.Self.Owner {
-			members = append(members, m)
-		}
-	}
+	members := s.replicaPeers(routing, zone)
 	if len(members) == 0 {
 		return DurabilityLocal
 	}
