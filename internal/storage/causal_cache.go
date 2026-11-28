@@ -11,12 +11,13 @@ type membershipSnapshot struct {
 	genesis    causal.Genesis
 	digest     causal.Digest
 	membership *causal.Membership
+	view       *tree.View
 }
 
-func (s *Store) pureMembership(state CausalState) (*causal.Membership, error) {
+func (s *Store) pureMembership(state CausalState) (*membershipSnapshot, error) {
 	for i := range s.membershipSnapshots {
 		if c := s.membershipSnapshots[i].Load(); c != nil && c.root == state.Root && c.genesis == state.Genesis && c.digest == state.MembershipDigest {
-			return c.membership, nil
+			return c, nil
 		}
 	}
 	m, e := state.MembershipReplica()
@@ -26,8 +27,9 @@ func (s *Store) pureMembership(state CausalState) (*causal.Membership, error) {
 	for i := len(s.membershipSnapshots) - 1; i > 0; i-- {
 		s.membershipSnapshots[i].Store(s.membershipSnapshots[i-1].Load())
 	}
-	s.membershipSnapshots[0].Store(&membershipSnapshot{state.Root, state.Genesis, state.MembershipDigest, m})
-	return m, nil
+	snapshot := &membershipSnapshot{state.Root, state.Genesis, state.MembershipDigest, m, m.Current()}
+	s.membershipSnapshots[0].Store(snapshot)
+	return snapshot, nil
 }
 
 type causalSnapshot struct {
@@ -88,11 +90,11 @@ func (s *Store) causalSnapshot(tx *Tx) (*causalSnapshot, error) {
 	if e != nil {
 		return nil, e
 	}
-	m, e := s.pureMembership(state)
+	membership, e := s.pureMembership(state)
 	if e != nil {
 		return nil, e
 	}
-	view := m.Current()
+	view, m := membership.view, membership.membership
 	c := &causalSnapshot{version: bytes.Clone(v), state: state, storageID: storageID(tx), membership: m, view: view, membershipDigest: causal.Digest(view.Digest), routingDigest: m.Digest(), inputDigest: state.MembershipDigest}
 	s.causalPrevious.Store(s.causalCache.Load())
 	s.causalCache.Store(c)

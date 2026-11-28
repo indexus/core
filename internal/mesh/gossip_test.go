@@ -1,16 +1,77 @@
 package mesh
 
 import (
+	"bytes"
 	"context"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"math/rand/v2"
+	"slices"
+	"sort"
 	"testing"
 
 	"github.com/indexus/go-indexus-core/internal/causal"
 	"github.com/indexus/go-indexus-core/internal/storage"
 	"github.com/indexus/go-indexus-core/internal/tree"
 )
+
+// GossipMember is one current holder as this replica sees it.
+type GossipMember struct {
+	ID   tree.ID
+	Host string
+}
+
+// GossipPeers picks one round of anti-entropy partners. Knowing every vnode is
+// cheap (the routing map); talking to every host each round is what costs N².
+//
+// Members are grouped into Kademlia buckets by the length of their common
+// prefix with self. The round contacts one member per non-empty bucket and
+// rotates within it, so every member is reached within |bucket| rounds. One
+// former host (still forwarding for stale peers) is added per round, rotating.
+//
+// GOS-1: in every round, for every target t, the contacted member of t's
+// bucket shares a strictly longer prefix with t. A fact therefore crosses the
+// whole network in at most depth(vnode trie) rounds of successful exchanges,
+// whichever member each bucket picks. See docs/protocol/gossip.md.
+func GossipPeers(self tree.ID, selfHost string, members []GossipMember, former []string, round uint64) []string {
+	var buckets [tree.Size*8 + 1][]GossipMember
+	for _, m := range members {
+		if m.ID == self || m.Host == "" {
+			continue
+		}
+		cpl := tree.CommonPrefixLen(self, m.ID)
+		buckets[cpl] = append(buckets[cpl], m)
+	}
+	// Decorrelate nodes so a bucket's members are not all picked in lockstep.
+	salt := binary.BigEndian.Uint64(self[:8])
+	seen := map[string]bool{selfHost: true}
+	var out []string
+	add := func(host string) {
+		if !seen[host] {
+			seen[host] = true
+			out = append(out, host)
+		}
+	}
+	for i, bucket := range buckets {
+		if len(bucket) == 0 {
+			continue
+		}
+		sort.Slice(bucket, func(a, b int) bool { return bytes.Compare(bucket[a].ID[:], bucket[b].ID[:]) < 0 })
+		add(bucket[(round+salt+uint64(i))%uint64(len(bucket))].Host)
+	}
+	var rest []string
+	for _, host := range former {
+		if !seen[host] {
+			rest = append(rest, host)
+		}
+	}
+	if len(rest) > 0 {
+		sort.Strings(rest)
+		add(rest[(round+salt)%uint64(len(rest))])
+	}
+	return out
+}
 
 // gossipShape builds n distinct vnode IDs. "spike" stacks most of them under
 // one hot prefix, the deep, lopsided trie a burst of splits leaves behind.
@@ -264,5 +325,62 @@ func TestGOS1_RealJoinsConvergeByBucketGossip(t *testing.T) {
 		if acks != 1 {
 			t.Fatalf("%d writers for zone %d", acks, key)
 		}
+	}
+}
+
+func TestBucketOrderMatchesGossipRotation(t *testing.T) {
+	rng := rand.New(rand.NewPCG(9, 18))
+	for _, n := range []int{1, 8, 15, 16, 17, 256, 1024} {
+		for _, shape := range []string{"random", "spike"} {
+			members := gossipShape(n, shape, rng)
+			ds := make([]tree.VNodeDescriptor, n)
+			for i, m := range members {
+				ds[i] = tree.VNodeDescriptor{ID: m.ID, Name: m.Host}
+			}
+			v, err := tree.NewViewFrom(0, ds)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, self := range []tree.ID{members[0].ID, members[n-1].ID, {}, {255, 255, 255}} {
+				for _, round := range []uint64{0, 3, 80, ^uint64(0)} {
+					var got []string
+					v.VisitBucketPeers(self, round+binary.BigEndian.Uint64(self[:8]), func(peer tree.VNodeDescriptor) { got = append(got, peer.Name) })
+					want := GossipPeers(self, "", members, nil, round)
+					if !slices.Equal(got, want) {
+						t.Fatalf("size=%d %s round=%d self=%x got %v want %v", n, shape, round, self, got, want)
+					}
+				}
+			}
+		}
+	}
+}
+
+func BenchmarkBucketPartnerSelection(b *testing.B) {
+	for _, n := range []int{64, 1024, 10000} {
+		members := gossipShape(n, "random", rand.New(rand.NewPCG(19, 88)))
+		ds := make([]tree.VNodeDescriptor, n)
+		for i, m := range members {
+			ds[i] = tree.VNodeDescriptor{ID: m.ID, Name: m.Host}
+		}
+		v, err := tree.NewViewFrom(0, ds)
+		if err != nil {
+			b.Fatal(err)
+		}
+		b.Run(fmt.Sprintf("%d/scan", n), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				self := members[i%n]
+				GossipPeers(self.ID, self.Host, members, nil, uint64(i))
+			}
+		})
+		b.Run(fmt.Sprintf("%d/index", n), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				self := members[i%n]
+				var names []string
+				v.VisitBucketPeers(self.ID, uint64(i)+binary.BigEndian.Uint64(self.ID[:8]), func(peer tree.VNodeDescriptor) { names = append(names, peer.Name) })
+				if len(names) == 0 {
+					b.Fatal("no contacts")
+				}
+			}
+		})
 	}
 }

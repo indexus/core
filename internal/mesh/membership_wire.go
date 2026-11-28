@@ -8,6 +8,7 @@ import (
 	"errors"
 	"slices"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/indexus/go-indexus-core/internal/causal"
@@ -58,25 +59,48 @@ type membershipReceipt struct {
 	hinted         time.Time
 }
 
+type membershipKey struct {
+	root     tree.VNodeDescriptor
+	genesis  causal.Genesis
+	revision causal.Digest
+}
+
+// export must read the same immutable revision as key.
+type localMembership struct {
+	key    membershipKey
+	export func() causal.MembershipDelta
+}
+
+type preparedMembership struct {
+	key     membershipKey
+	version causal.Digest
+}
+
+func (local localMembership) envelope() *MembershipEnvelope {
+	return &MembershipEnvelope{Root: local.key.root, Genesis: local.key.genesis, Delta: local.export()}
+}
+
 // membershipWire retains one sent/received version per peer, not a history of
 // certificates or versions. Eviction, lost replies and restart resend a body.
 // The mutex protects small scheduling/receipt maps; mergeMu never guards data.
 type membershipWire struct {
-	snapshot func() (*MembershipEnvelope, error)
-	merge    func(MembershipEnvelope) error
-	mergeMu  sync.Mutex
-	mu       sync.Mutex
-	peers    map[string]membershipReceipt
-	order    []string
-	pending  map[string]bool
-	closed   bool
-	ctx      context.Context
-	stop     context.CancelFunc
-	wg       sync.WaitGroup
-	slots    chan struct{}
+	snapshot  func() (localMembership, error)
+	merge     func(MembershipEnvelope) error
+	prepareMu sync.Mutex
+	prepared  atomic.Pointer[preparedMembership]
+	mergeMu   sync.Mutex
+	mu        sync.Mutex
+	peers     map[string]membershipReceipt
+	order     []string
+	pending   map[string]bool
+	closed    bool
+	ctx       context.Context
+	stop      context.CancelFunc
+	wg        sync.WaitGroup
+	slots     chan struct{}
 }
 
-func newMembershipWire(snapshot func() (*MembershipEnvelope, error), merge func(MembershipEnvelope) error) *membershipWire {
+func newMembershipWire(snapshot func() (localMembership, error), merge func(MembershipEnvelope) error) *membershipWire {
 	ctx, stop := context.WithCancel(context.Background())
 	return &membershipWire{snapshot: snapshot, merge: merge, ctx: ctx, stop: stop,
 		peers: make(map[string]membershipReceipt), pending: make(map[string]bool),
@@ -114,25 +138,38 @@ func (w *membershipWire) remember(peer string, sent, received causal.Digest) {
 }
 
 func (w *membershipWire) packet(known causal.Digest, full bool) (MembershipPacket, error) {
-	e, err := w.snapshot()
+	local, err := w.snapshot()
 	if err != nil {
 		return MembershipPacket{}, err
 	}
 	p := MembershipPacket{Known: known}
-	// A client without a routing view can bootstrap by asking for the body.
-	if e == nil {
+	if local.export == nil {
 		return p, nil
 	}
-	copy := e.clone()
-	raw, err := json.Marshal(copy)
-	if err != nil {
-		return MembershipPacket{}, err
+	cached := w.prepared.Load()
+	if cached == nil || cached.key != local.key {
+		// Concurrent peers preparing the same revision share its first hash.
+		w.prepareMu.Lock()
+		defer w.prepareMu.Unlock()
+		cached = w.prepared.Load()
+		if cached == nil || cached.key != local.key {
+			body := local.envelope()
+			raw, err := json.Marshal(body)
+			if err != nil {
+				return MembershipPacket{}, err
+			}
+			cached = &preparedMembership{local.key, sha256.Sum256(raw)}
+			w.prepared.Store(cached)
+			metrics.Gossip.MembershipBytes.Store(int64(len(raw)))
+			metrics.Gossip.Version.Store(hex.EncodeToString(cached.version[:]))
+			if full {
+				p.Body = body
+			}
+		}
 	}
-	p.Version = sha256.Sum256(raw)
-	metrics.Gossip.MembershipBytes.Store(int64(len(raw)))
-	metrics.Gossip.Version.Store(hex.EncodeToString(p.Version[:])) // observation, never an authority barrier
-	if full {
-		p.Body = &copy
+	p.Version = cached.version
+	if full && p.Body == nil {
+		p.Body = local.envelope()
 	}
 	return p, nil
 }
@@ -147,13 +184,13 @@ func (w *membershipWire) accept(ctx context.Context, peer string, p MembershipPa
 		}
 		return false, nil
 	}
+	if p.Body == nil {
+		return w.receipt(peer).received != p.Version, nil
+	}
 	w.mergeMu.Lock()
 	defer w.mergeMu.Unlock()
 	if err := ctx.Err(); err != nil {
 		return false, err
-	}
-	if p.Body == nil {
-		return w.receipt(peer).received != p.Version, nil
 	}
 	body := p.Body.clone()
 	if causal.Hash(body) != p.Version {
@@ -179,9 +216,9 @@ func (w *membershipWire) receive(ctx context.Context, peer string, p MembershipP
 	if !need {
 		r.Accepted = p.Version
 	}
-	r.Packet, err = w.packet(p.Version, true)
-	if r.Packet.Version == p.Known {
-		r.Packet.Body = nil
+	r.Packet, err = w.packet(p.Version, false)
+	if err == nil && r.Packet.Version != p.Known {
+		r.Packet, err = w.packet(p.Version, true)
 	}
 	observeMembershipPacket(r.Packet)
 	return r, err

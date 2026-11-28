@@ -36,13 +36,14 @@ func membershipWireFixture(t *testing.T, added string) (*membershipWire, *member
 			t.Fatal(err)
 		}
 	}
-	w := newMembershipWire(func() (*MembershipEnvelope, error) {
+	w := newMembershipWire(func() (localMembership, error) {
 		s.mu.Lock()
 		defer s.mu.Unlock()
 		if s.view == nil {
-			return nil, nil
+			return localMembership{}, nil
 		}
-		return &MembershipEnvelope{Root: s.root, Genesis: s.genesis, Delta: s.view.Export()}, nil
+		delta := s.view.Export()
+		return localMembership{membershipKey{s.root, s.genesis, s.view.Digest()}, func() causal.MembershipDelta { return delta }}, nil
 	}, func(e MembershipEnvelope) error {
 		s.mu.Lock()
 		defer s.mu.Unlock()
@@ -294,5 +295,23 @@ func TestMembershipWireConcurrentControlMerges(t *testing.T) {
 	wg.Wait()
 	if sb.merges != 1 {
 		t.Fatalf("same peer/version merged %d times", sb.merges)
+	}
+}
+
+func TestReferenceRoundDoesNotExportMembership(t *testing.T) {
+	a, state := membershipWireFixture(t, "a")
+	member := state.view
+	key := membershipKey{state.root, state.genesis, member.Digest()}
+	exports := 0
+	a.snapshot = func() (localMembership, error) {
+		return localMembership{key, func() causal.MembershipDelta { exports++; return member.Export() }}, nil
+	}
+	first, err := a.packet(causal.Digest{}, true)
+	if err != nil || first.Body == nil || first.Version != causal.Hash(*first.Body) {
+		t.Fatalf("full packet: %v", err)
+	}
+	reply, err := a.receive(context.Background(), "peer", MembershipPacket{Known: first.Version})
+	if err != nil || reply.Packet.Body != nil || reply.Packet.Version != first.Version || exports != 1 {
+		t.Fatalf("unchanged membership exported %d times: %+v %v", exports, reply, err)
 	}
 }

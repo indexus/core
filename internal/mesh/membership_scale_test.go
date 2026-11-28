@@ -34,8 +34,8 @@ func BenchmarkMembershipReferencePreparation(b *testing.B) {
 			if err := m.Merge(causal.MembershipDelta{Members: members}); err != nil {
 				b.Fatal(err)
 			}
-			w := newMembershipWire(func() (*MembershipEnvelope, error) {
-				return &MembershipEnvelope{Root: root, Genesis: genesis, Delta: m.Export()}, nil
+			w := newMembershipWire(func() (localMembership, error) {
+				return localMembership{membershipKey{root, genesis, m.Digest()}, m.Export}, nil
 			}, nil)
 			defer w.close()
 			b.ReportAllocs()

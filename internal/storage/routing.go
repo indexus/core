@@ -3,6 +3,7 @@ package storage
 import (
 	"math"
 	"math/bits"
+	"slices"
 
 	"github.com/indexus/go-indexus-core/internal/causal"
 	"github.com/indexus/go-indexus-core/internal/tree"
@@ -114,4 +115,36 @@ func (s *Store) NativeAddressShare() (float64, bool) {
 		share += math.Ldexp(1, -fixed)
 	}
 	return share, true
+}
+
+// VisitBucketHosts reads a single immutable control version, without exporting
+// the membership or cloning transfer snapshots for a maintenance round.
+func (r RoutingSnapshot) VisitBucketHosts(self tree.ID, offset uint64, visit func(string)) (int, error) {
+	var err error
+	r.snapshot.view.VisitBucketPeers(self, offset, func(peer tree.VNodeDescriptor) {
+		if err != nil {
+			return
+		}
+		var endpoint causal.Endpoint
+		endpoint, err = r.snapshot.membership.Endpoint(peer.Name)
+		if err == nil {
+			visit(endpoint.Host)
+		}
+	})
+	return r.snapshot.view.Len(), err
+}
+
+func (r RoutingSnapshot) TransferHosts() []string {
+	var hosts []string
+	for _, tr := range r.snapshot.state.Transfers {
+		hosts = append(hosts, tr.Cession.Source.Host, tr.Cession.Target.Host)
+	}
+	return hosts
+}
+
+// MembershipRevision identifies the exact durable delta of this snapshot.
+func (r RoutingSnapshot) MembershipRevision() causal.Digest { return r.snapshot.inputDigest }
+
+func (r RoutingSnapshot) ExportMembership() causal.MembershipDelta {
+	return causal.MembershipDelta{Members: slices.Clone(r.snapshot.state.Membership.Members)}
 }

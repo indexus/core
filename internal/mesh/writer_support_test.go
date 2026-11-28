@@ -44,14 +44,14 @@ func NewWriter(ctx context.Context, peers Transport, seeds []string) (*Writer, e
 	return w, nil
 }
 func (w *Writer) Close() { w.control.close() }
-func (w *Writer) snapshot() (*MembershipEnvelope, error) {
+func (w *Writer) snapshot() (localMembership, error) {
 	w.mu.Lock()
 	m, root, genesis := w.membership, w.root, w.genesis
 	w.mu.Unlock()
 	if m == nil {
-		return nil, nil
+		return localMembership{}, nil
 	}
-	return &MembershipEnvelope{Root: root, Genesis: genesis, Delta: m.Export()}, nil
+	return localMembership{membershipKey{root, genesis, m.Digest()}, m.Export}, nil
 }
 func (w *Writer) mergeMembership(e MembershipEnvelope) error {
 	w.mergeMu.Lock()

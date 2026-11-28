@@ -28,7 +28,8 @@ type View struct {
 	byName     map[string]VNodeID
 	byID       map[ID]string
 	retiredIDs map[ID]bool
-	xorIndex   []xorNode // immutable; clones can share it until membership changes
+	xorOrder   []VNodeDescriptor // immutable rank order of trie leaves
+	xorIndex   []xorNode         // immutable; clones can share it until membership changes
 }
 
 func NewView(generation uint64) *View {
@@ -70,6 +71,7 @@ func (v *View) Clone() *View {
 func (v *View) finish() {
 	active := canonicalActive(v.Active)
 	v.Digest = digestCanonical(v.Generation, active)
+	v.xorOrder = active
 	v.xorIndex = buildXORIndex(active)
 }
 
@@ -82,6 +84,7 @@ func (v *View) cloneMeta() *View {
 		byID:       maps.Clone(v.byID),
 		retiredIDs: maps.Clone(v.retiredIDs),
 		xorIndex:   v.xorIndex,
+		xorOrder:   v.xorOrder,
 	}
 }
 
@@ -117,6 +120,7 @@ func (v *View) addMember(name string, id VNodeID) error {
 	v.byID[id] = name
 	v.Active = append(v.Active, VNodeDescriptor{ID: id, Name: name})
 	v.xorIndex = nil
+	v.xorOrder = nil
 	return nil
 }
 
@@ -146,6 +150,7 @@ func (v *View) removeMember(name string) bool {
 	}
 	v.Active = kept
 	v.xorIndex = nil
+	v.xorOrder = nil
 	return true
 }
 

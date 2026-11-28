@@ -18,14 +18,27 @@ The runtime now picks its partners the way Kademlia picks its contacts.
 ## Rule
 
 Group the current holders by the length of their common prefix with this
-vnode's ID, which gives at most 97 buckets. In round `r`, contact one member
+vnode's ID, which gives at most 96 non-self buckets. In round `r`, contact one member
 of each non-empty bucket, rotating within the bucket by `r` and a per-vnode
 salt. Also contact one host from the rotating list of current transfer contacts:
 these may still be the only contact a stale peer has. The current runtime does
 not reconstruct a former-certificate graph.
 
-`mesh.GossipPeers` is the pure rule. `Service.GossipTargets` feeds it from the
-current membership and current transfer contacts. `Node.meshMaintainContext` uses it on every tick.
+At each maintenance tick, `Service.GossipTargets` follows the compressed XOR
+path toward its own address. Each opposite subtree is one bucket. The ranks
+of its leaves form a contiguous interval, so selecting the rotating peer
+takes constant work per branching bit. The same rule works before the local
+address appears in the view. In a balanced tree the path length is
+O(log N), with a hard limit of 96 bits for skewed placement. Local transfer
+contacts are considered separately. A control-state change that leaves
+membership unchanged reuses the same immutable placement index.
+
+The list sent to maintenance contains only this round's peers. The durable
+membership and the placement index are still replicated. A changed or missing
+version can require a full membership body. Once the two peers have exchanged
+receipts, preparing a version reference does not export, encode or hash that
+body again. These bounds describe steady-state partner selection and references;
+membership changes, bootstrap and exact regional reads have separate costs.
 
 ## GOS-1
 

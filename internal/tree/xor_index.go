@@ -87,3 +87,50 @@ func (v *View) FoldSibling(source ID) (VNodeDescriptor, bool) {
 	}
 	return peer, true
 }
+
+// VisitBucketPeers emits one peer per occupied XOR bucket, in increasing
+// common-prefix length. Offset advances the rotation within every bucket.
+// Compressed subtrees occupy contiguous ranks in xorOrder. Only the path
+// towards self is visited, even if self has not joined this view yet.
+func (v *View) VisitBucketPeers(self ID, offset uint64, visit func(VNodeDescriptor)) {
+	peers := v.xorOrder
+	if peers == nil {
+		peers = canonicalActive(v.Active)
+	}
+	selectPeer := func(bucket []VNodeDescriptor, depth uint8) {
+		visit(bucket[(offset+uint64(depth))%uint64(len(bucket))])
+	}
+	var at int32
+	for len(peers) > 0 {
+		depth := CommonPrefixLen(self, peers[0].ID)
+		if len(peers) == 1 {
+			if depth < Size*8 {
+				selectPeer(peers, depth)
+			}
+			return
+		}
+		var bit uint8
+		var pivot int
+		if len(v.xorIndex) > 0 {
+			node := v.xorIndex[at]
+			bit = node.bit
+			// Preorder encodes the left subtree in 2*leaves-1 nodes.
+			pivot = int(node.child[1]-node.child[0]+1) / 2
+			at = node.child[Bit(self, bit)]
+		} else {
+			bit = CommonPrefixLen(peers[0].ID, peers[len(peers)-1].ID)
+			pivot = sort.Search(len(peers), func(i int) bool { return Bit(peers[i].ID, bit) == 1 })
+		}
+		if depth < bit {
+			selectPeer(peers, depth)
+			return
+		}
+		if Bit(self, bit) == 0 {
+			selectPeer(peers[pivot:], bit)
+			peers = peers[:pivot]
+		} else {
+			selectPeer(peers[:pivot], bit)
+			peers = peers[pivot:]
+		}
+	}
+}

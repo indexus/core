@@ -12,17 +12,19 @@ func (s *Service) membershipTransport() *membershipWire {
 	s.controlMu.Lock()
 	defer s.controlMu.Unlock()
 	if s.membership == nil {
-		s.membership = newMembershipWire(func() (*MembershipEnvelope, error) {
-			root, genesis, delta, err := s.Store.Membership()
+		s.membership = newMembershipWire(func() (localMembership, error) {
+			r, err := s.Store.CausalRouting()
 			if err != nil {
-				return nil, err
+				return localMembership{}, err
 			}
-			return &MembershipEnvelope{Root: root, Genesis: genesis, Delta: delta}, nil
+			root, genesis := r.Identity()
+			return localMembership{membershipKey{root, genesis, r.MembershipRevision()}, r.ExportMembership}, nil
 		}, func(e MembershipEnvelope) error {
-			root, genesis, _, err := s.Store.Membership()
+			r, err := s.Store.CausalRouting()
 			if err != nil {
 				return err
 			}
+			root, genesis := r.Identity()
 			if e.Root != root || e.Genesis != genesis {
 				return storage.ErrWrongCluster
 			}
