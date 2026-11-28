@@ -125,3 +125,27 @@ test('interactive trace samples transient transfers instead of hiding all moves'
  assert.ok(r.snapshots.some(s=>s.jobs.some(j=>j.fraction>0&&j.fraction<1)),
   'a ten-second dashboard cadence can miss every small copy');
 });
+
+test('64k EBS clock includes the idle tail and conserves offered volume', () => {
+  const rate = t => demandAt(t, 'aws64k');
+  assert.deepEqual([0,70,90,110,220,330,399,400,550].map(rate),
+    [8000,8000,12000,16000,32000,64000,64000,0,0]);
+  let offered = 0;
+  for (let t = 0; t < 400; t++) offered += rate(t + 0.5);
+  assert.equal(offered, 11760000);
+});
+
+test('AWS inventory starts four vnodes per host independently of future packing',()=>{
+  const s = new SizingSimulation({scenario:'aws64k',initialHosts:12,initialVnodes:48,
+    slots:24,maxHosts:44,warmHosts:0,splitRate:50,bootPolicy:'forecast'});
+  assert.deepEqual(s.resources().map(r=>r.slots),Array(12).fill(4));
+  assert.equal(s.stats.boots,0);
+});
+
+test('zone installation can limit an otherwise fast copy',()=>{
+  const s=new SizingSimulation({initialVnodes:1,warmHosts:1,zonesPerSecond:20,dirtyFraction:0});
+  s.start(s.vnodes[0],{host:1,projection:{}},false,2000,'fixture');
+  const job=s.jobs[0],before=job.leftMiB;
+  s.advanceCopies();
+  assert.ok(Math.abs(before-job.leftMiB-20*s.c.dt*s.c.bytesPerItem/1048576)<1e-8);
+});

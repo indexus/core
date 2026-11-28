@@ -81,3 +81,46 @@ Les replays de calibration utilisent des moyennes et une répartition égale
 explicitement supposée ; ils n'annoncent pas un p99 prédit. `calibrated` reste
 `false` tant que les coûts CPU/I/O, les distributions de service, les événements
 de placement et les bascules réelles de charge ne sont pas qualifiés ensemble.
+
+## Rejouer les deux bancs EBS 64k
+
+Depuis ce dossier, `python3 placement_replay.py RESULTS` rejoue les décisions
+échantillonnées dans `operator/placement.jsonl`. Un octroi distant réellement
+appliqué fournit un créneau sur la machine choisie. Le mode observé restitue
+les bénéficiaires. Quatre variantes réattribuent ce créneau selon l’âge, le
+débit, leur produit au-dessus du seuil, ou la pression CPU du donneur. Une
+alternative exige un inventaire récent, une destination distante et des items
+connus qui satisfont la règle de soulagement. Un octroi par couple donneur/préfixe.
+Les octrois locaux, les décisions non échantillonnées et les annulations ne sont
+pas reconstruits. Les attentes non servies sont censurées à la fin de la fenêtre.
+Tester `--lease 15`, `30` et `60` mesure la sensibilité aux renouvellements.
+Les prochaines demandes et les créneaux restent ceux de la trace, même après
+une réattribution hypothétique. Un créneau octroyé précède le transfert effectif.
+
+`python3 fleet_replay.py RESULTS --boot 45` compare trois boucles sur les trames
+CPU complètes. Elles utilisent la capacité prête, la capacité prête plus engagée,
+ou une anticipation du trafic sur le délai de boot, bornée à un doublement.
+La charge CPU observée est maintenue fixe. L’intégrale du manque de capacité
+mesure le dépassement de la cible moyenne, en équivalents machine-seconde.
+Une machine en chauffe compte dans le coût dès sa demande. Les durées 20, 45 et
+90 secondes sont des scénarios. L’interpolation est constante entre trames.
+
+`python3 zone_service.py TRAIN/live.jsonl TEST/live.jsonl` mesure une vitesse par
+opération sur deux observations successives, et compare une prédiction constante
+à une estimation révisée après chaque observation (constante de temps 10 s).
+Pour une seule capture, fournir deux fois le chemin et `--split-time 400` pour
+réserver la période après charge aux tests, avec des opérations distinctes.
+Les opérations achevées entre deux sondes et celles de moins de dix secondes
+échappent à cette mesure. Le compteur installed_zones manque sur le premier banc EBS.
+
+Le modèle en boucle fermée accepte `scenario: 'aws64k'`, `initialHosts: 12`,
+`initialVnodes: 48`, `splitRate: 50`, ainsi que `bootPolicy: 'forecast'`
+ou `'serial'`. `zonesPerSecond` impose un coût supplémentaire d’installation
+par zone. L’occupation estimée du disque, le nombre d’items par zone, la forme
+de la demande par préfixe et la durée du boot restent des paramètres de scénario.
+La rampe idéale génère 11 760 000 demandes contre 11 825 088 mesurées.
+Les rejeux horodatés utilisent les observations réelles. Le modèle en boucle
+fermée sert à rechercher des contre-exemples. Il n’est pas qualifié pour prédire
+une latence client, la durée d’un gel ou le nombre exact de machines.
+
+Vérifier avec `python3 -m unittest test_aws_replay` et `node --test *.test.mjs`.

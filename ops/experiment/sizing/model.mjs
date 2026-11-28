@@ -18,6 +18,12 @@ const peak = r => Math.max(r.cpu, r.ram, r.disk, r.io);
 const quantile = (xs, q) => xs.length ? [...xs].sort((a,b)=>a-b)[Math.ceil(q*xs.length)-1] : null;
 
 export function demandAt(t, scenario = 'ramp') {
+  if (scenario === 'aws64k') {
+    if (t >= 400) return 0;
+    const stage = Math.floor(t / 110);
+    const rate = 8000 * 2 ** stage;
+    return rate * (1 + Math.max(0, t % 110 - 70) / 40);
+  }
   const stages = [[0,120,2000,2000], [120,180,2000,4000], [180,300,4000,4000],
     [300,360,4000,8000], [360,480,8000,8000], [480,540,8000,16000],
     [540,900,16000,16000], [900,1020,16000,4000], [1020,Infinity,4000,4000]];
@@ -38,8 +44,13 @@ export function configWith(overrides = {}) {
   if (!(c.cold < c.trigger && c.trigger < c.ceiling && c.ceiling <= 100)) throw Error('Seuil bas < déclenchement < plafond ≤ 100 requis.');
   if (c.copyCpuPct <= 0 || c.copyCpuPct >= c.ceiling) throw Error('Budget de copie incompatible avec le plafond.');
   if (!Number.isFinite(c.reservePct)||c.reservePct<0||c.reservePct>100)throw Error('Réserve entre 0 et 100 % requise.');
-  if (!['ramp','double','hotspot','volume'].includes(c.scenario)) throw Error('Scénario inconnu.');
+  if (!['ramp','double','hotspot','volume','aws64k'].includes(c.scenario)) throw Error('Scénario inconnu.');
   if (!['adaptive','fixed','items'].includes(c.policy)) throw Error('Politique inconnue.');
+  if (c.initialHosts !== undefined && (!Number.isInteger(c.initialHosts) || c.initialHosts < 1 ||
+      c.initialHosts > c.maxHosts || c.initialVnodes > c.initialHosts*c.slots)) throw Error('Initial host inventory cannot fit the vnodes');
+  if (c.bootPolicy !== undefined && !['serial','forecast'].includes(c.bootPolicy)) throw Error('Unknown boot policy');
+  if (c.zonesPerSecond !== undefined && !(Number.isFinite(c.zonesPerSecond) && c.zonesPerSecond > 0)) throw Error('Invalid installation rate');
+  if (c.splitRate !== undefined && !(Number.isFinite(c.splitRate) && c.splitRate > 0)) throw Error('Invalid split rate');
   if (c.initialVnodes > c.maxVnodes) throw Error('Inventaire initial supérieur à la borne du modèle.');
   return c;
 }
@@ -58,12 +69,13 @@ export class SizingSimulation {
       peakCpuDemand:0,peakRam:0,peakDisk:0,peakIo:0,peakHosts:0,peakVnodes:0,
       modelLimitHit:false,peakReadyHosts:0};
     const rng = random(this.c.seed);
+    for (let i=0;i<(this.c.initialHosts || 0);i++) this.addHost(0,false);
     for (let i=0;i<this.c.initialVnodes;i++) {
       const v = {id:i, root:i, host:-1, weight:0.7+0.6*rng(),
         dataMiB:this.c.dataGiB*1024*(0.8+0.4*rng()), coolUntil:0, job:null};
       this.vnodes.push(v);
       const rs = this.resources(0);
-      let h = this.hosts.find(h=>this.initialFits(rs[h.id],v));
+      let h = this.c.initialHosts ? this.hosts[i % this.c.initialHosts] : this.hosts.find(h=>this.initialFits(rs[h.id],v));
       if (!h) h = this.addHost(0,false);
       if (!h || !this.initialFits(this.resources(0)[h.id],v)) throw Error('Un vnode ne tient pas dans le budget initial : réduire son volume ou augmenter la machine.');
       v.host=h.id;
@@ -204,14 +216,15 @@ export class SizingSimulation {
       const r=rs[h.id],f=future[h.id];if(r.outgoing||r.incoming)continue;
       const eligible=this.vnodes.filter(v=>v.host===h.id&&!v.job&&v.coolUntil<=this.t);
       const itemHot=c.policy==='items'&&eligible.some(v=>v.dataMiB*1048576/c.bytesPerItem>c.itemLimit);
-      const hot=peak(f)>=c.trigger;
+      const rateHot=eligible.some(v=>rates[v.id] > c.splitRate);
+      const hot=peak(f)>=c.trigger || rateHot;
       const cool=r.slots===1&&peak(f)<c.cold&&this.t>c.cooldown;
       if(!itemHot&&!hot&&!cool)continue;
       eligible.sort((a,b)=>rates[b.id]-rates[a.id]);
       let done=false;
       for(const v of eligible) {
         const rate=rates[v.id];
-        const split=itemHot||((c.vnodeCores+rate*c.cpuUsPerWrite/1e6)/c.cores*100+c.copyCpuPct>c.ceiling);
+        const split=itemHot||rate > c.splitRate||((c.vnodeCores+rate*c.cpuUsPerWrite/1e6)/c.cores*100+c.copyCpuPct>c.ceiling);
         if(split&&this.vnodes.length>=c.maxVnodes){this.stats.modelLimitHit=true;continue;}
         const forecastData=v.dataMiB+rate*c.bootSeconds*c.bytesPerItem/1048576*c.insertFraction;
         const candidate={...v,dataMiB:forecastData/(split?2:1)};
@@ -236,7 +249,16 @@ export class SizingSimulation {
     const idle=this.hosts.filter(h=>rs[h.id].ready&&rs[h.id].slots===0&&!rs[h.id].incoming&&!rs[h.id].outgoing);
     const booting=this.hosts.filter(h=>!h.retired&&h.readyAt>this.t).length;
     // One boot per controller round; boot reservations are counted once.
-    if(idle.length+booting<want || (shortage&&idle.length===0&&booting===0))this.addHost(this.t+c.bootSeconds);
+    const needReceiver=shortage && idle.length===0 && booting===0;
+    const reserveShortfall=Math.max(0,want-idle.length-booting);
+    let starts=Number(needReceiver || reserveShortfall>0);
+    if(c.bootPolicy==='forecast' && shortage) {
+      const projectedWork=future.filter(r=>r.ready).reduce((sum,r)=>sum+r.cpu,0);
+      const fleet=this.hosts.filter(h=>!h.retired).length;
+      const capacityShortfall=Math.ceil(projectedWork/c.trigger)-fleet;
+      starts=Math.max(starts,capacityShortfall);
+    }
+    for(let i=0;i<starts;i++)if(!this.addHost(this.t+c.bootSeconds))break;
     for(const h of idle) {
       h.idleSince??=this.t;
       if(idle.length>want&&this.t-h.idleSince>=c.idleSeconds) {
@@ -262,7 +284,12 @@ export class SizingSimulation {
       };
       j.bandwidth=Math.min(c.bandwidthMiB,perHost(j.src,false),perHost(j.dst,true));
       const dirty=rates[j.vnode]*(1-j.share)*c.bytesPerItem/1048576*c.dirtyFraction;
-      const net=j.bandwidth-dirty;
+      // Installed zones are a separate bottleneck from bytes copied. The
+      // measured service rate includes concurrent writes and per-lot commits.
+      const zoneMiB=c.bytesPerItem*c.itemsPerZone/1048576;
+      const installMiB=c.zonesPerSecond===undefined?Infinity:c.zonesPerSecond*zoneMiB;
+      const net=Math.min(j.bandwidth-dirty,installMiB);
+      j.bandwidth=Math.min(j.bandwidth,Math.max(0,net+dirty));
       if(net<=0)this.stats.stalledCopySeconds+=c.dt;
       j.leftMiB=clamp(j.leftMiB-net*c.dt,0,j.initialMiB);
       j.fraction=Math.max(j.fraction,1-j.leftMiB/j.initialMiB);
