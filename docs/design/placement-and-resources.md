@@ -110,7 +110,10 @@ In order:
    boots one and fails the request; the donor asks again (it already does so
    when there is no free slot).
 4. At the machine cap only: `local` if the donor's machine is a target, then
-   any other target. Dividing the vnode still helps a process-bound donor.
+   any other target for process-bound requests. For a shared host CPU request,
+   the fallback requires a remote target whose CPU including the receiver budget
+   is below the source CPU. This allows a peer with many cold items to take
+   traffic. Both paths retain receiver admission checks.
 5. Refuse the spawn if no admissible machine exists. A quota or budget limit
    never authorizes bypassing resource admission.
 

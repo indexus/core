@@ -282,6 +282,36 @@ func TestHostReliefCannotFallBackToItsOwnMachineAtCap(t *testing.T) {
 	}
 }
 
+func TestHostReliefAtCapUsesCoolRemoteWithMoreItems(t *testing.T) {
+	donor := host(1, 0, 45, "hot")
+	donor.Machine, donor.ReceiverReserveCores = "donor", 0.5
+	donor.Items = map[string]int64{"hot": 100}
+	peer := host(1, 0, 10, "cold")
+	peer.Machine, peer.ReceiverReserveCores = "peer", 0.5
+	peer.Items = map[string]int64{"cold": 1000}
+	for _, tc := range []struct {
+		name      string
+		cpu       float64
+		receiving int
+		want      string
+	}{
+		{"cold prefix fits", 10, 0, "peer"},
+		{"projected CPU exceeds donor", 35, 0, ""},
+		{"existing receiver", 10, 1, ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			s := NewServer("key")
+			s.relief = map[string]*hostRelief{"donor": {owner: "hot", asking: true}}
+			candidate := peer
+			candidate.CPUPct, candidate.Receiving = tc.cpu, tc.receiving
+			_, env := s.decidePlacement([]autoscale.MachineFacts{donor, candidate}, "hot", "near")
+			if got := envOf(env, "INDEXUS_PLACE_CAP_AGENT"); got != tc.want {
+				t.Fatalf("fallback %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestPendingSourceLanesKeepTheBacklog(t *testing.T) {
 	s := new(Server)
 	machines := []autoscale.MachineFacts{

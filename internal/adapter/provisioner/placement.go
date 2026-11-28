@@ -199,16 +199,18 @@ func (s *Server) planPlacement(machines []autoscale.MachineFacts, requester, pre
 	if readyOnly && (record.Machine == "" || record.Kind == autoscale.PlaceSlots) {
 		return record, nil
 	}
+	donor := autoscale.MachineOf(machines, requester)
+	relief := s.relief[donor]
+	hostRelief := relief != nil && relief.asking && relief.owner == requester
+	if hostRelief {
+		relief.dest = record.Machine
+	}
 	var atCap autoscale.Placement
 	if record.Kind == autoscale.PlaceNew && record.Machine == "" {
-		atCap = autoscale.Place(machines, requester, false)
-	}
-	if r := s.relief[autoscale.MachineOf(machines, requester)]; r != nil && r.asking && r.owner == requester {
-		r.dest = record.Machine
-		// A local fallback divides one process but cannot move work off
-		// the physical host for which this relief was reserved.
-		if atCap.Kind == autoscale.PlaceLocal {
-			atCap = autoscale.Placement{Reason: "machine cap reached: host pressure needs a remote receiver"}
+		if hostRelief {
+			atCap = autoscale.RemoteReliefAtCap(machines, donor)
+		} else {
+			atCap = autoscale.Place(machines, requester, false)
 		}
 	}
 	record.capMachine = atCap.Machine

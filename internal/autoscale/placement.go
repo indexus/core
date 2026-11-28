@@ -187,6 +187,26 @@ func Place(machines []MachineFacts, donorVNode string, canBoot bool) Placement {
 	return Placement{Reason: "machine cap reached: no free slot with resource headroom"}
 }
 
+// RemoteReliefAtCap selects a fallback after normal placement found no
+// destination and no more machines can start. Item counts may rank a cold,
+// historical collection above a hot one. For a physical relief request,
+// compare the pair's projected CPU and retain all receiver admission checks.
+func RemoteReliefAtCap(machines []MachineFacts, donor string) Placement {
+	for _, source := range machines {
+		if source.Machine != donor || !source.CPUOK {
+			continue
+		}
+		target := pick(machines, func(m MachineFacts) bool {
+			return m.Machine != donor && ReceiverRefusal(m) == "" && projectedCPU(m) < source.CPUPct
+		})
+		if target != nil {
+			return Placement{PlaceExisting, target.Machine, "machine cap reached, remote receiver below donor CPU: " + headroom(*target)}
+		}
+		break
+	}
+	return Placement{Reason: "machine cap reached: host pressure needs a remote receiver with CPU headroom"}
+}
+
 // Under uniform traffic, a half split moves half the vnode's load off its
 // donor. A remote receiver relieves the pair when its projected items/core
 // stay strictly below the donor's original items/core. An incomplete count
