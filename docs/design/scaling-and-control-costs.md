@@ -14,8 +14,8 @@ et ce qui reste une cible. Les mesures et comptes de lignes sont dans
 | Cellules recalculées par comparaisons entre tous les nœuds | Corrigé : chemin dans le trie XOR existant, oracle indépendant et tests de vues profondes |
 | Polls de résumés détachés du contexte appelant | Corrigé pour les RPC de polling ; pushes, mutex et disque ne sont pas une deadline dure |
 | Rotation qui saute les pairs après annulation partielle | Corrigé pour passages complets et fenêtres stables ; tests à 63 pairs |
-| Références de membership préparées par export/JSON/hash complet | Toujours présent ; coût mesuré, à traiter par version immuable préencodée |
-| Diffusion de snapshots quand la membership change | Toujours présente ; deltas et réparation bornée proposés, pas livrés |
+| Références de membership préparées par export/JSON/hash complet | La préparation est réutilisée pour la même révision. Une nouvelle version nécessite encore un export et un hash complets. |
+| Diffusion de snapshots quand la membership change | Les pairs échangent des deltas sur une base commune et peuvent réparer en un aller-retour supplémentaire. Le bootstrap et les versions éloignées peuvent nécessiter un inventaire complet. Voir [le protocole](../protocol/gossip.md). |
 | Poll complet de tous les pairs et reconstruction des frontières | Toujours présent ; inscriptions et index incrémental à concevoir avec les garanties de lecture |
 | Spawn fabriquant un ancien DAG pour extraire des noms | Corrigé : noms du plan validé entier réservés directement ; ordre du plan explicitement conservé |
 | Fragments, opérations et exceptions dans les commits locaux | Coût dépendant de l'état local actuel, à indexer et borner ; pas éliminé par le retrait de Knowledge |

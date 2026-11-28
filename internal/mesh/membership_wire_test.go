@@ -173,7 +173,8 @@ func TestMembershipWireBootstrapsWithoutLocalView(t *testing.T) {
 
 func TestMembershipWireRejectsCorruptionAndDetachesBodies(t *testing.T) {
 	a, sa := membershipWireFixture(t, "a")
-	b, sb := membershipWireFixture(t, "")
+	// A responder-only member requires a reply body whose detachment we check.
+	b, sb := membershipWireFixture(t, "b")
 	p, err := a.packet(causal.Digest{}, true)
 	if err != nil {
 		t.Fatal(err)

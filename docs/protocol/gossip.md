@@ -99,6 +99,12 @@ membership validation before acknowledging. If its resulting version is B,
 the reply needs only a receipt and a version reference. A peer can also learn
 the change from the reply to a maintenance request.
 
+A request can also reference a version just learned from the other peer. If
+the receiving peer lacks a receipt for that direction, it can match the
+reference against its own complete digest. A receiver missing the requested
+base replies with a short repair request and defers its inventory until repair.
+A successful merge returning the sender’s exact version needs no inventory echo.
+
 Each vnode retains one prepared inventory and one transition from the preceding
 prepared version, shared by its peers. A cold peer or one that missed several
 versions can receive a full inventory. A missing base can trigger one full repair

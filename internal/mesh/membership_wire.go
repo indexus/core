@@ -213,7 +213,22 @@ func (w *membershipWire) accept(ctx context.Context, peer string, p MembershipPa
 		return false, nil
 	}
 	if p.Body == nil {
-		return w.receipt(peer).received != p.Version, nil
+		if w.receipt(peer).received == p.Version {
+			return false, nil
+		}
+		// A peer can learn our current version from a reply before we have
+		// received that version from it. Check the local digest in that case.
+		if p.Known == p.Version {
+			local, err := w.localSnapshot()
+			if err != nil {
+				return false, err
+			}
+			if local != nil && local.version == p.Version {
+				w.remember(peer, causal.Digest{}, p.Version)
+				return false, nil
+			}
+		}
+		return true, nil
 	}
 	w.mergeMu.Lock()
 	defer w.mergeMu.Unlock()
@@ -254,13 +269,15 @@ func (w *membershipWire) receive(ctx context.Context, peer string, p MembershipP
 	if err != nil {
 		return MembershipReply{}, err
 	}
-	r := MembershipReply{NeedBody: need}
-	if !need {
-		r.Accepted = p.Version
+	if need {
+		// The caller will send a full repair. Its merged view can differ
+		// from this one, so defer our inventory until that request.
+		return MembershipReply{NeedBody: true}, nil
 	}
+	r := MembershipReply{Accepted: p.Version}
 	r.Packet, err = w.packet(p.Version, false)
-	sameAfterPatch := !need && p.Base != (causal.Digest{}) && r.Packet.Version == p.Version
-	if err == nil && r.Packet.Version != p.Known && !sameAfterPatch {
+	sameAfterMerge := p.Body != nil && r.Packet.Version == p.Version
+	if err == nil && r.Packet.Version != p.Known && !sameAfterMerge {
 		r.Packet, err = w.packetAgainst(p.Version, p.Known, true)
 	}
 	observeMembershipPacket(r.Packet)
@@ -281,8 +298,8 @@ func (w *membershipWire) exchange(ctx context.Context, peer string, send members
 	if err != nil {
 		return err
 	}
-	if p.Version != r.sent {
-		p, err = w.packetAgainst(r.received, r.sent, true)
+	if p.Version != r.sent && p.Version != r.received {
+		p, err = w.packetAgainst(r.received, r.received, true)
 		if err != nil {
 			return err
 		}
@@ -302,9 +319,9 @@ func (w *membershipWire) exchange(ctx context.Context, peer string, send members
 		if out.Accepted == p.Version {
 			w.remember(peer, out.Accepted, causal.Digest{})
 		}
-		// A patch that produced exactly our advertised revision can be
+		// A merge that produced exactly our advertised revision can be
 		// acknowledged in both directions without echoing the inventory.
-		if !out.NeedBody && p.Base != (causal.Digest{}) && out.Packet.Body == nil && out.Packet.Base == (causal.Digest{}) && out.Packet.Version == p.Version {
+		if !out.NeedBody && p.Body != nil && out.Packet.Body == nil && out.Packet.Base == (causal.Digest{}) && out.Packet.Version == p.Version {
 			w.remember(peer, causal.Digest{}, p.Version)
 			return nil
 		}
