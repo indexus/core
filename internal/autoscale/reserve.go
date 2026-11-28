@@ -11,7 +11,7 @@ func ReceiverOffer(m MachineFacts) (ready, known bool) {
 	if !m.CPUOK || m.Cores <= 0 || !m.MemOK || !m.DiskOK || (m.ResourceManaged || m.AddressSlots > 0) && !m.HostCPUOK {
 		return false, false
 	}
-	return refusal(m) == "", true
+	return ReceiverRefusal(m) == "", true
 }
 
 // Reserve is the arithmetic of the ready reserve, in receiver offers: one

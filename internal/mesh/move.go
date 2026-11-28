@@ -3,6 +3,7 @@ package mesh
 import (
 	"context"
 	"errors"
+	"log/slog"
 
 	"github.com/indexus/go-indexus-core/internal/causal"
 	"github.com/indexus/go-indexus-core/internal/storage"
@@ -37,6 +38,7 @@ func (s *Service) MoveTo(ctx context.Context, target causal.Endpoint) error {
 		if err = s.Store.BeginCausalMove(target); err != nil {
 			return err
 		}
+		slog.InfoContext(ctx, "vnode move started", "vnode", s.VNode.Name, "source", s.Self.Host, "destination", target.Host, "epoch", target.Epoch)
 	}
 	for {
 		if err = ctx.Err(); err != nil {
@@ -68,6 +70,7 @@ func (s *Service) MoveTo(ctx context.Context, target causal.Endpoint) error {
 	if _, err = s.Store.PublishCausalMove(); err != nil {
 		return err
 	}
+	slog.InfoContext(ctx, "vnode move published", "vnode", s.VNode.Name, "source", s.Self.Host, "destination", target.Host, "epoch", target.Epoch)
 	return s.Sync(ctx, []string{target.Host})
 }
 func (s *Service) ReceiveMove(ctx context.Context, source string) error {

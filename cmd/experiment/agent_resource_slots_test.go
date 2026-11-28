@@ -37,7 +37,10 @@ func TestResourceSlotsGrowPastFiveAndDeferOnPressure(t *testing.T) {
 		v.record("ready", false, 10, nil, at.Add(-time.Second))
 		v.record("ready", false, 10, nil, at)
 	}
-	if f := facts(40, true); offeredSlots(f) != 0 || f.ReceiverReady == nil || *f.ReceiverReady {
+	if f := facts(40, true); offeredSlots(f) != 1 {
+		t.Fatalf("light receiver should fit: %+v", f)
+	}
+	if f := facts(42, true); offeredSlots(f) != 0 || f.ReceiverReady == nil || *f.ReceiverReady {
 		t.Fatalf("CPU headroom ignored: %+v", f)
 	}
 	if f := facts(40, false); offeredSlots(f) != 91 {
@@ -125,5 +128,22 @@ func TestDynamicAdmissionPastHundred(t *testing.T) {
 	f.CPUPct = 95
 	if offeredSlots(f) != 0 {
 		t.Fatal("admitted with saturated host CPU")
+	}
+}
+
+func TestReceiverForecastUsesRecentJoinOnThisMachine(t *testing.T) {
+	now := time.Now()
+	s := &slot{}
+	for i := range cpuSamples {
+		s.record("joining", true, float64(i)*3, nil, now.Add(time.Duration(i-cpuSamples+1)*factsEvery))
+	}
+	s.record("joining", false, 16, nil, now)
+	facts := func() autoscale.MachineFacts { return machineFacts([]*slot{s}, 4, autoscale.ResourceSample{}, 0, true) }
+	if f := facts(); f.ReceiverReserveCores != 1.5 {
+		t.Fatal("lost measured join cost", f)
+	}
+	s.joinSampleAt = now.Add(-2 * time.Minute)
+	if f := facts(); f.ReceiverReserveCores != 0.75 {
+		t.Fatal("stale receiver estimate", f)
 	}
 }

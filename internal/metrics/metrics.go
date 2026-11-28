@@ -158,11 +158,29 @@ func (m *milestone) Mark() time.Duration {
 // events: a mutex per start and end is fine.
 var open = struct {
 	sync.Mutex
-	since  map[string]time.Time
-	starts map[string]int
-	target map[string]string
-	phase  map[string]handoffPhase
-}{since: map[string]time.Time{}, starts: map[string]int{}, target: map[string]string{}, phase: map[string]handoffPhase{}}
+	since    map[string]time.Time
+	starts   map[string]int
+	target   map[string]string
+	progress map[string]*handoffProgress
+	phase    map[string]handoffPhase
+}{since: map[string]time.Time{}, starts: map[string]int{}, target: map[string]string{}, progress: map[string]*handoffProgress{}, phase: map[string]handoffPhase{}}
+
+type handoffProgress struct {
+	move      bool
+	installed int
+	last      time.Time
+}
+
+// HandoffInstalled tracks successful lot installations across retry attempts
+// within this process. Sampling phase changes alone cannot show forward progress.
+func HandoffInstalled(operation string, zones int) {
+	open.Lock()
+	defer open.Unlock()
+	if p := open.progress[operation]; p != nil {
+		p.installed += zones
+		p.last = time.Now()
+	}
+}
 
 type handoffPhase struct {
 	name    string
@@ -184,18 +202,24 @@ func HandoffPhase(operation, name string) {
 // HandoffStarted records an attempt of operation towards target (a vnode
 // name) and returns its number.
 func HandoffStarted(operation, target string) int {
-	return handoffBegin(operation, target, true)
+	return handoffBegin(operation, target, true, false)
 }
 
 // Waiting for resource admission is observable, but is not a failed attempt
 // to move authority (and must not trip the handoff-loop sentinel).
-func HandoffQueued(operation, target string) { handoffBegin(operation, target, false) }
+func HandoffQueued(operation, target string, move bool) {
+	handoffBegin(operation, target, false, move)
+}
 
-func handoffBegin(operation, target string, attempt bool) int {
+func handoffBegin(operation, target string, attempt, move bool) int {
 	open.Lock()
 	defer open.Unlock()
 	if _, ok := open.since[operation]; !ok {
 		open.since[operation] = time.Now()
+		open.progress[operation] = &handoffProgress{}
+	}
+	if move {
+		open.progress[operation].move = true
 	}
 	open.target[operation] = target
 	open.phase[operation] = handoffPhase{"begin", time.Now(), true}
@@ -225,6 +249,7 @@ func HandoffEnded(operation string, done bool) {
 		delete(open.since, operation)
 		delete(open.starts, operation)
 		delete(open.target, operation)
+		delete(open.progress, operation)
 	}
 }
 
@@ -238,7 +263,12 @@ func openSnapshot() map[string]any {
 		attempts = max(attempts, open.starts[op])
 		if len(list) < 32 { // for the dashboard: who is giving to whom
 			phase := open.phase[op]
-			list = append(list, map[string]any{"phase": phase.name, "phase_seconds": time.Since(phase.since).Seconds(), "running": phase.running, "op": op, "target": open.target[op], "seconds": time.Since(t).Seconds(), "attempts": open.starts[op]})
+			p := open.progress[op]
+			var lastAge any
+			if !p.last.IsZero() {
+				lastAge = time.Since(p.last).Seconds()
+			}
+			list = append(list, map[string]any{"installed_zones": p.installed, "last_install_seconds": lastAge, "phase": phase.name, "phase_seconds": time.Since(phase.since).Seconds(), "running": phase.running, "op": op, "target": open.target[op], "physical_move": p.move, "seconds": time.Since(t).Seconds(), "attempts": open.starts[op]})
 		}
 	}
 	return map[string]any{"count": len(open.since), "oldest_seconds": oldest, "max_attempts": attempts, "list": list}

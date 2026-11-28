@@ -26,6 +26,9 @@ type MachineFacts struct {
 	// CopySlots is the configured shared source-copy budget. Without a
 	// positive known limit each waiting requester is counted individually.
 	CopySlots int `json:"copy_slots,omitempty"`
+	// ReceiverReserveCores is this agent's forecast for the next join.
+	ReceiverReserveCores float64 `json:"receiver_reserve_cores,omitempty"`
+	ReceiverRefusal      string  `json:"receiver_refusal,omitempty"`
 	// VNodes are the names of the vnodes it hosts, to find the donor's machine.
 	VNodes []string `json:"vnodes"`
 	// Items is the advisory owned item count of each vnode it hosts, by name.
@@ -107,6 +110,8 @@ const (
 	// 2026-11-26, i4i.xlarge): two vnodes receiving on one 4 vCPU machine
 	// used 87-89 % of it, about 1.75 cores each.
 	receiverCores = 1.75
+	// Initial estimate for an instrumented machine until it samples a join.
+	MinReceiverCores = 0.75
 
 	// targetCPUMaxPct: a machine is a target only if its CPU plus the
 	// receiver budget stays at or under the steady-state target. The receiver
@@ -147,7 +152,7 @@ func Place(machines []MachineFacts, donorVNode string, canBoot bool) Placement {
 	donor := MachineOf(machines, donorVNode)
 	relieves, donorKnown := reliefRule(machines, donor, donorVNode)
 	eligible := func(m MachineFacts) bool {
-		return m.Running > 0 && m.Machine != donor && refusal(m) == "" && relieves(m)
+		return m.Running > 0 && m.Machine != donor && ReceiverRefusal(m) == "" && relieves(m)
 	}
 	preferred := pickByLoad(machines, func(m MachineFacts) bool { _, known := m.load(); return donorKnown && known && eligible(m) }, true)
 	// Pack existing remote capacity only with complete load observations. This
@@ -155,7 +160,7 @@ func Place(machines []MachineFacts, donorVNode string, canBoot bool) Placement {
 	if preferred != nil {
 		return Placement{PlaceExisting, preferred.Machine, "known-load remote machine with headroom: " + headroom(*preferred)}
 	}
-	if m := pick(machines, func(m MachineFacts) bool { return m.Running == 0 && refusal(m) == "" }); m != nil {
+	if m := pick(machines, func(m MachineFacts) bool { return m.Running == 0 && ReceiverRefusal(m) == "" }); m != nil {
 		return Placement{PlaceNew, m.Machine, "empty machine: " + headroom(*m)}
 	}
 	if existing := pick(machines, eligible); existing != nil {
@@ -172,10 +177,10 @@ func Place(machines []MachineFacts, donorVNode string, canBoot bool) Placement {
 	}
 	// Nothing will boot. Dividing the vnode still helps a process-bound donor,
 	// so take any machine with headroom, the donor's own included.
-	if m := pick(machines, func(m MachineFacts) bool { return m.Machine == donor && refusal(m) == "" }); m != nil {
+	if m := pick(machines, func(m MachineFacts) bool { return m.Machine == donor && ReceiverRefusal(m) == "" }); m != nil {
 		return Placement{PlaceLocal, m.Machine, "machine cap reached, donor machine keeps headroom: " + headroom(*m)}
 	}
-	if m := pick(machines, func(m MachineFacts) bool { return refusal(m) == "" }); m != nil {
+	if m := pick(machines, func(m MachineFacts) bool { return ReceiverRefusal(m) == "" }); m != nil {
 		return Placement{PlaceExisting, m.Machine, "machine cap reached, least loaded machine with headroom: " + headroom(*m)}
 	}
 	return Placement{Reason: "machine cap reached: no free slot with resource headroom"}
@@ -237,7 +242,7 @@ func (m MachineFacts) load() (int64, bool) {
 }
 
 // refusal is why a machine is not a target, or "" when it is one.
-func refusal(m MachineFacts) string {
+func ReceiverRefusal(m MachineFacts) string {
 	switch {
 	case (m.ResourceManaged || m.AddressSlots > 0) && (!m.HostCPUOK || !m.MemOK || !m.DiskOK || m.Cores <= 0):
 		return "waiting for machine resource measurements"
@@ -260,7 +265,11 @@ func refusal(m MachineFacts) string {
 // receiverCost is receiverCores in percent of the machine. An unknown core
 // count is taken as one core: such a machine is never a target by choice.
 func receiverCost(m MachineFacts) float64 {
-	return 100 * receiverCores / float64(max(m.Cores, 1))
+	cores := m.ReceiverReserveCores
+	if !(cores >= MinReceiverCores) || math.IsInf(cores, 0) {
+		cores = receiverCores
+	}
+	return 100 * cores / float64(max(m.Cores, 1))
 }
 
 // projectedCPU is the machine's CPU once it also pays for one more receiver.

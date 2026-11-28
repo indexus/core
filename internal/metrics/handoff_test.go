@@ -49,3 +49,22 @@ func TestMilestoneHasOneObserverPerEvent(t *testing.T) {
 		t.Fatal("install and write must capture independent, ordered process ages")
 	}
 }
+
+func TestPhysicalMoveProgressSurvivesRetryUntilCompletion(t *testing.T) {
+	const id = "move-retry"
+	HandoffQueued(id, "dst", true)
+	HandoffStarted(id, "dst")
+	HandoffInstalled(id, 12)
+	HandoffEnded(id, false)
+	HandoffStarted(id, "dst")
+	defer HandoffEnded(id, true)
+	for _, row := range openSnapshot()["list"].([]map[string]any) {
+		if row["op"] == id {
+			if row["attempts"] != 2 || row["physical_move"] != true || row["installed_zones"] != 12 || row["last_install_seconds"] == nil {
+				t.Fatalf("lost move progress on retry: %+v", row)
+			}
+			return
+		}
+	}
+	t.Fatal("missing open move")
+}

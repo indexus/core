@@ -50,9 +50,11 @@ type slot struct {
 	joining bool
 	cpu     []cpuSample
 	// items is the node's advisory owned item count, when it reports one.
-	items   int64
-	itemsOK bool
-	itemsAt time.Time
+	items        int64
+	itemsOK      bool
+	itemsAt      time.Time
+	joinCores    float64
+	joinSampleAt time.Time
 }
 
 // cpuSample is a node's cumulative CPU time read at a given moment.
@@ -74,6 +76,7 @@ const (
 func (s *slot) record(name string, joining bool, cpuSeconds float64, applied *int64, now time.Time) {
 	if name != s.name {
 		s.cpu = nil
+		s.joinSampleAt = time.Time{}
 	}
 	s.name, s.joining = name, joining
 	count := int64(-1)
@@ -83,6 +86,13 @@ func (s *slot) record(name string, joining bool, cpuSeconds float64, applied *in
 	s.cpu = append(s.cpu, cpuSample{at: now, seconds: cpuSeconds, applied: count})
 	if len(s.cpu) > cpuSamples {
 		s.cpu = s.cpu[1:]
+	}
+	if joining && len(s.cpu) == cpuSamples {
+		first := s.cpu[0]
+		if elapsed := now.Sub(first.at); elapsed >= factsEvery*(cpuSamples-1)/2 && elapsed <= 2*factsEvery*(cpuSamples-1) && cpuSeconds >= first.seconds {
+			s.joinCores, _ = s.cores()
+			s.joinSampleAt = now
+		}
 	}
 }
 
@@ -148,12 +158,16 @@ func machineFacts(slots []*slot, cores int, host autoscale.ResourceSample, addre
 	now := time.Now()
 	rate := autoscale.AppliedRate{AsOf: now}
 	complete := true
+	f.ReceiverReserveCores = autoscale.MinReceiverCores
 	for _, s := range slots {
 		if s == nil || !s.exited.IsZero() {
 			f.Free++
 			continue
 		}
 		f.Running++
+		if !s.joinSampleAt.IsZero() && now.Sub(s.joinSampleAt) <= time.Minute {
+			f.ReceiverReserveCores = max(f.ReceiverReserveCores, s.joinCores)
+		}
 		if s.name != "" {
 			f.VNodes = append(f.VNodes, s.name)
 			if s.itemsOK && time.Since(s.itemsAt) <= autoscale.ItemsCountMaxAge {
@@ -544,6 +558,7 @@ func agent(ctx context.Context, args []string) error {
 		}
 		if ready, known := autoscale.ReceiverOffer(facts); known || c.resourceSlots {
 			facts.ReceiverReady = &ready
+			facts.ReceiverRefusal = autoscale.ReceiverRefusal(facts)
 		}
 		return facts
 	}

@@ -158,7 +158,8 @@ skipped. This is the case of a local run on a laptop with a full disk.
 
 | Constant | Value | Why | Status |
 | --- | --- | --- | --- |
-| `receiverCores` | 1.75 cores | two receivers on 4 vCPU used 87-89 %, about 1.75 cores each. It includes the writes the new vnode takes over, which land on the target too. | one measurement |
+| Instrumented receiver forecast | At least 0.75 cores | The agent uses the largest recent joining-process estimate among its live slots. A sample uses six CPU readings and expires after one minute. | policy to qualify |
+| `receiverCores` (fallback and reserve-floor sizing) | 1.75 cores | two receivers on 4 vCPU used 87-89 %, about 1.75 cores each. It includes the writes the new vnode takes over, which land on the target too. | one measurement |
 | `targetCPUMaxPct` | 60 % | retain burst and transfer headroom | control target, not a hard cap |
 | `maxReceiversPerMachine` | 1 | two at once is what saturated the machines | one measurement |
 | `targetDiskMinFreePct` | 40 % | the node's own `DiskMinFreePct`: lower, the new vnode would ask for a scale-up at once | aligned with the node |
@@ -166,9 +167,18 @@ skipped. This is the case of a local run on a laptop with a full disk.
 | `placementMemory` | 15 s | a machine just chosen counts as receiving until its agent shows the vnode | assumed |
 | CPU window | 10 s | sees a join start, ignores one commit burst | assumed |
 
-On 4 vCPU the budget is 43.75 %, so a machine is a target up to 16.25 % CPU. In
-the measured run the donors at 28-49 % would mostly not have been targets and
-the three spares would have been used first. On 8 vCPU the limit is 38.125 %. This conservative estimate can prevent packing even when steady-state foreground would fit; do not lower it without measuring and pacing transfers.
+On a four-core host the initial forecast of 0.75 cores admits a receiver up to
+41.25% measured CPU. A recent 1.5-core observation lowers that threshold to
+22.5%. Only one receiver is admitted at once. The reserve-floor formula still
+uses the original 1.75-core unit so this change alone does not multiply spare
+boots. Agents export the forecast and refusal reason in their machine facts.
+
+A physical move retains the vnode address, increments its endpoint epoch and
+transfers its rights before publication. The node supports this through its
+move command. The AWS pressure path requests new addresses through the
+provisioner. Its placement counters classify where those new processes start.
+Monitoring reports transfers of a physical move separately and records confirmed
+zone installations and the age of the last one for each open operation.
 
 ### Wiring
 
@@ -345,7 +355,7 @@ budget below, not by refusing a relief. Coalesced requests are counted in
 
 ### A copy budget per host (fix-host)
 
-The receiver budget of placement (1.75 cores) bounds neither the source nor a
+The receiver budget of placement bounds neither the source nor a
 copy between two vnodes of one host: at t=428 s one host ran three outgoing
 operations from two vnodes at 96 % CPU. `mesh.CopyBudget` is a counting
 semaphore shared by the vnode *processes* of a host: a directory with one

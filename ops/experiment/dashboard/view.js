@@ -20,11 +20,19 @@
     const density=hosts>0&&ready!=null&&hosts===machines.length?ready/hosts:null;
     return {ready_count:ready,observed_count:observed,machine_count:hosts,ready_per_machine:density};
   }
+  const prepared=new WeakMap();
   function render(root,points,index=points.length-1){
+    const previous=new Map();
+    if(!global.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      for(const g of root.querySelectorAll('.topology [data-glyph]')){
+        previous.set(g.dataset.glyph,[Number(g.dataset.x),Number(g.dataset.y)]);
+      }
+    }
     root.classList.add('ix-dashboard');root.replaceChildren();
     const cols=Math.max(1,Math.floor((root.clientWidth+16)/436));
     const chartWidth=Math.max(160,Math.min(600,(root.clientWidth-16*(cols-1))/cols-26));
-    points=points.map(p=>{
+    const raw=points;
+    points=prepared.get(raw)||raw.map(p=>{
       const hs=p.fleet?.machines||[],out={...p};
       for(const k of ['cpu','ram','disk']){
         const vs=hs.map(h=>h[k]).filter(Number.isFinite);out[k+'_max']=vs.length?Math.max(...vs):null;
@@ -34,6 +42,7 @@
       out.coverage=stock;
       return Object.assign(out,growthMetrics(p),hostSpread(p));
     });
+    prepared.set(raw,points);
     if(!points.length){root.append(el('p','Aucune mesure disponible.'));return;}
     const p=points[index],f=p.fleet||{},sim=f.source==='simulation';
     root.append(el('p',sim?'Simulation de ressources : besoins de débit calculés ; ACK, lectures et latences non simulés.':'Mesures AWS : application au détenteur distincte des ACK client. Les tirets désignent une mesure inconnue.','note'));
@@ -88,7 +97,7 @@
     for(const [key,title] of [['hosts','Par machine'],['radial','Vnodes indépendants']]){
       const b=el('button',title);b.type='button';b.dataset.mode=key;
       b.onclick=()=>{
-        root.dataset.mode=key;
+        root.dataset.mode=key;delete root.dataset.selection;
         if(global.location.hash===''||global.location.hash==='#vnodes'){
           const url=new URL(global.location.href);url.hash=key==='radial'?'vnodes':'';
           global.history.replaceState(global.history.state,'',url);
@@ -106,7 +115,7 @@
       for(const b of choices.querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.mode===mode));
       detail.textContent='Sélectionner un vnode.';
       const shown=root.dataset.showWaiting==='true'?active:active.filter(tr=>tr.phase!=='copy-slot');
-      plot.replaceChildren(topology(machines,nodes,shown,detail,sim,p.metrics_stale,root.clientWidth,mode));
+      plot.replaceChildren(topology(machines,nodes,shown,detail,sim,p.metrics_stale,root.clientWidth,mode,root));
     }
     drawTopology();
     root.append(choices,detail,plot,el('h2','Transferts et délégations'));
@@ -116,10 +125,23 @@
     if(!transfers.length)list.append(el('p',p.metrics_stale?'État des transferts inconnu.':'Aucun transfert observé à cet instant.'));
     for(const tr of transfers){
       const row=el('div',null,'transfer'+(tr.frozen?' hot':''));
+      const kind=tr.physical_move===true?'déplacement du vnode':tr.physical_move===false?'délégation de zone':'transfert';
+      const retry=tr.attempts!=null?' · tentative '+fmt(tr.attempts):'';
+      const installed=tr.installed_zones==null?'':' · '+fmt(tr.installed_zones)+' installations de zone confirmées';
+      const lastInstall=tr.last_install_s==null?'':' · dernier lot il y a '+fmt(tr.last_install_s,1)+' s';
+      const phaseTime=tr.phase_age_s!=null?' · dans cette phase depuis '+fmt(tr.phase_age_s,2)+' s':'';
       row.append(el('strong',`${tr.source_machine||'?'} → ${tr.target_machine||'destination inconnue'}`),
-        el('span',`${tr.phase||'copie'}${tr.stale?' · état périmé':''} · âge ${fmt(tr.age_s,1)} s · ${tr.progress==null?'progression non mesurée':fmt(tr.progress*100,1)+' % copiés'}${tr.share==null?'':' · '+fmt(tr.share*100,1)+' % de charge déplacée'}${tr.frozen?' · fence franchie':''}`));list.append(row);
+        el('span',`${kind} · ${tr.phase||'copie'}${phaseTime}${retry}${installed}${lastInstall}${tr.stale?' · état périmé':''} · âge ${fmt(tr.age_s,1)} s · ${tr.progress==null?'progression non mesurée':fmt(tr.progress*100,1)+' % copiés'}${tr.share==null?'':' · '+fmt(tr.share*100,1)+' % de charge déplacée'}${tr.frozen?' · fence franchie':''}`));list.append(row);
     }
     root.append(list);
+    if(previous.size){
+      for(const g of root.querySelectorAll('.topology [data-glyph]')){
+        const pos=previous.get(g.dataset.glyph);
+        if(!pos){g.animate([{opacity:0},{opacity:1}],450);continue;}
+        const dx=pos[0]-Number(g.dataset.x),dy=pos[1]-Number(g.dataset.y);
+        if(dx||dy)g.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'translate(0,0)'}],{duration:600,easing:'ease-out'});
+      }
+    }
   }
   function departedTransfers(before,now){
     if(!before?.fleet||!now.fleet||before.metrics_stale||now.metrics_stale)return null;
@@ -152,7 +174,7 @@
     const counted=stale?[]:nodes.filter(n=>n.state!=='stale'&&n.items_counted!==false&&Number.isFinite(n.items));
     return {value:counted.length?counted.reduce((sum,n)=>sum+n.items,0):null,count:counted.length,total:nodes.length};
   }
-  function topology(machines,nodes,transfers,detail,sim,stale,width,mode){
+  function topology(machines,nodes,transfers,detail,sim,stale,width,mode,root){
     const wrap=el('div',null,'topology');
     if(!machines.length){wrap.append(el('p','Aucun inventaire machine enregistré.'));return wrap;}
     const colors={ready:'#16856a',receiving:'#347cca',joining:'#347cca',unknown:'#888'};
@@ -177,13 +199,14 @@
     const edges=[];
     const all=el('button','Afficher tous les transferts');
     all.type='button';all.hidden=true;
-    const reset=()=>{for(const edge of edges)edge.path.style.display='';all.hidden=true;};
+    const reset=()=>{delete root.dataset.selection;for(const edge of edges)edge.path.style.display='';all.hidden=true;};
     all.onclick=()=>{reset();detail.textContent='Sélectionner un vnode.';};
     wrap.append(all);
     function select(group,description,matches,extra){
       group.setAttribute('tabindex',0);group.setAttribute('role','button');group.setAttribute('aria-label',description);
       const title=svg('title',{});title.textContent=description;group.append(title);
       group.onclick=()=>{
+        root.dataset.selection=group.dataset.glyph;
         const related=edges.filter(edge=>matches(edge.tr));
         for(const edge of edges)edge.path.style.display=matches(edge.tr)?'':'none';
         all.hidden=edges.length===0;
@@ -197,9 +220,11 @@
     }else ordered.forEach((h,i)=>{
       const ns=members.get(h.id),x=(i%cols+.5)*cell,y=Math.floor(i/cols)*step+radius+12;
       hosts.set(h.id,{x,y,r:radius});
-      const g=svg('g',{}),sum=itemSum(ns,stale);
+      const g=svg('g',{'data-glyph':'host:'+h.id,'data-x':x,'data-y':y}),sum=itemSum(ns,stale);
       g.append(svg('circle',{cx:x,cy:y,r:radius,fill:'#8881',stroke:pressure(h)>60?'#ce663e':'#888','stroke-width':2}));
       const observed=fmt(sum.value)+' items';
+      const admission=(Number.isFinite(h.reserve_cores)?' · réserve '+fmt(h.reserve_cores,2)+' vCPU':'')+
+        (h.refusal?' · réception refusée : '+h.refusal:(h.ready_offer===true?' · réception disponible':''));
       const resources=[['cpu','CPU'],['ram','RAM'],['disk','Disque']];
       label(g,x,y+radius+17,h.label||h.id);label(g,x,y+radius+34,observed);
       for(const [j,[k]] of resources.entries()){
@@ -207,13 +232,13 @@
         g.append(svg('rect',{x:left,y:top,width:19,height:4,fill:'#8884'}));
         if(Number.isFinite(h[k]))g.append(svg('rect',{x:left,y:top,width:19*Math.min(100,Math.max(0,h[k]))/100,height:4,fill:h[k]>60?'#ce663e':'#347cca'}));
       }
-      select(g,`${h.label||h.id} · ${observed} · ${sum.count}/${ns.length} vnodes comptés · ${resources.map(([k,l])=>l+' '+fmt(h[k],1)+' %').join(' · ')}`,tr=>tr.source_machine===h.id||tr.target_machine===h.id);
+      select(g,`${h.label||h.id} · ${observed} · ${sum.count}/${ns.length} vnodes comptés${admission} · ${resources.map(([k,l])=>l+' '+fmt(h[k],1)+' %').join(' · ')}`,tr=>tr.source_machine===h.id||tr.target_machine===h.id);
       glyphs.append(g);
       const side=Math.ceil(Math.sqrt(ns.length));
       ns.forEach((n,j)=>{
         const nx=x+((j%side)-(Math.min(side,ns.length-Math.floor(j/side)*side)-1)/2)*16,ny=y+(Math.floor(j/side)-(Math.ceil(ns.length/side)-1)/2)*16;
         const point={x:nx,y:ny,r:6};ends.set(n.id,point);if(n.monitor&&(n.state!=='stale'||!ends.has(n.monitor)))ends.set(n.monitor,point);
-        const dot=svg('g',{});dot.append(svg('circle',{cx:nx,cy:ny,r:6,fill:stale?colors.unknown:colors[n.state]||colors.unknown}));
+        const dot=svg('g',{'data-glyph':'grid:'+n.id,'data-x':nx,'data-y':ny});dot.append(svg('circle',{cx:nx,cy:ny,r:6,fill:stale?colors.unknown:colors[n.state]||colors.unknown}));
         select(dot,`${n.label||n.id} · ${h.label||h.id} · ${n.state} · ${fmt(itemSum([n],stale).value)} items · ${fmt(stale?null:n.applied_s??n.estimated_s,1)} ${sim?'requises':'applications'}/s`,tr=>touchesNode(tr,n));glyphs.append(dot);
       });
     });
@@ -225,10 +250,18 @@
       const path=d>a.r+b.r?`M${a.x+dx*a.r/d} ${a.y+dy*a.r/d} L${b.x-dx*(b.r+2)/d} ${b.y-dy*(b.r+2)/d}`:
         `M${a.x} ${a.y-a.r} Q${a.x+55} ${a.y-55} ${b.x+b.r} ${b.y}`;
       const arrow=svg('path',{d:path,fill:'none',stroke:color,opacity:(tr.stale||stale) ? 0.25 : 0.72,'stroke-dasharray':tr.stale||stale?'4 4':'none','marker-end':'url(#'+(tr.frozen?'fence':'flow')+')','pointer-events':'none'});
-      edges.push({tr,path:arrow});links.append(arrow);
+      const bundle=svg('g',{});bundle.append(arrow);
+      if(root.dataset.playing==='true'&&tr.phase!=='copy-slot'&&!global.matchMedia('(prefers-reduced-motion: reduce)').matches){
+        const pulse=svg('circle',{r:2.4,fill:color,'pointer-events':'none'});
+        pulse.append(svg('animateMotion',{path,dur:'2s',repeatCount:'indefinite'}));bundle.append(pulse);
+      }
+      edges.push({tr,path:bundle});links.append(bundle);
     }
     if(mode==='radial')wrap.append(el('p',sim?'Disposition circulaire des vnodes simulés.':'Branches grises : préfixes binaires communs aux adresses. Sélectionner un vnode pour lire ses buckets parmi les adresses observées.','note'));
     wrap.append(canvas);
+    for(const glyph of glyphs.querySelectorAll('[data-glyph]')){
+      if(glyph.dataset.glyph===root.dataset.selection){glyph.onclick();break;}
+    }
     if(unresolved)wrap.append(el('p',fmt(unresolved)+' transfert(s) avec extrémité inconnue.','note'));
     return wrap;
   }
@@ -270,7 +303,7 @@
     }
     if(leaves.every(l=>l.bits))branch(0,leaves.length,0,{x:mid,y:mid});
     for(const [i,{n,bits}] of leaves.entries()){
-      const {x,y}=point(i,radius),r=5,g=svg('g',{});
+      const {x,y}=point(i,radius),r=5,g=svg('g',{'data-glyph':'radial:'+n.id,'data-x':x,'data-y':y});
       const pos={x,y,r};ends.set(n.id,pos);if(n.monitor&&(n.state!=='stale'||!ends.has(n.monitor)))ends.set(n.monitor,pos);
       g.append(svg('circle',{cx:x,cy:y,r,fill:stale?colors.unknown:colors[n.state]||colors.unknown}));
       const description=`${n.label} · ${n.machine} · ${n.state} · ${fmt(itemSum([n],stale).value)} items · ${fmt(stale?null:n.applied_s??n.estimated_s,1)} ${sim?'requises':'applications'}/s`;

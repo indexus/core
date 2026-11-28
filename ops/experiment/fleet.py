@@ -52,6 +52,8 @@ class Fleet:
                          cores=f.get('cores'), receiving=f.get('receiving'),
                          slots=None if f.get('resource_managed') else f.get('running', 0)+f.get('free', 0))
                 h['ready_offer'] = f.get('receiver_ready')
+                h['reserve_cores'] = f.get('receiver_reserve_cores')
+                h['refusal'] = f.get('receiver_refusal')
                 if h['state'] == 'warm' and not h['ready_offer']:
                     h['state'] = 'unavailable'
             hosts[h['id']] = h
@@ -89,7 +91,8 @@ class Fleet:
                 target_monitor = endpoint.get(target)
                 self.transfers[ident].append(dict(id=ident+':'+str(tr.get('op')), source=ident,
                                       source_machine=machine, target_machine=host(target) if target else None,
-                                      target=target_monitor, phase=tr.get('phase'), age_s=tr.get('seconds'),
+                                      target=target_monitor, phase=tr.get('phase'), age_s=tr.get('seconds'), attempts=tr.get('attempts'), physical_move=tr.get('physical_move'),
+                                      installed_zones=tr.get('installed_zones'), last_install_s=tr.get('last_install_seconds'),
                                       phase_age_s=tr.get('phase_seconds'), progress=None,
                                       frozen=tr.get('op') in (m.get('frozen_transfers') or [])))
         nodes = []

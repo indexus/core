@@ -147,7 +147,7 @@ func (s *Service) handoffLocked(ctx context.Context, r Request, lane *os.File) (
 	}
 	c := offer.Cession
 	id := c.ID
-	metrics.HandoffQueued(id.String(), c.Target.Host)
+	metrics.HandoffQueued(id.String(), c.Target.Host, c.Source.VNode == c.Target.VNode && c.Source.Storage != c.Target.Storage)
 	defer func() { err = s.endHandoff(ctx, id, c, err) }()
 
 	switch {

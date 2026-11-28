@@ -396,13 +396,19 @@ def fleet_page(points, title, live):
         data.append(p)
     # JSON lives inside a script: escaped terminators protect against node names.
     payload = json.dumps(data, separators=(',', ':'), ensure_ascii=False).replace('<', '\\u003c')
-    refresh = '<meta http-equiv="refresh" content="5">' if live else ''
+    refresh = 'setInterval(()=>{if(!playing && +slider.value===points.length-1 && !document.hidden)location.reload()},10000);' if live else ''
     stale = '<p>Télémétrie périmée</p>' if points and (points[-1].get('metrics_stale') or points[-1].get('load_stale')) else ''
-    return ('<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+refresh+
+    return ('<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+
             '<title>'+html.escape(title)+'</title><style>body{margin:0;padding:20px;background:#fafaf8;color:#252622}body>h1{font:600 20px system-ui}'+
             '@media(prefers-color-scheme:dark){body{background:#1a1a19;color:#eeeee8}}'+assets.joinpath('view.css').read_text()+'</style></head><body><h1>'+html.escape(title)+'</h1>'+stale+
-            '<label>Instant observé <input id="moment" type="range" min="0" max="'+str(max(0,len(data)-1))+'" value="'+str(max(0,len(data)-1))+'"></label> <output id="time"></output><main id="dashboard"></main><script>'+assets.joinpath('view.js').read_text()+
-            ';const points='+payload+';const slider=document.getElementById("moment");function draw(){IndexusDashboard.render(document.getElementById("dashboard"),points,+slider.value);document.getElementById("time").textContent=(points[+slider.value]?.x??0)+" s";}slider.oninput=draw;draw();</script></body></html>')
+            '<nav class="timeline" aria-label="Lecture du banc"><button id="playback" type="button">Lire à 5×</button> <label>Instant observé <input id="moment" type="range" min="0" max="'+str(max(0,len(data)-1))+'" value="'+str(max(0,len(data)-1))+'"></label> <output id="time"></output></nav><main id="dashboard"></main><script>'+assets.joinpath('view.js').read_text()+
+            ';const points='+payload+';const slider=document.getElementById("moment");function draw(){const root=document.getElementById("dashboard");root.dataset.playing=String(playing);IndexusDashboard.render(root,points,+slider.value);document.getElementById("time").textContent=(points[+slider.value]?.x??0)+" s";}' + """const play=document.getElementById("playback");let playing=false,timer;
+function pause(){playing=false;clearTimeout(timer);play.textContent="Lire à 5×";}
+function tick(){draw();const i=+slider.value;if(i>=points.length-1){pause();draw();return;}
+  timer=setTimeout(()=>{slider.value=i+1;tick()},Math.max(16,(points[i+1].x-points[i].x)*200));}
+play.onclick=()=>{if(playing){pause();draw();return;}if(+slider.value>=points.length-1)slider.value=0;
+  playing=true;play.textContent="Pause";tick();};
+slider.oninput=()=>{pause();draw();};draw();"""+refresh+'</script></body></html>')
 
 
 if __name__ == "__main__":

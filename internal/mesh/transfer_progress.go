@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/indexus/go-indexus-core/internal/metrics"
 	"github.com/indexus/go-indexus-core/internal/storage"
 )
 
@@ -43,6 +44,7 @@ func (p *transferProgress) add(step string, mark time.Time, zones int) time.Time
 	p.steps[step] += took
 	p.slowest[step] = max(p.slowest[step], took)
 	if zones > 0 {
+		metrics.HandoffInstalled(p.operation, zones)
 		p.zones += zones
 		p.batches++
 	}
