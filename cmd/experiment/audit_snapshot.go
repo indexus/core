@@ -6,11 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"net/url"
 	"os"
 	"slices"
 	"sort"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/indexus/go-indexus-core/indexus"
@@ -85,6 +87,22 @@ func auditOwnership(ctx context.Context, mons []string, report *auditReport) {
 	report.DoubleSample = zones[:min(len(zones), 20)]
 }
 
+// A slot that answered the initial census can retire before final totals.
+// Only a refused dial to the selected entry can move this job to the next
+// entry. Errors from a live entry or its downstream route remain visible.
+func auditCollectionTotal(ctx context.Context, nodes []string, start int, tok, collection string) (int64, error) {
+	for offset := range len(nodes) {
+		entry := nodes[(start+offset)%len(nodes)]
+		total, err := collectionTotalContext(ctx, entry, tok, collection, true)
+		var call *url.Error
+		if offset+1 == len(nodes) || !errors.Is(err, syscall.ECONNREFUSED) || !errors.As(err, &call) || !strings.HasPrefix(call.URL, strings.TrimRight(entry, "/")+"/set?") {
+			return total, err
+		}
+		fmt.Fprintf(os.Stderr, "audit total %s: entry %s refused connection; trying next entry\n", collection, entry)
+	}
+	return 0, errors.New("no entry for audit total")
+}
+
 func auditTotals(ctx context.Context, nodes []string, tok string, ackedBy map[string]int64, report *auditReport) bool {
 	type totalJob struct {
 		idx        int
@@ -107,7 +125,7 @@ func auditTotals(ctx context.Context, nodes []string, tok string, ackedBy map[st
 		go func() {
 			defer totalWG.Done()
 			for job := range totalJobs {
-				got, err := collectionTotalContext(ctx, nodes[job.idx%len(nodes)], tok, job.collection, true)
+				got, err := auditCollectionTotal(ctx, nodes, job.idx, tok, job.collection)
 				mu.Lock()
 				report.Collections++
 				if errors.Is(err, indexus.ErrReadChanged) {

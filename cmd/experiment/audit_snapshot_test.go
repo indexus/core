@@ -6,8 +6,10 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -144,5 +146,69 @@ func TestFinalAuditBoundsSlowTotalAndRejectsPermanentRefusal(t *testing.T) {
 		if totals.Load() != 1 || len(report.TotalErrors) != 1 || report.FinalRetries != 0 {
 			t.Fatalf("calls=%d report=%+v", totals.Load(), report)
 		}
+	}
+}
+
+func TestAuditTotalsAfterEntryRetirement(t *testing.T) {
+	retired := httptest.NewServer(nil)
+	retired.Close()
+	dead, err := url.Parse(retired.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	port, err := strconv.Atoi(dead.Port())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		name       string
+		redirected bool
+	}{
+		{"entry retired", false}, {"live entry points to an unreachable owner", true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var reads atomic.Int32
+			live := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				reads.Add(1)
+				_, _ = w.Write([]byte(`{"set":{"L":{"count":7}}}`))
+			}))
+			defer live.Close()
+			entry := retired.URL
+			if test.redirected {
+				forwarder := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					_ = json.NewEncoder(w).Encode(map[string]any{"contact": map[string]any{"ip": dead.Hostname(), "port": port}})
+				}))
+				defer forwarder.Close()
+				entry = forwarder.URL
+			}
+			var report auditReport
+			auditTotals(context.Background(), []string{entry, live.URL}, "token", map[string]int64{"C": 7}, &report)
+			if report.Collections != 1 || len(report.CountMismatches) != 0 {
+				t.Fatalf("report=%+v", report)
+			}
+			if test.redirected {
+				if reads.Load() != 0 || report.TotalErrors["C"] == "" {
+					t.Fatal("unreachable redirected owner was hidden")
+				}
+			} else if reads.Load() != 1 || len(report.TotalErrors) != 0 {
+				t.Fatalf("surviving entry reads=%d, report=%+v", reads.Load(), report)
+			}
+		})
+	}
+}
+
+func TestAuditWrongTotalFromLiveEntryIsFinal(t *testing.T) {
+	bad := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { _, _ = w.Write([]byte(`{"set":{"L":{"count":6}}}`)) }))
+	defer bad.Close()
+	var otherReads atomic.Int32
+	other := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		otherReads.Add(1)
+		_, _ = w.Write([]byte(`{"set":{"L":{"count":7}}}`))
+	}))
+	defer other.Close()
+	var report auditReport
+	auditTotals(context.Background(), []string{bad.URL, other.URL}, "token", map[string]int64{"C": 7}, &report)
+	if got := report.CountMismatches["C"]; got != [2]int64{7, 6} || otherReads.Load() != 0 {
+		t.Fatalf("mismatch=%v other reads=%d", got, otherReads.Load())
 	}
 }
