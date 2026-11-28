@@ -127,7 +127,8 @@ nav.timeline + main {padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 .ix-dashboard .tile span {font-size:12px}
 .ix-dashboard .tile strong {font-size:19px;font-variant-numeric:tabular-nums}
 .ix-dashboard .charts {grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:12px;margin-top:14px}
-.ix-dashboard figure {padding:9px 10px}
+.ix-dashboard figure {padding:11px 13px}
+.ix-dashboard > .tiles > .tile {padding-block:11px}
 .ix-dashboard figcaption {display:flex;align-items:center;justify-content:space-between;gap:4px}
 .ix-dashboard figure .legend {gap:8px;min-height:16px;font-size:11px}
 .ix-dashboard .expand-chart {background:transparent;color:inherit;border:0;cursor:zoom-in;font-size:18px;line-height:24px}
@@ -156,12 +157,13 @@ body:has(> nav.timeline)>h1 {font:600 20px system-ui;margin:0 0 8px}
 @media(max-width:660px){
   .ix-dashboard .tile {flex-basis:28%;padding:3px 7px}
   .ix-dashboard .tile strong {font-size:16px}
+  .ix-dashboard > .tiles > .tile {padding-block:6px}
 }
 .ix-dashboard .alert {margin:1px 0 6px;padding:2px 7px;font-size:12px}
 .ix-dashboard .outside-scope[role=button]:hover {opacity:1}
 .ix-dashboard {container-type:inline-size}
 .ix-dashboard .network-workspace {
-  --network-side:min(55%, max(260px, calc(100dvh - 186px)));
+  --network-side:min(53%, max(250px, calc(100dvh - 208px)));
   display:grid;
   grid-template-columns:var(--network-side) minmax(0,1fr);
   margin-top:8px;
@@ -170,7 +172,7 @@ body:has(> nav.timeline)>h1 {font:600 20px system-ui;margin:0 0 8px}
 }
 .ix-dashboard .network-pane {min-width:0}
 .ix-dashboard .network-frame {aspect-ratio:1}
-.ix-dashboard .network-frame > svg {position:absolute;inset:0;width:100%;height:100%}
+.ix-dashboard .network-frame > svg {position:absolute;inset:8px;width:calc(100% - 16px);height:calc(100% - 16px)}
 .ix-dashboard .network-workspace .overview {
   margin:0;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -190,8 +192,7 @@ body:has(> nav.timeline)>h1 {font:600 20px system-ui;margin:0 0 8px}
 dialog.chart-dialog .chart-field {height:min(50vh,380px)}
 @container (max-width:680px) {
   .ix-dashboard .network-workspace {grid-template-columns:minmax(0,1fr);gap:8px}
-  .ix-dashboard .overview .chart-field {min-height:104px}
-  .ix-dashboard .network-workspace .overview .chart-field {min-height:142px}
+  .ix-dashboard .network-workspace .overview .chart-field {min-height:130px}
 }
 
 @container (max-width:480px) {
