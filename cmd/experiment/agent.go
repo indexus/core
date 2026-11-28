@@ -26,7 +26,7 @@ import (
 // agent manages node slots on one machine, so one machine can
 // host several vnodes and a cluster is rebuilt without recreating machines:
 //
-//	POST /spawn[?genesis=1&wait=ready&prefer_near=&compaction=&items=&provisioner=&bootstrap=]
+//	POST /spawn[?genesis=1&wait=ready&prefer_near=|founder=&compaction=&items=&provisioner=&bootstrap=]
 //	POST /restart?slot=i   crash (SIGKILL) and restart a slot on the same disk
 //	POST /kill?slot=i      crash a slot and leave it down
 //	POST /reset            kill every slot and wipe the disks
@@ -225,6 +225,7 @@ func offeredSlots(f autoscale.MachineFacts) int {
 
 type spawnOptions struct {
 	Genesis     bool   `json:"genesis,omitempty"`
+	Founder     string `json:"founder,omitempty"` // an exact public address for a fresh benchmark founder
 	PreferNear  string `json:"prefer_near,omitempty"`
 	Compaction  bool   `json:"compaction"`
 	Items       int    `json:"items_per_vnode,omitempty"`
@@ -346,7 +347,9 @@ func agent(ctx context.Context, args []string) error {
 			network["bootstrap"] = []string{o.Bootstrap}
 		}
 		identity := map[string]any{"network": "experiment", "cluster": "experiment", "issuer": c.issuer}
-		if o.PreferNear != "" {
+		if o.Founder != "" {
+			identity["name"] = o.Founder
+		} else if o.PreferNear != "" {
 			identity["prefer_near"] = o.PreferNear // a target: each attempt gets a fresh name (SPAWN-1)
 		}
 		limits := map[string]any{"data_bytes": c.dataBytes, "writes_per_second": c.writeCap}
@@ -413,12 +416,22 @@ func agent(ctx context.Context, args []string) error {
 			}
 		}
 		dir := filepath.Join(c.dir, strconv.Itoa(i))
-		if fresh {
-			keepLog(i)
-			_ = os.RemoveAll(dir)
-		}
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return err
+		if fresh && o.Founder != "" {
+			// A named replay must never adopt or erase a persisted disk/key.
+			if err := os.MkdirAll(c.dir, 0o755); err != nil {
+				return err
+			}
+			if err := os.Mkdir(dir, 0o755); err != nil {
+				return fmt.Errorf("founder requires a new slot directory: %w", err)
+			}
+		} else {
+			if fresh {
+				keepLog(i)
+				_ = os.RemoveAll(dir)
+			}
+			if err := os.MkdirAll(dir, 0o755); err != nil {
+				return err
+			}
 		}
 		path, err := writeConfig(dir, ports, o)
 		if err != nil {
@@ -572,6 +585,13 @@ func agent(ctx context.Context, args []string) error {
 		o := c.defaults
 		o.Genesis = q.Get("genesis") == "1"
 		o.PreferNear = q.Get("prefer_near")
+		if q.Has("founder") {
+			o.Founder = q.Get("founder")
+			if len(q["founder"]) != 1 || q.Has("prefer_near") || indexus.CheckName(o.Founder) != nil {
+				http.Error(w, "founder needs one 16-character vnode name and cannot use prefer_near", http.StatusBadRequest)
+				return
+			}
+		}
 		if v := q.Get("compaction"); v != "" {
 			o.Compaction = v == "true"
 		}
@@ -601,9 +621,16 @@ func agent(ctx context.Context, args []string) error {
 		}
 		i := -1
 		for j, s := range slots {
-			if !alive(s) {
+			if o.Founder != "" && s != nil && s.options.Founder == o.Founder {
+				mu.Unlock()
+				http.Error(w, "founder already started on this machine", http.StatusConflict)
+				return
+			}
+			if i < 0 && !alive(s) && (o.Founder == "" || s == nil) {
 				i = j
-				break
+				if o.Founder == "" {
+					break
+				}
 			}
 		}
 		if i < 0 && c.slots == 0 {
@@ -629,6 +656,10 @@ func agent(ctx context.Context, args []string) error {
 		fmt.Fprintf(w, "local-%s-%d\n", c.host, i)
 	})
 	mux.HandleFunc("/restart", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Has("founder") {
+			http.Error(w, "restart keeps the existing identity", http.StatusBadRequest)
+			return
+		}
 		i, err := slotArg(r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)

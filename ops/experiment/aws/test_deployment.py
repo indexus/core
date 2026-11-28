@@ -19,7 +19,7 @@ ELASTIC = HERE.parent / "elastic"
 
 class DeploymentWiringTests(unittest.TestCase):
     def test_steps_replay_seed_tag_and_independent_passes(self):
-        for setting in ("STEP_SEED", "STEP_TAG", "AUDIT_SECONDS"):
+        for setting in ("STEP_SEED", "STEP_TAG", "STEP_FOUNDERS", "AUDIT_SECONDS"):
             self.assertTrue(all(setting in line for line in RUN.splitlines() if "env | grep -E" in line))
         script = (HERE / "scenarios.sh").read_text()
         steps = re.search(r"^steps\(\) \{.*?^}", script, re.M | re.S).group()
@@ -41,26 +41,66 @@ PROVISIONER=fake STEP_VNODES=16 STEP_SEED=009 STEP_TAG=replay STEP_PASSES=3 step
             "-seed=11 -tag=replay -id-prefix=pass3-",
         ])
 
+    def test_founder_manifest_rejected_before_reset_or_provisioning(self):
+        script = HERE / "scenarios.sh"
+        a, b = "0" * 16, "_" * 16
+        for names in [a, f"{a},{a}", f"{a},{b},", f"{a},short", f"{a},{'@' * 16}"]:
+            with self.subTest(names=names):
+                r = subprocess.run(["bash", str(script), "--check-founders", "2", names], capture_output=True)
+                self.assertNotEqual(r.returncode, 0)
+        self.assertEqual(subprocess.run(["bash", str(script), "--check-founders", "2", f"{a},{b}"]).returncode, 0)
+        self.assertLess(RUN.index("--check-founders"), RUN.index('aws --region'))
+
+    def test_founders_apply_to_the_correct_seed_spawn(self):
+        scenario = (HERE / "scenarios.sh").read_text()
+        funcs = "\n".join(re.search(r"^" + name + r"\(\) \{.*?^}", scenario, re.M | re.S).group()
+                          for name in ("check_founders", "cluster", "build"))
+        mock = r'''OUT=$1; AG=(a b); MODE=steps; RESOURCE_SLOTS=true
+curl() { :; }
+sleep() { :; }
+endpoints() { :; }
+seed_spawn() { echo "$2" >> "$OUT/requests"; echo "local-fake-slot"; }
+founder_endpoint() { echo "http://peer|http://monitor"; }
+balanced() { :; }
+cluster 4 "$2" "$3"
+'''
+        names = [c * 16 for c in "0AZ_"]
+        with tempfile.TemporaryDirectory() as tmp:
+            cmd = ["bash", "-uc", funcs + "\n" + mock, "_", tmp]
+            subprocess.run(cmd + ["compaction=false", ",".join(names)], check=True)
+            requests = (Path(tmp) / "requests").read_text().splitlines()
+            self.assertEqual([r.split("/")[0] for r in requests], ["a", "b", "a", "b"])
+            self.assertEqual([r.split("founder=")[1] for r in requests], names)
+            bad = subprocess.run(cmd + ["prefer_near=" + names[0], ",".join(names)], capture_output=True)
+            self.assertNotEqual(bad.returncode, 0)
+            self.assertEqual((Path(tmp) / "requests").read_text().splitlines(), requests)
+
     def test_initial_xor_cells_use_branch_depth_and_unique_names(self):
         scenario = (HERE / "scenarios.sh").read_text()
         check = re.search(r"^balanced\(\) \{.*?^}", scenario, re.M | re.S).group()
         alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
-        def accepted(values):
+        def accepted(values, order=None):
             with tempfile.TemporaryDirectory() as tmp:
                 urls = []
+                expected = []
                 for i, value in enumerate(values):
                     name = "".join(alphabet[(value >> n) & 63] for n in reversed(range(0, 96, 6)))
+                    expected.append(name)
                     host = Path(tmp) / str(i)
                     host.mkdir()
                     (host / "metrics").write_text(json.dumps({"name": name}))
                     urls.append(host.as_uri())
-                cmd = check + '\nMONITORS=$1; balanced "$2"'
-                return subprocess.run(["bash", "-uc", cmd, "_", ",".join(urls), str(len(urls))],
+                cmd = check + '\nMONITORS=$1; FOUNDER_MONITORS=$3; balanced "$2" "$4"'
+                ordered = [urls[i] for i in order] if order is not None else []
+                return subprocess.run(["bash", "-uc", cmd, "_", ",".join(urls), str(len(urls)),
+                                       ",".join(ordered), ",".join(expected) if ordered else ""],
                                       capture_output=True).returncode == 0
         high = 1 << 95
         self.assertTrue(accepted([0, 1, high, high | (1 << 93)]))  # four quarter cells
         self.assertFalse(accepted([*range(8), high, high + 1]))  # sixteenths and quarters
         self.assertFalse(accepted([0, 0]))
+        self.assertTrue(accepted([0, high], [0, 1]))
+        self.assertFalse(accepted([0, high], [1, 0]))  # same names on opposite hosts
 
     def test_steps_stop_before_load_on_rejected_layout(self):
         script = (HERE / "scenarios.sh").read_text()

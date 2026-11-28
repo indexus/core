@@ -44,6 +44,28 @@ export SSL_CERT_FILE=/tmp/exp/ca/ca.crt   # for load, observe, audit and curl
 
 `GET /metrics` reports `transport.http3`, `transport.tcp` and `transport.fallbacks`.
 
+## Replay the starting topology of a steps benchmark
+
+Set `STEP_SEED` and `STEP_TAG` to reproduce the offered keys. Set the optional
+`STEP_FOUNDERS` to reproduce the public 96-bit addresses of the initial vnodes.
+Each successful steps build records the ordered list as `STEP_FOUNDERS=...` in
+`cluster.log`. Use the same number and order of initial hosts for comparisons.
+The first name belongs to genesis on the first host, the next to the first slot
+on the second host, then hosts alternate round-robin. Each name is exactly 16
+Indexus alphabet characters. The list must contain `STEP_VNODES` distinct names.
+
+```sh
+MODE=steps HOSTS=2 STEP_VNODES=4 \
+STEP_FOUNDERS=0000000000000000,G000000000000000,W000000000000000,m000000000000000 \
+bash ops/experiment/aws/run.sh
+```
+
+Use this option on disposable benchmark agents. A new pass resets their slots,
+creates fresh node keys and checks the observed address of every founder in
+creation order before load. Restarting a process on its original disk keeps its
+identity. Autoscaled vnodes continue to use ordinary placement hints. Even with
+identical founders, EC2 boot timing and transfer scheduling can vary.
+
 ## Live curves
 
 `ops/experiment/live.py` follows a run from the counters alone, one point

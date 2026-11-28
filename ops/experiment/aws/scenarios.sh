@@ -7,6 +7,14 @@
 # The cluster is rebuilt through the agents between phases, never by
 # recreating machines: reset, genesis, joins one at a time (JOIN-1).
 set -u
+# Validate the operator input before an AWS launch or any local agent reset.
+check_founders() {
+  python3 -c 'import re,sys
+names = sys.argv[2].split(",")
+if len(names) != int(sys.argv[1]) or len(set(names)) != len(names) or not all(re.fullmatch(r"[0-9A-Za-z_-]{16}", n) for n in names):
+    sys.exit("STEP_FOUNDERS must contain one unique 16-character vnode name per founder, in creation order")' "$1" "$2"
+}
+if [[ "${1:-}" == --check-founders ]]; then check_founders "$2" "$3"; exit $?; fi
 OUT=$1
 X=${EXPERIMENT:-/opt/indexus/experiment}
 AUDITOR=${AUDITOR:-$X}
@@ -50,15 +58,25 @@ every_monitor() {
 # carry twice the load and turns a scaling step red for a placement reason
 # (REM-120): such a cluster is rebuilt before any load.
 balanced() {
-  python3 - "$MONITORS" "$1" <<'PY'
+  python3 - "$MONITORS" "$1" "${2:-}" "${FOUNDER_MONITORS:-}" <<'PY'
 import json, sys, urllib.request
 A = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
 names = []
+by_monitor = {}
 for m in sys.argv[1].split(","):
     with urllib.request.urlopen(m + "/metrics", timeout=5) as r:
-        names.append(json.load(r)["name"])
+        name = json.load(r)["name"]
+        names.append(name)
+        by_monitor[m] = name
 if len(set(names)) != int(sys.argv[2]) or len(set(names)) != len(names):
     sys.exit("missing or duplicate vnode identity")
+if sys.argv[4] or sys.argv[3]:
+    ordered = [by_monitor.get(m) for m in sys.argv[4].split(",")]
+    if len(ordered) != len(names) or set(ordered) != set(names):
+        sys.exit("startup order does not cover the observed vnodes")
+    if sys.argv[3] and ordered != sys.argv[3].split(","):
+        sys.exit("observed founder address or assignment differs from STEP_FOUNDERS")
+    print("STEP_FOUNDERS=" + ",".join(ordered))
 def value(name):
     n = 0
     for c in name:
@@ -82,7 +100,15 @@ PY
 # agents, each one client ready before the next; rebuilt (up to 3 times) when
 # the layout is not balanced.
 cluster() {
-  local try
+  local try founders=${3:-}
+  if [[ -n "$founders" ]]; then
+    check_founders "$1" "$founders" || return 1
+    if [[ "&${2:-}&" == *"&prefer_near="* || "&${2:-}&" == *"&founder="* ]]; then
+      echo "STEP_FOUNDERS conflicts with founder/prefer_near in spawn options" >&2; return 1
+    fi
+    build "$@" 2>>"$OUT/cluster.log" && balanced "$1" "$founders" >>"$OUT/cluster.log" 2>&1
+    return $?
+  fi
   for try in 1 2 3; do
     build "$@" 2>>"$OUT/cluster.log"
     balanced "$1" >>"$OUT/cluster.log" 2>&1 && return 0
@@ -111,16 +137,39 @@ seed_spawn() {
     sleep 2
   done
 }
+# Resolve the exact slot returned by this POST (ports can be dynamic).
+founder_endpoint() {
+  curl -sf "$1/slots" | python3 -c 'import sys,json
+slot = int(sys.argv[1].rsplit("-",1)[1])
+row = next(r for r in json.load(sys.stdin) if r["slot"] == slot and r["alive"])
+print(row["p2p"] + "|" + row["monitor"])' "$2"
+}
 build() {
   local n=$1 extra=${2:-} a i # i: the caller's loop variable otherwise (bash scope)
+  local named="" names spawned info
+  FOUNDER_MONITORS=""
+  IFS=, read -r -a names <<<"${3:-}"
   # Twice: the provisioner can still start a node for the old cluster on an
   # agent reset a moment before (2026-11-20: the joiners then bootstrapped
   # on that stray node and the pass ran on one vnode).
-  for a in "${AG[@]}" "${AG[@]}"; do curl -sf --max-time 60 -X POST "$a/reset" >/dev/null; done
-  local genesis; genesis=$(seed_spawn 60 "${AG[0]}/spawn?genesis=1&$extra")
-  BOOT=$(curl -sf "${AG[0]}/slots" | python3 -c 'import sys,json;i=int(sys.argv[1].rsplit("-",1)[1]);print(next(r["p2p"] for r in json.load(sys.stdin) if r["slot"] == i))' "$genesis")
+  for a in "${AG[@]}" "${AG[@]}"; do curl -sf --max-time 60 -X POST "$a/reset" >/dev/null || return 1; done
+  [[ -z "${3:-}" ]] || named="&founder=${names[0]}"
+  local genesis; genesis=$(seed_spawn 60 "${AG[0]}/spawn?genesis=1&$extra$named") || return 1
+  info=$(founder_endpoint "${AG[0]}" "$genesis") || return 1
+  BOOT=${info%%|*}
+  if [[ -n "${3:-}" || "${MODE:-}" == steps ]]; then FOUNDER_MONITORS=${info#*|}; fi
   for i in $(seq 1 $((n - 1))); do
-    seed_spawn 240 "${AG[$((i % ${#AG[@]}))]}/spawn?wait=ready&bootstrap=$BOOT&$extra" >/dev/null || echo "spawn $i failed" >&2
+    [[ -z "${3:-}" ]] || named="&founder=${names[i]}"
+    a=${AG[$((i % ${#AG[@]}))]}
+    if spawned=$(seed_spawn 240 "$a/spawn?wait=ready&bootstrap=$BOOT&$extra$named"); then
+      if [[ -n "$FOUNDER_MONITORS" ]]; then
+        info=$(founder_endpoint "$a" "$spawned") || return 1
+        FOUNDER_MONITORS="$FOUNDER_MONITORS,${info#*|}"
+      fi
+    else
+      echo "spawn $i failed" >&2
+      [[ -z "${3:-}" ]] || return 1
+    fi
   done
   endpoints
   sleep 20
@@ -431,7 +480,7 @@ steps() {
   # green passes in a row (indexus-scale-ladder).
   for i in $(seq 1 "${STEP_PASSES:-1}"); do
     if (( i > 1 )); then id_prefix="pass$i-"; fi
-    cluster "${STEP_VNODES:-${SIZES%% *}}" "compaction=true&provisioner=$PROVISIONER&items=${ITEMS:-500000}" || return 1
+    cluster "${STEP_VNODES:-${SIZES%% *}}" "compaction=true&provisioner=$PROVISIONER&items=${ITEMS:-500000}" "${STEP_FOUNDERS:-}" || return 1
     phase "steps-$i" $((p + (levels - 1) * (r + p))) "${STEP_TAIL:-300}" -scenario steps -rate "${STEP_RATE:-1000}" -step-ramp "${r}s" -step-plateau "${p}s" -workers "${STEP_WORKERS:-4096}" -discover-every 5s -probe-every 200ms -route "${STEP_ROUTE:-relay}" -seed "$((10#$seed + i - 1))" -tag "${STEP_TAG:-}" -id-prefix "$id_prefix"
   done
 }

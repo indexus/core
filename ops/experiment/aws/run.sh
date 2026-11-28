@@ -84,6 +84,11 @@ if [[ -n "${STEP_SEED:-}" ]]; then
 fi
 if [[ -n "${STEP_TAG:-}" && ! $STEP_TAG =~ ^[0-9A-Za-z_-]{1,6}$ ]]; then echo "invalid STEP_TAG (1-6 identifier characters)" >&2; exit 2; fi
 export STEP_SEED STEP_TAG
+if [[ -n "${STEP_FOUNDERS:-}" && "${1:-}" != destroy ]]; then
+  [[ "$MODE" == steps ]] || { echo "STEP_FOUNDERS requires MODE=steps" >&2; exit 2; }
+  bash "$HERE/scenarios.sh" --check-founders "${STEP_VNODES:-${SIZES%% *}}" "$STEP_FOUNDERS" || exit 2
+  export STEP_FOUNDERS
+fi
 if [[ "$MODE" == steps ]]; then
   export STEP_VNODES="${STEP_VNODES:-${SIZES%% *}}"
   if ! [[ "$STEP_VNODES" =~ ^[1-9][0-9]*$ ]]; then
@@ -233,7 +238,7 @@ cp "$capacity" "$RESULTS/capacity.json"
   echo "diff_sha256=$(git -C "$ROOT" diff HEAD -- . ':!ops/agent' | shasum -a 256 | cut -d' ' -f1)"
   echo "scaling_items=$ITEMS scaling_writes=${SCALING_WRITES:-0} cpu_target_pct=${CPU_TARGET_PCT:-0} write_cap=$WRITE_CAP resource_signals=${RESOURCE_SIGNALS:-true} ready_reserve_pct=${READY_RESERVE_PCT:-15}"
   echo "hosts=$HOSTS host_type=$HOST_TYPE slots=$SLOTS resource_slots=$resource_slots loaders=$LOADERS loader_type=$LOADER_TYPE sizes=$SIZES mode=$MODE net=$NET region=$REGION"
-  env | grep -E '^(SCALING_WRITES|OBSERVE_SECONDS|PUSH_START|STEP_SECONDS|PCT|PASSES|RATES_PER_VNODE|SAMPLE|STEP_VNODES|STEP_RATE|STEP_LEVELS|STEP_RAMP|STEP_PLATEAU|STEP_PASSES|STEP_WORKERS|STEP_TAIL|STEP_ROUTE|STEP_SEED|STEP_TAG|PHASE_AUDIT|AUDIT_SECONDS|QUIET_MAX|STALL_VNODES|STALL_RATE|STALL_FILL|STALL_ITEMS|STALL_FILL_RATE|RAMP_[A-Z0-9_]+)=' || true
+  env | grep -E '^(SCALING_WRITES|OBSERVE_SECONDS|PUSH_START|STEP_SECONDS|PCT|PASSES|RATES_PER_VNODE|SAMPLE|STEP_VNODES|STEP_RATE|STEP_LEVELS|STEP_RAMP|STEP_PLATEAU|STEP_PASSES|STEP_WORKERS|STEP_TAIL|STEP_ROUTE|STEP_SEED|STEP_TAG|STEP_FOUNDERS|PHASE_AUDIT|AUDIT_SECONDS|QUIET_MAX|STALL_VNODES|STALL_RATE|STALL_FILL|STALL_ITEMS|STALL_FILL_RATE|RAMP_[A-Z0-9_]+)=' || true
 } >"$RESULTS/tree.txt"
 echo "==> building linux/amd64 binaries"
 rm -rf "$BIN" && mkdir -p "$BIN/elastic"
@@ -279,7 +284,7 @@ aws --region "$REGION" s3 cp "$HERE/../fleet.py" "s3://$bucket/plan/fleet.py" --
 aws --region "$REGION" s3 cp "$HERE/../ramp.py" "s3://$bucket/plan/ramp.py" --only-show-errors
 # Plan parameters the load machine exports before scenarios.sh (REM-94).
 # Quoted: RATES_PER_VNODE holds spaces, and the loader sources this file.
-env | grep -E '^(SCALING_WRITES|OBSERVE_SECONDS|PUSH_START|STEP_SECONDS|PCT|PASSES|RATES_PER_VNODE|SAMPLE|STEP_VNODES|STEP_RATE|STEP_LEVELS|STEP_RAMP|STEP_PLATEAU|STEP_PASSES|STEP_WORKERS|STEP_TAIL|STEP_ROUTE|STEP_SEED|STEP_TAG|PHASE_AUDIT|AUDIT_SECONDS|QUIET_MAX|STALL_VNODES|STALL_RATE|STALL_FILL|STALL_ITEMS|STALL_FILL_RATE|RAMP_[A-Z0-9_]+)=' | sed "s/=\(.*\)/='\1'/" >"$BIN/plan.env" || true
+env | grep -E '^(SCALING_WRITES|OBSERVE_SECONDS|PUSH_START|STEP_SECONDS|PCT|PASSES|RATES_PER_VNODE|SAMPLE|STEP_VNODES|STEP_RATE|STEP_LEVELS|STEP_RAMP|STEP_PLATEAU|STEP_PASSES|STEP_WORKERS|STEP_TAIL|STEP_ROUTE|STEP_SEED|STEP_TAG|STEP_FOUNDERS|PHASE_AUDIT|AUDIT_SECONDS|QUIET_MAX|STALL_VNODES|STALL_RATE|STALL_FILL|STALL_ITEMS|STALL_FILL_RATE|RAMP_[A-Z0-9_]+)=' | sed "s/=\(.*\)/='\1'/" >"$BIN/plan.env" || true
 aws --region "$REGION" s3 cp "$BIN/plan.env" "s3://$bucket/plan/env" --only-show-errors
 
 # Network: one public subnet; members reach each other on any port, nothing
