@@ -5,8 +5,10 @@ elastic/facts.sh and the host template did not fetch it, so a fresh cluster
 would have fallen back to the slot-count placement without saying so.
 """
 from pathlib import Path
+import json
 import re
 import subprocess
+import tempfile
 import unittest
 
 HERE = Path(__file__).resolve().parent
@@ -38,6 +40,35 @@ PROVISIONER=fake STEP_VNODES=16 STEP_SEED=009 STEP_TAG=replay STEP_PASSES=3 step
             "-seed=10 -tag=replay -id-prefix=pass2-",
             "-seed=11 -tag=replay -id-prefix=pass3-",
         ])
+
+    def test_initial_xor_cells_use_branch_depth_and_unique_names(self):
+        scenario = (HERE / "scenarios.sh").read_text()
+        check = re.search(r"^balanced\(\) \{.*?^}", scenario, re.M | re.S).group()
+        alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
+        def accepted(values):
+            with tempfile.TemporaryDirectory() as tmp:
+                urls = []
+                for i, value in enumerate(values):
+                    name = "".join(alphabet[(value >> n) & 63] for n in reversed(range(0, 96, 6)))
+                    host = Path(tmp) / str(i)
+                    host.mkdir()
+                    (host / "metrics").write_text(json.dumps({"name": name}))
+                    urls.append(host.as_uri())
+                cmd = check + '\nMONITORS=$1; balanced "$2"'
+                return subprocess.run(["bash", "-uc", cmd, "_", ",".join(urls), str(len(urls))],
+                                      capture_output=True).returncode == 0
+        high = 1 << 95
+        self.assertTrue(accepted([0, 1, high, high | (1 << 93)]))  # four quarter cells
+        self.assertFalse(accepted([*range(8), high, high + 1]))  # sixteenths and quarters
+        self.assertFalse(accepted([0, 0]))
+
+    def test_steps_stop_before_load_on_rejected_layout(self):
+        script = (HERE / "scenarios.sh").read_text()
+        steps = re.search(r"^steps\(\) \{.*?^}", script, re.M | re.S).group()
+        harness = 'cluster() { return 1; }; phase() { echo unexpected; }; PROVISIONER=fake STEP_SEED=1 SIZES=8 steps'
+        run = subprocess.run(["bash", "-uc", steps + "\n" + harness], capture_output=True, text=True)
+        self.assertNotEqual(run.returncode, 0)
+        self.assertEqual(run.stdout, "")
 
     def test_dynamic_slot_policy_reaches_host_loader_and_capacity(self):
         self.assertIn('SLOTS=0', RUN)
