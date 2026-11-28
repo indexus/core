@@ -26,6 +26,14 @@ node scripts/perf/search-bitmaps.mjs /path/to/sdk-js 1000000
 (cd /path/to/sdk-js && node scripts/perf/sift-session.mjs /path/to/sift 1000000)
 ```
 
+A local SIFT1M replay with SDK `b41bb6c` selected 62,500 of one million rows.
+Summed over 64 queries, prefiltering plus exact search took 3.86 s.
+Prefiltering, building the smaller IVF and querying 16 cells took 2.69 s
+with recall@10 of 99.53%. The global IVF and the smaller IVF returned
+identical hits at 16 probes. This was one run on a shared Apple M1 Pro
+with the data already in memory at the start of each strategy.
+[Raw measurements and input hashes](sift-session-1m-20261128.json).
+
 ## Upstream reference workload
 
 The official nightly archive for **2026-11-12** has one namespace, 10 M documents, top 10, target 8 requests/s and a measured duration of 600 s. The table uses client-side combined observations, including warm-up classifications when they occur in the measurement window. [Nightly workflow](https://github.com/turbopuffer/tpuf-benchmark/blob/7789dc5fac4ad55dbc8169ab759a09485febec1a/.github/workflows/nightly.yml) · [Website profiles](https://github.com/turbopuffer/tpuf-benchmark/tree/7789dc5fac4ad55dbc8169ab759a09485febec1a/benchmarks/website)
