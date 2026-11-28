@@ -34,6 +34,7 @@ func (e MembershipEnvelope) clone() MembershipEnvelope {
 type MembershipPacket struct {
 	Version causal.Digest       `json:",omitzero"`
 	Known   causal.Digest       `json:",omitzero"`
+	Base    causal.Digest       `json:",omitzero"` // nonzero when Body carries changes from this version
 	Body    *MembershipEnvelope `json:",omitempty"`
 }
 
@@ -74,6 +75,9 @@ type localMembership struct {
 type preparedMembership struct {
 	key     membershipKey
 	version causal.Digest
+	body    *MembershipEnvelope
+	base    causal.Digest
+	changes *MembershipEnvelope
 }
 
 func (local localMembership) envelope() *MembershipEnvelope {
@@ -137,46 +141,70 @@ func (w *membershipWire) remember(peer string, sent, received causal.Digest) {
 	w.putPeer(peer, r)
 }
 
-func (w *membershipWire) packet(known causal.Digest, full bool) (MembershipPacket, error) {
+// Keep one complete immutable revision and at most one transition shared by
+// all peers. A receipt never retains another copy of the inventory.
+func (w *membershipWire) localSnapshot() (*preparedMembership, error) {
 	local, err := w.snapshot()
-	if err != nil {
-		return MembershipPacket{}, err
-	}
-	p := MembershipPacket{Known: known}
-	if local.export == nil {
-		return p, nil
+	if err != nil || local.export == nil {
+		return nil, err
 	}
 	cached := w.prepared.Load()
-	if cached == nil || cached.key != local.key {
-		// Concurrent peers preparing the same revision share its first hash.
-		w.prepareMu.Lock()
-		defer w.prepareMu.Unlock()
-		cached = w.prepared.Load()
-		if cached == nil || cached.key != local.key {
-			body := local.envelope()
-			raw, err := json.Marshal(body)
-			if err != nil {
-				return MembershipPacket{}, err
-			}
-			cached = &preparedMembership{local.key, sha256.Sum256(raw)}
-			w.prepared.Store(cached)
-			metrics.Gossip.MembershipBytes.Store(int64(len(raw)))
-			metrics.Gossip.Version.Store(hex.EncodeToString(cached.version[:]))
-			if full {
-				p.Body = body
-			}
+	if cached != nil && cached.key == local.key {
+		return cached, nil
+	}
+	w.prepareMu.Lock()
+	defer w.prepareMu.Unlock()
+	cached = w.prepared.Load()
+	if cached != nil && cached.key == local.key {
+		return cached, nil
+	}
+	body := local.envelope()
+	raw, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	next := &preparedMembership{key: local.key, version: sha256.Sum256(raw), body: body}
+	if cached != nil {
+		next.changes = membershipChanges(cached.body, body)
+		if next.changes != nil {
+			next.base = cached.version
 		}
 	}
-	p.Version = cached.version
-	if full && p.Body == nil {
-		p.Body = local.envelope()
+	w.prepared.Store(next)
+	metrics.Gossip.MembershipBytes.Store(int64(len(raw)))
+	metrics.Gossip.Version.Store(hex.EncodeToString(next.version[:]))
+	return next, nil
+}
+
+func (w *membershipWire) packetAgainst(known, base causal.Digest, body bool) (MembershipPacket, error) {
+	p := MembershipPacket{Known: known}
+	local, err := w.localSnapshot()
+	if err != nil || local == nil {
+		return p, err
+	}
+	p.Version = local.version
+	if body {
+		src := local.body
+		if local.changes != nil && local.base == base {
+			p.Base = base
+			src = local.changes
+		}
+		copy := src.clone()
+		p.Body = &copy
 	}
 	return p, nil
+}
+
+func (w *membershipWire) packet(known causal.Digest, full bool) (MembershipPacket, error) {
+	return w.packetAgainst(known, causal.Digest{}, full)
 }
 
 func (w *membershipWire) accept(ctx context.Context, peer string, p MembershipPacket) (bool, error) {
 	if err := ctx.Err(); err != nil {
 		return false, err
+	}
+	if p.Base != (causal.Digest{}) && (p.Body == nil || p.Base == p.Version) {
+		return false, causal.ErrConflict
 	}
 	if p.Version == (causal.Digest{}) {
 		if p.Body != nil {
@@ -193,7 +221,21 @@ func (w *membershipWire) accept(ctx context.Context, peer string, p MembershipPa
 		return false, err
 	}
 	body := p.Body.clone()
-	if causal.Hash(body) != p.Version {
+	verification := &body
+	if p.Base != (causal.Digest{}) {
+		local, err := w.localSnapshot()
+		if err != nil {
+			return false, err
+		}
+		if local == nil || local.version != p.Base {
+			return true, nil
+		}
+		verification, err = expandMembership(local.body, &body)
+		if err != nil {
+			return false, err
+		}
+	}
+	if causal.Hash(verification) != p.Version {
 		return false, causal.ErrConflict
 	}
 	if w.receipt(peer).received != p.Version {
@@ -217,15 +259,16 @@ func (w *membershipWire) receive(ctx context.Context, peer string, p MembershipP
 		r.Accepted = p.Version
 	}
 	r.Packet, err = w.packet(p.Version, false)
-	if err == nil && r.Packet.Version != p.Known {
-		r.Packet, err = w.packet(p.Version, true)
+	sameAfterPatch := !need && p.Base != (causal.Digest{}) && r.Packet.Version == p.Version
+	if err == nil && r.Packet.Version != p.Known && !sameAfterPatch {
+		r.Packet, err = w.packetAgainst(p.Version, p.Known, true)
 	}
 	observeMembershipPacket(r.Packet)
 	return r, err
 }
 
-// exchange sends at most two control requests. Only an explicit NeedBody can
-// cause the retry; transport errors leave receipts unchanged for a later round.
+// exchange sends at most two control requests. A missing reference or patch base
+// can trigger one full repair. Transport errors return to the caller.
 func (w *membershipWire) exchange(ctx context.Context, peer string, send membershipSend) error {
 	select {
 	case w.slots <- struct{}{}:
@@ -239,7 +282,7 @@ func (w *membershipWire) exchange(ctx context.Context, peer string, send members
 		return err
 	}
 	if p.Version != r.sent {
-		p, err = w.packet(r.received, true)
+		p, err = w.packetAgainst(r.received, r.sent, true)
 		if err != nil {
 			return err
 		}
@@ -256,23 +299,28 @@ func (w *membershipWire) exchange(ctx context.Context, peer string, send members
 		if out.NeedBody && out.Accepted != (causal.Digest{}) || !out.NeedBody && out.Accepted != p.Version {
 			return causal.ErrConflict
 		}
+		if out.Accepted == p.Version {
+			w.remember(peer, out.Accepted, causal.Digest{})
+		}
+		// A patch that produced exactly our advertised revision can be
+		// acknowledged in both directions without echoing the inventory.
+		if !out.NeedBody && p.Base != (causal.Digest{}) && out.Packet.Body == nil && out.Packet.Base == (causal.Digest{}) && out.Packet.Version == p.Version {
+			w.remember(peer, causal.Digest{}, p.Version)
+			return nil
+		}
 		need, err := w.accept(ctx, peer, out.Packet)
 		if err != nil {
 			return err
 		}
-		if need {
-			return causal.ErrDependency
-		} // peer must honor Known on its reply
-		if out.Accepted == p.Version {
-			w.remember(peer, out.Accepted, causal.Digest{})
-		}
-		if !out.NeedBody {
+		if !out.NeedBody && !need {
 			return nil
 		}
-		if attempt != 0 || p.Body != nil {
+		if attempt != 0 || (need && out.Packet.Base == (causal.Digest{})) || (out.NeedBody && p.Body != nil && p.Base == (causal.Digest{})) {
 			return causal.ErrDependency
 		}
-		p, err = w.packet(w.receipt(peer).received, true)
+		// The peers may have merged different inventories during the first
+		// request. Request a complete reply as well as sending a full body.
+		p, err = w.packet(causal.Digest{}, true)
 		if err != nil {
 			return err
 		}
@@ -334,7 +382,9 @@ func observeMembershipPacket(p MembershipPacket) {
 	if p.Version == (causal.Digest{}) {
 		return
 	}
-	if p.Body != nil {
+	if p.Base != (causal.Digest{}) {
+		metrics.Gossip.DeltaPackets.Add(1)
+	} else if p.Body != nil {
 		metrics.Gossip.FullPackets.Add(1)
 	} else {
 		metrics.Gossip.ReferencePackets.Add(1)

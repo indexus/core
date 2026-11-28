@@ -89,18 +89,26 @@ lopsided trie, instead of N−1.
 | No rotation inside a bucket | `TestGossipRotationCoversEveryMember` |
 | No rotation of former holders | `TestGossipRotationCoversEveryMember` |
 
-## Not done yet
+## Membership changes during joins
 
-The partner count is bounded; changed snapshot payloads are not. A different
-acknowledged version still sends the whole current membership. A same-version
-reference has constant wire size, but the current producer still exports,
-serializes and hashes the full membership to prepare it. This CPU cost is
-measured separately from transport.
+Two peers that have already exchanged receipts can send just the changed member
+records. For example, if both know version A and one learns a new vnode, it sends
+A, the new member record and the digest of the complete target version B. Its
+peer reconstructs B, checks the digest, and merges the records through normal
+membership validation before acknowledging. If its resulting version is B,
+the reply needs only a receipt and a version reference. A peer can also learn
+the change from the reply to a maintenance request.
 
-The target is one immutable current version and compact announcements of changed
-member records, with deduplication and bounded anti-entropy repair. `NeedBody` is
-the current missing-reference reply; there is no `NeedKnowledge` authority
-exchange. A future delta format must preserve restart and loss recovery, root
-identity checks, retirement tombstones and conflicting-announcement rejection.
-It must not restore a global history of authority events. See
-[the staged proposal and primary sources](../design/scaling-and-control-costs.md).
+Each vnode retains one prepared inventory and one transition from the preceding
+prepared version, shared by its peers. A cold peer or one that missed several
+versions can receive a full inventory. A missing base can trigger one full repair
+exchange. Transport failures are left to a later maintenance round. Retirement
+tombstones remain part of the inventory. These packets carry no write authority.
+
+The wire counters distinguish full, delta and reference packets. Preparing a new
+version and checking the digest of a reconstructed inventory still require
+work proportional to the current membership. Bursts of independent joins can
+also cause full repairs. The single-join measurement covers the JSON request
+and reply between an established pair, excluding transport headers; it does
+not measure cluster-wide convergence time. See `TestMembershipOneJoinWireCost`
+and [the scaling analysis](../design/scaling-and-control-costs.md).

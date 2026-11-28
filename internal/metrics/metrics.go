@@ -103,7 +103,7 @@ var Writes struct {
 // Gossip is the anti-entropy loop. Gauges hold the last observed value.
 var Gossip struct {
 	Rounds, Partners, KnownVNodes, MembershipBytes atomic.Int64
-	FullPackets, ReferencePackets                  atomic.Int64
+	FullPackets, DeltaPackets, ReferencePackets    atomic.Int64
 	RoundNanos                                     atomic.Int64
 	// AsyncSyncs counts bounded background membership refresh hints.
 	AsyncSyncs        atomic.Int64
@@ -318,7 +318,7 @@ func Snapshot() map[string]any {
 		},
 		"gossip": map[string]any{
 			"rounds": Gossip.Rounds.Load(), "partners": Gossip.Partners.Load(),
-			"full_packets": Gossip.FullPackets.Load(), "reference_packets": Gossip.ReferencePackets.Load(),
+			"full_packets": Gossip.FullPackets.Load(), "delta_packets": Gossip.DeltaPackets.Load(), "reference_packets": Gossip.ReferencePackets.Load(),
 			"known_vnodes": Gossip.KnownVNodes.Load(), "membership_bytes": Gossip.MembershipBytes.Load(),
 			"round_nanos": Gossip.RoundNanos.Load(), "version": version,
 			"async_syncs":         Gossip.AsyncSyncs.Load(),
