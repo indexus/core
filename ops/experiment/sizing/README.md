@@ -124,3 +124,33 @@ fermée sert à rechercher des contre-exemples. Il n’est pas qualifié pour pr
 une latence client, la durée d’un gel ou le nombre exact de machines.
 
 Vérifier avec `python3 -m unittest test_aws_replay` et `node --test *.test.mjs`.
+
+### Soulagement entre pairs
+
+`python3 peer_relief.py RESULTS/live.jsonl --at 345 --seeds 10` démarre un
+modèle en boucle fermée à partir d'un instantané de machines et de débits de
+vnodes observés. La flotte reste fixe pendant 120 secondes. Chaque machine
+compte le travail qui arrive, les écritures déléguées et le coût des copies.
+Les contacts changent selon la graine. Le receveur refuse une projection CPU
+supérieure à 60 % ou une mesure RAM/disque déjà au-dessus de 60 %. Une réservation
+simulée mobilise les deux extrémités. Le temps de soulagement exige cinq
+secondes consécutives sous 60 % pour une machine initialement chaude. Les
+attentes non terminées comptent pour 120 secondes dans le délai médian.
+
+Comparer le démarrage périodique, la réutilisation d'un pair, la granularité
+binaire, la cadence de copie et le prêt de créneau. La référence périodique
+avec pacing reprend la formule de partage CPU entre lots. Ces politiques
+exploratoires n'exécutent ni le provisioner AWS ni le protocole d'autorité.
+La simulation fait progresser le trafic avec la copie et conserve le débit
+total. Les parts de préfixes, la durée des copies et le temps restant des
+joins en cours sont supposés. Le coût marginal d'une écriture est configurable.
+Le CPU résiduel initial reste fixe, les files représentent le travail CPU
+et les limites mémoire/disque sont des mesures initiales. Le modèle suppose
+des contacts accessibles et des préfixes délégables. Il ne simule ni les RTT
+de découverte, ni les pannes, ni les files EBS, ni le p99 client.
+
+Varier `--cost-ms`, `--occupied-for`, `--copy-seconds`, `--fraction`,
+`--heat` (1 signifie une chaleur uniforme) et `--ramp`. Le modèle de partage
+de créneau retire du temps au travail en cours et en repousse la fin. Il suppose
+qu'une frontière de lot sûre est disponible. En production une clôture ou une
+reprise gelée conserve la priorité. Les tests sont dans `test_peer_relief.py`.
