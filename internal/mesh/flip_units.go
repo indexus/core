@@ -354,11 +354,16 @@ func (s *Service) cutoverLot(ctx context.Context, transfer storage.CausalTransfe
 	held = time.Since(began)
 	installed := 0
 	if err == nil {
-		metrics.Handoffs.FreezeReturnToInstallACK.Observe(time.Since(fencedAt))
+		ackDelay := time.Since(fencedAt)
+		metrics.Handoffs.FreezeReturnToInstallACK.Observe(ackDelay)
 		installed = len(keys)
 		// The receiver writes these zones now: waiting writers go to it
 		// without waiting for this disk's ACK bookkeeping.
 		release()
+		if slog.Default().Enabled(ctx, slog.LevelDebug) {
+			slog.DebugContext(ctx, "zone cutover", "freeze_call_us", fencedAt.Sub(began).Microseconds(),
+				"fence_to_install_ack_us", ackDelay.Microseconds())
+		}
 		setPhase("ack")
 		err = s.Store.AckZoneInstalls(operation, keys)
 		if err == nil {
