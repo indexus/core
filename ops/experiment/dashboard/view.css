@@ -147,23 +147,21 @@ dialog.chart-dialog .camera-bar {margin:0 0 10px auto}
 .ix-dashboard svg [aria-pressed=true] circle {stroke:currentColor;stroke-width:2}
 .ix-dashboard .legend[aria-label] {align-items:center;gap:5px;margin:8px 0}
 .ix-dashboard .legend[aria-label] button {font:inherit;border:1px solid #8885;border-radius:6px;padding:4px 9px;cursor:pointer}
-.ix-dashboard .diagnostics {margin-top:5px;font-size:12px}
+.ix-dashboard .diagnostics {margin-top:24px}
+.ix-dashboard .diagnostics h2 {font-size:16px;margin:0}
+.ix-dashboard .diagnostics .chart-field {height:clamp(150px,20vh,240px)}
+.ix-dashboard .diagnostics .tiles {margin-top:16px}
 body:has(> nav.timeline) {padding:10px 16px}
-body:has(> nav.timeline)>h1 {font:600 15px system-ui;margin:0 0 8px}
+body:has(> nav.timeline)>h1 {font:600 20px system-ui;margin:0 0 8px}
 @media(max-width:660px){
   .ix-dashboard .tile {flex-basis:28%;padding:3px 7px}
   .ix-dashboard .tile strong {font-size:16px}
 }
-/* Keep the network and transport controls on screen as the toolbar wraps. */
-body:has(> nav.timeline) {box-sizing:border-box;min-height:100dvh;display:flex;flex-direction:column}
-body:has(> nav.timeline)>p {display:none} /* The renderer identifies the stale stream at the selected instant. */
-nav.timeline + .ix-dashboard:not(:has(.diagnostics[open])) {display:flex;flex-direction:column;flex:1;padding-bottom:0}
-body:has(> nav.timeline):not(:has(.diagnostics[open])) {height:100dvh;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
 .ix-dashboard .alert {margin:1px 0 6px;padding:2px 7px;font-size:12px}
 .ix-dashboard .outside-scope[role=button]:hover {opacity:1}
 .ix-dashboard {container-type:inline-size}
 .ix-dashboard .network-workspace {
-  --network-side:min(47%, max(260px, calc(100dvh - 208px)));
+  --network-side:min(55%, max(260px, calc(100dvh - 186px)));
   display:grid;
   grid-template-columns:var(--network-side) minmax(0,1fr);
   margin-top:8px;
@@ -193,7 +191,7 @@ dialog.chart-dialog .chart-field {height:min(50vh,380px)}
 @container (max-width:680px) {
   .ix-dashboard .network-workspace {grid-template-columns:minmax(0,1fr);gap:8px}
   .ix-dashboard .overview .chart-field {min-height:104px}
-  .ix-dashboard .network-workspace {padding-bottom:66px}
+  .ix-dashboard .network-workspace .overview .chart-field {min-height:142px}
 }
 
 @container (max-width:480px) {

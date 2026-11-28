@@ -84,7 +84,6 @@
       }
     }
     const frame=document.createDocumentFragment();
-    const wasOpen=root.querySelector('.diagnostics')?.open;
     const sections=['.transfers','.topology','details','.charts','.tiles'];
     const anchor=sections.find(sel=>{
       const r=root.querySelector(sel)?.getBoundingClientRect();
@@ -122,9 +121,9 @@
     const headline=filtered?[['Vnodes sélectionnés',scope.ids.size],['Applications /s',last.rate],['Items',last.stock],['Transferts observés',last.open]]:
       stats.filter((_,i)=>[0,1,2,5,9,10].includes(i));
     for(const [label,value] of headline){const t=el('div',null,'tile');t.append(el('span',label),el('strong',typeof value==='string'?value:fmt(value,1)));tiles.append(t);}frame.append(tiles);
-    const charts=el('div',null,'charts overview'),unmeasured=[];
-    const diagnostics=el('details',null,'diagnostics'),more=el('div',null,'charts');diagnostics.open=Boolean(wasOpen);
-    diagnostics.append(el('summary','Autres mesures du réseau'));
+    const charts=el('div',null,'charts overview');
+    const diagnostics=el('section',null,'diagnostics'),more=el('div',null,'charts');
+    diagnostics.append(el('h2','Autres mesures du réseau'));
     const catalog=filtered?[[sim?'Demande estimée /s':'Écritures appliquées /s',[['rate','sélection']]],['Items détenus',[['stock','sélection']]],['Transferts observés',[['open','ouverts'],['frozen','fence franchie']]],
         ['Vnodes de la sélection',[['ready','prêts'],['reporting','observés']]],
         ['Débit maximal par vnode /s',[['peakRate','maximum']]],
@@ -175,18 +174,16 @@
         try{sessionStorage.setItem(location.pathname+':'+layoutKey,JSON.stringify(layout));}catch{}
         charts.children[slot].replaceWith(panel(slot));
         if(other>=0&&other!==slot)charts.children[other].replaceWith(panel(other));
+        drawRemaining();
         charts.children[slot].querySelector('select').focus({preventScroll:true});
       };
       return figure;
     }
     layout.forEach((_,slot)=>charts.append(panel(slot)));
-    if(!filtered){
-      catalog.forEach((spec,id)=>{
-        if(!available[id])unmeasured.push(spec[0]);
-        if(!defaults.includes(id)&&available[id])more.append(chart(past,...spec));
-      });
-      diagnostics.append(more);
+    function drawRemaining(){
+      if(!filtered)more.replaceChildren(...catalog.flatMap((spec,id)=>layout.includes(id)?[]:[chart(past,...spec)]));
     }
+    if(!filtered){drawRemaining();diagnostics.append(more);}
     const choices=el('div',null,'scene-options'), plot=el('div',null,'network-pane');
     const active=p.metrics_stale?[]:transfers.filter(tr=>!tr.stale);
     const unknownLinks=transfers.length-active.length;
@@ -236,7 +233,6 @@
         const tile=el('div',null,'tile');tile.append(el('span',label),el('strong',String(value??'—')));extra.append(tile);
       }
       diagnostics.append(extra);
-      if(unmeasured.length)diagnostics.append(el('p','Non mesuré : '+unmeasured.join(' · '),'note'));
       if(transfers.length){
         const rows=el('details');rows.append(el('summary','Journal des transferts ('+transfers.length+')'));
         for(const tr of transfers)rows.append(el('p',transferTip(tr)+(tr.stale?' · observation périmée':'')));
