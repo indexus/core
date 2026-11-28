@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+	"sync/atomic"
 	"testing"
 
 	"github.com/indexus/go-indexus-core/indexus"
@@ -93,5 +95,53 @@ func TestPointACKsDoNotFragmentRegionalRoutes(t *testing.T) {
 	}
 	if owner, _ := r.owner(indexus.ID{255}); owner != "source" {
 		t.Fatalf("neighbor goes to %q", owner)
+	}
+}
+
+func TestRepeatedACKIndexTracksSplitsAndForgottenOwners(t *testing.T) {
+	var cache routes
+	root := indexus.EncodeCell(indexus.Region{})
+	child := indexus.EncodeCell(indexus.Region{Mask: indexus.ID{128}})
+	cache.learn("source", root)
+	cache.learn("receiver", child)
+	cache.learn("source", root)
+	if got, _ := cache.owner(indexus.ID{}); got != "source" {
+		t.Fatalf("relearned root left the old child owner %q", got)
+	}
+	cache.forget("source")
+	cache.learn("source", root)
+	if got, _ := cache.owner(indexus.ID{}); got != "source" {
+		t.Fatalf("a forgotten advertisement prevented relearning: %q", got)
+	}
+}
+
+func BenchmarkDirectRoutesRepeatedACKs(b *testing.B) {
+	for _, cells := range []int{512, 4096} {
+		b.Run(strconv.Itoa(cells), func(b *testing.B) {
+			var cache routes
+			encoded := make([]string, cells)
+			for i := range encoded {
+				region := indexus.Region{
+					Mask:  indexus.ID{255, 240},
+					Value: indexus.ID{byte(i >> 4), byte(i&15) << 4},
+				}
+				encoded[i] = indexus.EncodeCell(region)
+				cache.learn("receiver", encoded[i])
+			}
+			var sequence atomic.Uint64
+			b.ReportAllocs()
+			b.SetParallelism(8)
+			b.ResetTimer()
+			b.RunParallel(func(pb *testing.PB) {
+				for pb.Next() {
+					n := sequence.Add(1)
+					cell := n % uint64(cells)
+					id := indexus.ID{byte(cell >> 4), byte(cell&15) << 4, byte(n >> 12), byte(n >> 20)}
+					cache.owner(id)
+					cache.learn("receiver", encoded[cell])
+					cache.learnZone(id, "receiver")
+				}
+			})
+		})
 	}
 }

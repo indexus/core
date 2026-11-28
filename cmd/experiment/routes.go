@@ -15,11 +15,12 @@ import (
 // smaller cell, after a fold the larger one, is the current one. A stale
 // route only costs a relay, which answers with the current one.
 type routes struct {
-	mu    sync.RWMutex
-	cells []route
-	exact map[indexus.ID]string
-	order []indexus.ID
-	next  int
+	mu         sync.RWMutex
+	cells      []route
+	cellOwners map[indexus.Region]string
+	exact      map[indexus.ID]string
+	order      []indexus.ID
+	next       int
 }
 
 type route struct {
@@ -85,10 +86,18 @@ func (r *routes) learn(owner, cell string) {
 	if n == 8*len(region.Mask) {
 		return
 	}
+	r.mu.RLock()
+	known := r.cellOwners[region] == owner
+	r.mu.RUnlock()
+	if known {
+		return
+	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	// Regional entries are disjoint. Repeated advertisements of a cell
-	// already covered by its owner change no route.
+	// A concurrent update may already have installed this region.
+	if r.cellOwners[region] == owner {
+		return
+	}
 	for _, c := range r.cells {
 		if c.owner == owner {
 			if overlap, ok := c.cell.Intersect(region); ok && overlap == region {
@@ -112,6 +121,17 @@ func (r *routes) learn(owner, cell string) {
 	if len(r.cells) > 4096 {
 		r.cells = r.cells[len(r.cells)-4096:]
 	}
+	r.indexCells()
+}
+
+func (r *routes) indexCells() {
+	if r.cellOwners == nil {
+		r.cellOwners = make(map[indexus.Region]string, len(r.cells))
+	}
+	clear(r.cellOwners)
+	for _, c := range r.cells {
+		r.cellOwners[c.cell] = c.owner
+	}
 }
 
 // forget drops the routes to an owner that did not answer.
@@ -130,6 +150,7 @@ func (r *routes) forget(owner string) {
 		}
 	}
 	r.cells = kept
+	r.indexCells()
 }
 
 func (r *routes) count() int {
