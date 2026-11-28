@@ -37,8 +37,8 @@
     });
     const offset=anchor&&root.querySelector(anchor).getBoundingClientRect().top;
     root.classList.add('ix-dashboard');
-    const cols=Math.max(1,Math.floor((root.clientWidth+16)/436));
-    const chartWidth=Math.max(160,Math.min(600,(root.clientWidth-16*(cols-1))/cols-26));
+    const cols=Math.max(1,Math.floor((root.clientWidth+12)/322));
+    const chartWidth=Math.max(160,Math.min(600,(root.clientWidth-12*(cols-1))/cols-22));
     const raw=points;
     points=prepared.get(raw)||raw.map(p=>{
       const hs=p.fleet?.machines||[],out={...p};
@@ -102,12 +102,12 @@
     const departures=departedTransfers(points[index-1],p);
     const waiting=active.filter(tr=>tr.phase==='copy-slot').length;
     choices.setAttribute('aria-label','Vue du réseau');
-    for(const [key,title] of [['hosts','Par machine'],['radial','Vnodes indépendants'],['shares','Plages d’adresses']]){
+    for(const [key,title] of [['hosts','Par machine'],['radial','Arbre radial'],['space','Réseau 3D'],['shares','Plages d’adresses']]){
       const b=el('button',title);b.type='button';b.dataset.mode=key;
       b.onclick=()=>{
         root.dataset.mode=key;delete root.dataset.selection;
-        if(global.location.hash===''||['#vnodes','#plages'].includes(global.location.hash)){
-          const url=new URL(global.location.href);url.hash=key==='radial'?'vnodes':key==='shares'?'plages':'';
+        if(global.location.hash===''||['#vnodes','#plages','#reseau-3d'].includes(global.location.hash)){
+          const url=new URL(global.location.href);url.hash=key==='radial'?'vnodes':key==='shares'?'plages':key==='space'?'reseau-3d':'';
           global.history.replaceState(global.history.state,'',url);
         }
         drawTopology();
@@ -119,7 +119,7 @@
       label.append(box,document.createTextNode(' Afficher les attentes de créneau ('+fmt(waiting)+')'));choices.append(label);
     }
     function drawTopology(){
-      const mode=root.dataset.mode||(global.location.hash==='#vnodes'?'radial':global.location.hash==='#plages'?'shares':'hosts');
+      const mode=root.dataset.mode||(global.location.hash==='#vnodes'?'radial':global.location.hash==='#plages'?'shares':global.location.hash==='#reseau-3d'?'space':'hosts');
       for(const b of choices.querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.mode===mode));
       detail.textContent='Sélectionner un vnode.';
       const shown=root.dataset.showWaiting==='true'?active:active.filter(tr=>tr.phase!=='copy-slot');
@@ -190,7 +190,8 @@
   function topology(machines,nodes,transfers,detail,sim,stale,width,mode,root){
     const wrap=el('div',null,'topology');
     if(!machines.length){wrap.append(el('p','Aucun inventaire machine enregistré.'));return wrap;}
-    if(mode==='shares')return shareView(nodes,stale,wrap);
+    if(mode==='space')return spaceView(root,nodes,transfers,detail,stale,wrap);
+    if(mode==='shares')return shareView(nodes,stale,wrap,root);
     const colors={ready:'#16856a',receiving:'#347cca',joining:'#347cca',unknown:'#888'};
     wrap.append(el('p','Vnode vert = prêt · bleu = en cours de join · gris = inconnu ou périmé. Contour orange = ressource au-dessus de 60 %. Flèche orange = opération ayant franchi une fence. Le gel d’une écriture peut déjà être terminé.','note'));
     const canvas=svg('svg',{'aria-label':'Machines, vnodes et sens des transferts',role:'group'});
@@ -272,7 +273,7 @@
       edges.push({tr,path:bundle});links.append(bundle);
     }
     if(mode==='radial')wrap.append(el('p',sim?'Disposition circulaire des vnodes simulés.':'Branches grises : préfixes binaires communs aux adresses. Sélectionner un vnode pour lire ses buckets parmi les adresses observées.','note'));
-    wrap.append(canvas);
+    wrap.append(viewport(root,mode,canvas));
     for(const glyph of glyphs.querySelectorAll('[data-glyph]')){
       if(glyph.dataset.glyph===root.dataset.selection){glyph.onclick();break;}
     }
@@ -351,7 +352,7 @@
     if(keys.length)visit(0,keys.length,1);
     return shares;
   }
-  function shareView(nodes,stale,wrap){
+  function shareView(nodes,stale,wrap,root){
     const fresh=nodes.filter(n=>n.state!=='stale');
     if(stale||!fresh.length){wrap.append(el('p','Plages indisponibles à cet instant.'));return wrap;}
     const measured=fresh.some(n=>Number.isFinite(n.native_share));
@@ -361,7 +362,7 @@
     if(!measured&&projected.size!==fresh.length){wrap.append(el('p','Adresses distinctes indisponibles pour calculer le placement XOR.'));return wrap;}
     wrap.append(el('p',measured?'Droits régionaux installés, relevés sur chaque vnode. Les activations ponctuelles en cours de transfert sont exclues.':'Placement XOR théorique entre les vnodes observés. Les droits installés ne figurent pas dans cette capture.'));
     const graph=svg('svg',{viewBox:'0 0 240 240',role:'group','aria-label':'Part de l’espace total des adresses'});
-    graph.style.maxWidth='36rem';graph.style.margin='auto';
+
     graph.append(svg('circle',{cx:120,cy:120,r:88,stroke:'#8884','stroke-width':35,fill:'none'}));
     const total=entries.reduce((sum,e)=>sum+(e.share||0),0);
     const list=el('div',null,'address-list');
@@ -383,15 +384,192 @@
       offset+=share;
     }
     if(total>1+1e-12)wrap.append(el('p','Les relevés locaux dépassent ensemble 100 %. Les parts individuelles figurent ci-dessous.'));
-    else wrap.append(graph,el('p','Un tour représente 100 % des adresses. Chaque arc regroupe la part d’un vnode. Le gris indique la part non renseignée.','note'));
+    else wrap.append(viewport(root,'shares',graph),el('p','Un tour représente 100 % des adresses. Chaque arc regroupe la part d’un vnode. Le gris indique la part non renseignée.','note'));
     wrap.append(readout,list);return wrap;
   }
+  // Camera state belongs to the view, so changing the replay time keeps it.
+  const cameras=new WeakMap();
+  function viewport(root,mode,graph,orbit){
+    const frame=el('div',null,'network-frame'),bar=el('div',null,'camera-bar');
+    frame.append(graph,bar);
+    const base=graph.getAttribute('viewBox').split(' ').map(Number);
+    const [, ,w,h]=base;
+    graph.setAttribute('tabindex','0');
+    graph.setAttribute('aria-description','Zoom avec + et − ou Ctrl + molette. Flèches pour naviguer.');
+    let modes=cameras.get(root);
+    if(!modes){modes=new Map();cameras.set(root,modes);}
+    const initial={zoom:1,x:.5,y:.5,yaw:0,pitch:0};
+    const cam=modes.get(mode)||{...initial};modes.set(mode,cam);
+    const level=el('output');
+    function paint(){
+      const width=w/cam.zoom,height=h/cam.zoom;
+      graph.setAttribute('viewBox',[cam.x*w-width/2,cam.y*h-height/2,width,height].join(' '));
+      level.textContent=Math.round(cam.zoom*100)+' %';
+      if(orbit)orbit(cam);
+    }
+    function zoom(f,event){
+      const prior=cam.zoom;
+      cam.zoom=Math.max(1,Math.min(12,prior*f));
+      if(event){
+        const matrix=graph.getScreenCTM();
+        if(matrix){
+          const p=new DOMPoint(event.clientX,event.clientY).matrixTransform(matrix.inverse());
+          cam.x+=(p.x/w-cam.x)*(1-prior/cam.zoom);cam.y+=(p.y/h-cam.y)*(1-prior/cam.zoom);
+        }
+      }
+      if(cam.zoom===1){cam.x=.5;cam.y=.5;}
+      paint();
+    }
+    for(const [name,label,act] of [['−','Réduire',()=>zoom(1/1.4)],['+','Agrandir',()=>zoom(1.4)],['Recentrer','Rétablir la vue',()=>{Object.assign(cam,initial);paint();}]]){
+      const b=el('button',name);b.type='button';b.setAttribute('aria-label',label);b.onclick=act;bar.append(b);
+    }
+    bar.append(level);
+    graph.addEventListener('keydown',e=>{
+      if(e.target!==graph)return;
+      if(e.key==='+'||e.key==='=')zoom(1.4);
+      else if(e.key==='-')zoom(1/1.4);
+      else if(e.key==='Home'){Object.assign(cam,initial);paint();}
+      else if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){
+        const dx=Number(e.key==='ArrowRight')-Number(e.key==='ArrowLeft');
+        const dy=Number(e.key==='ArrowDown')-Number(e.key==='ArrowUp');
+        if(orbit){cam.yaw+=dx*.12;cam.pitch=Math.max(-1.55,Math.min(1.55,cam.pitch+dy*.12));}
+        else{cam.x+=dx*.08/cam.zoom;cam.y+=dy*.08/cam.zoom;}
+        paint();
+      }else return;
+      e.preventDefault();
+    });
+    graph.addEventListener('wheel',e=>{
+      if(!e.ctrlKey&&!e.metaKey)return;
+      e.preventDefault();zoom(Math.exp(-Math.sign(e.deltaY)*.15),e);
+    },{passive:false});
+    let drag=null,moved=false;
+    graph.addEventListener('pointerdown',e=>{
+      if(e.button!==0)return;
+      moved=false;drag={x:e.clientX,y:e.clientY,id:e.pointerId};
+    });
+    graph.addEventListener('pointermove',e=>{
+      if(!drag||drag.id!==e.pointerId)return;
+      const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+      if(!moved&&Math.hypot(dx,dy)<4)return;
+      moved=true;graph.setPointerCapture(e.pointerId);drag.x=e.clientX;drag.y=e.clientY;
+      if(orbit&&!e.shiftKey){
+        cam.yaw+=dx*.009;cam.pitch=Math.max(-1.55,Math.min(1.55,cam.pitch+dy*.009));
+      }else{
+        const scale=graph.getScreenCTM()?.a||1;
+        cam.x-=dx/(scale*w);cam.y-=dy/(scale*h);
+      }
+      paint();
+    });
+    for(const ev of ['pointerup','pointercancel','pointerleave'])graph.addEventListener(ev,e=>{
+      if(ev!=='pointerleave'||!graph.hasPointerCapture(e.pointerId))drag=null;
+    });
+    graph.addEventListener('click',e=>{if(moved){e.stopPropagation();moved=false;}},true);
+    paint();return frame;
+  }
+
+  function spaceView(root,nodes,transfers,detail,stale,wrap){
+    const graph=svg('svg',{viewBox:'0 0 820 480','aria-label':'Réseau de vnodes en trois dimensions'});
+    const links=svg('g',{'pointer-events':'none'}),dots=svg('g',{});
+    graph.append(links,dots);
+    const members=[...nodes].sort((a,b)=>String(a.label).localeCompare(String(b.label)));
+    const edges=[],byID=new Map(),byMonitor=new Map();
+    const locations=members.map(n=>{
+      // Interleave the first 30 address bits into latitude and longitude.
+      let bits=addressBits(n.label);
+      if(!bits){
+        let hash=2166136261;for(const c of String(n.id))hash=Math.imul(hash^c.charCodeAt(0),16777619);
+        bits=(hash>>>0).toString(2).padStart(32,'0');
+      }
+      let u=0,v=0;
+      for(let i=0;i<30;i+=2){u=2*u+Number(bits[i]);v=2*v+Number(bits[i+1]);}
+      const lat=(u+.5)/16384-1,lon=(v+.5)*Math.PI/16384,r=Math.sqrt(1-lat*lat);
+      const dot=svg('g',{role:'button',tabindex:0,'aria-label':n.label});
+      const circle=svg('circle',{fill:stale||n.state==='stale'?'#89949d':n.state==='ready'?'#17886e':'#397bc1'});
+      const title=svg('title',{});title.textContent=n.label+' · '+n.machine;dot.append(circle,title);
+      const loc={n,bits,x:r*Math.cos(lon),y:lat,z:r*Math.sin(lon),dot,circle};
+      byID.set(n.id,loc);if(n.monitor&&(!byMonitor.has(n.monitor)||n.state!=='stale'))byMonitor.set(n.monitor,loc);
+      dot.onclick=()=>{root.dataset.selection=n.id;detail.textContent=n.label+' · '+n.machine+' · '+fmt(n.items)+' items';paint(current);};
+      dot.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();dot.onclick();}};
+      return loc;
+    });
+    function edge(a,b,color,transfer){
+      if(!a||!b||a===b)return;
+      const line=svg('line',{stroke:color,'stroke-width':transfer?1.9:1});
+      if(transfer)line.setAttribute('marker-end','url(#space-tip)');
+      edges.push({a,b,line,transfer});links.append(line);
+    }
+    const defs=svg('defs',{}),tip=svg('marker',{id:'space-tip',viewBox:'0 0 10 10',refX:10,refY:5,markerWidth:5,markerHeight:5,orient:'auto'});
+    tip.append(svg('path',{d:'M0 0 L10 5 L0 10Z',fill:'context-stroke'}));defs.append(tip);graph.prepend(defs);
+    // One inferred link per trie bifurcation; never draw it as measured traffic.
+    const sorted=locations.filter(p=>addressBits(p.n.label)).sort((a,b)=>a.bits.localeCompare(b.bits));
+    function connect(lo,hi){
+      if(hi-lo<2)return;
+      const k=commonBits(sorted[lo].bits,sorted[hi-1].bits);if(k===96)return;
+      let m=lo+1;while(sorted[m].bits[k]==='0')m++;
+      edge(sorted[lo],sorted[m],'#8195a4',false);connect(lo,m);connect(m,hi);
+    }
+    connect(0,sorted.length);
+    for(const tr of transfers)edge(byID.get(tr.source),byID.get(tr.target)||byMonitor.get(tr.target),tr.frozen?'#d97640':'#468ed0',true);
+    let current;
+    function paint(cam){
+      current=cam;
+      const cy=Math.cos(cam.yaw),sy=Math.sin(cam.yaw),cp=Math.cos(cam.pitch),sp=Math.sin(cam.pitch);
+      for(const p of locations){
+        const x=p.x*cy+p.z*sy,z=p.z*cy-p.x*sy;
+        p.depth=z*cp+p.y*sp;
+        const scale=182/(1-p.depth*.21);
+        p.px=410+x*scale;p.py=240+(p.y*cp-z*sp)*scale;
+        const selected=p.n.id===root.dataset.selection;
+        p.dot.setAttribute('transform',`translate(${p.px} ${p.py})`);
+        p.circle.setAttribute('r',selected?7:4+p.depth*1.4);
+        p.circle.setAttribute('stroke',selected?'currentColor':'none');
+        p.dot.setAttribute('opacity',selected?1:.72+.27*p.depth);
+        if(selected)detail.textContent=p.n.label+' · '+p.n.machine+' · '+fmt(p.n.items)+' items';
+      }
+      for(const {a,b,line,transfer} of edges){
+        const dx=b.px-a.px,dy=b.py-a.py;
+        const inset=transfer?Math.min(.45,7/Math.max(1,Math.hypot(dx,dy))):0;
+        const attrs={x1:a.px,y1:a.py,x2:b.px-inset*dx,y2:b.py-inset*dy,opacity:transfer ? .9 : .25};
+        for(const [k,v] of Object.entries(attrs))line.setAttribute(k,v);
+      }
+      dots.append(...[...locations].sort((a,b)=>a.depth-b.depth).map(p=>p.dot));
+    }
+    wrap.append(viewport(root,'space',graph,paint),el('p','Glisser pour tourner. Maj + glisser pour déplacer la vue. Gris : voisinage reconstruit par préfixes. Flèches : transferts observés entre vnodes identifiés.','note'));
+    return wrap;
+  }
   function pressure(h){return Math.max(...['cpu','ram','disk','io'].map(k=>Number.isFinite(h[k])?h[k]:-1));}
-  function chart(points,title,series,width,stepped=false){
+  function exploreChart(points,title,series,stepped){
+    const modal=el('dialog',null,'ix-dashboard chart-dialog');
+    modal.setAttribute('aria-label',title);
+    const header=el('div',null,'camera-bar'),body=el('div'),level=el('output');
+    let start=0,count=points.length;
+    function update(){
+      count=Math.max(Math.min(2,points.length),Math.min(points.length,count));
+      start=Math.max(0,Math.min(points.length-count,start));
+      body.replaceChildren(chart(points.slice(start,start+count),title,series,Math.max(260,modal.clientWidth-46),stepped,true));
+      level.textContent=fmt(points[start].x??points[start].t)+' – '+fmt(points[start+count-1].x??points[start+count-1].t)+' s';
+    }
+    for(const [text,label,action] of [
+      ['−','Élargir la période',()=>{const end=start+count;count=Math.min(points.length,count*2);start=end-count;}],
+      ['+','Resserrer la période',()=>{const end=start+count;count=Math.max(2,Math.ceil(count/2));start=end-count;}],
+      ['←','Période précédente',()=>{start-=Math.ceil(count/2);}],
+      ['→','Période suivante',()=>{start+=Math.ceil(count/2);}],
+      ['Fermer','Fermer',()=>modal.close()]]){
+      const b=el('button',text);b.type='button';b.setAttribute('aria-label',label);b.onclick=()=>{action();if(modal.open)update();};header.append(b);
+    }
+    header.append(level);modal.append(header,body);document.body.append(modal);
+    modal.onclose=()=>modal.remove();modal.showModal();update();
+  }
+  function chart(points,title,series,width,stepped=false,expanded=false){
     const figure=el('figure'),caption=el('figcaption',title),legend=el('div',null,'legend');figure.append(caption,legend);
     const values=series.flatMap(([k])=>points.map(p=>p[k]).filter(Number.isFinite));
     if(!values.length){figure.append(el('p','Non mesuré.','note'));return figure;}
-    const w=width,h=190,l=55,r=12,t=12,b=28,top=Math.max(...values,1)*1.08;
+    if(!expanded){
+      const expand=el('button','⤢','expand-chart');expand.type='button';expand.setAttribute('aria-label','Explorer '+title);
+      expand.onclick=()=>exploreChart(points,title,series,stepped);
+      caption.append(expand);
+    }
+    const w=width,h=expanded?330:135,l=55,r=12,t=12,b=28,top=Math.max(...values,1)*1.08;
     const first=points[0].x??points[0].t??0,last=Math.max(first+1,points.at(-1).x??points.at(-1).t??0);
     const sx=p=>l+((p.x??p.t??0)-first)/(last-first)*(w-l-r),sy=v=>t+(1-v/top)*(h-t-b);
     const g=svg('svg',{viewBox:`0 0 ${w} ${h}`,role:'img','aria-label':title});
