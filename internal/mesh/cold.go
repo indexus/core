@@ -117,12 +117,12 @@ func (s *Service) compact(ctx context.Context, config ColdConfig, resumeOnly boo
 		return nil
 	}
 	proposal := &ColdProposal{Operation: work.Operation, Source: work.Source, Bytes: work.Bytes, MaxCombinedFraction: work.MaxCombinedFraction, HeatBudget: work.HeatBudget}
-	if config.MaxItems > 0 {
+	if work.MaxItems > 0 {
 		totals, err := s.Store.PlanningTotals()
 		if err != nil {
 			return err
 		}
-		proposal.Items, proposal.MaxItems = totals.Items, config.MaxItems
+		proposal.Items, proposal.MaxItems = totals.Items, work.MaxItems
 	}
 	if work.AbortRequested {
 		return s.abortCold(ctx, *work, proposal)
@@ -164,7 +164,7 @@ func (s *Service) beginColdDrain(config ColdConfig, activity uint64) (*storage.C
 		Base           [32]byte
 		Activity       uint64
 	}{nonce, s.Self, target, snapshot.Current().Digest, activity}))
-	work, err := s.Store.BeginColdDrain(operation, target, storage.ColdLimits{MaxCombinedFraction: config.MaxCombinedFraction, HeatBudget: config.HeatBudget})
+	work, err := s.Store.BeginColdDrain(operation, target, storage.ColdLimits{MaxCombinedFraction: config.MaxCombinedFraction, HeatBudget: config.HeatBudget, MaxItems: config.MaxItems})
 	if err != nil {
 		return nil, err
 	}

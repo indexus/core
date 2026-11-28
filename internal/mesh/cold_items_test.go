@@ -45,3 +45,28 @@ func TestCOLD2_FoldRespectsTheItemBound(t *testing.T) {
 		t.Fatalf("fold within the bound not finished: %+v %v", status, err)
 	}
 }
+
+func TestColdRecoveryKeepsItemAdmissionBeforeFirstPin(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	net, nodes, _ := coldPair(t, ctx, 4)
+	net.setBefore(func(req Request) error {
+		if req.Kind == KindColdPin {
+			return storage.ErrClosed
+		}
+		return nil
+	})
+	if err := nodes[1].Compact(ctx, ColdConfig{MaxItems: 1}); !errors.Is(err, storage.ErrClosed) {
+		t.Fatalf("interrupt first pin: %v", err)
+	}
+	net.setBefore(nil)
+	if err := nodes[1].ResumeCold(ctx); !errors.Is(err, storage.ErrDataCapacity) {
+		t.Fatalf("recovery must respect the original item limit: %v", err)
+	}
+	for _, n := range nodes {
+		st, err := n.Store.ColdStatus()
+		if err != nil || st.Pin != nil || st.Drain != nil {
+			t.Fatalf("refused attempt left state: %+v, %v", st, err)
+		}
+	}
+}

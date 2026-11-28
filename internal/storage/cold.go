@@ -32,6 +32,7 @@ type ColdDrain struct {
 	Bytes               int64
 	MaxCombinedFraction float64
 	HeatBudget          uint64
+	MaxItems            int64 `json:",omitempty"`
 	Pieces              []ColdPiece
 	Retirement          *causal.Member
 	PinConfirmed        bool
@@ -108,6 +109,7 @@ type ColdLimits struct {
 	// plus the source's stay under this share of the survivor's capacity.
 	MaxCombinedFraction float64
 	HeatBudget          uint64
+	MaxItems            int64 `json:",omitempty"`
 }
 
 // ColdOffer is what a survivor checks before it pins.
@@ -163,7 +165,7 @@ func (s *Store) BeginColdDrain(operation string, target causal.Endpoint, limits 
 			return ErrNotOwner
 		}
 		base := view.Digest
-		out = ColdDrain{Operation: operation, Source: from, Target: target, BaseDigest: base, Activity: status.Activity, MaxCombinedFraction: limits.MaxCombinedFraction, HeatBudget: limits.HeatBudget}
+		out = ColdDrain{Operation: operation, Source: from, Target: target, BaseDigest: base, Activity: status.Activity, MaxCombinedFraction: limits.MaxCombinedFraction, HeatBudget: limits.HeatBudget, MaxItems: limits.MaxItems}
 		// Placement chooses a survivor; only actual installed local rights
 		// determine what is ceded. Sparse delegated exceptions migrate through
 		// the current directory, not through a false Native==XOR-cell test.
