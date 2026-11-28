@@ -390,12 +390,12 @@ experiment agent gives every slot of a machine `<dir>/copy-budget`
 
 | Rule | How |
 | --- | --- |
-| at most N copies per host | an outgoing grain takes one slot before its admission and keeps it until the grain ends |
+| at most N concurrent warm donors | an outgoing grain takes one slot before its admission and keeps it until the grain ends |
 | a dead process frees its slot | the kernel closes its files; the name left on the slot is taken over |
-| source and receiver cannot wait for each other | a transfer holds at most one slot and nobody holds one while waiting for another; the receiver never waits |
-| one transfer, one slot | the slot carries the transfer's id: a co-resident receiver finds it and takes none (`copy_slot_shared`) |
+| source and receiver cannot wait for each other | incoming warm pages use an independent lane, released after local staging. The receiver probes its outgoing budget without waiting |
+| co-resident transfers share their outgoing slot | the slot carries the transfer's id: a co-resident receiver finds it and takes none (`copy_slot_shared`) |
 | admission before any fence | an unfenced source waits at most `copySlotWait`, then returns `ErrNotReady`. A new proposal takes its slot before partitioning or pinning the input. A previously durable warm operation keeps its identity on retry; exhaustion never starts an extra warm copy (`copy_slot_timeouts`) |
-| no freeze is lengthened | only a grain with nothing fenced yet (phase before `TransferMoving`) waits; a resumed grain and a receiver's preload take a free slot or proceed at once (`copy_slot_busy`) |
+| no freeze is lengthened | a resumed source with a fence bypasses outgoing admission. Sealed regions, unfinished zone fences and header-only preloads bypass incoming admission |
 | writes | never look at the budget |
 
 | Constant | Value | Why | Status |
