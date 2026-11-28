@@ -160,10 +160,21 @@
     function label(group,x,y,value){
       const t=svg('text',{x,y,'text-anchor':'middle'});t.textContent=value;group.append(t);
     }
-    function select(group,description,extra){
+    const edges=[];
+    const all=el('button','Afficher tous les transferts');
+    all.type='button';all.hidden=true;
+    const reset=()=>{for(const edge of edges)edge.path.style.display='';all.hidden=true;};
+    all.onclick=()=>{reset();detail.textContent='Sélectionner un vnode.';};
+    wrap.append(all);
+    function select(group,description,matches,extra){
       group.setAttribute('tabindex',0);group.setAttribute('role','button');group.setAttribute('aria-label',description);
       const title=svg('title',{});title.textContent=description;group.append(title);
-      group.onclick=()=>{detail.textContent=description+(extra?extra():'');};
+      group.onclick=()=>{
+        const related=edges.filter(edge=>matches(edge.tr));
+        for(const edge of edges)edge.path.style.display=matches(edge.tr)?'':'none';
+        all.hidden=edges.length===0;
+        detail.textContent=description+(extra?extra():'')+' · '+fmt(related.length)+' lien(s) de transfert visible(s)';
+      };
       group.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();group.onclick();}};
     }
     if(mode==='radial'){
@@ -182,14 +193,14 @@
         g.append(svg('rect',{x:left,y:top,width:19,height:4,fill:'#8884'}));
         if(Number.isFinite(h[k]))g.append(svg('rect',{x:left,y:top,width:19*Math.min(100,Math.max(0,h[k]))/100,height:4,fill:h[k]>60?'#ce663e':'#347cca'}));
       }
-      select(g,`${h.label||h.id} · ${observed} · ${sum.count}/${ns.length} vnodes comptés · ${resources.map(([k,l])=>l+' '+fmt(h[k],1)+' %').join(' · ')}`);
+      select(g,`${h.label||h.id} · ${observed} · ${sum.count}/${ns.length} vnodes comptés · ${resources.map(([k,l])=>l+' '+fmt(h[k],1)+' %').join(' · ')}`,tr=>tr.source_machine===h.id||tr.target_machine===h.id);
       glyphs.append(g);
       const side=Math.ceil(Math.sqrt(ns.length));
       ns.forEach((n,j)=>{
         const nx=x+((j%side)-(Math.min(side,ns.length-Math.floor(j/side)*side)-1)/2)*16,ny=y+(Math.floor(j/side)-(Math.ceil(ns.length/side)-1)/2)*16;
         const point={x:nx,y:ny,r:6};ends.set(n.id,point);if(n.monitor&&(n.state!=='stale'||!ends.has(n.monitor)))ends.set(n.monitor,point);
         const dot=svg('g',{});dot.append(svg('circle',{cx:nx,cy:ny,r:6,fill:stale?colors.unknown:colors[n.state]||colors.unknown}));
-        select(dot,`${n.label||n.id} · ${h.label||h.id} · ${n.state} · ${fmt(itemSum([n],stale).value)} items · ${fmt(stale?null:n.applied_s??n.estimated_s,1)} ${sim?'requises':'applications'}/s`);glyphs.append(dot);
+        select(dot,`${n.label||n.id} · ${h.label||h.id} · ${n.state} · ${fmt(itemSum([n],stale).value)} items · ${fmt(stale?null:n.applied_s??n.estimated_s,1)} ${sim?'requises':'applications'}/s`,tr=>touchesNode(tr,n));glyphs.append(dot);
       });
     });
     let unresolved=0;
@@ -199,7 +210,8 @@
       const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),color=tr.frozen?'#ce663e':'#588fc2';
       const path=d>a.r+b.r?`M${a.x+dx*a.r/d} ${a.y+dy*a.r/d} L${b.x-dx*(b.r+2)/d} ${b.y-dy*(b.r+2)/d}`:
         `M${a.x} ${a.y-a.r} Q${a.x+55} ${a.y-55} ${b.x+b.r} ${b.y}`;
-      links.append(svg('path',{d:path,fill:'none',stroke:color,opacity:(tr.stale||stale) ? 0.25 : 0.72,'stroke-dasharray':tr.stale||stale?'4 4':'none','marker-end':'url(#'+(tr.frozen?'fence':'flow')+')','pointer-events':'none'}));
+      const arrow=svg('path',{d:path,fill:'none',stroke:color,opacity:(tr.stale||stale) ? 0.25 : 0.72,'stroke-dasharray':tr.stale||stale?'4 4':'none','marker-end':'url(#'+(tr.frozen?'fence':'flow')+')','pointer-events':'none'});
+      edges.push({tr,path:arrow});links.append(arrow);
     }
     if(mode==='radial')wrap.append(el('p',sim?'Disposition circulaire des vnodes simulés.':'Branches grises : préfixes binaires communs aux adresses. Sélectionner un vnode pour lire ses buckets parmi les adresses observées.','note'));
     wrap.append(canvas);
@@ -211,6 +223,9 @@
     if(!/^[0-9A-Za-z_-]{16}$/.test(label))return '';
     const alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
     return [...label].map(c=>alphabet.indexOf(c).toString(2).padStart(6,'0')).join('');
+  }
+  function touchesNode(tr,n){
+    return tr.source===n.id||tr.target===n.id||(n.monitor&&tr.target===n.monitor);
   }
   function commonBits(a,b){
     let i=0;while(i<a.length&&i<b.length&&a[i]===b[i])i++;return i;
@@ -245,7 +260,7 @@
       const pos={x,y,r};ends.set(n.id,pos);if(n.monitor&&(n.state!=='stale'||!ends.has(n.monitor)))ends.set(n.monitor,pos);
       g.append(svg('circle',{cx:x,cy:y,r,fill:stale?colors.unknown:colors[n.state]||colors.unknown}));
       const description=`${n.label} · ${n.machine} · ${n.state} · ${fmt(itemSum([n],stale).value)} items · ${fmt(stale?null:n.applied_s??n.estimated_s,1)} ${sim?'requises':'applications'}/s`;
-      select(g,description,()=>{
+      select(g,description,tr=>touchesNode(tr,n),()=>{
         if(!bits||stale)return '';
         const buckets=new Map();
         for(const l of leaves)if(l.bits&&l.bits!==bits&&l.n.state!=='stale'){
