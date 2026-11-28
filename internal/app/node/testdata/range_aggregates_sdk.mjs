@@ -155,6 +155,15 @@ const multi = topByAttributes(
   { limit: 5 },
 ).map((r) => r.id + "@" + r.location);
 assert.deepEqual(multi, [upper, "aa-upper-null@zz", "null-measure@aa", a, z]);
+// The primary key places null first. Only the secondary placement changes
+// between these two top-k results; both reuse the original two direct reads.
+const nullableTop = nulls => topByAttributes(records, [
+  { select: r => r.metrics[0], order: "desc", nulls: "first" },
+  { select: measure, order: "asc", nulls },
+], { limit: 5 }).map(r => r.id + "@" + r.location);
+const firstThenLast = nullableTop("last"), firstThenFirst = nullableTop("first");
+assert.deepEqual(firstThenLast, ["no-range@aa","all-null@zz",upper,"aa-upper-null@zz","null-measure@aa"]);
+assert.deepEqual(firstThenFirst, ["no-range@aa","all-null@zz","aa-upper-null@zz",upper,"null-measure@aa"]);
 // Both owners contribute to the same [7, 4] group. A missing second
 // column and an entirely missing tuple stay visible. Page the fixed result
 // locally; these assertions share the two original reads.
@@ -173,7 +182,7 @@ await assertCold();
 console.log(
   JSON.stringify({
     cases: cases.length,
-    multi,
+    multi, firstThenLast, firstThenFirst,
     groups: grouped.length,
     docs: records.length,
     directRPC: calls.length,
