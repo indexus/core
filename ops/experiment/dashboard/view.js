@@ -86,10 +86,17 @@
     choices.setAttribute('aria-label','Vue du réseau');
     for(const [key,title] of [['hosts','Par machine'],['radial','Vnodes indépendants']]){
       const b=el('button',title);b.type='button';b.dataset.mode=key;
-      b.onclick=()=>{root.dataset.mode=key;drawTopology();};choices.append(b);
+      b.onclick=()=>{
+        root.dataset.mode=key;
+        if(global.location.hash===''||global.location.hash==='#vnodes'){
+          const url=new URL(global.location.href);url.hash=key==='radial'?'vnodes':'';
+          global.history.replaceState(global.history.state,'',url);
+        }
+        drawTopology();
+      };choices.append(b);
     }
     function drawTopology(){
-      const mode=root.dataset.mode||'hosts';
+      const mode=root.dataset.mode||(global.location.hash==='#vnodes'?'radial':'hosts');
       for(const b of choices.children)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));
       detail.textContent='Sélectionner un vnode.';
       plot.replaceChildren(topology(machines,nodes,active,detail,sim,p.metrics_stale,root.clientWidth,mode));
