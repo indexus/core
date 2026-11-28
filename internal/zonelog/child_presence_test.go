@@ -28,7 +28,7 @@ func TestObserveChildPresenceOverwritesAndAmbiguity(t *testing.T) {
 	apply(a, b, root, last)
 	check := func(sn *Snapshot, loc string, seen, unknown uint64) {
 		t.Helper()
-		g, u, e := sn.observeChildPresence(context.Background(), "c", loc, false)
+		g, u, e := sn.observeChildPresence(context.Background(), "c", loc, omittedChildRanges{})
 		if g != seen || u != unknown || e != nil {
 			t.Fatalf("%s: got %x/%x, %v; want %x/%x", loc, g, u, e, seen, unknown)
 		}
@@ -65,7 +65,7 @@ func TestObserveChildPresenceOverwritesAndAmbiguity(t *testing.T) {
 	}
 	// A newer physical key in the snapshot's mutable memtable may obscure
 	// its old live record. Either witness or unknown is safe, even after flush.
-	g, u, e := before.observeChildPresence(context.Background(), "c", "a", false)
+	g, u, e := before.observeChildPresence(context.Background(), "c", "a", omittedChildRanges{})
 	if e != nil || g&high == 0 || (g|u)&1 == 0 || g&u != 0 {
 		t.Fatal(g, u, e)
 	}
@@ -176,25 +176,72 @@ func BenchmarkObserveChildPresence(b *testing.B) {
 }
 
 func TestObserveChildPresenceCapsSegmentReferences(t *testing.T) {
-	s, _ := presenceFixture(t, 1, true)
-	// The real segment with child zero sits beyond the per-request budget.
-	// Empty segment headers stand in for a backlog of newer disjoint runs.
-	s.mu.Lock()
-	original := s.segs
-	s.segs = append([]*segment{}, original...)
-	for range childSegmentLimit {
-		s.segs = append(s.segs, &segment{})
+	for _, n := range []int{9, 16, 17} {
+		t.Run(fmt.Sprint(n), func(t *testing.T) {
+			s, io := presenceFixture(t, 1, true)
+			// An inconclusive mutable row must remain unknown even when it lies
+			// outside all omitted segments' bounds.
+			if err := s.Apply([]Record{{Collection: "c", Location: "a1", ID: "deleted", Uncounted: true}}); err != nil {
+				t.Fatal(err)
+			}
+			s.mu.Lock()
+			original := s.segs
+			fake := append([]*segment{}, original...)
+			// With 16 files, the oldest file holds a001, the next holds a3.
+			// A widely separated second interval must leave child a2 empty.
+			if n == 16 {
+				key, err := makeKey(s.cols["c"], "a3", strings.Repeat("x", maxID))
+				if err != nil {
+					s.mu.Unlock()
+					t.Fatal(err)
+				}
+				fake = append(fake, &segment{pages: 1, blocks: []block{{first: key}}, last: key})
+			}
+			for len(fake) < n {
+				fake = append(fake, &segment{})
+			}
+			s.segs = fake
+			s.mu.Unlock()
+			defer func() { s.mu.Lock(); s.segs = original; s.mu.Unlock() }()
+			sn, omitted := s.pinSnapshot(childSegmentLimit)
+			sn.Close()
+			if len(sn.segs) != childSegmentLimit || omitted.unbounded != (n > 16) || cap(omitted.ranges) > childSegmentLimit {
+				t.Fatalf("unexpected snapshot bounds: files=%d metadata=%+v", len(sn.segs), omitted)
+			}
+			calls := io.reads.Load()
+			seen, unknown, err := s.ObserveChildPresence(context.Background(), "c", "a")
+			want := uint64(3)
+			if n == 16 {
+				want |= 1 << 3
+			}
+			if n == 17 {
+				want = ^uint64(0)
+			}
+			if err != nil || seen != 0 || unknown != want || calls != io.reads.Load() {
+				t.Fatal(seen, unknown, err, calls, io.reads.Load())
+			}
+		})
 	}
-	s.mu.Unlock()
-	defer func() { s.mu.Lock(); s.segs = original; s.mu.Unlock() }()
-	sn, omitted := s.pinSnapshot(childSegmentLimit)
-	size := len(sn.segs)
-	sn.Close()
-	if !omitted || size != childSegmentLimit {
-		t.Fatal(size, omitted)
+}
+
+func TestOmittedChildrenUseZoneHeadsAsHalfOpenBounds(t *testing.T) {
+	lo, hi, err := zoneRange(1, "a")
+	if err != nil {
+		t.Fatal(err)
 	}
-	seen, unknown, err := s.ObserveChildPresence(context.Background(), "c", "a")
-	if seen != 0 || unknown != ^uint64(0) || err != nil {
-		t.Fatal(seen, unknown, err)
+	for _, tc := range []struct {
+		head []byte
+		want bool
+	}{{lo, true}, {hi, false}} {
+		for _, id := range []string{"", "id", strings.Repeat("x", maxID)} {
+			key := append(append([]byte{}, tc.head...), id...)
+			r := boundOmittedChildren([]*segment{{pages: 1, blocks: []block{{first: key}}, last: key}})
+			if got := r.mayOverlap(lo, hi); got != tc.want {
+				t.Fatalf("id length %d: got %v, want %v", len(id), got, tc.want)
+			}
+		}
+	}
+	if !boundOmittedChildren([]*segment{{pages: 1}}).mayOverlap(lo, hi) {
+		t.Fatal("missing segment metadata must be inconclusive")
 	}
 }

@@ -59,9 +59,9 @@ func (s *Store) Snapshot() *Snapshot {
 }
 
 // pinSnapshot pins a version. With a positive segment limit it copies only
-// the newest segment references and reports whether older ones were omitted.
+// the newest segment references and captures bounded metadata for older ones.
 // Only partial child observation uses a limited snapshot.
-func (s *Store) pinSnapshot(segmentLimit int) (*Snapshot, bool) {
+func (s *Store) pinSnapshot(segmentLimit int) (*Snapshot, omittedChildRanges) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	seq := s.visible
@@ -79,7 +79,7 @@ func (s *Store) pinSnapshot(segmentLimit int) (*Snapshot, bool) {
 		imm:  s.imm,
 		segs: slices.Clone(s.segs[start:]),
 		cols: len(s.colNames),
-	}, start > 0
+	}, boundOmittedChildren(s.segs[:start])
 }
 
 // retiredSeg is a merged-away segment kept open until every snapshot with
