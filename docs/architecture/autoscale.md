@@ -95,6 +95,17 @@ seul, et à l'urgence mémoire (`mem` au seuil de refus). La pause AUTO-3
 ci-dessous reste en amont : tant qu'un transfert ouvert progresse sans droit
 délégable, le tick n'évalue rien.
 
+**Transfert entrant.** Le receveur compte les appels `install-zone` réussis
+depuis son dernier échantillon de ressources (`inbound_lots`). Lorsque le
+CPU partagé déclenche seul, sans arrivée ni attente d’écriture locale, une
+installation récente accorde au travail de copie une fenêtre supplémentaire.
+Elle dure au plus la durée de confirmation du signal CPU, plafonnée à
+`PressureHold`. Dès un échantillon sans installation, la demande CPU peut
+partir. Des installations continues, y compris des rejeux, ne prolongent pas
+la fenêtre. Une charge de lecture durable peut ainsi demander un renfort
+au premier tick suivant l’échéance. Le compteur `cpu_waits_inbound`
+indique quand cette temporisation a écarté le signal CPU.
+
 Champs ajoutés au `POST /v1/scale` : `signal`, `transfers_in_flight`,
 `cpu_process_pct`, `cpu_host_pct`, `cpu_host_ok`. `reason` existait.
 Champs ajoutés à `autoscale.pressure` (`/metrics`, `/status`, `/autoscale`) :

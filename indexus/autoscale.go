@@ -123,7 +123,9 @@ func (n *Node) AutoscaleTick() {
 	// hides the current demand when the controller resumes.
 	rate := n.writeDemandRate(time.Now())
 	resources := n.autoscale.Sample()
+	var installed int64
 	if n.mesh != nil {
+		installed = n.mesh.installedLots.Swap(0)
 		n.mesh.service.ObserveCopyPressure(resources.CPUPct, n.autoscale.Config().CPULimitPct, resources.CPUOK)
 	}
 	if n.holdAutoscaleForTransfers() {
@@ -132,6 +134,7 @@ func (n *Node) AutoscaleTick() {
 	zones, items := n.retainedOwnedMetrics()
 	in := n.autoscaleInput(zones, items, rate)
 	in.Resources = resources
+	in.InboundLots = installed
 	n.autoscale.Tick(in, func(req autoscale.Request) error {
 		return n.askForPeers(req, in, zones)
 	})

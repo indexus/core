@@ -180,8 +180,10 @@ type Input struct {
 	OldestWait time.Duration
 	// TransfersOut is the number of transfers this vnode is copying out.
 	TransfersOut int
-	OwnedZones   int
-	OwnedItems   int
+	// InboundLots counts successful install-zone calls during this resource sample.
+	InboundLots int64
+	OwnedZones  int
+	OwnedItems  int
 	// WriteRate is the writes that arrived at this vnode as their holder, per
 	// second since the last tick: demand, whether or not it was served.
 	WriteRate float64
@@ -219,19 +221,20 @@ type Controller struct {
 	pendingBefore map[tree.ID]bool
 	scaleUpsDone  int
 
-	lastQueue      int
-	lastQueueAt    time.Time
-	lastMem        float64
-	lastMemAt      time.Time
-	lastCPU        float64
-	lastCPUAt      time.Time
-	pressureSince  [4]time.Time
-	writeEWMA      float64
-	writeEWMAInit  bool
-	writeHotSince  time.Time
-	risingFast     bool
-	lastReason     string
-	lastPreferNear string
+	lastQueue       int
+	lastQueueAt     time.Time
+	lastMem         float64
+	lastMemAt       time.Time
+	lastCPU         float64
+	lastCPUAt       time.Time
+	pressureSince   [4]time.Time
+	inboundCPUUntil time.Time
+	writeEWMA       float64
+	writeEWMAInit   bool
+	writeHotSince   time.Time
+	risingFast      bool
+	lastReason      string
+	lastPreferNear  string
 	// pending is the target of the last scale-up request, sent or timed out,
 	// until a vnode near it is active (SCALE-1).
 	pending      tree.ID
@@ -516,13 +519,15 @@ func (a *Controller) samplePressure(in Input, sum int64, now time.Time) (sustain
 	cpuRise := a.cpuRiseRateLocked(res.CPUPct, res.CPUOK, now)
 	projected := a.projectMemoryLocked(res.MemPct, now)
 
-	sustained, held, holdNeed = a.holdLocked(res, memRise, cpuRise, projected, now)
+	sustained, held, holdNeed, cpuDeferred := a.holdLocked(in, memRise, cpuRise, projected, now)
 
 	a.lastPressure = map[string]any{
 		"queue":               in.Queue,
 		"queue_delta":         queueDelta,
 		"oldest_wait_ms":      in.OldestWait.Milliseconds(),
 		"transfers_out":       in.TransfersOut,
+		"inbound_lots":        in.InboundLots,
+		"cpu_waits_inbound":   cpuDeferred,
 		"hot_signal":          sustained,
 		"hot_for":             held.Round(time.Second).String(),
 		"inserts_window":      sum,
