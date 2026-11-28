@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/indexus/go-indexus-core/indexus"
+	"github.com/indexus/go-indexus-core/internal/storage"
 )
 
 func TestLocalFingerprintHTTPDistributedPrefix(t *testing.T) {
@@ -70,4 +73,32 @@ func TestLocalFingerprintHTTPDistributedPrefix(t *testing.T) {
 	// A remote write does not appear on this disk, and a remote outage cannot prevent this local read.
 	first.stop()
 	probe(second, "@", "0")
+}
+
+func TestLocalFingerprintHTTPBudgetUnknown(t *testing.T) {
+	n := startConfiguredDataNode(t, Config{Name: "AAAAAAAAAAAAAAAB", Storage: filepath.Join(t.TempDir(), "node"), Advertise: []string{"127.0.0.1"}, ClusterID: "integration", ClusterCapacity: 1 << 28, CreateCluster: true})
+	const collection = "Demo000000000000"
+	// One document exceeds the cold probe's logical content budget.
+	_, err := n.boot.store.Write("large-blob", storage.Record{Collection: collection, Location: "a", ID: "large", Weight: 1, Payload: json.RawMessage(`"` + strings.Repeat("x", 8<<20) + `"`)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	url := fmt.Sprintf("http://127.0.0.1:%d/zones/fingerprint/local?collection=%s&location=a", n.port, collection)
+	res, err := http.Get(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	var body map[string]any
+	if err := json.NewDecoder(res.Body).Decode(&body); err != nil {
+		t.Fatal(err)
+	}
+	if res.StatusCode != 200 || body["complete"] != false {
+		t.Fatalf("%d %v", res.StatusCode, body)
+	}
+	for _, k := range []string{"fingerprint", "guard", "monoid"} {
+		if v, exists := body[k]; !exists || v != nil {
+			t.Fatalf("budget exhaustion leaked %s: %v", k, body)
+		}
+	}
 }
