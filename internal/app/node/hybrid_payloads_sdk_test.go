@@ -17,13 +17,14 @@ func TestHybridPayloadsSDKTwoColdPeers(t *testing.T) {
 		owner               *runningDataNode
 		location, id, title string
 		distance            float64
+		sparse              [][2]int
 	}{
-		{first, "aa", "a", "CAFÉ-crème café", 3},
-		{first, "aa", "b", "crème café", 0},
-		{second, "zz", "c", "café crème", 1},
-		{second, "zz", "d", "port", 2},
+		{first, "aa", "a", "CAFÉ-crème café", 3, [][2]int{{8, 2}, {1024, 3}}},
+		{first, "aa", "b", "crème café", 0, [][2]int{{8, -1}}},
+		{second, "zz", "c", "café crème", 1, [][2]int{{5, 7}}},
+		{second, "zz", "d", "port", 2, [][2]int{{1024, 1}}},
 	} {
-		body, err := json.Marshal(map[string]string{"title": row.title})
+		body, err := json.Marshal(map[string]any{"title": row.title, "sparse": row.sparse})
 		if err != nil {
 			t.Fatal(err)
 		}
