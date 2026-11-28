@@ -193,19 +193,6 @@ the peer returns 413 and no rows. An invalid request returns 400, a peer
 without installed authority returns 409, and a frozen owner returns 503.
 The caller chooses the next peer. Each call sees its own snapshot.
 
-### Immediate children observed on one peer
-
-`GET /zones/children/local?collection=<name>&location=<prefix>` requires read
-access. It returns e.g. `{"children":["a0","a_"],"complete":false}`. At root
-(`@`) the addresses have one character. A leaf returns an empty list. Rows
-placed directly at the requested prefix do not create a child.
-
-The peer probes its own store for witnesses under immediate children. Treat
-the array as traversal hints: additional children can exist locally or on
-other peers, and a reported child can reflect a stale copy during handoff.
-An empty array also carries `complete:false`. Exact readers need a separate
-coverage mechanism. The request never fans out, follows referrals, warms the
-summary cache or retains a cursor. The response sets `Cache-Control: no-store`.
 ### Local hints for direct child prefixes
 
 `Store.ObserveChildPresence` reports two 64-bit masks indexed by the routing
@@ -224,7 +211,14 @@ eight recent immutable segments, stopping on the first source with a
 physical candidate. It reads key heads and flags. It does not advance to the
 next document, chase MVCC version chains, decode metrics, or fetch payloads.
 The pinned view copies at most eight segment references. Across 64 children
-there are at most 512 segment range checks and as many indexed seeks.
+there are at most 512 checks of recent segments and as many indexed seeks.
+With 9–16 segments the snapshot also copies the resident first and last key
+heads of up to eight older segments (at most 240 bytes of key data). A child
+outside every older range needs no additional uncertainty from that backlog.
+This adds at most 512 in-memory interval checks and zero disk reads. With
+more than 16 segments, the snapshot skips all older metadata and a child
+without a recent witness remains uncertain. Inconclusive recent probes
+continue to report uncertainty in both cases.
 Skiplist navigation, segment indexes, compressed page sizes, cache misses
 and snapshot registration/reclamation affect elapsed time. Cancellation is
 checked between child ranges and segments; an I/O already in progress can
@@ -234,3 +228,61 @@ complete before cancellation returns.
 locations. In memory those totals fold the descendant rows. On disk they
 use segment sums, and determining a unique location among retractions can
 require a further key walk.
+
+### Immediate children observed on one peer
+
+`GET /zones/children/local?collection=<name>&location=<prefix>` requires read
+access. It returns e.g. `{"children":["a0","a_"],"complete":false}`. At root
+(`@`) the addresses have one character. A leaf returns an empty list. Rows
+placed directly at the requested prefix do not create a child.
+
+The peer probes its own store for witnesses under immediate children. Treat
+the array as traversal hints: additional children can exist locally or on
+other peers, and a reported child can reflect a stale copy during handoff.
+An empty array also carries `complete:false`. Exact readers need a separate
+coverage mechanism. The request never fans out, follows referrals, warms the
+summary cache or retains a cursor. The response sets `Cache-Control: no-store`.
+
+A client reading `/records/direct` can opt into document bodies with
+`payloads=true`. A successful response to that request includes the top-level
+marker `"payloads":true`, even for an empty address. The SDK requires the
+marker so an older peer cannot silently answer a text query with metadata
+alone. A document can omit its payload. Binary values use the existing item
+representation (base64 with `binary:true`). The same read authorization,
+local snapshot and record limit apply. Body lengths count against the read
+budget before the per-record fetch, including base64 expansion for binary.
+
+On `/zones/children/local`, requesting `include_uncertain=true` includes
+both children with a local witness and heads whose bounded probe was
+inconclusive. A successful reply echoes `"include_uncertain":true` and
+keeps `"complete":false`, including for an empty leaf. The default and
+`include_uncertain=false` return witnessed children only and omit the marker.
+Callers relying on uncertain candidates must verify the echo. A tombstone
+before a live key is one cause of uncertainty. An older segment spanning many child ranges, or a backlog
+of more than 16 segments, can make all 64 immediate children candidates. Client traversal must budget the resulting expansion.
+
+### Local subtree fingerprint
+
+`GET /zones/fingerprint/local?collection=C&location=L` takes a read-scoped
+observation on the addressed peer. It includes direct records at L and records
+under L on that disk. It does not contact other peers. A peer can respond when
+another peer owns L. A successful response always has `complete:false`.
+
+The response echoes `collection` and `location`. When the local observation
+is available it includes:
+
+- `fingerprint`, an opaque token comparable for the same peer, collection and
+  location. A change invalidates the cached local observation.
+- `guard`, an opaque transaction witness. To establish a client baseline,
+  probe before and after the local reads and require matching non-null guards
+  and fingerprints. Unrelated writes can change the guard.
+- `monoid`, with `algorithm:"sha256-add256-v1"`, a big-endian, 64-character
+  lowercase hexadecimal `sum` and an unsigned decimal string `count`. For
+  known disjoint observations from a consistent view, add sums modulo
+  2^256 and add counts exactly. The same row can occur on two disks during a
+  transfer. The sums describe local copies and carry no ownership proof.
+
+When the storage probe cannot supply an observation, all three values are
+JSON null. The client can use its ordinary traversal. Unavailable service
+returns 503, invalid parameters return 400. Read the response directly from
+each relevant peer. Equality on one peer does not describe remote changes.

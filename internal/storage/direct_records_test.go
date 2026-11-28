@@ -92,3 +92,49 @@ func TestDirectRecordsBudgetCountsOpaqueBodiesBeforeDecoding(t *testing.T) {
 		t.Fatal("expected the in-budget malformed encoding to reach the decoder", err)
 	}
 }
+
+func TestDirectPayloadBudgetAndRepresentation(t *testing.T) {
+	s, _, _ := ticketStores(t)
+	z, _ := tree.NewZoneKey("0000000000000001", "a")
+	records := []Record{
+		{Collection: z.Collection, Location: "a", ID: "json", Payload: json.RawMessage(`{"tags":["demo"]}`)},
+		{Collection: z.Collection, Location: "a", ID: "binary", Binary: true, Payload: json.RawMessage(`"Ymlu"`)},
+		{Collection: z.Collection, Location: "a", ID: "empty", Binary: true, Payload: json.RawMessage(`""`)},
+		{Collection: z.Collection, Location: "a", ID: "large", Payload: json.RawMessage(`"` + strings.Repeat("x", 2048) + `"`)},
+	}
+	if err := s.SeedLocalRecords(records); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.db.Flush(); err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	plain, err := s.DirectRecords(ctx, z, 4, 1024)
+	if err != nil || len(plain) != 4 {
+		t.Fatal(plain, err)
+	}
+	for _, r := range plain {
+		if r.Binary || r.Payload != nil {
+			t.Fatal(r.ID)
+		}
+	}
+	if got, err := s.ReadDirectRecords(ctx, z, 4, 1024, true); !errors.Is(err, ErrDirectRecordBudget) || got != nil {
+		t.Fatal(got, err)
+	}
+	got, err := s.ReadDirectRecords(ctx, z, 4, 4096, true)
+	if err != nil || len(got) != 4 {
+		t.Fatal(err, got)
+	}
+	for _, r := range got {
+		var want *Record
+		for i := range records {
+			if records[i].ID == r.ID {
+				want = &records[i]
+				break
+			}
+		}
+		if want == nil || want.Binary != r.Binary || !bytes.Equal(want.Payload, r.Payload) {
+			t.Fatalf("unexpected %s body or encoding", r.ID)
+		}
+	}
+}
