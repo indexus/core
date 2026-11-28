@@ -58,7 +58,7 @@
   }
   function transferTip(tr){
     return [tr.source_machine+' → '+(tr.target_machine||'?'),tr.phase,'âge '+fmt(tr.age_s,1)+' s',
-      tr.frozen?'Fence franchie':null,tr.attempts!=null?'Tentative '+tr.attempts:null,
+      tr.frozen?'Bascule en cours par lots de zones':null,tr.attempts!=null?'Tentative '+tr.attempts:null,
       tr.installed_zones!=null?fmt(tr.installed_zones)+' installations':null,
       tr.last_install_s!=null?'Dernier lot il y a '+fmt(tr.last_install_s,1)+' s':null,
       tr.phase_age_s!=null?'Dans cette phase depuis '+fmt(tr.phase_age_s,1)+' s':null].filter(Boolean).join(' · ');
@@ -124,7 +124,7 @@
     const charts=el('div',null,'charts overview');
     const diagnostics=el('section',null,'diagnostics'),more=el('div',null,'charts');
     diagnostics.append(el('h2','Autres mesures du réseau'));
-    const catalog=filtered?[[sim?'Demande estimée /s':'Écritures appliquées /s',[['rate','sélection']]],['Items détenus',[['stock','sélection']]],['Transferts observés',[['open','ouverts'],['frozen','fence franchie']]],
+    const catalog=filtered?[[sim?'Demande estimée /s':'Écritures appliquées /s',[['rate','sélection']]],['Items détenus',[['stock','sélection']]],['Transferts observés',[['open','ouverts'],['frozen','en bascule']]],
         ['Vnodes de la sélection',[['ready','prêts'],['reporting','observés']]],
         ['Débit maximal par vnode /s',[['peakRate','maximum']]],
         ['Ressources des hôtes, max. %',[['cpu','CPU'],['ram','RAM'],['disk','disque']]]]:[
@@ -136,7 +136,7 @@
       ['Écritures/s par machine active',[['hostRateLow','minimum'],['hostRateMedian','médiane'],['hostRateHigh','maximum']]],
       ['Items par machine active',[['hostItemsLow','minimum'],['hostItemsMedian','médiane'],['hostItemsHigh','maximum']]],
       ['Densité du réseau',[['ready_per_machine','vnodes prêts par machine']],true],
-      ['Transferts ouverts',[['open','ouverts'],['frozen','gelés']]],
+      ['Transferts ouverts',[['open','ouverts'],['frozen','en bascule']]],
       ['Ressources : maximum observé, %',[['cpu_max','CPU'],['ram_max','RAM'],['disk_max','disque']]],
       ['Pression client',[['shed','non envoyées /s'],['queued','en file'],['in_flight','en vol']]],
       ['Lectures et fraîcheur, p99 ms',[['read_p99_ms','lecture'],['fresh_p99_ms','total racine']]],
