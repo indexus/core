@@ -112,6 +112,7 @@ func NewHttpHandler(tlsDir string, service Service, newContact func(string, map[
 	mux.HandleFunc("/records", handler.GetRecords)
 	mux.HandleFunc("/records/direct", handler.GetDirectRecords)
 	mux.HandleFunc("/zones/children/local", handler.GetLocalChildren)
+	mux.HandleFunc("/zones/fingerprint/local", handler.GetLocalFingerprint)
 	mux.HandleFunc("/content", handler.GetContent)
 	mux.HandleFunc("/sets", handler.GetSets)
 	mux.HandleFunc("/aggregates", handler.GetAggregates)

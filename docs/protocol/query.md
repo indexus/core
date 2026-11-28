@@ -260,3 +260,29 @@ keeps `"complete":false`, including for an empty leaf. The default and
 Callers relying on uncertain candidates must verify the echo. A tombstone
 before a live key is one cause of uncertainty. An older segment spanning many child ranges, or a backlog
 of more than 16 segments, can make all 64 immediate children candidates. Client traversal must budget the resulting expansion.
+
+### Local subtree fingerprint
+
+`GET /zones/fingerprint/local?collection=C&location=L` takes a read-scoped
+observation on the addressed peer. It includes direct records at L and records
+under L on that disk. It does not contact other peers. A peer can respond when
+another peer owns L. A successful response always has `complete:false`.
+
+The response echoes `collection` and `location`. When the local observation
+is available it includes:
+
+- `fingerprint`, an opaque token comparable for the same peer, collection and
+  location. A change invalidates the cached local observation.
+- `guard`, an opaque transaction witness. To establish a client baseline,
+  probe before and after the local reads and require matching non-null guards
+  and fingerprints. Unrelated writes can change the guard.
+- `monoid`, with `algorithm:"sha256-add256-v1"`, a big-endian, 64-character
+  lowercase hexadecimal `sum` and an unsigned decimal string `count`. For
+  known disjoint observations from a consistent view, add sums modulo
+  2^256 and add counts exactly. The same row can occur on two disks during a
+  transfer. The sums describe local copies and carry no ownership proof.
+
+When the storage probe cannot supply an observation, all three values are
+JSON null. The client can use its ordinary traversal. Unavailable service
+returns 503, invalid parameters return 400. Read the response directly from
+each relevant peer. Equality on one peer does not describe remote changes.
