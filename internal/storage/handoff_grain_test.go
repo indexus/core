@@ -69,7 +69,7 @@ func TestHandoffGrainBoundsBytesBeforeZoneLimit(t *testing.T) {
 	if e := store.SeedLocalRecords(records); e != nil {
 		t.Fatal(e)
 	}
-	grain, e := store.HandoffGrain(context.Background(), tree.Region{}, 512, 1<<20)
+	grain, held, e := store.HandoffGrainBytes(context.Background(), tree.Region{}, 512, 1<<20)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -83,6 +83,9 @@ func TestHandoffGrainBoundsBytesBeforeZoneLimit(t *testing.T) {
 	})
 	if e != nil {
 		t.Fatal(e)
+	}
+	if held != bytes {
+		t.Fatalf("grain estimates %d bytes, independent inventory found %d", held, bytes)
 	}
 	if count == 0 || count >= len(records) || bytes > 1<<20 {
 		t.Fatalf("grain did not respect byte target: count=%d bytes=%d", count, bytes)
@@ -126,5 +129,45 @@ func TestHandoffGrainRejectsInvalidBudgetsAndCancelledContext(t *testing.T) {
 	cancel()
 	if _, e := store.HandoffGrain(ctx, tree.Region{}, 512, 1<<20); e == nil {
 		t.Fatal("cancelled context accepted")
+	}
+}
+
+func BenchmarkHandoffGrainBytes(b *testing.B) {
+	s := sampleStore(b, 2048)
+	for b.Loop() {
+		if _, _, err := s.HandoffGrainBytes(b.Context(), tree.Region{}, 512, 1<<20); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func TestHandoffGrainSizeMatchesIndependentInventory(t *testing.T) {
+	store := sampleStore(t, 900)
+	ctx := context.Background()
+	anchor, err := tree.NewZoneKey("collection-00000", "z00000")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, input := range []tree.Region{{}, {Mask: tree.ID{0, 0, 0x11}, Value: tree.ID{0, 0, anchor.ID[2] & 0x11}}} {
+		for _, limit := range []int{3, 64, 512, 1024} {
+			grain, size, err := store.HandoffGrainBytes(ctx, input, limit, 1<<20)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if cut, ok := input.Intersect(grain); !ok || cut != grain {
+				t.Fatalf("grain outside input %+v: %+v", input, grain)
+			}
+			var bytes int64
+			var count int
+			err = store.scanZonePages(zonePages{size: 64, rows: rowsMeta, within: grain.Contains}, func(tx *Tx, z tree.ZoneKey, rows []*row) error {
+				_, n, err := zoneBytesOf(tx, liveZone(z), rows)
+				count++
+				bytes += n
+				return err
+			})
+			if err != nil || size != bytes || count == 0 || count > limit {
+				t.Fatalf("input=%v limit=%d size=%d scanned=%d zones=%d err=%v", input, limit, size, bytes, count, err)
+			}
+		}
 	}
 }

@@ -22,62 +22,49 @@ func (s *Store) HandoffGrainBytes(ctx context.Context, region tree.Region, maxZo
 	if !region.Valid() || maxZones < 1 || maxBytes < 1 {
 		return region, 0, ErrConflict
 	}
-	for {
-		if err := ctx.Err(); err != nil {
-			return region, 0, err
-		}
-		var sample []tree.ID
-		var totalBytes int64
-		oversized := false
-		err := s.scanSpatialRegion(ctx, region, rowsMeta, func(tx *Tx, z tree.ZoneKey, rows []*row) error {
-			if err := ctx.Err(); err != nil {
-				return err
-			}
-			_, size, err := zoneBytesOf(tx, liveZone(z), rows)
-			if err != nil {
-				return err
-			}
-			sample = append(sample, z.ID)
-			if size > maxBytes-totalBytes {
-				oversized = true
-			} else {
-				totalBytes += size
-			}
-			if len(sample) > maxZones || oversized {
-				return errGrainSampleFull
-			}
-			return nil
-		})
-		if err != nil && !errors.Is(err, errGrainSampleFull) {
-			return region, 0, err
-		}
-		if len(sample) <= maxZones && !oversized {
-			return region, totalBytes, nil
-		}
-		// The index yields sorted IDs. Keep the anchor's contiguous prefix
-		// through the first varying bit, rather than creating new low-bit
-		// stripes by maximizing sample balance. Existing region constraints
-		// are retained; regions with arbitrary masks remain exact.
-		first, last := sample[0], sample[len(sample)-1]
-		differing := false
-		for i := range region.Mask {
-			for bit := byte(128); bit != 0; bit >>= 1 {
-				region.Mask[i] |= bit
-				region.Value[i] = (region.Value[i] &^ bit) | (first[i] & bit)
-				if (first[i]^last[i])&bit != 0 {
-					differing = true
-					break
-				}
-			}
-			if differing {
-				break
-			}
-		}
-		if !differing {
-			return tree.Point(first), 0, nil
-		}
-
+	if err := ctx.Err(); err != nil {
+		return region, 0, err
 	}
+	var first tree.ID
+	var totalBytes, prefixBytes int64
+	var zones int
+	commonBits := uint8(tree.Size * 8)
+	err := s.scanSpatialRegion(ctx, region, rowsMeta, func(tx *Tx, z tree.ZoneKey, rows []*row) error {
+		if zones == 0 {
+			first = z.ID
+		}
+		// IDs arrive in order. When a shorter common prefix appears, all
+		// preceding rows are on the anchor's side of this new fork, and
+		// all subsequent rows are outside that side.
+		if bits := tree.CommonPrefixLen(first, z.ID); bits < commonBits {
+			commonBits, prefixBytes = bits, totalBytes
+		}
+		zones++
+		_, size, err := zoneBytesOf(tx, liveZone(z), rows)
+		if err != nil {
+			return err
+		}
+		if zones > maxZones || size > maxBytes-totalBytes {
+			return errGrainSampleFull
+		}
+		totalBytes += size
+		return nil
+	})
+	if !errors.Is(err, errGrainSampleFull) {
+		if err != nil {
+			return region, 0, err
+		}
+		return region, totalBytes, nil
+	}
+	if commonBits == tree.Size*8 {
+		return tree.Point(first), 0, nil
+	}
+	// Preserve all constraints of the input, including non-prefix masks.
+	for bit := uint8(0); bit <= commonBits; bit++ {
+		region.Mask = tree.SetBit(region.Mask, bit, 1)
+		region.Value = tree.SetBit(region.Value, bit, tree.Bit(first, bit))
+	}
+	return region, prefixBytes, nil
 }
 
 var errGrainSampleFull = errors.New("handoff grain sample full")
