@@ -28,8 +28,8 @@ const read = async location => {
   const rows = await api.getDirectRecords("http",peers[0],collection,location,4,{includePayloads:true});
   return rows.map(row=>row.payload);
 };
-const refresh = (baseline,load) => api.refreshObservedCut("http", peers[0], collection, locations,
-  {baseline, load, concurrency:2, maxRequests:32});
+const refresh = (baseline,load,reloadLocations) => api.refreshObservedCut("http", peers[0], collection, locations,
+  {baseline, load, reloadLocations, concurrency:2, maxRequests:32});
 const initialCut = await refresh(undefined,read);
 assert.deepEqual(initialCut.loads.map(l=>[l.location,l.value,l.verified]),
   locations.map(location=>[location,["original"],true]));
@@ -63,13 +63,19 @@ assert.deepEqual(changed.changed,["aa0"]);
 assert.deepEqual(changed.unchanged,["aa1"]);
 assert.equal(changed.changedFraction,0.5);
 assert.ok(calls.every(c=>c.path==="/zones/fingerprint/local"));
-const edited = await refresh(changed.baseline,read);
+await mutate("edit-neighbor");
+const edited = await refresh(changed.baseline,read,["aa0"]);
 assert.deepEqual(edited.loads,[{location:"aa0",value:["modified"],verified:true}]);
 assert.deepEqual(calls.filter(c=>c.path==="/records/direct").map(c=>c.location),["aa0"]);
-assert.deepEqual((await refresh(edited.baseline)).unchanged.sort(),locations);
+const deferred = await refresh(edited.baseline);
+assert.deepEqual(deferred.changed,["aa1"]);
+assert.deepEqual(deferred.unchanged,["aa0"]);
+const settled = await refresh(deferred.baseline,read,["aa1"]);
+assert.deepEqual(settled.loads,[{location:"aa1",value:["later"],verified:true}]);
+assert.deepEqual((await refresh(settled.baseline)).unchanged.sort(),locations);
 await mutate("delete");
 calls.length=0;
-const removed = await refresh(edited.baseline,read);
+const removed = await refresh(settled.baseline,read);
 assert.deepEqual(removed.changed,["aa0"]);
 assert.deepEqual(removed.loads,[{location:"aa0",value:[],verified:true}]);
 assert.deepEqual(calls.filter(c=>c.path==="/records/direct").map(c=>c.location),["aa0"]);
