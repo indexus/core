@@ -2,8 +2,11 @@ package indexus
 
 import (
 	"context"
+	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/indexus/go-indexus-core/internal/storage"
 )
 
 // While maintenance is held, a summary reconcile schedules no cold fold: the
@@ -74,4 +77,59 @@ func TestHeldMaintenanceStartsNoRoundOnANewPeer(t *testing.T) {
 		t.Fatal(err)
 	}
 	eventually(t, "a round on a new peer once the hold is lifted", func() bool { return node.mesh.gossipRound.Load() > 0 })
+}
+
+// Reproduce a join that has already received a right but is still acquiring
+// its cell. Then simulate a crash after persisting a separate cold decision.
+func TestJoiningDefersNewColdFoldAndRecoversDurableDrain(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	f := &coldVolumeFixture{capacity: 1 << 27}
+	for _, first := range []byte{255, 127} {
+		id := ID{first, 1}
+		f.descriptors = append(f.descriptors, VNodeDescriptor{ID: id, Name: BASE64.Encode(id.Bytes())})
+		f.paths = append(f.paths, filepath.Join(t.TempDir(), "data.db"))
+	}
+	f.open(t)
+	if err := f.services[1].Join(ctx); err != nil {
+		t.Fatal(err)
+	}
+	f.sync(t, ctx, 2)
+	node := f.nodes[1]
+	node.SetJoining(true)
+	config := CausalCompactionConfig{CoolFor: time.Minute}
+	if err := node.EnableCausalCompaction(config); err != nil {
+		t.Fatal(err)
+	}
+	node.mesh.cool.reset(time.Now().Add(-2*time.Minute), 0)
+	node.meshScheduleCompaction()
+	if node.mesh.lastColdAttempt.Load() != 0 {
+		t.Fatal("joining vnode scheduled a new fold after its first right")
+	}
+	node.SetJoining(false)
+	node.meshScheduleCompaction()
+	if node.mesh.lastColdAttempt.Load() != 0 {
+		t.Fatal("time spent joining counted as cold")
+	}
+
+	// Commit only the donor's intent. Restart all processes and let ordinary
+	// maintenance finish it while the recovering donor still reports joining.
+	if _, err := f.stores[1].BeginColdDrain("restart-drain", f.services[0].Self, storage.ColdLimits{MaxCombinedFraction: 0.45}); err != nil {
+		t.Fatal(err)
+	}
+	for _, store := range f.stores {
+		if err := store.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	f.open(t)
+	node = f.nodes[1]
+	node.SetJoining(true)
+	if err := node.meshMaintainContext(ctx); err != nil {
+		t.Fatal(err)
+	}
+	status, err := f.stores[1].ColdStatus()
+	if err != nil || status.Drain == nil || status.Drain.Operation != "restart-drain" || !status.Drain.Witnessed {
+		t.Fatalf("persisted drain after restart: %+v, err %v", status.Drain, err)
+	}
 }

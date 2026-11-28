@@ -144,7 +144,8 @@ func (n *Node) compactCausal(ctx context.Context, c CausalCompactionConfig, auto
 	return err
 }
 func (n *Node) meshScheduleCompaction() {
-	if n.mesh == nil || n.maintenanceHeld.Load() {
+	// Recovery of a persisted drain runs separately in Service.Resume.
+	if n.mesh == nil || n.maintenanceHeld.Load() || n.Joining() {
 		return
 	}
 	c := n.mesh.compaction.Load()
