@@ -42,3 +42,48 @@ func indexedOwner(nodes []xorNode, zone ID) ID {
 	}
 	return nodes[at].id
 }
+
+// FoldSibling finds the one live peer that would inherit this whole cell.
+// At the last branching bit on the source path, the opposite branch must
+// be a leaf. If it branches again, the source cell contains keys on both
+// sides of that deeper bit and no single survivor can cover it.
+func (v *View) FoldSibling(source ID) (VNodeDescriptor, bool) {
+	if !v.HasID(source) || len(v.Active) < 2 {
+		return VNodeDescriptor{}, false
+	}
+	if nodes := v.xorIndex; len(nodes) != 0 {
+		node := nodes[0]
+		for {
+			side := Bit(source, node.bit)
+			child := nodes[node.child[side]]
+			if child.bit == Size*8 {
+				sibling := nodes[node.child[1-side]]
+				if sibling.bit != Size*8 {
+					return VNodeDescriptor{}, false
+				}
+				return VNodeDescriptor{ID: sibling.id, Name: v.NameOf(sibling.id)}, true
+			}
+			node = child
+		}
+	}
+	// In a small or incrementally built view, the opposite branch contains
+	// precisely the peers tied for the longest shared prefix with source.
+	best := -1
+	var peer VNodeDescriptor
+	unique := false
+	for _, candidate := range v.Active {
+		if candidate.ID == source {
+			continue
+		}
+		depth := int(CommonPrefixLen(source, candidate.ID))
+		if depth > best {
+			best, peer, unique = depth, candidate, true
+		} else if depth == best {
+			unique = false
+		}
+	}
+	if !unique {
+		return VNodeDescriptor{}, false
+	}
+	return peer, true
+}

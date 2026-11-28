@@ -6,13 +6,11 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"sort"
 
 	"github.com/indexus/go-indexus-core/internal/causal"
 	"github.com/indexus/go-indexus-core/internal/metrics"
 	"github.com/indexus/go-indexus-core/internal/protocol"
 	"github.com/indexus/go-indexus-core/internal/storage"
-	"github.com/indexus/go-indexus-core/internal/tree"
 )
 
 const (
@@ -163,7 +161,7 @@ func (s *Service) beginColdDrain(config ColdConfig, activity uint64) (*storage.C
 		Source, Target causal.Endpoint
 		Base           [32]byte
 		Activity       uint64
-	}{nonce, s.Self, target, snapshot.Current().Digest, activity}))
+	}{nonce, s.Self, target, snapshot.ViewDigest(), activity}))
 	work, err := s.Store.BeginColdDrain(operation, target, storage.ColdLimits{MaxCombinedFraction: config.MaxCombinedFraction, HeatBudget: config.HeatBudget, MaxItems: config.MaxItems})
 	if err != nil {
 		return nil, err
@@ -178,42 +176,19 @@ func (s *Service) foldTarget(snapshot storage.RoutingSnapshot) (causal.Endpoint,
 	if root.Name == s.VNode.Name {
 		return causal.Endpoint{}, protocol.ErrNoBetterConfiguration
 	}
-	view := snapshot.Current()
-	if !view.HasName(s.VNode.Name) {
-		return causal.Endpoint{}, storage.ErrNotOwner
-	}
-	cell, err := tree.Cell(view, s.VNode.Name)
+	source, peer, err := snapshot.FoldSibling(s.VNode.Name)
 	if err != nil {
 		return causal.Endpoint{}, err
 	}
-	sourceID, _ := view.IDOf(s.VNode.Name)
-	view.Remove(s.VNode.Name)
-	candidates := append([]tree.VNodeDescriptor(nil), view.Active...)
-	sort.Slice(candidates, func(i, j int) bool { return string(candidates[i].ID[:]) < string(candidates[j].ID[:]) })
-	for _, candidate := range candidates {
-		// Sibling folds are geometrically symmetric. Orient them by a
-		// total order (the pinned root ranks first) to avoid two drains
-		// repeatedly rejecting each other's pin under a fair scheduler.
-		if candidate.Name != root.Name && bytes.Compare(sourceID[:], candidate.ID[:]) < 0 {
-			continue
-		}
-		next, err := tree.Cell(view, candidate.Name)
-		if err != nil {
-			return causal.Endpoint{}, err
-		}
-		if intersection, ok := cell.Intersect(next); !ok || intersection != cell {
-			continue
-		}
-		target, err := snapshot.Placement(candidate.Name)
-		if err != nil {
-			return causal.Endpoint{}, err
-		}
-		if !target.Valid() {
-			break
-		}
-		return target, nil
+	// Orient eligible sibling pairs to prevent competing pins. Root wins.
+	if peer.Name == "" || (peer.Name != root.Name && bytes.Compare(source[:], peer.ID[:]) < 0) {
+		return causal.Endpoint{}, protocol.ErrNoBetterConfiguration
 	}
-	return causal.Endpoint{}, protocol.ErrNoBetterConfiguration
+	target, err := snapshot.Placement(peer.Name)
+	if err == nil && !target.Valid() {
+		return causal.Endpoint{}, protocol.ErrNoBetterConfiguration
+	}
+	return target, err
 }
 
 // retireCold moves everything to the pinned survivor and publishes the
@@ -318,7 +293,7 @@ func (s *Service) coldDirty(ctx context.Context, work *storage.ColdDrain, propos
 	if err != nil {
 		return dirty, err
 	}
-	dirty = dirty || hot(status.Activity, work.Activity, work.HeatBudget) || snapshot.Current().Digest != work.BaseDigest
+	dirty = dirty || hot(status.Activity, work.Activity, work.HeatBudget) || snapshot.ViewDigest() != work.BaseDigest
 	if dirty || started {
 		return dirty, nil
 	}

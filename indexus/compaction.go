@@ -124,6 +124,11 @@ func (n *Node) compactCausal(ctx context.Context, c CausalCompactionConfig, auto
 	if errors.Is(err, mesh.ErrColdDeferred) {
 		return nil
 	}
+	// No peer covers this whole cell in the required direction. No drain
+	// was started, so retrying this automatic plan need not flush summaries.
+	if automatic && errors.Is(err, protocol.ErrNoBetterConfiguration) {
+		return err
+	}
 	refreshErr := n.meshRefreshView()
 	if refreshErr != nil {
 		return errors.Join(err, refreshErr)
@@ -155,7 +160,7 @@ func (n *Node) meshScheduleCompaction() {
 		return
 	}
 	root, _ := snapshot.Identity()
-	if root.Name == n.Name() || !snapshot.Current().HasName(n.Name()) {
+	if root.Name == n.Name() || !snapshot.HasMember(n.Name()) {
 		return
 	}
 	if !n.mesh.compactionRunning.CompareAndSwap(false, true) {

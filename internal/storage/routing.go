@@ -13,6 +13,8 @@ type RoutingSnapshot struct{ snapshot *causalSnapshot }
 func (r RoutingSnapshot) Identity() (tree.VNodeDescriptor, causal.Genesis) {
 	return r.snapshot.state.Root, r.snapshot.state.Genesis
 }
+func (r RoutingSnapshot) HasMember(name string) bool   { return r.snapshot.view.HasName(name) }
+func (r RoutingSnapshot) ViewDigest() [32]byte         { return r.snapshot.view.Digest }
 func (r RoutingSnapshot) Current() *tree.View          { return r.snapshot.view.Clone() }
 func (r RoutingSnapshot) Digest() causal.Digest        { return r.snapshot.membershipDigest }
 func (r RoutingSnapshot) RoutingDigest() causal.Digest { return r.snapshot.routingDigest }
@@ -30,6 +32,16 @@ func (r RoutingSnapshot) Resolve(h causal.Endpoint) (causal.Endpoint, error) {
 // It is an advisory cell, never authority to write.
 func (r RoutingSnapshot) Cell(name string) (tree.Region, error) {
 	return tree.Cell(r.snapshot.view, name)
+}
+
+// FoldSibling inspects the immutable placement index before any durable drain.
+func (r RoutingSnapshot) FoldSibling(name string) (tree.ID, tree.VNodeDescriptor, error) {
+	source, ok := r.snapshot.view.IDOf(name)
+	if !ok {
+		return tree.ID{}, tree.VNodeDescriptor{}, ErrNotOwner
+	}
+	peer, _ := r.snapshot.view.FoldSibling(source)
+	return source, peer, nil
 }
 
 // WriteRegionHint is a conservative route hint for a successfully ACKed point.
