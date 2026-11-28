@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"errors"
 	"github.com/indexus/go-indexus-core/internal/tree"
 	"testing"
 )
@@ -23,6 +24,23 @@ func TestGranularPointCoverageIsCanonicalAndIndependentForExactFullQuery(t *test
 	if e != nil {
 		t.Fatal(e)
 	}
+	assertDirect := func(store *Store, key tree.ZoneKey, wantErr error) {
+		t.Helper()
+		rows, err := store.DirectRecords(context.Background(), key, 1, 1<<10)
+		if !errors.Is(err, wantErr) {
+			t.Fatalf("direct %s: got %v, want %v", key.Location, err, wantErr)
+		}
+		if wantErr != nil {
+			if rows != nil {
+				t.Fatal("partial read on refusal", rows)
+			}
+		} else if len(rows) != 1 || rows[0].ID != key.Location {
+			t.Fatal("unexpected direct rows", rows)
+		}
+	}
+	assertDirect(source, point, ErrFrozen)
+	assertDirect(source, parent, nil)
+	assertDirect(target, point, ErrNotOwner)
 	if e = target.StageZones(op.Cession.ID, source.node, snaps); e != nil {
 		t.Fatal(e)
 	}
@@ -33,6 +51,8 @@ func TestGranularPointCoverageIsCanonicalAndIndependentForExactFullQuery(t *test
 	if e = target.InstallZones(op.Cession.ID, proofs); e != nil {
 		t.Fatal(e)
 	}
+	assertDirect(target, point, nil)
+	assertDirect(target, parent, ErrNotOwner)
 	if _, e = target.Write("point-new", Record{Collection: point.Collection, Location: point.Location, ID: "point-new"}); e != nil {
 		t.Fatal(e)
 	}
