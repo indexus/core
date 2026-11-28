@@ -126,6 +126,7 @@ resource "aws_iam_instance_profile" "exp" {
 
 locals {
   common = {
+    data_storage = "auto"
     bucket      = aws_s3_bucket.run.id
     region      = var.region
     ttl         = var.ttl_minutes

@@ -29,7 +29,7 @@ sysctl -w net.core.rmem_max=7500000 net.core.wmem_max=7500000
 
 # Local NVMe instance storage (i4i and the like), if any, holds the node data.
 dev=$(lsblk -dpno NAME,MODEL | awk '/Instance Storage/ {print $1; exit}')
-if [[ -n "$dev" ]]; then mkfs.xfs -f "$dev"; install -d /var/lib/indexus; mount -o noatime "$dev" /var/lib/indexus; fi
+if [[ "${data_storage}" == auto && -n "$dev" ]]; then mkfs.xfs -f "$dev"; install -d /var/lib/indexus; mount -o noatime "$dev" /var/lib/indexus; fi
 install -d -m 0755 /opt/indexus/elastic /opt/indexus/ca /var/lib/indexus
 for f in node issuer provisioner agent ca/ca.crt ca/ca.key; do
   until aws s3 cp "s3://${bucket}/bin/$f" "/opt/indexus/$f" --region "${region}"; do sleep 5; done
@@ -40,6 +40,13 @@ until aws s3 cp --recursive "s3://${bucket}/bin/elastic/" /opt/indexus/elastic/ 
 chmod +x /opt/indexus/node /opt/indexus/issuer /opt/indexus/provisioner /opt/indexus/agent /opt/indexus/elastic/*
 TOKEN=$(curl -sf -X PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 600")
 IP=$(curl -sf -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4)
+device=$(findmnt -no SOURCE -T /var/lib/indexus)
+model=$(lsblk -sno MODEL "$device")
+if [[ "${data_storage}" == ebs && "$model" != *"Elastic Block Store"* ]]; then
+  echo "Expected EBS for /var/lib/indexus, got $device ($model)" >&2
+  exit 1
+fi
+printf '%s\n' "$device" "$model" | aws s3 cp - "s3://${bucket}/results/storage/$IP.txt" --region "${region}" --only-show-errors
 HOST0="${host0}"
 [[ -z "$HOST0" ]] && HOST0="$IP"
 

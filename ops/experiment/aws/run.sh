@@ -36,6 +36,8 @@ LOADER_ROOT="${EXPERIMENT_LOADER_ROOT:-$ROOT}"
 [[ -f "$ROOT/go.mod" && -f "$LOADER_ROOT/go.mod" ]] || { echo "Invalid experiment source/loader checkout" >&2; exit 2; }
 REGION="${REGION:-eu-west-3}"
 HOSTS="${HOSTS:-4}"
+DATA_STORAGE="${DATA_STORAGE:-auto}"
+case "$DATA_STORAGE" in auto|ebs) ;; *) echo "DATA_STORAGE must be auto or ebs" >&2; exit 2;; esac
 # Machines on demand: the provisioner starts one more host (from a launch
 # template of this run) when fewer than SPARE slots stay free. The ceiling is
 # not a fixed count: it follows the load up to what
@@ -303,7 +305,7 @@ cli iam add-role-to-instance-profile --instance-profile-name "$RUN" --role-name 
 ami=$(cli ssm get-parameter --name /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64 --query Parameter.Value)
 work=$(mktemp -d)
 template="$RUN-host" # always available, including after a live policy increase
-common=(bucket="$bucket" region="$REGION" ttl="$TTL" slots="$SLOTS" resource_slots="$resource_slots" capacity_s3="s3://$bucket/plan/capacity.json" run="$RUN" data_bytes="$DATA_BYTES" write_cap="${WRITE_CAP:-0}" write_demand="${SCALING_WRITES:-0}" items="$ITEMS"
+common=(data_storage="$DATA_STORAGE" bucket="$bucket" region="$REGION" ttl="$TTL" slots="$SLOTS" resource_slots="$resource_slots" capacity_s3="s3://$bucket/plan/capacity.json" run="$RUN" data_bytes="$DATA_BYTES" write_cap="${WRITE_CAP:-0}" write_demand="${SCALING_WRITES:-0}" items="$ITEMS"
   cpu_target="${CPU_TARGET_PCT:-0}" resource_signals="${RESOURCE_SIGNALS:-true}" ready_reserve_pct="${READY_RESERVE_PCT:-15}" replication="${REPLICATION:-}" replication_machine="${REPLICATION_MACHINE:-host}"
   launch_template="$template" machines_max="$HOSTS_MAX" spare="${SPARE:-$SLOTS}" debug_base="$debug_base")
 
