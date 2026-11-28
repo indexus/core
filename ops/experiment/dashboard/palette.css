@@ -1,0 +1,30 @@
+/* Indexus logo periwinkle (#718dd2), violet controls, and separate data hues. */
+:root {
+  --ix-logo:#718dd2;
+  --ix-page:#f8f7fc;
+  --ix-panel:#fff;
+  --ix-ink:#191621;
+  --ix-muted:#625d70;
+  --ix-rule:#dcd7e7;
+  --ix-line:#81768f;
+  --ix-accent:#7055a8;
+  --ix-tint:#f0edf8;
+  --ix-blue:#4663a5;
+  --ix-orange:#a34e27;
+  --ix-green:#297658;
+}
+@media (prefers-color-scheme:dark) {
+  :root {
+    --ix-page:#111015;
+    --ix-panel:#1c1922;
+    --ix-ink:#faf8fd;
+    --ix-muted:#bcb5c8;
+    --ix-rule:#423a4e;
+    --ix-line:#9d93ac;
+    --ix-accent:#c1acf0;
+    --ix-tint:#2b2438;
+    --ix-blue:#9ebbf8;
+    --ix-orange:#f0aa81;
+    --ix-green:#79cba7;
+  }
+}

@@ -6,7 +6,7 @@ const view=await readFile(new URL('./view.html',import.meta.url),'utf8');
 if(source.includes('</script'))throw Error('Unsafe script terminator in model source');
 const output=resolve(process.argv[2]||'sizing.html');
 const js=await readFile(new URL('../dashboard/view.js',import.meta.url),'utf8');
-const css=await readFile(new URL('../dashboard/view.css',import.meta.url),'utf8');
+const css=(await Promise.all(['palette.css','view.css'].map(name=>readFile(new URL('../dashboard/'+name,import.meta.url),'utf8')))).join('\n');
 const fragment=view.replace('/*__SIZING_MODEL__*/',source.replace(/^export /gm,'')).replace('/*__DASHBOARD_JS__*/',js).replace('/*__DASHBOARD_CSS__*/',css);
 const page=process.argv.includes('--page')?await readFile(new URL('./page.html',import.meta.url),'utf8'):null;
 await writeFile(output,page?page.replace('<!--__SIZING_VIEW__-->',fragment):fragment);

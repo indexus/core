@@ -315,10 +315,13 @@ def page(points_raw, charts=None, title="Indexus – campagne en direct", sub=No
     data = [{k: p.get(k) for k in keys} for p in points]
     sub = sub or f'Compteurs seulement, un point toutes les 5 s. La page se recharge seule. Dernier point : {time.strftime("%H:%M:%S", time.localtime(last.get("wall", 0))) if last else "aucun"}.' 
     table = "".join(f'<tr><td>{p["x"]}</td><td>{html.escape(str(p.get("phase", "")))}</td>' + "".join(f'<td>{"" if p.get(k) is None else p[k]}</td>' for k in ("offered", "acked", "shed", "p99_ms", "vnodes", "open", "skew")) + "</tr>" for p in points[-200:])
+    # A copied loader may contain only live.py and fleet.py. Its comparison
+    # pages keep native scheme colors when the operator UI assets are absent.
+    palette = Path(__file__).parent/'dashboard'/'palette.css'
     return f'''<!doctype html><html lang="fr"><head><meta charset="utf-8">{'<meta http-equiv="refresh" content="5">' if live else ""}
 <title>{html.escape(title)}</title><style>
-:root{{--surface:#fcfcfb;--text:#0b0b0b;--muted:#52514e;--grid:#e4e3df;--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100}}
-@media (prefers-color-scheme:dark){{:root{{--surface:#1a1a19;--text:#f0efec;--muted:#c3c2b7;--grid:#383835;--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500}}}}
+{palette.read_text() if palette.is_file() else ''}
+:root{{color-scheme:light dark;--surface:var(--ix-page,Canvas);--text:var(--ix-ink,CanvasText);--muted:var(--ix-muted,GrayText);--grid:var(--ix-rule,GrayText);--s1:var(--ix-blue,LinkText);--s2:var(--ix-orange,Chocolate);--s3:var(--ix-green,SeaGreen);--s4:var(--ix-accent,MediumPurple)}}
 body{{margin:0;padding:20px;background:var(--surface);color:var(--text);font:14px/1.4 system-ui,sans-serif}}
 h1{{font-size:18px;margin:0 0 4px}} .sub{{color:var(--muted);margin:0 0 16px}}
 .tiles{{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px}} .tile{{border:1px solid var(--grid);border-radius:8px;padding:8px 12px;min-width:120px}}
@@ -398,8 +401,8 @@ def fleet_page(points, title, live):
     payload = json.dumps(data, separators=(',', ':'), ensure_ascii=False).replace('<', '\\u003c')
     refresh = 'setInterval(()=>{if(!playing && +slider.value===points.length-1 && !document.hidden)location.reload()},10000);' if live else ''
     return ('<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+
-            '<title>'+html.escape(title)+'</title><style>body{margin:0;padding:20px;background:#fafaf8;color:#252622}body>h1{font:600 20px system-ui}'+
-            '@media(prefers-color-scheme:dark){body{background:#1a1a19;color:#eeeee8}}'+assets.joinpath('view.css').read_text()+'</style></head><body><h1>Indexus · Suivi du réseau</h1>'+
+            '<title>'+html.escape(title)+'</title><style>'+assets.joinpath('palette.css').read_text()+
+            'body{margin:0;padding:20px;background:var(--ix-page);color:var(--ix-ink)}'+assets.joinpath('view.css').read_text()+'</style></head><body><h1>Indexus · Suivi du réseau</h1>'+
             '<nav class="timeline" aria-label="Lecture du banc"><button id="playback" type="button">Lire à 5×</button> <label>Instant observé <input id="moment" type="range" min="0" max="'+str(max(0,len(data)-1))+'" value="'+str(max(0,len(data)-1))+'"></label> <output id="time"></output></nav><main id="dashboard"></main><script>'+assets.joinpath('view.js').read_text()+
             ';const points='+payload+';const slider=document.getElementById("moment");function draw(){const root=document.getElementById("dashboard");root.dataset.playing=String(playing);IndexusDashboard.render(root,points,+slider.value);document.getElementById("time").textContent=(points[+slider.value]?.x??0)+" s";}' + """const play=document.getElementById("playback");let playing=false,timer;
 function pause(){playing=false;clearTimeout(timer);play.textContent="Lire à 5×";}

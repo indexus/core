@@ -286,10 +286,10 @@
     if(!machines.length){wrap.append(el('p','Aucun inventaire machine enregistré.'));return wrap;}
     if(mode==='space')return spaceView(root,nodes,transfers,stale,wrap);
     if(mode==='shares')return shareView(nodes,stale,wrap,root);
-    const colors={ready:'#16856a',receiving:'#347cca',joining:'#347cca',unknown:'#888'};
+    const colors={ready:'var(--ix-green)',receiving:'var(--ix-blue)',joining:'var(--ix-blue)',unknown:'var(--ix-line)'};
     const canvas=svg('svg',{'aria-label':'Machines, vnodes et sens des transferts',role:'group'});
     const defs=svg('defs',{});
-    for(const [id,color] of [['flow','#588fc2'],['fence','#ce663e']]){
+    for(const [id,color] of [['flow','var(--ix-blue)'],['fence','var(--ix-orange)']]){
       const marker=svg('marker',{id,viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:6,markerHeight:6,orient:'auto'});
       marker.append(svg('path',{d:'M0 0 L10 5 L0 10 Z',fill:color}));defs.append(marker);
     }
@@ -315,7 +315,7 @@
       const ns=members.get(h.id),x=(i%cols+.5)*cell,y=Math.floor(i/cols)*step+radius+12;
       hosts.set(h.id,{x,y,r:radius});
       const g=svg('g',{'data-glyph':'host:'+h.id,'data-x':x,'data-y':y}),sum=itemSum(ns,stale);
-      g.append(svg('circle',{cx:x,cy:y,r:radius,fill:'#8881',stroke:pressure(h)>60?'#ce663e':'#888','stroke-width':2}));
+      g.append(svg('circle',{cx:x,cy:y,r:radius,fill:'var(--ix-tint)',stroke:pressure(h)>60?'var(--ix-orange)':'var(--ix-line)','stroke-width':2}));
       const observed=fmt(sum.value)+' items';
       const admission=(Number.isFinite(h.reserve_cores)?' · réserve '+fmt(h.reserve_cores,2)+' vCPU':'')+
         (h.refusal?' · réception refusée : '+h.refusal:(h.ready_offer===true?' · réception disponible':''));
@@ -323,8 +323,8 @@
       label(g,x,y+radius+17,h.label||h.id);label(g,x,y+radius+34,observed);
       for(const [j,[k]] of resources.entries()){
         const left=x-34+24*j,top=y+radius+43;
-        g.append(svg('rect',{x:left,y:top,width:19,height:4,fill:'#8884'}));
-        if(Number.isFinite(h[k]))g.append(svg('rect',{x:left,y:top,width:19*Math.min(100,Math.max(0,h[k]))/100,height:4,fill:h[k]>60?'#ce663e':'#347cca'}));
+        g.append(svg('rect',{x:left,y:top,width:19,height:4,fill:'var(--ix-rule)'}));
+        if(Number.isFinite(h[k]))g.append(svg('rect',{x:left,y:top,width:19*Math.min(100,Math.max(0,h[k]))/100,height:4,fill:h[k]>60?'var(--ix-orange)':'var(--ix-blue)'}));
       }
       select(g,`${h.label||h.id} · ${observed} · ${sum.count}/${ns.length} vnodes comptés${admission} · ${resources.map(([k,l])=>l+' '+fmt(h[k],1)+' %').join(' · ')}`,ns.map(n=>n.label));
       glyphs.append(g);
@@ -340,7 +340,7 @@
     for(const tr of transfers){
       const a=ends.get(tr.source)||hosts.get(tr.source_machine),b=ends.get(tr.target)||hosts.get(tr.target_machine);
       if(!a||!b){unresolved++;continue;}
-      const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),color=tr.frozen?'#ce663e':'#588fc2';
+      const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),color=tr.frozen?'var(--ix-orange)':'var(--ix-blue)';
       const path=d>a.r+b.r?`M${a.x+dx*a.r/d} ${a.y+dy*a.r/d} L${b.x-dx*(b.r+2)/d} ${b.y-dy*(b.r+2)/d}`:
         `M${a.x} ${a.y-a.r} Q${a.x+55} ${a.y-55} ${b.x+b.r} ${b.y}`;
       const arrow=svg('path',{d:path,fill:'none',stroke:color,opacity:(tr.stale||stale) ? 0.25 : 0.72,'stroke-dasharray':tr.stale||stale?'4 4':'none','marker-end':'url(#'+(tr.frozen?'fence':'flow')+')','pointer-events':'none'});
@@ -374,7 +374,7 @@
     if(!leaves.length)return;
     const radius=Math.max(150,leaves.length*2.6),size=2*radius+250,mid=size/2;
     canvas.setAttribute('viewBox',`0 0 ${size} ${size}`);
-    const branches=svg('g',{fill:'none',stroke:'#8886','pointer-events':'none'});
+    const branches=svg('g',{fill:'none',stroke:'var(--ix-line)','pointer-events':'none'});
     layer.append(branches);
     const angle=i=>2*Math.PI*i/leaves.length-Math.PI/2;
     const point=(i,r)=>({x:mid+r*Math.cos(angle(i)),y:mid+r*Math.sin(angle(i))});
@@ -439,13 +439,14 @@
     const explanation=measured?'Droits régionaux installés, relevés sur chaque vnode. Les activations ponctuelles en cours de transfert sont exclues.':'Placement XOR théorique entre les vnodes observés. Les droits installés ne figurent pas dans cette capture.';
     const graph=svg('svg',{viewBox:'0 0 240 240',role:'group','aria-label':'Part de l’espace total des adresses'});
 
-    graph.append(svg('circle',{cx:120,cy:120,r:88,stroke:'#8884','stroke-width':35,fill:'none'}));
+    graph.append(svg('circle',{cx:120,cy:120,r:88,stroke:'var(--ix-rule)','stroke-width':35,fill:'none'}));
     const total=entries.reduce((sum,e)=>sum+(e.share||0),0);
     const list=el('div',null,'address-list');
 
     let offset=0;
+    const swatches=['var(--ix-accent)','var(--ix-blue)','var(--ix-green)','var(--ix-orange)','var(--ix-logo)'];
     for(const {n,share} of entries){
-      const color='hsl('+([...n.label].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,0)%360)+' 60% 48%)';
+      const color=swatches[[...n.label].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,0)%swatches.length];
       const text=n.label+' · '+(Number.isFinite(share)?fmt(100*share,4)+' %':'inconnu');
       const button=el('button',text);
       button.style.borderInlineStart='5px solid '+color;
@@ -564,7 +565,7 @@
       for(let i=0;i<30;i+=2){u=2*u+Number(bits[i]);v=2*v+Number(bits[i+1]);}
       const lat=(u+.5)/16384-1,lon=(v+.5)*Math.PI/16384,r=Math.sqrt(1-lat*lat);
       const dot=svg('g',{role:'button',tabindex:0,'aria-label':n.label});
-      const circle=svg('circle',{fill:stale||n.state==='stale'?'#89949d':n.state==='ready'?'#17886e':'#397bc1'});
+      const circle=svg('circle',{fill:stale||n.state==='stale'?'var(--ix-line)':n.state==='ready'?'var(--ix-green)':'var(--ix-blue)'});
       const title=svg('title',{});title.textContent=n.label+' · '+n.machine;dot.append(circle,title);
       const loc={n,bits,x:r*Math.cos(lon),y:lat,z:r*Math.sin(lon),dot,circle};
       byID.set(n.id,loc);if(n.monitor&&(!byMonitor.has(n.monitor)||n.state!=='stale'))byMonitor.set(n.monitor,loc);
@@ -585,10 +586,10 @@
       if(hi-lo<2)return;
       const k=commonBits(sorted[lo].bits,sorted[hi-1].bits);if(k===96)return;
       let m=lo+1;while(sorted[m].bits[k]==='0')m++;
-      edge(sorted[lo],sorted[m],'#8195a4',false);connect(lo,m);connect(m,hi);
+      edge(sorted[lo],sorted[m],'var(--ix-line)',false);connect(lo,m);connect(m,hi);
     }
     connect(0,sorted.length);
-    for(const tr of transfers)edge(byID.get(tr.source),byID.get(tr.target)||byMonitor.get(tr.target),tr.frozen?'#d97640':'#468ed0',tr);
+    for(const tr of transfers)edge(byID.get(tr.source),byID.get(tr.target)||byMonitor.get(tr.target),tr.frozen?'var(--ix-orange)':'var(--ix-blue)',tr);
     function paint(cam){
       const cy=Math.cos(cam.yaw),sy=Math.sin(cam.yaw),cp=Math.cos(cam.pitch),sp=Math.sin(cam.pitch);
       for(const p of locations){
@@ -599,7 +600,7 @@
         const selected=scopes.get(root).ids.has(p.n.label);
         p.dot.setAttribute('transform',`translate(${p.px} ${p.py})`);
         p.circle.setAttribute('r',selected?7:4+p.depth*1.4);
-        p.circle.setAttribute('stroke',selected?'currentColor':'none');
+        p.circle.setAttribute('stroke',selected?'var(--ix-accent)':'none');
         p.dot.setAttribute('opacity',selected?1:.72+.27*p.depth);
 
       }
