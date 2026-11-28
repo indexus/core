@@ -142,7 +142,6 @@
       const past=points.slice(0,index+1);
       if(past.some(p=>series.some(([k])=>Number.isFinite(p[k])))){if(!filtered)(['Écritures /s','Latence écriture, ms','Transferts ouverts'].includes(title)?charts:more).append(chart(past,title,series,chartWidth,stepped));}else unmeasured.push(title);
     }
-    frame.append(charts);
     for(const [title,series] of [
       ['Écritures réussies avec relais, %',[['relayed_pct','avec relais']]],
       ['Trafic moyen par vnode, Kio/s',[['mesh_kb_s','mesh'],['gossip_kb_s','membership']]],
@@ -181,10 +180,12 @@
       for(const b of choices.querySelectorAll('button')){if(b.dataset.mode)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));};
       const shown=root.dataset.showWaiting==='true'?active:active.filter(tr=>tr.phase!=='copy-slot');
       const visible=filtered?shown.filter(tr=>nodes.some(n=>scope.ids.has(n.label)&&touchesNode(tr,n))):shown;
-      plot.replaceChildren(topology(machines,nodes,visible,sim,p.metrics_stale,root.clientWidth,mode,root));installTips(plot);
+      plot.replaceChildren(topology(machines,nodes,visible,sim,p.metrics_stale,mode,root));installTips(plot);
     }
     drawTopology();
-    frame.append(choices,plot);
+    const workspace=el('div',null,'network-workspace');
+    workspace.append(plot,charts);
+    frame.append(choices,workspace);
     if(!filtered){
       const extra=el('div',null,'tiles');
       for(const [label,value] of stats.filter((_,i)=>![0,1,2,5,9,10].includes(i))){
@@ -245,7 +246,7 @@
     const counted=stale?[]:nodes.filter(n=>n.state!=='stale'&&n.items_counted!==false&&Number.isFinite(n.items));
     return {value:counted.length?counted.reduce((sum,n)=>sum+n.items,0):null,count:counted.length,total:nodes.length};
   }
-  function topology(machines,nodes,transfers,sim,stale,width,mode,root){
+  function topology(machines,nodes,transfers,sim,stale,mode,root){
     const wrap=el('div',null,'topology');
     if(!machines.length){wrap.append(el('p','Aucun inventaire machine enregistré.'));return wrap;}
     if(mode==='space')return spaceView(root,nodes,transfers,stale,wrap);
@@ -263,7 +264,7 @@
     const members=new Map(ordered.map(h=>[h.id,[]]));
     for(const n of nodes)members.get(n.machine)?.push(n);
     const widest=Math.max(1,...Array.from(members.values(),ns=>Math.ceil(Math.sqrt(ns.length))));
-    const radius=Math.max(38,widest*11),cell=radius*2+62,step=cell+36,cols=Math.max(1,Math.min(ordered.length,Math.ceil(Math.sqrt(ordered.length * (width/Math.max(240,global.innerHeight*.48)) * step/cell))));
+    const radius=Math.max(38,widest*11),cell=radius*2+62,step=cell+36,cols=Math.max(1,Math.min(ordered.length,Math.ceil(Math.sqrt(ordered.length * step/cell))));
     canvas.setAttribute('viewBox',`0 0 ${cols*cell} ${Math.ceil(ordered.length/cols)*step}`);
     function label(group,x,y,value){
       const t=svg('text',{x,y,'text-anchor':'middle'});t.textContent=value;group.append(t);
@@ -512,7 +513,7 @@
   }
 
   function spaceView(root,nodes,transfers,stale,wrap){
-    const graph=svg('svg',{viewBox:'0 0 820 480','aria-label':'Réseau de vnodes en trois dimensions'});
+    const graph=svg('svg',{viewBox:'0 0 480 480','aria-label':'Réseau de vnodes en trois dimensions'});
     const links=svg('g',{'pointer-events':'none'}),dots=svg('g',{});
     graph.append(links,dots);
     const members=[...nodes].sort((a,b)=>String(a.label).localeCompare(String(b.label)));
@@ -559,7 +560,7 @@
         const x=p.x*cy+p.z*sy,z=p.z*cy-p.x*sy;
         p.depth=z*cp+p.y*sp;
         const scale=182/(1-p.depth*.21);
-        p.px=410+x*scale;p.py=240+(p.y*cp-z*sp)*scale;
+        p.px=240+x*scale;p.py=240+(p.y*cp-z*sp)*scale;
         const selected=scopes.get(root).ids.has(p.n.label);
         p.dot.setAttribute('transform',`translate(${p.px} ${p.py})`);
         p.circle.setAttribute('r',selected?7:4+p.depth*1.4);
