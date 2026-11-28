@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/netip"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -40,6 +41,7 @@ type CopyBudget struct {
 	dir      string
 	slots    int
 	pressure atomic.Pointer[copyPressure]
+	localIPs map[netip.Addr]bool
 	// Independent of the outgoing slots: reciprocal senders can both receive.
 	receiver *CopyBudget
 }
@@ -94,7 +96,7 @@ func NewCopyBudget(dir string, slots int) (*CopyBudget, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, err
 	}
-	b := &CopyBudget{dir: dir, slots: slots}
+	b := &CopyBudget{dir: dir, slots: slots, localIPs: localCopyIPs()}
 	if slots == 1 {
 		incoming := filepath.Join(dir, "incoming")
 		if err := os.MkdirAll(incoming, 0o755); err != nil {
@@ -279,8 +281,16 @@ func (b *CopyBudget) pace(ctx context.Context, operation string, work time.Durat
 	if b == nil || urgent {
 		return ctx.Err()
 	}
+	var idle time.Duration
+	if replies, ok := ctx.Value(copyRepliesKey{}).(*copyReplies); ok {
+		idle = min(work, time.Duration(replies.wait.Load()))
+		metrics.Handoffs.CopyPeerWaitNanos.Add(int64(idle))
+	}
+	// A lot active for A needs A*(1-share)/share idle time in total.
+	// The time already spent waiting for a remote reply counts toward it.
+	work -= idle
 	sample := b.pressure.Load()
-	delay := sample.cooldown(work)
+	delay := sample.cooldown(work) - idle
 	if delay <= 0 {
 		return ctx.Err()
 	}
@@ -300,7 +310,7 @@ func (b *CopyBudget) pace(ctx context.Context, operation string, work time.Durat
 			return nil
 		case <-sample.changed:
 			sample = b.pressure.Load()
-			shorter := sample.cooldown(work)
+			shorter := sample.cooldown(work) - idle
 			if shorter <= time.Since(started) {
 				return ctx.Err()
 			}

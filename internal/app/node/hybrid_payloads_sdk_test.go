@@ -48,6 +48,8 @@ func TestHybridPayloadsSDKTwoColdPeers(t *testing.T) {
 		}
 	}
 	cold()
-	runDirectSDK(t, "hybrid_payloads_sdk.mjs", sdk, first, second)
-	cold()
+	for _, mode := range []string{"direct", "roots"} {
+		runDirectSDK(t, "hybrid_payloads_sdk.mjs", sdk, first, second, mode)
+		cold()
+	}
 }

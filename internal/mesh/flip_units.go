@@ -265,10 +265,11 @@ func flipUnits(zones []tree.ZoneKey, heat func(tree.Key) int64, size int) [][][]
 // and install. Each lot's no-writer window is recorded on progress.
 func (s *Service) flipUnit(ctx context.Context, transfer storage.CausalTransfer, unit []tree.ZoneKey, known *flipKnown, progress *transferProgress, sizer *adaptiveUnit) error {
 	for start := 0; start < len(unit); {
+		lotCtx := s.jobs.copies.traceWarmLot(ctx, known.urgent)
 		began := time.Now()
 		local := known.ofKeys(unit[start:])
 		metrics.HandoffPhase(transfer.Cession.ID.String(), "warm-copy")
-		keys, err := s.copyLot(ctx, transfer, unit[start:], local, !known.urgent)
+		keys, err := s.copyLot(lotCtx, transfer, unit[start:], local, !known.urgent)
 		known.merge(local)
 		if err != nil {
 			return fmt.Errorf("warm-lot: %w", err)
@@ -276,13 +277,13 @@ func (s *Service) flipUnit(ctx context.Context, transfer storage.CausalTransfer,
 		if len(keys) == 0 {
 			return nil
 		}
-		held, err := s.cutoverLot(ctx, transfer, keys, local, known, progress)
+		held, err := s.cutoverLot(lotCtx, transfer, keys, local, known, progress)
 		progress.held(held)
 		sizer.Observe(len(keys), held)
 		if err != nil {
 			return err
 		}
-		if err := s.jobs.copies.pace(ctx, progress.operation, time.Since(began), known.urgent); err != nil {
+		if err := s.jobs.copies.pace(lotCtx, progress.operation, time.Since(began), known.urgent); err != nil {
 			return err
 		}
 		start += len(keys)
