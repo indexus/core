@@ -95,3 +95,54 @@ func TestPressureResourceFluctuationsDoNotHideAnotherMatureResource(t *testing.T
 		clock.advance(time.Second)
 	}
 }
+
+func TestSharedCPUWaitsOnlyABoundedTimeForInboundInstalls(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		change func(*Input)
+		wait   time.Duration
+		want   string
+		host   bool
+	}{
+		{"continued installs cannot starve read-only CPU relief", func(*Input) {}, 30 * time.Second, "cpu", true},
+		{"stalled transfer stops delaying immediately", func(in *Input) { in.InboundLots = 0 }, time.Second, "cpu", true},
+		{"arriving writes keep CPU relief", func(in *Input) { in.WriteRate = 1 }, time.Second, "cpu", true},
+		{"own CPU keeps CPU relief", func(in *Input) { in.Resources = sharedHostSample(80, 90) }, time.Second, "cpu", false},
+		{"queue", func(in *Input) { in.OldestWait = 3 * time.Second }, time.Second, "queue", false},
+		{"disk", func(in *Input) { in.Resources.DiskFreePct = 1 }, time.Second, "disk", false},
+		{"memory", func(in *Input) { in.Resources.MemPct = 99 }, time.Second, "mem", false},
+		{"owned items", func(in *Input) { in.OwnedItems = 500 }, time.Second, "items", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			clock := clockAt(time.Unix(1_800_000_000, 0))
+			a := New(Config{Now: clock.now, Enabled: true, ItemsLimit: 500, PressureHold: 30 * time.Second, CPULimitPct: 60, MemRefusePct: 90, DiskMinFreePct: 20})
+			in := Input{Resources: sharedHostSample(5, 90), InboundLots: 1}
+			a.evaluatePressure(in)
+			clock.advance(30 * time.Second)
+			if sig, _ := a.evaluatePressure(in); sig != "" {
+				t.Fatalf("incoming mounts triggered %s", sig)
+			}
+			if got := a.Snapshot()["pressure"].(map[string]any); got["cpu_waits_inbound"] != true || got["inbound_lots"] != int64(1) {
+				t.Fatal(got)
+			}
+			tc.change(&in)
+			clock.advance(tc.wait)
+			if sig, host := a.evaluatePressure(in); sig != tc.want || host != tc.host {
+				t.Fatalf("got (%q,%t), want (%q,%t)", sig, host, tc.want, tc.host)
+			}
+		})
+	}
+}
+
+func TestInboundInstallsDeferCPURiseOnce(t *testing.T) {
+	clock := clockAt(time.Unix(1_800_000_000, 0))
+	a := New(Config{Now: clock.now, Enabled: true, CPULimitPct: 95, CPUFloorPct: 25, CPURisePct: 1, RiseHold: 2 * time.Second})
+	for second := 0; second <= 5; second++ {
+		in := Input{Resources: sharedHostSample(1, 35+float64(second)*2), InboundLots: 3}
+		sig, host := a.evaluatePressure(in)
+		if second < 5 && sig != "" || second == 5 && (sig != "cpu_rise" || !host) {
+			t.Fatalf("at %ds: %q host=%t", second, sig, host)
+		}
+		clock.advance(time.Second)
+	}
+}

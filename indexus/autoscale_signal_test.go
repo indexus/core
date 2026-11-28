@@ -1,6 +1,7 @@
 package indexus
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,6 +11,9 @@ import (
 	"time"
 
 	"github.com/indexus/go-indexus-core/internal/autoscale"
+	"github.com/indexus/go-indexus-core/internal/mesh"
+	"github.com/indexus/go-indexus-core/internal/storage"
+	"github.com/indexus/go-indexus-core/internal/tree"
 )
 
 // AutoscaleTick evaluates the machine, not only this process, and the scale
@@ -54,5 +58,34 @@ func TestAutoscaleTickPostsHostPressureForAHotHost(t *testing.T) {
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatalf("no scale request for a host at 90%%: %v", n.AutoscaleSnapshot())
+	}
+}
+
+func TestAutoscaleSamplesInboundMountsOnce(t *testing.T) {
+	var descriptors []VNodeDescriptor
+	for _, id := range []ID{{16}, {224}} {
+		descriptors = append(descriptors, VNodeDescriptor{ID: id, Name: BASE64.Encode(id.Bytes())})
+	}
+	f := newReadPhaseFixture(t, descriptors, false, true)
+	ctx := context.Background()
+	row := storage.Record{Collection: "0000000000000001", Location: tree.EncodeName(tree.ID{224}), ID: "join-row"}
+	if _, err := f.nodes[0].MeshData(ctx, mesh.Request{Kind: "write", RequestID: "seed", Record: &row}); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.services[1].Join(ctx); err != nil {
+		t.Fatal(err)
+	}
+	receiver := f.nodes[1]
+	receiver.EnableAutoscale(autoscale.Config{Enabled: true, ItemsOnly: true, Sample: func(string) autoscale.ResourceSample { return autoscale.ResourceSample{} }})
+	receiver.AutoscaleTick()
+	if got := receiver.AutoscaleSnapshot()["pressure"].(map[string]any)["inbound_lots"].(int64); got < 1 {
+		t.Fatalf("no inbound lot on receiver, got %d", got)
+	}
+	if _, err := receiver.MeshData(ctx, mesh.Request{Kind: "install-zone"}); err == nil {
+		t.Fatal("invalid lot acknowledged")
+	}
+	receiver.AutoscaleTick()
+	if got := receiver.AutoscaleSnapshot()["pressure"].(map[string]any)["inbound_lots"].(int64); got != 0 {
+		t.Fatalf("failed or old lot counted, got %d", got)
 	}
 }

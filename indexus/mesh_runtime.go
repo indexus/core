@@ -31,6 +31,7 @@ type meshRuntime struct {
 	lastWrite         atomic.Int64
 	demandAt          time.Time // last autoscale tick: write demand rate
 	demandSeen        int64
+	installedLots     atomic.Int64 // successful inbound lot installs since the last resource sample
 	lastColdAttempt   atomic.Int64
 	gossipRound       atomic.Uint64
 	writes            atomic.Int64 // client writes seen, for the COLD-2 cool meter
@@ -135,6 +136,9 @@ func (n *Node) MeshData(ctx context.Context, request mesh.Request) (mesh.Respons
 	// that applied the record; a relayed response that names this vnode as the
 	// applier must not fold the delta again.
 	response, err := n.mesh.service.Handle(ctx, request)
+	if err == nil && request.Kind == "install-zone" {
+		n.mesh.installedLots.Add(1)
+	}
 	appliedHere := err == nil && request.Record != nil && response.AppliedLocally
 	refreshErr := n.meshRefreshViewFor(request.Kind)
 	if err == nil {
