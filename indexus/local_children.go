@@ -9,6 +9,12 @@ import (
 // bounded local storage probes. During handoff, even a reported child can be
 // a stale copy. Omitted children must remain eligible for exact traversal.
 func (n *Node) GetLocalChildrenContext(ctx context.Context, collection, location string) ([]string, error) {
+	return n.ReadLocalChildrenContext(ctx, collection, location, false)
+}
+
+// ReadLocalChildrenContext optionally includes inconclusive local probes as
+// candidate addresses. Neither a candidate nor an omission proves ownership.
+func (n *Node) ReadLocalChildrenContext(ctx context.Context, collection, location string, includeUncertain bool) ([]string, error) {
 	if err := checkKey(&Item{Collection: collection, Location: location}, BASE64.Root()); err != nil {
 		return nil, err
 	}
@@ -29,7 +35,7 @@ func (n *Node) GetLocalChildrenContext(ctx context.Context, collection, location
 		return nil, ctx.Err()
 	}
 	defer func() { <-n.mesh.readSlots }()
-	seen, _, err := n.mesh.service.Store.ObserveChildPresence(ctx, collection, location)
+	seen, unknown, err := n.mesh.service.Store.ObserveChildPresence(ctx, collection, location)
 	if err != nil {
 		return nil, err
 	}
@@ -37,9 +43,13 @@ func (n *Node) GetLocalChildrenContext(ctx context.Context, collection, location
 		return nil, err
 	}
 	children := make([]string, 0)
-	if seen != 0 {
+	candidates := seen
+	if includeUncertain {
+		candidates |= unknown
+	}
+	if candidates != 0 {
 		for i, child := range ChildCandidates(BASE64, location) {
-			if seen&(uint64(1)<<i) != 0 {
+			if candidates&(uint64(1)<<i) != 0 {
 				children = append(children, child)
 			}
 		}

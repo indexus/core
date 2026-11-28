@@ -45,3 +45,45 @@ func TestLocalChildrenOneLevel(t *testing.T) {
 		}
 	}
 }
+
+func TestLocalChildrenIncludesUncertainTombstoneCandidatesOnRequest(t *testing.T) {
+	n := startDataNode(t, "AAAAAAAAAAAAAAAB", nil)
+	const col = "Demo000000000000"
+	for _, item := range []indexus.Item{
+		{Collection: col, Location: "aa", Id: "seen"},
+		{Collection: col, Location: "zz", Id: "a-first"},
+		{Collection: col, Location: "zz", Id: "b-live"},
+	} {
+		if err := n.node.New(&item, "@", nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := n.node.Delete(&indexus.Item{Collection: col, Location: "zz", Id: "a-first"}, "@", nil); err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		loc, flag string
+		want      []string
+	}{
+		{"@", "", []string{"a"}}, {"@", "&include_uncertain=false", []string{"a"}},
+		{"@", "&include_uncertain=true", []string{"a", "z"}},
+		{"z", "&include_uncertain=true", []string{"zz"}}, {"zz", "&include_uncertain=true", []string{}},
+	} {
+		url := fmt.Sprintf("http://127.0.0.1:%d/zones/children/local?collection=%s&location=%s%s", n.port, col, tc.loc, tc.flag)
+		r, err := http.Get(url)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var got struct {
+			Children  []string
+			Complete  *bool
+			Uncertain *bool `json:"include_uncertain"`
+		}
+		err = json.NewDecoder(r.Body).Decode(&got)
+		r.Body.Close()
+		wantEcho := tc.flag == "&include_uncertain=true"
+		if err != nil || r.StatusCode != 200 || got.Children == nil || !slices.Equal(got.Children, tc.want) || got.Complete == nil || *got.Complete || (got.Uncertain != nil) != wantEcho || (wantEcho && !*got.Uncertain) {
+			t.Fatalf("%s: status=%d response=%+v error=%v", url, r.StatusCode, got, err)
+		}
+	}
+}
