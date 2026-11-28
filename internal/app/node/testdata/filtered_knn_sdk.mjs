@@ -37,14 +37,26 @@ const cases = [
   { group: 3, query: [0, 0], want: [] },
 ];
 assert.equal(rows.length, 6);
-for (const { group, query, want } of cases) {
-  const candidates = rows.filter(row => row.metrics[0] === group).map(row => ({
+function groupVectors(group) {
+  return rows.filter(row => row.metrics[0] === group).map(row => ({
     id: row.id, location: row.location, vector: row.metrics.slice(1),
   }));
+}
+for (const { group, query, want } of cases) {
+  const candidates = groupVectors(group);
   for (const limit of [1, 2, 10]) {
     const hits = exactKnn(candidates, query, { limit });
     assert.deepEqual(hits.map(hit => [hit.id, hit.location, hit.distance_squared]), want.slice(0, limit));
   }
 }
+// [0,1] and [0,3] have the same direction but different L2 lengths.
+const vectors = groupVectors(1);
+const cosineWant = [["before","zz",0], ["far","aa",0], ["same","aa",1], ["same","zz",1]];
+for (const limit of [1, 2, 10]) {
+  const hits = exactKnn(vectors, [0, 1], { metric: "cosine", limit });
+  assert.deepEqual(hits.map(hit => [hit.id, hit.location, hit.cosine_distance]), cosineWant.slice(0, limit));
+}
+assert.throws(() => exactKnn(vectors, [0, 0], { metric: "cosine" }), RangeError);
+assert.throws(() => exactKnn(groupVectors(2), [0, 1], { metric: "cosine" }), RangeError);
 await assertCold();
-console.log(JSON.stringify({ liveRows: rows.length, directRPC: calls.length, offlineRankings: cases.length * 3, coldCacheChecks: 4 }));
+console.log(JSON.stringify({ liveRows: rows.length, directRPC: calls.length, l2Rankings: cases.length * 3, cosineRankings: 3, zeroVectorErrors: 2, coldCacheChecks: 4 }));
