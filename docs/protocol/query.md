@@ -192,3 +192,17 @@ opaque bodies needed to decode it,
 the peer returns 413 and no rows. An invalid request returns 400, a peer
 without installed authority returns 409, and a frozen owner returns 503.
 The caller chooses the next peer. Each call sees its own snapshot.
+
+### Immediate children observed on one peer
+
+`GET /zones/children/local?collection=<name>&location=<prefix>` requires read
+access. It returns e.g. `{"children":["a0","a_"],"complete":false}`. At root
+(`@`) the addresses have one character. A leaf returns an empty list. Rows
+placed directly at the requested prefix do not create a child.
+
+The peer probes its own store for witnesses under immediate children. Treat
+the array as traversal hints: additional children can exist locally or on
+other peers, and a reported child can reflect a stale copy during handoff.
+An empty array also carries `complete:false`. Exact readers need a separate
+coverage mechanism. The request never fans out, follows referrals, warms the
+summary cache or retains a cursor. The response sets `Cache-Control: no-store`.
