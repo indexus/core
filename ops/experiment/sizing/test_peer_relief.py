@@ -28,6 +28,18 @@ class PeerReliefTest(unittest.TestCase):
         self.assertLessEqual(r['borrowed_lane_seconds'],5)
         self.assertLess(r['rate_drift'],1e-8)
 
+    def test_booted_capacity_relief_requires_a_copy(self):
+        observed = fixture(1)
+        options = dict(additional_hosts=3, boot_seconds=20, occupied_for=60, breadth=5)
+        before_boot = simulate(observed, 'spawn', seconds=20, **options)
+        self.assertEqual((before_boot['hosts'], before_boot['started']), (2, 0))
+        without_placement = simulate(observed, 'spawn', seconds=60, **(options | {'breadth': 0}))
+        result = simulate(observed, 'spawn', seconds=60, **options)
+        self.assertEqual(result['hosts'], 5)
+        self.assertGreater(result['finished'], 0)
+        self.assertLess(result['hot_host_seconds'], without_placement['hot_host_seconds'])
+        self.assertLess(result['rate_drift'], 1e-8)
+
     def test_no_peer_with_memory_headroom(self):
         f = fixture(0)
         f['fleet']['machines'][1]['ram']=80

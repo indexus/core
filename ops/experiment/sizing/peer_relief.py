@@ -66,8 +66,12 @@ def fleet(frame, cost, occupied_for):
 
 
 def simulate(frame, policy, seed=1, cost=.001, seconds=120, occupied_for=30,
-             breadth=4, hot_fraction=.5, copy_seconds=10, warmup=15, ramp=1, heat=1.):
+             breadth=4, hot_fraction=.5, copy_seconds=10, warmup=15, ramp=1, heat=1.,
+             additional_hosts=0, boot_seconds=45):
     hosts = fleet(frame,cost,occupied_for)
+    if additional_hosts < 0 or boot_seconds < 0:
+        raise ValueError("additional host count and boot delay must be nonnegative")
+    initial_hosts = len(hosts)
     initial_rate = sum(sum(h.rates) for h in hosts)
     rng = random.Random(seed)
     offsets = {h.id:i%5 for i,h in enumerate(hosts)}
@@ -80,6 +84,12 @@ def simulate(frame, policy, seed=1, cost=.001, seconds=120, occupied_for=30,
     initially_hot = {key for key,val in initial_cpu.items() if val > .60}
     good = {key:0 for key in initially_hot}
     for t in range(seconds):
+        if additional_hosts and t == boot_seconds:
+            reference = hosts[0]
+            for i in range(additional_hosts):
+                host = Host(f"new-{i}", reference.cores, 0., [], reference.reserve, t)
+                offsets[host.id] = i % 5
+                hosts.append(host)
         demand = 1 + (ramp-1)*min(t/40,1)
         for h in hosts:
             h.extra = 0
@@ -193,7 +203,7 @@ def simulate(frame, policy, seed=1, cost=.001, seconds=120, occupied_for=30,
             queue_seconds+=h.queue
         max_drift=max(max_drift,abs(sum(sum(h.rates) for h in hosts)-initial_rate))
     waits=[first_relief.get(k,seconds) for k in initially_hot]
-    return dict(hosts=len(hosts),initial_hot=len(waits),served=len(first_relief),
+    return dict(hosts=len(hosts),initial_hosts=initial_hosts,initial_hot=len(waits),served=len(first_relief),
                 median_delay_censored=median(waits) if waits else None,
                 hot_host_seconds=hot_seconds,last_above_60=last_hot,
                 peak_queue=round(peak_queue),queued_write_seconds=round(queue_seconds),
@@ -211,13 +221,18 @@ if __name__=='__main__':
     p.add_argument('--copy-seconds',type=int,default=10)
     p.add_argument('--ramp',type=float,default=1.)
     p.add_argument('--heat',type=float,default=1.)
+    p.add_argument('--additional-hosts', type=int, default=0)
+    p.add_argument('--boot-seconds', type=int, default=45)
     a=p.parse_args()
     if min(a.seeds,a.copy_seconds,a.cost_ms,a.ramp,a.heat)<=0 or not 0<a.fraction<=1 or a.occupied_for<0:
         p.error('invalid scenario parameter')
+    if min(a.additional_hosts, a.boot_seconds) < 0:
+        p.error('additional hosts and boot delay must be nonnegative')
     frame=snapshot(a.live,a.at)
     for policy,k in [('periodic_paced',1),('periodic',1),('periodic',4),('spawn',4),('reuse',2),('reuse',4),('reuse',8),('paced',4),('elastic_grain',4),('leased',4),('share_lane',4),('potential',4)]:
         runs=[simulate(frame,policy,seed, cost=a.cost_ms/1000,occupied_for=a.occupied_for,
-                       hot_fraction=a.fraction,copy_seconds=a.copy_seconds,breadth=k,ramp=a.ramp,heat=a.heat)
+                       hot_fraction=a.fraction,copy_seconds=a.copy_seconds,breadth=k,ramp=a.ramp,heat=a.heat,
+                       additional_hosts=a.additional_hosts,boot_seconds=a.boot_seconds)
               for seed in range(a.seeds)]
         summary={key:median([r[key] for r in runs]) for key in runs[0]
                  if all(r[key] is not None for r in runs)}
