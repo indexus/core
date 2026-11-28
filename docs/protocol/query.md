@@ -221,3 +221,17 @@ complete before cancellation returns.
 locations. In memory those totals fold the descendant rows. On disk they
 use segment sums, and determining a unique location among retractions can
 require a further key walk.
+
+### Immediate children observed on one peer
+
+`GET /zones/children/local?collection=<name>&location=<prefix>` requires read
+access. It returns e.g. `{"children":["a0","a_"],"complete":false}`. At root
+(`@`) the addresses have one character. A leaf returns an empty list. Rows
+placed directly at the requested prefix do not create a child.
+
+The peer probes its own store for witnesses under immediate children. Treat
+the array as traversal hints: additional children can exist locally or on
+other peers, and a reported child can reflect a stale copy during handoff.
+An empty array also carries `complete:false`. Exact readers need a separate
+coverage mechanism. The request never fans out, follows referrals, warms the
+summary cache or retains a cursor. The response sets `Cache-Control: no-store`.
