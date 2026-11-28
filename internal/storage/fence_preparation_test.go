@@ -295,3 +295,41 @@ func TestFenceZonesReturnsTheSealOfEachSnapshot(t *testing.T) {
 		}
 	}
 }
+
+func TestColdFencePrepLeavesSourceWritableAndIncludesLateACK(t *testing.T) {
+	source, target, genesis := ticketStores(t)
+	row := Record{Collection: "Demo000000000000", Location: "aa", ID: "early"}
+	if _, err := source.Write("early", row); err != nil {
+		t.Fatal(err)
+	}
+	op := ticketAdmission(t, source, target, genesis.Right().ID, tree.Region{})
+	z, _ := recordZone(row)
+	zones := []tree.ZoneKey{z}
+	commit, err := source.PrepareColdFence(op.Cession.ID, zones)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Mutating the caller's slice cannot redirect this prepared decision.
+	zones[0], _ = tree.NewZoneKey(row.Collection, "bb")
+	row.ID = "late"
+	if _, err := source.Write("late", row); err != nil {
+		t.Fatalf("source cannot ACK during warm preparation: %v", err)
+	}
+	snaps, _, proofs, err := commit()
+	if err != nil || len(snaps) != 1 || snaps[0].Zone != z || len(snaps[0].Records) != 2 {
+		t.Fatalf("stale or redirected fence: %+v, %v", snaps, err)
+	}
+	if err := target.MountZones(op.Cession.ID, source.node, nil, nil, snaps, proofs); err != nil {
+		t.Fatal(err)
+	}
+	if _, applied, err := target.Apply("late", row); err != nil || applied {
+		t.Fatalf("late ACK was not deduplicated at the receiver: applied=%v err=%v", applied, err)
+	}
+	row.ID = "after"
+	if _, err := source.Write("after", row); err == nil {
+		t.Fatal("source still writable after commit")
+	}
+	if _, err := target.Write("after", row); err != nil {
+		t.Fatal(err)
+	}
+}

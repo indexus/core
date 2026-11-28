@@ -308,11 +308,14 @@ func (s *Service) pinSurvivor(ctx context.Context, proposal *ColdProposal, targe
 	return pin.ColdDirty, s.Store.ConfirmColdPin(*pin.ColdPin)
 }
 
+type coldFoldContextKey struct{}
+
 // drainPieces hands every piece of the drain to the survivor. It reports
 // false when heat or a change to the pair calls the fold off before a piece
 // started. A started piece is completed even then: rolling back its point
 // flips or its emitted certificate would revoke acknowledged writes.
 func (s *Service) drainPieces(ctx context.Context, work *storage.ColdDrain, proposal *ColdProposal, dirty bool) (drained bool, err error) {
+	ctx = context.WithValue(ctx, coldFoldContextKey{}, true)
 	for _, piece := range work.Pieces {
 		snapshot, err := s.Store.CausalRouting()
 		if err != nil {

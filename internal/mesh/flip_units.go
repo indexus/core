@@ -278,8 +278,10 @@ func (s *Service) flipUnit(ctx context.Context, transfer storage.CausalTransfer,
 			return nil
 		}
 		held, err := s.cutoverLot(lotCtx, transfer, keys, local, known, progress)
-		progress.held(held)
-		sizer.Observe(len(keys), held)
+		if held > 0 {
+			progress.held(held)
+			sizer.Observe(len(keys), held)
+		}
 		if err != nil {
 			return err
 		}
@@ -297,6 +299,19 @@ func (s *Service) flipUnit(ctx context.Context, transfer storage.CausalTransfer,
 func (s *Service) cutoverLot(ctx context.Context, transfer storage.CausalTransfer, keys []tree.ZoneKey, local map[string]uint64, known *flipKnown, progress *transferProgress) (held time.Duration, err error) {
 	operation := transfer.Cession.ID
 	target := transfer.Cession.Target
+	fence := func() ([]storage.Snapshot, []storage.ZoneSeal, []causal.ZoneTransfer, error) {
+		return s.Store.FenceZones(operation, keys)
+	}
+	if cold, _ := ctx.Value(coldFoldContextKey{}).(bool); cold && !known.urgent {
+		metrics.HandoffPhase(operation.String(), "prepare-cold-fence")
+		fence, err = s.Store.PrepareColdFence(operation, keys)
+		if err != nil {
+			return 0, err
+		}
+		if err := ctx.Err(); err != nil {
+			return 0, err
+		}
+	}
 	began := time.Now()
 	mark := began
 	cutoverDone := s.beginCutover(keys)
@@ -321,7 +336,7 @@ func (s *Service) cutoverLot(ctx context.Context, transfer storage.CausalTransfe
 		}
 	}()
 
-	snaps, seals, zts, err := s.Store.FenceZones(operation, keys)
+	snaps, seals, zts, err := fence()
 	fencedAt := time.Now()
 	mark = progress.add("freeze", mark, 0)
 	if err != nil {

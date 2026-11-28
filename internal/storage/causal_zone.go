@@ -7,6 +7,7 @@ import (
 	"errors"
 	"github.com/indexus/go-indexus-core/internal/causal"
 	"github.com/indexus/go-indexus-core/internal/tree"
+	"slices"
 	"strings"
 )
 
@@ -155,20 +156,41 @@ func (s *Store) freezePreparedTx(tx *Tx, state CausalState, operation causal.Tra
 }
 
 func (s *Store) FreezeZones(operation causal.TransferID, zones []tree.ZoneKey) ([]Snapshot, error) {
-	snaps, _, _, err := s.fencePrepared(operation, zones, false)
+	snaps, _, _, err := s.fencePrepared(operation, zones, false, nil)
 	return snaps, err
 }
 
-func (s *Store) fencePrepared(operation causal.TransferID, zones []tree.ZoneKey, emit bool) ([]Snapshot, []ZoneSeal, []causal.ZoneTransfer, error) {
+// PrepareColdFence reads and seals a cold lot while its source still accepts
+// writes. The returned commit enters the normal admission gate, validates
+// the snapshot under the writer and rebuilds a changed lot inside the gate.
+func (s *Store) PrepareColdFence(operation causal.TransferID, zones []tree.ZoneKey) (func() ([]Snapshot, []ZoneSeal, []causal.ZoneTransfer, error), error) {
+	zones = slices.Clone(zones)
+	prepared, err := s.prepareFence(operation, zones)
+	if err != nil {
+		return nil, err
+	}
+	return func() ([]Snapshot, []ZoneSeal, []causal.ZoneTransfer, error) {
+		return s.fencePrepared(operation, zones, true, prepared)
+	}, nil
+}
+
+func (s *Store) fencePrepared(operation causal.TransferID, zones []tree.ZoneKey, emit bool, prepared []preparedFence) ([]Snapshot, []ZoneSeal, []causal.ZoneTransfer, error) {
 	if len(zones) == 0 {
 		return nil, nil, nil, nil
 	}
 	release := s.beginFencePreparation(zones)
 	defer release()
-	for attempt := 0; attempt < fencePrepareAttempts; attempt++ {
-		prepared, err := s.prepareFence(operation, zones)
-		if err != nil {
-			return nil, nil, nil, err
+	attempts := fencePrepareAttempts
+	if prepared != nil {
+		attempts++ // allow all normal gated attempts if the warm read raced
+	}
+	for attempt := 0; attempt < attempts; attempt++ {
+		var err error
+		if prepared == nil {
+			prepared, err = s.prepareFence(operation, zones)
+			if err != nil {
+				return nil, nil, nil, err
+			}
 		}
 		snaps, seals := make([]Snapshot, len(prepared)), make([]ZoneSeal, len(prepared))
 		for i, p := range prepared {
@@ -185,6 +207,7 @@ func (s *Store) fencePrepared(operation causal.TransferID, zones []tree.ZoneKey,
 			return nil
 		})
 		if errors.Is(err, errFenceChanged) {
+			prepared = nil
 			continue
 		}
 		return snaps, seals, zts, err
@@ -523,7 +546,7 @@ func (s *Store) installZonesTx(tx *Tx, state CausalState, operation causal.Trans
 // the writer: the caller sends them and does not hash the lot again while
 // the lot has no writer.
 func (s *Store) FenceZones(operation causal.TransferID, zones []tree.ZoneKey) ([]Snapshot, []ZoneSeal, []causal.ZoneTransfer, error) {
-	return s.fencePrepared(operation, zones, true)
+	return s.fencePrepared(operation, zones, true, nil)
 }
 
 // stagingVersion is the canonical header (source, base digest, certification)

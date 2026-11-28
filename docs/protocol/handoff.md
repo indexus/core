@@ -218,3 +218,12 @@ Neither local copies nor remote copies grant authority; any future local
 transport must pass the same certification, fence, install, placement and replay
 gates. Adding a vnode on an existing machine does not add physical CPU/disk
 capacity or fault isolation.
+
+
+During a cold drain, an unfenced lot can be read and sealed before the
+source begins queuing its writers. The preparation grants no rights. At
+cutover the source checks the per-zone sequence and the exact transfer-state
+row under the writer lock. A changed lot is rebuilt under local admission
+before any cession is committed. Discarding a preparation, including on
+cancellation, requires no cleanup on disk. Already frozen recovery and hot
+joins retain their existing scheduling.
