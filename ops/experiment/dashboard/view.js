@@ -32,7 +32,7 @@
       const stock=itemSum(p.fleet?.vnodes||[],p.metrics_stale);
       out.stock=stock.value??(!p.metrics_stale&&!p.fleet?.vnodes?.length?p.items:null);
       out.coverage=stock;
-      return Object.assign(out,growthMetrics(p));
+      return Object.assign(out,growthMetrics(p),hostSpread(p));
     });
     if(!points.length){root.append(el('p','Aucune mesure disponible.'));return;}
     const p=points[index],f=p.fleet||{},sim=f.source==='simulation';
@@ -54,6 +54,8 @@
       ['Latence écriture, ms',[['p50_ms','p50'],['p95_ms','p95'],['p99_ms','p99']]],
       ['Items observés dans le réseau',[['stock','somme des compteurs disponibles']]],
       ['Croissance du réseau',[['ready_count','vnodes prêts'],['machine_count','machines observées']],true],
+      ['Écritures/s par machine active',[['hostRateLow','minimum'],['hostRateMedian','médiane'],['hostRateHigh','maximum']]],
+      ['Items par machine active',[['hostItemsLow','minimum'],['hostItemsMedian','médiane'],['hostItemsHigh','maximum']]],
       ['Densité du réseau',[['ready_per_machine','vnodes prêts par machine']],true],
       ['Transferts ouverts',[['open','ouverts'],['frozen','gelés']]],
       ['Ressources : maximum observé, %',[['cpu_max','CPU'],['ram_max','RAM'],['disk_max','disque']]],
@@ -74,28 +76,73 @@
       ['Générateur de charge, % CPU',[['loader_pct','CPU']]],
       ['Remontée des totaux',[['flush_s','temps le plus long (s)'],['pending_k','arêtes en attente (milliers)']]]
     ])more.append(chart(points.slice(0,index+1),title,series,chartWidth));diagnostics.append(more);root.append(diagnostics);
-    root.append(el('h2','Machines et vnodes'));
-    root.append(el('p',`${unknown} machine(s) avec ressources inconnues. Chaque cercle regroupe les vnodes d’une machine. Les flèches suivent les transferts du donneur vers le receveur. Sélectionner un rond pour ses mesures. La somme des compteurs disponibles peut être partielle et n’est pas un audit des clés uniques.`, 'note'));
+    root.append(el('h2','Réseau au temps '+fmt(p.x??p.t)+' s'));
+    root.append(el('p',`${unknown} machine(s) avec ressources inconnues. Les flèches représentent les transferts signalés à cet instant, du donneur vers le receveur. Sélectionner un rond pour ses mesures. La somme des compteurs disponibles peut être partielle et n’est pas un audit des clés uniques.`, 'note'));
     const detail=el('p','Sélectionner un vnode.','detail');detail.setAttribute('aria-live','polite');
-    root.append(detail,topology(machines,nodes,transfers,detail,sim,p.metrics_stale,root.clientWidth),el('h2','Transferts et délégations'));
+    const choices=el('div',null,'legend'), plot=el('div');
+    const active=p.metrics_stale?[]:transfers.filter(tr=>!tr.stale);
+    const unknownLinks=transfers.length-active.length;
+    const departures=departedTransfers(points[index-1],p);
+    choices.setAttribute('aria-label','Vue du réseau');
+    for(const [key,title] of [['hosts','Par machine'],['radial','Vnodes indépendants']]){
+      const b=el('button',title);b.type='button';b.dataset.mode=key;
+      b.onclick=()=>{root.dataset.mode=key;drawTopology();};choices.append(b);
+    }
+    function drawTopology(){
+      const mode=root.dataset.mode||'hosts';
+      for(const b of choices.children)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));
+      detail.textContent='Sélectionner un vnode.';
+      plot.replaceChildren(topology(machines,nodes,active,detail,sim,p.metrics_stale,root.clientWidth,mode));
+    }
+    drawTopology();
+    root.append(choices,detail,plot,el('h2','Transferts et délégations'));
+    if(!p.metrics_stale)root.append(el('p',fmt(active.length)+' opération(s) signalée(s)'+(departures==null?'':' · '+fmt(departures)+' sortie(s) de la liste depuis le relevé précédent')+'.','note'));
+    if(unknownLinks)root.append(el('p',fmt(unknownLinks)+' dernière(s) observation(s) périmée(s), masquée(s) sur le graphe. Clôture inconnue.','note'));
     const list=el('div',null,'transfers');
     if(!transfers.length)list.append(el('p',p.metrics_stale?'État des transferts inconnu.':'Aucun transfert observé à cet instant.'));
     for(const tr of transfers){
       const row=el('div',null,'transfer'+(tr.frozen?' hot':''));
       row.append(el('strong',`${tr.source_machine||'?'} → ${tr.target_machine||'destination inconnue'}`),
-        el('span',`${tr.phase||'copie'}${tr.stale?' · état périmé':''} · âge ${fmt(tr.age_s,1)} s · ${tr.progress==null?'progression non mesurée':fmt(tr.progress*100,1)+' % copiés'}${tr.share==null?'':' · '+fmt(tr.share*100,1)+' % de charge déplacée'}${tr.frozen?' · gel observé':''}`));list.append(row);
+        el('span',`${tr.phase||'copie'}${tr.stale?' · état périmé':''} · âge ${fmt(tr.age_s,1)} s · ${tr.progress==null?'progression non mesurée':fmt(tr.progress*100,1)+' % copiés'}${tr.share==null?'':' · '+fmt(tr.share*100,1)+' % de charge déplacée'}${tr.frozen?' · fence franchie':''}`));list.append(row);
     }
     root.append(list);
+  }
+  function departedTransfers(before,now){
+    if(!before?.fleet||!now.fleet||before.metrics_stale||now.metrics_stale)return null;
+    const reported=new Set((now.fleet.vnodes||[]).filter(n=>n.state!=='stale').map(n=>n.id));
+    const present=new Set((now.fleet.transfers||[]).map(tr=>tr.id));
+    return (before.fleet.transfers||[]).filter(tr=>!tr.stale&&!present.has(tr.id)&&
+      (now.fleet.source==='simulation'||reported.has(tr.source))).length;
+  }
+  function hostSpread(p){
+    const sums=new Map(),result={};
+    if(p.metrics_stale)return result;
+    for(const n of p.fleet?.vnodes||[]){
+      if(!sums.has(n.machine))sums.set(n.machine,{hostItems:0,hostRate:0});
+      const h=sums.get(n.machine);
+      for(const [key,val] of [['hostItems',n.items_counted===false?null:n.items],['hostRate',n.applied_s??n.estimated_s]]){
+        if(n.state==='stale'||!Number.isFinite(val))h[key]=null;
+        else if(h[key]!=null)h[key]+=val;
+      }
+    }
+    for(const key of ['hostRate','hostItems']){
+      const v=[...sums.values()].map(h=>h[key]).filter(Number.isFinite).sort((a,b)=>a-b);
+      if(v.length){
+        result[key+'Low']=v[0];result[key+'High']=v.at(-1);
+        result[key+'Median']=(v[Math.floor((v.length-1)/2)]+v[Math.floor(v.length/2)])/2;
+      }
+    }
+    return result;
   }
   function itemSum(nodes,stale){
     const counted=stale?[]:nodes.filter(n=>n.state!=='stale'&&n.items_counted!==false&&Number.isFinite(n.items));
     return {value:counted.length?counted.reduce((sum,n)=>sum+n.items,0):null,count:counted.length,total:nodes.length};
   }
-  function topology(machines,nodes,transfers,detail,sim,stale,width){
+  function topology(machines,nodes,transfers,detail,sim,stale,width,mode){
     const wrap=el('div',null,'topology');
     if(!machines.length){wrap.append(el('p','Aucun inventaire machine enregistré.'));return wrap;}
     const colors={ready:'#16856a',receiving:'#347cca',joining:'#347cca',unknown:'#888'};
-    wrap.append(el('p','Vnode vert = prêt · bleu = en cours de join · gris = inconnu ou périmé. Contour orange = ressource au-dessus de 60 %. Flèche orange = gel observé.','note'));
+    wrap.append(el('p','Vnode vert = prêt · bleu = en cours de join · gris = inconnu ou périmé. Contour orange = ressource au-dessus de 60 %. Flèche orange = opération ayant franchi une fence. Le gel d’une écriture peut déjà être terminé.','note'));
     const canvas=svg('svg',{'aria-label':'Machines, vnodes et sens des transferts',role:'group'});
     const defs=svg('defs',{});
     for(const [id,color] of [['flow','#588fc2'],['fence','#ce663e']]){
@@ -113,13 +160,16 @@
     function label(group,x,y,value){
       const t=svg('text',{x,y,'text-anchor':'middle'});t.textContent=value;group.append(t);
     }
-    function select(group,description){
+    function select(group,description,extra){
       group.setAttribute('tabindex',0);group.setAttribute('role','button');group.setAttribute('aria-label',description);
       const title=svg('title',{});title.textContent=description;group.append(title);
-      group.onclick=()=>{detail.textContent=description;};
+      group.onclick=()=>{detail.textContent=description+(extra?extra():'');};
       group.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();group.onclick();}};
     }
-    ordered.forEach((h,i)=>{
+    if(mode==='radial'){
+      canvas.setAttribute('class','radial');
+      radialNodes(nodes,glyphs,ends,canvas,colors,select,sim,stale);
+    }else ordered.forEach((h,i)=>{
       const ns=members.get(h.id),x=(i%cols+.5)*cell,y=Math.floor(i/cols)*step+radius+12;
       hosts.set(h.id,{x,y,r:radius});
       const g=svg('g',{}),sum=itemSum(ns,stale);
@@ -137,7 +187,7 @@
       const side=Math.ceil(Math.sqrt(ns.length));
       ns.forEach((n,j)=>{
         const nx=x+((j%side)-(Math.min(side,ns.length-Math.floor(j/side)*side)-1)/2)*16,ny=y+(Math.floor(j/side)-(Math.ceil(ns.length/side)-1)/2)*16;
-        const point={x:nx,y:ny,r:6};ends.set(n.id,point);if(n.monitor)ends.set(n.monitor,point);
+        const point={x:nx,y:ny,r:6};ends.set(n.id,point);if(n.monitor&&(n.state!=='stale'||!ends.has(n.monitor)))ends.set(n.monitor,point);
         const dot=svg('g',{});dot.append(svg('circle',{cx:nx,cy:ny,r:6,fill:stale?colors.unknown:colors[n.state]||colors.unknown}));
         select(dot,`${n.label||n.id} · ${h.label||h.id} · ${n.state} · ${fmt(itemSum([n],stale).value)} items · ${fmt(stale?null:n.applied_s??n.estimated_s,1)} ${sim?'requises':'applications'}/s`);glyphs.append(dot);
       });
@@ -151,9 +201,60 @@
         `M${a.x} ${a.y-a.r} Q${a.x+55} ${a.y-55} ${b.x+b.r} ${b.y}`;
       links.append(svg('path',{d:path,fill:'none',stroke:color,opacity:(tr.stale||stale) ? 0.25 : 0.72,'stroke-dasharray':tr.stale||stale?'4 4':'none','marker-end':'url(#'+(tr.frozen?'fence':'flow')+')','pointer-events':'none'}));
     }
+    if(mode==='radial')wrap.append(el('p',sim?'Disposition circulaire des vnodes simulés.':'Branches grises : préfixes binaires communs aux adresses. Sélectionner un vnode pour lire ses buckets parmi les adresses observées.','note'));
     wrap.append(canvas);
     if(unresolved)wrap.append(el('p',fmt(unresolved)+' transfert(s) avec extrémité inconnue.','note'));
     return wrap;
+  }
+  // Names encode 96 bits using Indexus's alphabet (internal/tree/codec.go).
+  function addressBits(label){
+    if(!/^[0-9A-Za-z_-]{16}$/.test(label))return '';
+    const alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+    return [...label].map(c=>alphabet.indexOf(c).toString(2).padStart(6,'0')).join('');
+  }
+  function commonBits(a,b){
+    let i=0;while(i<a.length&&i<b.length&&a[i]===b[i])i++;return i;
+  }
+  function radialNodes(nodes,layer,ends,canvas,colors,select,sim,stale){
+    const leaves=nodes.map(n=>({n,bits:addressBits(n.label)})).sort((a,b)=>
+      (a.bits<b.bits?-1:a.bits>b.bits?1:0)||String(a.n.id).localeCompare(String(b.n.id)));
+    if(!leaves.length)return;
+    const radius=Math.max(150,leaves.length*2.6),size=2*radius+28,mid=size/2;
+    canvas.setAttribute('viewBox',`0 0 ${size} ${size}`);
+    const branches=svg('g',{fill:'none',stroke:'#8886','pointer-events':'none'});
+    layer.append(branches);
+    const angle=i=>2*Math.PI*i/leaves.length-Math.PI/2;
+    const point=(i,r)=>({x:mid+r*Math.cos(angle(i)),y:mid+r*Math.sin(angle(i))});
+    function branch(start,end,depth,parent){
+      const leaf=end-start===1;
+      const here=point((start+end-1)/2,leaf?radius:radius*depth/(depth+2));
+      branches.append(svg('line',{x1:parent.x,y1:parent.y,x2:here.x,y2:here.y}));
+      if(leaf)return;
+      const bit=commonBits(leaves[start].bits,leaves[end-1].bits);
+      if(bit===96){
+        for(let i=start;i<end;i++)branch(i,i+1,depth+1,here);
+        return;
+      }
+      let split=start+1;
+      while(split<end&&leaves[split].bits[bit]===leaves[start].bits[bit])split++;
+      branch(start,split,depth+1,here);branch(split,end,depth+1,here);
+    }
+    if(leaves.every(l=>l.bits))branch(0,leaves.length,0,{x:mid,y:mid});
+    for(const [i,{n,bits}] of leaves.entries()){
+      const {x,y}=point(i,radius),r=5,g=svg('g',{});
+      const pos={x,y,r};ends.set(n.id,pos);if(n.monitor&&(n.state!=='stale'||!ends.has(n.monitor)))ends.set(n.monitor,pos);
+      g.append(svg('circle',{cx:x,cy:y,r,fill:stale?colors.unknown:colors[n.state]||colors.unknown}));
+      const description=`${n.label} · ${n.machine} · ${n.state} · ${fmt(itemSum([n],stale).value)} items · ${fmt(stale?null:n.applied_s??n.estimated_s,1)} ${sim?'requises':'applications'}/s`;
+      select(g,description,()=>{
+        if(!bits||stale)return '';
+        const buckets=new Map();
+        for(const l of leaves)if(l.bits&&l.bits!==bits&&l.n.state!=='stale'){
+          const k=commonBits(bits,l.bits);buckets.set(k,(buckets.get(k)||0)+1);
+        }
+        return ' · Buckets observables (bits communs × pairs) : '+[...buckets].sort(([a],[b])=>a-b).map(([k,count])=>k+' × '+count).join(', ');
+      });
+      layer.append(g);
+    }
   }
   function pressure(h){return Math.max(...['cpu','ram','disk','io'].map(k=>Number.isFinite(h[k])?h[k]:-1));}
   function chart(points,title,series,width,stepped=false){
@@ -179,5 +280,5 @@
     }
     for(const [x,label] of [[l,first],[w-r,last]]){const n=svg('text',{x,y:h-5,'text-anchor':x===l?'start':'end'});n.textContent=fmt(label)+' s';g.append(n);}figure.append(g);return figure;
   }
-  global.IndexusDashboard={render,growthMetrics,itemSum};
+  global.IndexusDashboard={render,growthMetrics,itemSum,addressBits,commonBits,hostSpread,departedTransfers};
 })(typeof window==='undefined'?globalThis:window);

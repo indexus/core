@@ -24,3 +24,25 @@ test('stock sums reporting vnodes, preserving measured zero and missing coverage
   assert.equal(itemSum(nodes,true).value,null);
   assert.equal(itemSum([{items:0}],false).value,0);
 });
+test('radial layout uses the Indexus 96-bit alphabet and XOR bucket depths',()=>{
+  const {addressBits,commonBits}=globalThis.IndexusDashboard;
+  const zero=addressBits('0'.repeat(16));
+  assert.equal(zero,'0'.repeat(96));
+  assert.equal(commonBits(zero,addressBits('0'.repeat(15)+'1')),95);
+  assert.equal(commonBits(zero,addressBits('_'.repeat(16))),0);
+  assert.equal(addressBits('V1'),'');
+});
+test('load spread excludes a machine with incomplete counters',()=>{
+  const {hostSpread}=globalThis.IndexusDashboard;
+  const p={fleet:{vnodes:[{machine:'a',applied_s:2,items:5},{machine:'a',applied_s:4,items:7},
+    {machine:'b',applied_s:null,items:1},{machine:'c',applied_s:0,items:0}]}};
+  assert.deepEqual(hostSpread(p),{hostRateLow:0,hostRateMedian:3,hostRateHigh:6,hostItemsLow:0,hostItemsMedian:1,hostItemsHigh:12});
+  assert.deepEqual(hostSpread({...p,metrics_stale:true}),{});
+});
+test('only a fresh donor can confirm an operation left its reported list',()=>{
+  const {departedTransfers}=globalThis.IndexusDashboard;
+  const before={fleet:{transfers:[{id:'done',source:'A'},{id:'unknown',source:'B'},{id:'active',source:'A'}]}};
+  const now={fleet:{vnodes:[{id:'A',state:'ready'},{id:'B',state:'stale'}],transfers:[{id:'active',source:'A'}]}};
+  assert.equal(departedTransfers(before,now),1);
+  assert.equal(departedTransfers(before,{...now,metrics_stale:true}),null);
+});

@@ -89,3 +89,6 @@
   border-left:3px solid var(--series-2);
   padding:8px
 }
+.ix-dashboard button[aria-pressed] {border:1px solid #8887;border-radius:5px;padding:5px 12px;color:inherit;background:transparent;cursor:pointer}
+.ix-dashboard button[aria-pressed=true] {background:var(--series-1);color:white}
+.ix-dashboard .topology svg.radial {max-height:90vh}

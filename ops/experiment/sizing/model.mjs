@@ -316,7 +316,7 @@ export class SizingSimulation {
       cpu:+r.cpu.toFixed(3),ram:+r.ram.toFixed(3),disk:+r.disk.toFixed(3),io:+r.io.toFixed(3),
       rate:+r.rate.toFixed(1),copyMiB:+r.copyMiB.toFixed(1)}));
     this.snapshots.push({t:this.t,demand:demandAt(this.t,this.c.scenario),hosts,
-      jobs:this.jobs.map(j=>({vnode:j.vnode,src:j.src,dst:j.dst,fraction:j.fraction,share:j.share,
+      jobs:this.jobs.map(j=>({vnode:j.vnode,sourceVnode:j.sourceVnode,src:j.src,dst:j.dst,fraction:j.fraction,share:j.share,
         bandwidth:j.bandwidth,leftMiB:j.leftMiB})),vnodes:this.vnodes.length});
   }
 
@@ -340,6 +340,6 @@ export function dashboardPoints(result) {
     state:!h.ready?'booting':h.slots?'active':'warm',cpu:h.cpu,ram:h.ram,disk:h.disk,io:h.io,cpu_scope:'estimé',slots:result.config.slots})),
    vnodes:s.hosts.flatMap(h=>h.vnodes.map(id=>({id:id+'@'+h.id,label:'V'+(id+1),machine:String(h.id),
     state:h.copied.some(j=>j.vnode===id)?'receiving':'ready',estimated_s:h.nodeStats?.[id]?.rate??null}))),
-   transfers:s.jobs.map(j=>({id:String(j.vnode),source_machine:String(j.src),target_machine:String(j.dst),
+   transfers:s.jobs.map(j=>({id:String(j.vnode),source:j.sourceVnode+'@'+j.src,target:j.vnode+'@'+j.dst,source_machine:String(j.src),target_machine:String(j.dst),
     phase:'copie progressive',progress:j.fraction,share:j.share,age_s:null}))}}));
 }
