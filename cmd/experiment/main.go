@@ -39,7 +39,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: experiment load|observe|audit|agent|ca|sentinel|loadagent [flags]")
+		fmt.Fprintln(os.Stderr, "usage: experiment load|observe|audit|settlement|agent|ca|sentinel|loadagent [flags]")
 		os.Exit(2)
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -50,6 +50,8 @@ func main() {
 		err = load(ctx, os.Args[2:])
 	case "observe":
 		err = observe(ctx, os.Args[2:])
+	case "settlement":
+		err = settlement(ctx, os.Args[2:])
 	case "audit":
 		err = audit(ctx, os.Args[2:])
 	case "agent":

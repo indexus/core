@@ -167,20 +167,18 @@ phase() {
   # for three polls in a row, at most QUIET_MAX s (2026-11-19: late joins and
   # folds during the audit made each read take seconds).
   endpoints # the vnodes started during the phase are audited too
-  local quiet=0 waited=0 busy
+  local quiet=0 waited=0 busy=unknown started=$SECONDS
   while (( quiet < 3 && waited < ${QUIET_MAX:-300} )); do
-    busy=$(for m in ${MONITORS//,/ }; do curl -sk --max-time 3 "$m/metrics"; echo; done | python3 -c '
-import sys,json
-n=0
-for l in sys.stdin:
-    try: m=json.loads(l)
-    except Exception: continue
-    n+=m["handoffs"]["open"]["count"]+len(m.get("frozen_transfers") or [])
-print(n)')
+    busy=$(timeout 10 "$AUDITOR" settlement "$dir/monitors") || busy=unknown
     if [[ "$busy" == 0 ]]; then quiet=$((quiet + 1)); else quiet=0; fi
-    sleep 10; waited=$((waited + 10))
+    if (( quiet < 3 )); then sleep 10; fi
+    waited=$((SECONDS - started))
   done
-  echo "quiet after ${waited}s" >"$dir/quiet.log"
+  if (( quiet >= 3 )); then
+    echo "three quiet samples after ${waited}s"
+  else
+    echo "quiet unconfirmed after ${waited}s; last movement count: $busy"
+  fi >"$dir/quiet.log"
   # Bounded: complete reads are refused while a transfer is open, and an
   # unbounded audit kept a whole campaign from uploading anything (2026-11-18).
   timeout "${AUDIT_SECONDS:-900}" "$AUDITOR" audit -targets "$TARGETS" -monitors "$MONITORS" -monitors-file "$dir/monitors" -issuer "$ISSUER" -sample "${SAMPLE:-20000}" -out "$dir" >"$dir/audit.log" 2>&1 || echo "audit exit $? (124: stopped after ${AUDIT_SECONDS:-900} s)" >>"$dir/audit.log"

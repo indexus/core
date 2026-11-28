@@ -113,16 +113,25 @@ func (n *Node) ItemsAge() (time.Duration, bool) {
 
 // FrozenTransfers is the monitoring view of Store.FrozenOutgoing.
 func (n *Node) FrozenTransfers() []string {
+	ids, _ := n.ObserveFrozenTransfers()
+	return ids
+}
+
+// ObserveFrozenTransfers reports a failed storage read to settlement probes.
+func (n *Node) ObserveFrozenTransfers() ([]string, error) {
 	store := n.durableStore()
 	if store == nil {
-		return nil
+		return nil, ErrNotReady
 	}
-	out, _ := store.FrozenOutgoing()
+	out, err := store.FrozenOutgoing()
+	if err != nil {
+		return nil, err
+	}
 	ids := make([]string, len(out))
 	for i, id := range out {
 		ids[i] = id.String()
 	}
-	return ids
+	return ids, nil
 }
 
 // WriteDemand is the monitoring view of write demand at this vnode, counted

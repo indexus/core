@@ -254,6 +254,13 @@ func HandoffEnded(operation string, done bool) {
 	}
 }
 
+// OpenHandoffs reads the same donor registry as the dashboard without enumerating it.
+func OpenHandoffs() int {
+	open.Lock()
+	defer open.Unlock()
+	return len(open.since)
+}
+
 func openSnapshot() map[string]any {
 	open.Lock()
 	defer open.Unlock()

@@ -149,6 +149,10 @@ func (h *Handler) joining() bool {
 // handoff counters (internal/metrics), plus storage and process gauges. It is
 // cheap enough to poll every second.
 func (h *Handler) Metrics(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Query().Get("view") == "settlement" {
+		h.settlement(w)
+		return
+	}
 	body := metrics.Snapshot()
 	body["name"] = h.service.Name()
 	body["client_ready"] = h.service.ClientReady()
@@ -191,6 +195,26 @@ func (h *Handler) Metrics(w http.ResponseWriter, r *http.Request) {
 		body["udp"] = udp
 	}
 	writeJSON(w, http.StatusOK, body)
+}
+
+// The auditor polls until transfers settle. Only the identity and movement
+// indicators used in its census are needed for that decision.
+func (h *Handler) settlement(w http.ResponseWriter) {
+	f, ok := h.service.(interface{ ObserveFrozenTransfers() ([]string, error) })
+	if !ok {
+		http.Error(w, "transfer observation unavailable", http.StatusServiceUnavailable)
+		return
+	}
+	frozen, err := f.ObserveFrozenTransfers()
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"name": h.service.Name(), "id": hex.EncodeToString(h.service.ID()),
+		"joining": h.joining(), "frozen_transfers": frozen,
+		"handoffs": map[string]any{"open": map[string]int{"count": metrics.OpenHandoffs()}},
+	})
 }
 
 // Ownership explicitly enumerates writable zones and may scan the data disk.

@@ -13,6 +13,21 @@ import (
 	"time"
 )
 
+// settlement prints one census for the pre-audit observation window. The
+// audit itself repeats the census around its ownership and total checks.
+func settlement(ctx context.Context, args []string) error {
+	if len(args) != 1 {
+		return errors.New("usage: experiment settlement MONITORS_FILE")
+	}
+	pool := auditMonitorPool{file: args[0]}
+	_, moving, err := pool.census(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Println(moving)
+	return nil
+}
+
 // Unknown telemetry cannot certify quiet. Counts include handoffs, frozen
 // transfers and joining processes; overlapping indicators need only be zero.
 func surveyAuditSlots(ctx context.Context, mons []string) (map[string]string, int, error) {
@@ -38,7 +53,7 @@ func surveyAuditSlots(ctx context.Context, mons []string) (map[string]string, in
 			}
 			call, cancel := context.WithTimeout(ctx, 2*time.Second)
 			defer cancel()
-			req, err := http.NewRequestWithContext(call, http.MethodGet, mon+"/metrics", nil)
+			req, err := http.NewRequestWithContext(call, http.MethodGet, mon+"/metrics?view=settlement", nil)
 			if err != nil {
 				failures[i] = err
 				return
