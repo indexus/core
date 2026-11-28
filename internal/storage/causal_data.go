@@ -833,6 +833,21 @@ func (s *Store) forgetTransfer(id causal.TransferID) error {
 		if t.Phase != causal.TransferInstalled {
 			return ErrNotReady
 		}
+		// While a cold drain can resume its pieces, the installed operation is
+		// its durable completion receipt. Transfer rows have already been freed.
+		if raw := tx.value(meta(coldDrainKey)); raw != nil {
+			var drain ColdDrain
+			if err := json.Unmarshal(raw, &drain); err != nil {
+				return err
+			}
+			if drain.Retirement == nil {
+				for _, piece := range drain.Pieces {
+					if piece.Operation == id {
+						return nil
+					}
+				}
+			}
+		}
 		delete(state.Transfers, id)
 		return writeCausal(tx, state)
 	})

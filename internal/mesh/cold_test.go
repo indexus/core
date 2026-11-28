@@ -524,3 +524,93 @@ func TestColdFoldUsesAcyclicSurvivorPreference(t *testing.T) {
 		t.Fatal("wrong sibling retired")
 	}
 }
+
+func TestColdFoldCollectionAcrossRestart(t *testing.T) {
+	for _, finish := range []string{"retire", "abort"} {
+		t.Run(finish, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+			defer cancel()
+			net, nodes, reopen := coldRestartFixture(t)
+			record := storage.Record{Collection: "0000000000000001", Location: "00", ID: "record", Metrics: []float64{1}}
+			if _, err := nodes[0].Write(ctx, "receipt", record); err != nil {
+				t.Fatal(err)
+			}
+			if err := nodes[1].Join(ctx); err != nil {
+				t.Fatal(err)
+			}
+			if err := nodes[0].Sync(ctx, []string{nodes[1].Self.Host}); err != nil {
+				t.Fatal(err)
+			}
+			if err := nodes[0].Resume(ctx); err != nil {
+				t.Fatal(err)
+			}
+
+			// Stop the donor after every piece is installed and before retirement.
+			var installed causal.TransferID
+			net.setBefore(func(req Request) error {
+				if req.Kind != KindColdCheck {
+					return nil
+				}
+				status, err := nodes[1].Store.ColdStatus()
+				if err != nil {
+					return err
+				}
+				if len(status.Drain.Pieces) != 1 {
+					return errors.New("expected one donor piece")
+				}
+				id := status.Drain.Pieces[0].Operation
+				routing, err := nodes[1].Store.CausalRouting()
+				if err != nil {
+					return err
+				}
+				if phase, ok := routing.TransferPhase(id); ok && phase == causal.TransferInstalled {
+					installed = id
+					return storage.ErrClosed
+				}
+				return nil
+			})
+			if err := nodes[1].Compact(ctx, ColdConfig{}); err == nil || !installed.Valid() {
+				t.Fatalf("cut after install: %v, operation %v", err, installed)
+			}
+			net.setBefore(nil)
+			if err := nodes[1].Store.CollectTransferred(installed); err != nil {
+				t.Fatal(err)
+			}
+			if finish == "abort" {
+				if err := nodes[1].Store.RequestColdAbort(); err != nil {
+					t.Fatal(err)
+				}
+			}
+			reopen()
+			err := nodes[1].ResumeCold(ctx)
+			if finish == "abort" {
+				if !errors.Is(err, protocol.ErrColdPlanPreempted) {
+					t.Fatalf("abort: %v", err)
+				}
+			} else if err != nil {
+				t.Fatal(err)
+			}
+			status, err := nodes[1].Store.ColdStatus()
+			if err != nil || (finish == "abort" && status.Drain != nil) || (finish == "retire" && (status.Drain == nil || !status.Drain.Witnessed)) {
+				t.Fatalf("unexpected drain after %s: %+v %v", finish, status, err)
+			}
+			if err := nodes[1].Resume(ctx); err != nil {
+				t.Fatal(err)
+			}
+			routing, err := nodes[1].Store.CausalRouting()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, ok := routing.TransferPhase(installed); ok {
+				t.Fatal("completed fold still retains its collected transfer")
+			}
+			if _, _, err := nodes[1].Store.Apply("stale", record); err == nil {
+				t.Fatal("source still writable")
+			}
+			if _, applied, err := nodes[0].Store.Apply("receipt", record); err != nil || applied {
+				t.Fatalf("duplicate receipt: %t %v", applied, err)
+			}
+			assertColdRows(t, ctx, nodes, map[string]storage.Record{record.Location + ":" + record.ID: record}, false)
+		})
+	}
+}
