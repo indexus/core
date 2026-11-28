@@ -38,11 +38,12 @@ func directSDKPeers(t *testing.T) (string, *runningDataNode, *runningDataNode) {
 	return sdk, first, second
 }
 
-func runDirectSDK(t *testing.T, script, sdk string, first, second *runningDataNode) {
+func runDirectSDK(t *testing.T, script, sdk string, first, second *runningDataNode, args ...string) {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, "node", "testdata/"+script, sdk, directSDKCollection, strconv.Itoa(first.port), strconv.Itoa(second.port))
+	cmdArgs := []string{"testdata/" + script, sdk, directSDKCollection, strconv.Itoa(first.port), strconv.Itoa(second.port)}
+	cmd := exec.CommandContext(ctx, "node", append(cmdArgs, args...)...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("%v\n%s", err, out)
