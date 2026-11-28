@@ -48,6 +48,15 @@ class CapacityTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 self.bound(config, quota=quota)
 
+    def test_peak_fleet_requirement_cannot_be_silently_capped(self):
+        config = self.config(hosts=12, ttl=20, budget='6.6', min_peak_hosts=90)
+        with self.assertRaisesRegex(ValueError, r"requires 90 data hosts, ceiling=45"):
+            capacity.bound(config, 4, 32, 512, 2, '.398', '1.6968')
+        config['budget'] = '12.51'
+        self.assertEqual(capacity.bound(config, 4, 32, 512, 2, '.398', '1.6968')['max_machines'], 90)
+        with self.assertRaisesRegex(ValueError, "ceiling=60"):
+            self.bound(dict(config, max_hosts=60))
+
     def test_invalid_numeric_configuration(self):
         for budget in ('0', '-1', 'NaN', 'Infinity'):
             with self.assertRaises(ValueError):
@@ -74,7 +83,8 @@ class CapacityTests(unittest.TestCase):
             state = Path(directory) / 'run.capacity.json'
             config = self.config(run='test', region='eu-west-3', bucket='test',
                                  host_type='i4i.xlarge', loader_type='c6i.4xlarge',
-                                 host_price='.398', loader_price='.808', max_hosts=16, resource_slots=True)
+                                 host_price='.398', loader_price='.808', max_hosts=16, resource_slots=True,
+                                 min_peak_hosts=12)
             original = json.dumps(config)
             state.write_text(original)
             with patch.object(sys, 'argv', ['capacity.py', 'update', str(state),
@@ -86,6 +96,7 @@ class CapacityTests(unittest.TestCase):
             self.assertEqual(state.read_text(), original)
             self.assertEqual(json.loads(out.getvalue())['max_vnodes'], 128)
             self.assertTrue(json.loads(out.getvalue())['resource_slots'])
+            self.assertEqual(json.loads(out.getvalue())['min_peak_hosts'], 12)
 
     def test_failed_policy_publication_keeps_local_state(self):
         with tempfile.TemporaryDirectory() as directory:

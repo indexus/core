@@ -216,6 +216,7 @@ policy_args=(plan --run "$RUN" --region "$REGION" --bucket "$bucket"
 operator_max="${HOSTS_MAX:-${HOSTS_CEILING:-}}"
 if [[ -n "${HOSTS_CEILING:-}" && -n "$operator_max" ]] && ((HOSTS_CEILING < operator_max)); then operator_max=$HOSTS_CEILING; fi
 [[ -z "$operator_max" ]] || policy_args+=(--max-hosts "$operator_max")
+[[ -z "${MIN_PEAK_HOSTS:-}" ]] || policy_args+=(--min-peak-hosts "$MIN_PEAK_HOSTS")
 python3 "$HERE/capacity.py" "${policy_args[@]}" >"$capacity"
 HOSTS_MAX=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["max_machines"])' "$capacity")
 echo "==> scaling: items=$ITEMS writes/s=${SCALING_WRITES:-0} write-cap=$WRITE_CAP (0 disables each threshold)"

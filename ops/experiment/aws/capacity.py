@@ -46,8 +46,15 @@ def bound(config, host_cpus, loader_cpus, quota, other_cpus, host_price, loader_
     if config.get('max_hosts') is not None:
         limits['operator'] = positive(config['max_hosts'])
     ceiling = min(limits.values())
-    if ceiling < config['hosts']:
-        raise ValueError(f"initial fleet exceeds capacity: hosts={config['hosts']}, limits={limits}")
+    required = max(config["hosts"], config.get("min_peak_hosts") or 0)
+    if ceiling < required:
+        minimum_budget = hours * (required * host_price + config["loaders"] * loader_price)
+        minimum_vcpus = other_cpus + required * host_cpus + config["loaders"] * loader_cpus
+        raise ValueError(
+            f"fleet requires {required} data hosts, ceiling={ceiling} ({limits}); "
+            f"requires at least ${minimum_budget:.4f} of EC2 budget and "
+            f"{minimum_vcpus} regional vCPUs at this TTL"
+        )
     return dict(config, max_machines=ceiling, max_vnodes=None if dynamic else ceiling * config['slots'],
                 limits=limits, reason='+'.join(k for k, v in limits.items() if v == ceiling),
                 host_vcpus=host_cpus, loader_vcpus=loader_cpus, quota_vcpus=quota,
@@ -104,6 +111,7 @@ def main():
     initial.add_argument('--resource-slots', action='store_true',
                          help='slots is the address range; live machine resources admit each vnode')
     initial.add_argument('--max-hosts', type=positive)
+    initial.add_argument('--min-peak-hosts', type=positive, help='fail if the planned fleet cannot reach this size')
     initial.add_argument('--host-price')
     initial.add_argument('--loader-price')
     update = commands.add_parser('update')
@@ -120,6 +128,8 @@ def main():
         previous = json.loads(state.read_text())
         config = {k: previous[k] for k in ('run', 'region', 'bucket', 'host_type', 'loader_type',
                   'hosts', 'slots', 'loaders', 'ttl', 'budget', 'max_hosts', 'host_price', 'loader_price')}
+        if previous.get('min_peak_hosts') is not None:
+            config['min_peak_hosts'] = previous['min_peak_hosts']
         if previous.get('resource_slots'):
             config['resource_slots'] = True
         for k, v in args.items():
