@@ -35,6 +35,20 @@ class LiveTests(unittest.TestCase):
         self.assertEqual(point['forward_attempts_per_entry'], 2.0)
 
 
+    def test_network_rates_follow_surviving_vnodes(self):
+        def sample(name, count, t):
+            return dict(name=name, sample_t=t, writes=dict(received=0, relayed=0),
+                        gossip=dict(membership_bytes=10),
+                        mesh_sent=dict(membership=dict(request_bytes=count, response_bytes=0)))
+        initial = {"a": sample("gone", 75000, 10), "b": sample("active", 0, 10)}
+        _, prev = live.network(initial, None, 10)
+        next_frame = {"a": sample("replacement", 100000, 15), "b": sample("active", 5120, 15)}
+        out, prev = live.network(next_frame, prev, 15)
+        self.assertEqual(out["gossip_kb_s"], 1)
+        repeated, _ = live.network(next_frame, prev, 20)
+        self.assertNotIn("gossip_kb_s", repeated)
+
+
 class LivePercentileTests(unittest.TestCase):
     def test_three_percentiles_are_kept_for_service_and_scheduled_latency(self):
         row = dict(t=1, offered=100, acked=100, shed=0,
