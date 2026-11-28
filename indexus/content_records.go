@@ -2,12 +2,14 @@ package indexus
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/indexus/go-indexus-core/internal/mesh"
+	"github.com/indexus/go-indexus-core/internal/storage"
 	"github.com/indexus/go-indexus-core/internal/wire"
 )
 
@@ -65,5 +67,46 @@ func (n *Node) GetRecordsContext(ctx context.Context, collection, prefix string,
 		}
 		return out[i].Id < out[j].Id
 	})
+	return out, nil
+}
+
+// GetDirectRecordsContext reads live document IDs, weights and metrics at one
+// exact address from this disk, or refuses if its local right cannot serve it.
+func (n *Node) GetDirectRecordsContext(ctx context.Context, collection, location string, limit int) ([]Item, error) {
+	if n.mesh == nil {
+		return nil, ErrNotReady
+	}
+	if limit < 1 || limit > wire.MaxContentRecords {
+		return nil, fmt.Errorf("invalid record budget")
+	}
+	if err := checkKey(&Item{Collection: collection, Location: location}, BASE64.Root()); err != nil {
+		return nil, err
+	}
+	z, err := NewZoneKey(collection, location)
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+	select {
+	case n.mesh.readSlots <- struct{}{}:
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+	defer func() { <-n.mesh.readSlots }()
+	rows, err := n.mesh.service.Store.DirectRecords(ctx, z, limit, wire.MaxContentBytes)
+	if errors.Is(err, storage.ErrDirectRecordBudget) {
+		return nil, ErrQueryBudget
+	}
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Item, len(rows))
+	for i, r := range rows {
+		if r.Metrics == nil {
+			r.Metrics = []float64{}
+		}
+		out[i] = Item{Collection: r.Collection, Location: r.Location, Id: r.ID, Weight: r.Weight, Metrics: r.Metrics}
+	}
 	return out, nil
 }
