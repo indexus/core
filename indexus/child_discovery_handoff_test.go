@@ -95,6 +95,17 @@ func TestFreshChildDiscoveryDuringHandoff(t *testing.T) {
 		if receiver[1+BASE64.IndexOf('z')].Count != 0 {
 			return fmt.Errorf("receiver has the source-owned child z")
 		}
+		srcSeen, _, err := f.stores[0].ObserveChildPresence(ctx, collection, "0")
+		if err != nil {
+			return err
+		}
+		dstSeen, dstUnknown, err := f.stores[1].ObserveChildPresence(ctx, collection, "0")
+		if err != nil {
+			return err
+		}
+		if srcSeen&(uint64(1)<<BASE64.IndexOf('0')) == 0 || (dstSeen|dstUnknown)&(uint64(1)<<BASE64.IndexOf('z')) != 0 {
+			return fmt.Errorf("expected stale source witness at 0 and no target copy at z; got source %x, target %x/%x", srcSeen, dstSeen, dstUnknown)
+		}
 		// A direct record at the intermediate prefix shares its child's summary
 		// with deeper records. A unique deep location may produce a shortened key.
 		want := map[string]int{"0": 1, "01": 1 + deep, "0zABC": 1}

@@ -54,20 +54,32 @@ type Snapshot struct {
 // Uses s.mu.RLock() so concurrent snapshots, readers, and Children() scans
 // run in parallel without turning reads into exclusive writers on s.mu.
 func (s *Store) Snapshot() *Snapshot {
+	sn, _ := s.pinSnapshot(0)
+	return sn
+}
+
+// pinSnapshot pins a version. With a positive segment limit it copies only
+// the newest segment references and reports whether older ones were omitted.
+// Only partial child observation uses a limited snapshot.
+func (s *Store) pinSnapshot(segmentLimit int) (*Snapshot, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	seq := s.visible
 	s.snapMu.Lock()
 	s.snapshots = append(s.snapshots, seq)
 	s.snapMu.Unlock()
+	start := 0
+	if segmentLimit > 0 {
+		start = max(0, len(s.segs)-segmentLimit)
+	}
 	return &Snapshot{
 		s:    s,
 		seq:  seq,
 		mem:  s.mem,
 		imm:  s.imm,
-		segs: slices.Clone(s.segs),
+		segs: slices.Clone(s.segs[start:]),
 		cols: len(s.colNames),
-	}
+	}, start > 0
 }
 
 // retiredSeg is a merged-away segment kept open until every snapshot with
