@@ -21,6 +21,53 @@
     return {ready_count:ready,observed_count:observed,machine_count:hosts,ready_per_machine:density};
   }
   const prepared=new WeakMap();
+  const scopes=new WeakMap();
+  function selectedPoint(p,ids){
+    const fresh=(p.fleet?.vnodes||[]).filter(n=>ids.has(n.label)&&n.state!=='stale');
+    const complete=!p.metrics_stale&&fresh.length===ids.size&&new Set(fresh.map(n=>n.label)).size===ids.size;
+    const sum=get=>complete&&fresh.every(n=>Number.isFinite(get(n)))?fresh.reduce((s,n)=>s+get(n),0):null;
+    const incident=(p.fleet?.transfers||[]).filter(tr=>!tr.stale&&fresh.some(n=>touchesNode(tr,n)));
+    return {x:p.x,t:p.t,rate:sum(n=>n.applied_s??n.estimated_s),stock:sum(n=>n.items_counted===false?null:n.items),
+      open:complete?incident.length:null,frozen:complete?incident.filter(tr=>tr.frozen).length:null};
+  }
+  function bindPick(root,element,labels,text){
+    const scope=scopes.get(root);
+    element.dataset.tip=text;
+    element.setAttribute('aria-label',text);
+    if(!labels.length)return;
+    element.setAttribute('role','button');element.setAttribute('tabindex','0');
+    const picked=labels.every(id=>scope.ids.has(id));
+    element.setAttribute('aria-pressed',String(picked));
+    if(scope.ids.size&&!picked)element.classList.add('outside-scope');
+    element.onclick=e=>{
+      for(const id of labels){if(picked)scope.ids.delete(id);else scope.ids.add(id);}
+      scope.refresh();
+      const replacement=[...root.querySelectorAll('.network-pane [data-tip]')].find(item=>item.dataset.tip===text);
+      if(replacement&&e?.detail===0)replacement.focus({preventScroll:true});
+      if(replacement&&e?.clientX)replacement.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,clientX:e.clientX,clientY:e.clientY}));
+    };
+    element.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();element.onclick(e);}};
+  }
+  function transferTip(tr){
+    return [tr.source_machine+' → '+(tr.target_machine||'?'),tr.phase,'âge '+fmt(tr.age_s,1)+' s',
+      tr.frozen?'Fence franchie':null,tr.attempts!=null?'Tentative '+tr.attempts:null,
+      tr.installed_zones!=null?fmt(tr.installed_zones)+' installations':null,
+      tr.last_install_s!=null?'Dernier lot il y a '+fmt(tr.last_install_s,1)+' s':null,
+      tr.phase_age_s!=null?'Dans cette phase depuis '+fmt(tr.phase_age_s,1)+' s':null].filter(Boolean).join(' · ');
+  }
+  function installTips(plot){
+    const tip=el('div',null,'graph-tip');tip.hidden=true;tip.setAttribute('role','tooltip');plot.append(tip);
+    function show(e){
+      const hit=e.target.closest('[data-tip]');
+      if(!hit){tip.hidden=true;return;}
+      const r=hit.getBoundingClientRect();
+      tip.textContent=hit.dataset.tip;tip.hidden=false;
+      tip.style.left=Math.max(4,Math.min((e.clientX??r.x)+12,innerWidth-tip.offsetWidth-8))+'px';
+      tip.style.top=Math.max(4,Math.min((e.clientY??r.y)+14,innerHeight-tip.offsetHeight-8))+'px';
+    }
+    plot.onpointermove=show;plot.onfocusin=show;plot.onpointerdown=show;
+    plot.onpointerleave=plot.onfocusout=()=>{tip.hidden=true;};
+  }
   function render(root,points,index=points.length-1){
     const previous=new Map();
     if(!global.matchMedia('(prefers-reduced-motion: reduce)').matches){
@@ -29,7 +76,7 @@
       }
     }
     const frame=document.createDocumentFragment();
-    const wasOpen=root.querySelector('details')?.open;
+    const wasOpen=root.querySelector('.diagnostics')?.open;
     const sections=['.transfers','.topology','details','.charts','.tiles'];
     const anchor=sections.find(sel=>{
       const r=root.querySelector(sel)?.getBoundingClientRect();
@@ -40,6 +87,9 @@
     const cols=Math.max(1,Math.floor((root.clientWidth+12)/322));
     const chartWidth=Math.max(160,Math.min(600,(root.clientWidth-12*(cols-1))/cols-22));
     const raw=points;
+    const scope=scopes.get(root)||{ids:new Set()};
+    scopes.set(root,scope);scope.refresh=()=>render(root,raw,index);
+    const filtered=scope.ids.size>0;
     points=prepared.get(raw)||raw.map(p=>{
       const hs=p.fleet?.machines||[],out={...p};
       for(const k of ['cpu','ram','disk']){
@@ -53,18 +103,28 @@
     prepared.set(raw,points);
     if(!points.length){root.replaceChildren(el('p','Aucune mesure disponible.'));return;}
     const p=points[index],f=p.fleet||{},sim=f.source==='simulation';
-    frame.append(el('p',sim?'Simulation de ressources : besoins de débit calculés ; ACK, lectures et latences non simulés.':'Mesures AWS : application au détenteur distincte des ACK client. Les tirets désignent une mesure inconnue.','note'));
     if(p.metrics_stale||p.load_stale)frame.append(el('p','Télémétrie périmée : '+[p.metrics_stale?'nœuds':'',p.load_stale?'charge':''].filter(Boolean).join(', '),'alert'));
     const machines=f.machines||[],nodes=f.vnodes||[],transfers=f.transfers||[];
     const tiles=el('div',null,'tiles');
     const warm=machines.filter(h=>h.state==='warm').length,boot=machines.filter(h=>h.state==='booting').length;
     const bad=machines.filter(h=>[h.cpu,h.ram,h.disk,h.io].some(v=>Number.isFinite(v)&&v>60)).length;
-    const unknown=machines.filter(h=>h.cpu==null||h.ram==null||h.disk==null).length;
+
     const hasResources=machines.some(h=>[h.cpu,h.ram,h.disk].some(Number.isFinite));
     const hasReadiness=sim||machines.some(h=>h.ready_offer!=null);
     const stats=[['Demande /s',p.load_stale?null:p.offered],['ACK client /s',p.load_stale?null:p.acked],['Items observés',p.stock],['Vnodes comptés / inventoriés',p.coverage.total?fmt(p.coverage.count)+' / '+fmt(p.coverage.total):'—'],['Vnodes prêts / observés',fmt(p.ready_count)+' / '+fmt(p.observed_count)],['Machines observées',p.machine_count],['Chaudes / démarrage',`${hasReadiness?warm:'?'} / ${sim?boot:'?'}`],['Réceptions admissibles',machines.some(h=>h.ready_offer!=null)?machines.filter(h=>h.ready_offer).length:null],['Machines observées > 60 %',hasResources?bad:null],['Transferts',p.metrics_stale?null:p.open??transfers.length],['p99 écriture, ms',p.load_stale?null:p.p99_ms]];
-    for(const [label,value] of stats){const t=el('div',null,'tile');t.append(el('span',label),el('strong',typeof value==='string'?value:fmt(value,1)));tiles.append(t);}frame.append(tiles);
-    const charts=el('div',null,'charts'),unmeasured=[];
+    const scoped=filtered?points.slice(0,index+1).map(pt=>selectedPoint(pt,scope.ids)):null;
+    const last=scoped?.at(-1);
+    const headline=filtered?[['Vnodes sélectionnés',scope.ids.size],['Applications /s',last.rate],['Items',last.stock],['Transferts observés',last.open]]:
+      stats.filter((_,i)=>[0,1,2,5,9,10].includes(i));
+    for(const [label,value] of headline){const t=el('div',null,'tile');t.append(el('span',label),el('strong',typeof value==='string'?value:fmt(value,1)));tiles.append(t);}frame.append(tiles);
+    const charts=el('div',null,'charts overview'),unmeasured=[];
+    const diagnostics=el('details',null,'diagnostics'),more=el('div',null,'charts');diagnostics.open=Boolean(wasOpen);
+    diagnostics.append(el('summary','Autres mesures du réseau'));
+    if(filtered){
+      for(const [title,series] of [[sim?'Demande estimée /s':'Écritures appliquées /s',[['rate','sélection']]],['Items détenus',[['stock','sélection']]],['Transferts observés',[['open','ouverts'],['frozen','fence franchie']]]]){
+        charts.append(chart(scoped,title,series,chartWidth));
+      }
+    }
     for(const [title,series,stepped] of [
       ['Écritures /s',[['offered','demandées'],['acked','ACK client'],['estimated_s','besoin réparti (simulation)']]],
       ['Lectures client /s',[['reads_s','tentatives'],['read_failed_s','échecs']]],
@@ -80,11 +140,9 @@
       ['Lectures et fraîcheur, p99 ms',[['read_p99_ms','lecture'],['fresh_p99_ms','total racine']]]
     ]){
       const past=points.slice(0,index+1);
-      if(past.some(p=>series.some(([k])=>Number.isFinite(p[k]))))charts.append(chart(past,title,series,chartWidth,stepped));else unmeasured.push(title);
+      if(past.some(p=>series.some(([k])=>Number.isFinite(p[k])))){if(!filtered)(['Écritures /s','Latence écriture, ms','Transferts ouverts'].includes(title)?charts:more).append(chart(past,title,series,chartWidth,stepped));}else unmeasured.push(title);
     }
     frame.append(charts);
-    if(unmeasured.length)frame.append(el('p','Non mesuré : '+unmeasured.join(' · '),'note'));
-    const diagnostics=el('details'),more=el('div',null,'charts');diagnostics.open=Boolean(wasOpen);diagnostics.append(el('summary','Routage, trafic et remontée des totaux'));
     for(const [title,series] of [
       ['Écritures réussies avec relais, %',[['relayed_pct','avec relais']]],
       ['Trafic moyen par vnode, Kio/s',[['mesh_kb_s','mesh'],['gossip_kb_s','membership']]],
@@ -92,14 +150,11 @@
       ['Latence depuis l’arrivée prévue, ms',[['intended_p50_ms','p50'],['intended_p95_ms','p95'],['intended_p99_ms','p99']]],
       ['Générateur de charge, % CPU',[['loader_pct','CPU']]],
       ['Remontée des totaux',[['flush_s','temps le plus long (s)'],['pending_k','arêtes en attente (milliers)']]]
-    ])more.append(chart(points.slice(0,index+1),title,series,chartWidth));diagnostics.append(more);frame.append(diagnostics);
-    frame.append(el('h2','Réseau au temps '+fmt(p.x??p.t)+' s'));
-    frame.append(el('p',`${unknown} machine(s) avec ressources inconnues. Les flèches représentent les transferts signalés à cet instant, du donneur vers le receveur. Sélectionner un rond pour ses mesures. La somme des compteurs disponibles peut être partielle et n’est pas un audit des clés uniques.`, 'note'));
-    const detail=el('p','Sélectionner un vnode.','detail');detail.setAttribute('aria-live','polite');
-    const choices=el('div',null,'legend'), plot=el('div');
+    ])if(!filtered)more.append(chart(points.slice(0,index+1),title,series,chartWidth));diagnostics.append(more);
+    const choices=el('div',null,'legend'), plot=el('div',null,'network-pane');
     const active=p.metrics_stale?[]:transfers.filter(tr=>!tr.stale);
     const unknownLinks=transfers.length-active.length;
-    const departures=departedTransfers(points[index-1],p);
+
     const waiting=active.filter(tr=>tr.phase==='copy-slot').length;
     choices.setAttribute('aria-label','Vue du réseau');
     for(const [key,title] of [['hosts','Par machine'],['radial','Arbre radial'],['space','Réseau 3D'],['shares','Plages d’adresses']]){
@@ -113,6 +168,9 @@
         drawTopology();
       };choices.append(b);
     }
+    const clear=el('button',filtered?'Vue globale · effacer la sélection ('+scope.ids.size+')':'Vue globale');
+    clear.type='button';clear.disabled=!filtered;clear.title=[...scope.ids].join(', ');
+    clear.onclick=()=>{scope.ids.clear();scope.refresh();};choices.append(clear);
     if(waiting){
       const label=el('label'),box=el('input');box.type='checkbox';box.checked=root.dataset.showWaiting==='true';
       box.onchange=()=>{root.dataset.showWaiting=String(box.checked);drawTopology();};
@@ -120,28 +178,28 @@
     }
     function drawTopology(){
       const mode=root.dataset.mode||(global.location.hash==='#vnodes'?'radial':global.location.hash==='#plages'?'shares':global.location.hash==='#reseau-3d'?'space':'hosts');
-      for(const b of choices.querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.mode===mode));
-      detail.textContent='Sélectionner un vnode.';
+      for(const b of choices.querySelectorAll('button')){if(b.dataset.mode)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));};
       const shown=root.dataset.showWaiting==='true'?active:active.filter(tr=>tr.phase!=='copy-slot');
-      plot.replaceChildren(topology(machines,nodes,shown,detail,sim,p.metrics_stale,root.clientWidth,mode,root));
+      const visible=filtered?shown.filter(tr=>nodes.some(n=>scope.ids.has(n.label)&&touchesNode(tr,n))):shown;
+      plot.replaceChildren(topology(machines,nodes,visible,sim,p.metrics_stale,root.clientWidth,mode,root));installTips(plot);
     }
     drawTopology();
-    frame.append(choices,detail,plot,el('h2','Transferts et délégations'));
-    if(!p.metrics_stale)frame.append(el('p',fmt(active.length)+' opération(s) signalée(s)'+(departures==null?'':' · '+fmt(departures)+' sortie(s) de la liste depuis le relevé précédent')+'.','note'));
-    if(unknownLinks)frame.append(el('p',fmt(unknownLinks)+' dernière(s) observation(s) périmée(s), masquée(s) sur le graphe. Clôture inconnue.','note'));
-    const list=el('div',null,'transfers');
-    if(!transfers.length)list.append(el('p',p.metrics_stale?'État des transferts inconnu.':'Aucun transfert observé à cet instant.'));
-    for(const tr of transfers){
-      const row=el('div',null,'transfer'+(tr.frozen?' hot':''));
-      const kind=tr.physical_move===true?'déplacement du vnode':tr.physical_move===false?'délégation de zone':'transfert';
-      const retry=tr.attempts!=null?' · tentative '+fmt(tr.attempts):'';
-      const installed=tr.installed_zones==null?'':' · '+fmt(tr.installed_zones)+' installations de zone confirmées';
-      const lastInstall=tr.last_install_s==null?'':' · dernier lot il y a '+fmt(tr.last_install_s,1)+' s';
-      const phaseTime=tr.phase_age_s!=null?' · dans cette phase depuis '+fmt(tr.phase_age_s,2)+' s':'';
-      row.append(el('strong',`${tr.source_machine||'?'} → ${tr.target_machine||'destination inconnue'}`),
-        el('span',`${kind} · ${tr.phase||'copie'}${phaseTime}${retry}${installed}${lastInstall}${tr.stale?' · état périmé':''} · âge ${fmt(tr.age_s,1)} s · ${tr.progress==null?'progression non mesurée':fmt(tr.progress*100,1)+' % copiés'}${tr.share==null?'':' · '+fmt(tr.share*100,1)+' % de charge déplacée'}${tr.frozen?' · fence franchie':''}`));list.append(row);
+    frame.append(choices,plot);
+    if(!filtered){
+      const extra=el('div',null,'tiles');
+      for(const [label,value] of stats.filter((_,i)=>![0,1,2,5,9,10].includes(i))){
+        const tile=el('div',null,'tile');tile.append(el('span',label),el('strong',String(value??'—')));extra.append(tile);
+      }
+      diagnostics.append(extra);
+      if(unmeasured.length)diagnostics.append(el('p','Non mesuré : '+unmeasured.join(' · '),'note'));
+      if(transfers.length){
+        const rows=el('details');rows.append(el('summary','Journal des transferts ('+transfers.length+')'));
+        for(const tr of transfers)rows.append(el('p',transferTip(tr)+(tr.stale?' · observation périmée':'')));
+        diagnostics.append(rows);
+      }
+      if(unknownLinks)diagnostics.append(el('p',fmt(unknownLinks)+' observations de transfert périmées.'));
+      frame.append(diagnostics);
     }
-    frame.append(list);
     root.replaceChildren(frame);
     if(anchor){
       const target=root.querySelector(anchor);
@@ -187,13 +245,12 @@
     const counted=stale?[]:nodes.filter(n=>n.state!=='stale'&&n.items_counted!==false&&Number.isFinite(n.items));
     return {value:counted.length?counted.reduce((sum,n)=>sum+n.items,0):null,count:counted.length,total:nodes.length};
   }
-  function topology(machines,nodes,transfers,detail,sim,stale,width,mode,root){
+  function topology(machines,nodes,transfers,sim,stale,width,mode,root){
     const wrap=el('div',null,'topology');
     if(!machines.length){wrap.append(el('p','Aucun inventaire machine enregistré.'));return wrap;}
-    if(mode==='space')return spaceView(root,nodes,transfers,detail,stale,wrap);
+    if(mode==='space')return spaceView(root,nodes,transfers,stale,wrap);
     if(mode==='shares')return shareView(nodes,stale,wrap,root);
     const colors={ready:'#16856a',receiving:'#347cca',joining:'#347cca',unknown:'#888'};
-    wrap.append(el('p','Vnode vert = prêt · bleu = en cours de join · gris = inconnu ou périmé. Contour orange = ressource au-dessus de 60 %. Flèche orange = opération ayant franchi une fence. Le gel d’une écriture peut déjà être terminé.','note'));
     const canvas=svg('svg',{'aria-label':'Machines, vnodes et sens des transferts',role:'group'});
     const defs=svg('defs',{});
     for(const [id,color] of [['flow','#588fc2'],['fence','#ce663e']]){
@@ -206,28 +263,14 @@
     const members=new Map(ordered.map(h=>[h.id,[]]));
     for(const n of nodes)members.get(n.machine)?.push(n);
     const widest=Math.max(1,...Array.from(members.values(),ns=>Math.ceil(Math.sqrt(ns.length))));
-    const radius=Math.max(38,widest*11),cell=radius*2+62,step=cell+36,cols=Math.max(1,Math.min(ordered.length,Math.floor(width/cell)));
+    const radius=Math.max(38,widest*11),cell=radius*2+62,step=cell+36,cols=Math.max(1,Math.min(ordered.length,Math.ceil(Math.sqrt(ordered.length * (width/Math.max(240,global.innerHeight*.48)) * step/cell))));
     canvas.setAttribute('viewBox',`0 0 ${cols*cell} ${Math.ceil(ordered.length/cols)*step}`);
     function label(group,x,y,value){
       const t=svg('text',{x,y,'text-anchor':'middle'});t.textContent=value;group.append(t);
     }
-    const edges=[];
-    const all=el('button','Afficher tous les transferts');
-    all.type='button';all.hidden=true;
-    const reset=()=>{delete root.dataset.selection;for(const edge of edges)edge.path.style.display='';all.hidden=true;};
-    all.onclick=()=>{reset();detail.textContent='Sélectionner un vnode.';};
-    wrap.append(all);
-    function select(group,description,matches,extra){
-      group.setAttribute('tabindex',0);group.setAttribute('role','button');group.setAttribute('aria-label',description);
-      const title=svg('title',{});title.textContent=description;group.append(title);
-      group.onclick=()=>{
-        root.dataset.selection=group.dataset.glyph;
-        const related=edges.filter(edge=>matches(edge.tr));
-        for(const edge of edges)edge.path.style.display=matches(edge.tr)?'':'none';
-        all.hidden=edges.length===0;
-        detail.textContent=description+(extra?extra():'')+' · '+fmt(related.length)+' lien(s) de transfert visible(s)';
-      };
-      group.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();group.onclick();}};
+    function select(group,description,labels,extra){
+      bindPick(root,group,labels,description);
+      if(extra)group.onpointerenter=()=>{group.dataset.tip=description+extra();};
     }
     if(mode==='radial'){
       canvas.setAttribute('class','radial');
@@ -247,14 +290,14 @@
         g.append(svg('rect',{x:left,y:top,width:19,height:4,fill:'#8884'}));
         if(Number.isFinite(h[k]))g.append(svg('rect',{x:left,y:top,width:19*Math.min(100,Math.max(0,h[k]))/100,height:4,fill:h[k]>60?'#ce663e':'#347cca'}));
       }
-      select(g,`${h.label||h.id} · ${observed} · ${sum.count}/${ns.length} vnodes comptés${admission} · ${resources.map(([k,l])=>l+' '+fmt(h[k],1)+' %').join(' · ')}`,tr=>tr.source_machine===h.id||tr.target_machine===h.id);
+      select(g,`${h.label||h.id} · ${observed} · ${sum.count}/${ns.length} vnodes comptés${admission} · ${resources.map(([k,l])=>l+' '+fmt(h[k],1)+' %').join(' · ')}`,ns.map(n=>n.label));
       glyphs.append(g);
       const side=Math.ceil(Math.sqrt(ns.length));
       ns.forEach((n,j)=>{
         const nx=x+((j%side)-(Math.min(side,ns.length-Math.floor(j/side)*side)-1)/2)*16,ny=y+(Math.floor(j/side)-(Math.ceil(ns.length/side)-1)/2)*16;
         const point={x:nx,y:ny,r:6};ends.set(n.id,point);if(n.monitor&&(n.state!=='stale'||!ends.has(n.monitor)))ends.set(n.monitor,point);
         const dot=svg('g',{'data-glyph':'grid:'+n.id,'data-x':nx,'data-y':ny});dot.append(svg('circle',{cx:nx,cy:ny,r:6,fill:stale?colors.unknown:colors[n.state]||colors.unknown}));
-        select(dot,`${n.label||n.id} · ${h.label||h.id} · ${n.state} · ${fmt(itemSum([n],stale).value)} items · ${fmt(stale?null:n.applied_s??n.estimated_s,1)} ${sim?'requises':'applications'}/s`,tr=>touchesNode(tr,n));glyphs.append(dot);
+        select(dot,`${n.label||n.id} · ${h.label||h.id} · ${n.state} · ${fmt(itemSum([n],stale).value)} items · ${fmt(stale?null:n.applied_s??n.estimated_s,1)} ${sim?'requises':'applications'}/s`,[n.label]);glyphs.append(dot);
       });
     });
     let unresolved=0;
@@ -270,13 +313,10 @@
         const pulse=svg('circle',{r:2.4,fill:color,'pointer-events':'none'});
         pulse.append(svg('animateMotion',{path,dur:'2s',repeatCount:'indefinite'}));bundle.append(pulse);
       }
-      edges.push({tr,path:bundle});links.append(bundle);
+      const hit=svg('path',{d:path,fill:'none',stroke:'transparent','stroke-width':8,'pointer-events':'stroke',tabindex:0});
+      hit.dataset.tip=transferTip(tr);hit.setAttribute('aria-label',hit.dataset.tip);bundle.prepend(hit);links.append(bundle);
     }
-    if(mode==='radial')wrap.append(el('p',sim?'Disposition circulaire des vnodes simulés.':'Branches grises : préfixes binaires communs aux adresses. Sélectionner un vnode pour lire ses buckets parmi les adresses observées.','note'));
     wrap.append(viewport(root,mode,canvas));
-    for(const glyph of glyphs.querySelectorAll('[data-glyph]')){
-      if(glyph.dataset.glyph===root.dataset.selection){glyph.onclick();break;}
-    }
     if(unresolved)wrap.append(el('p',fmt(unresolved)+' transfert(s) avec extrémité inconnue.','note'));
     return wrap;
   }
@@ -326,7 +366,7 @@
         x:left?-9:9,y:4,'text-anchor':left?'end':'start','font-family':'monospace'});
       name.textContent=n.label;g.append(name);
       const description=`${n.label} · ${n.machine} · ${n.state} · ${fmt(itemSum([n],stale).value)} items · ${fmt(stale?null:n.applied_s??n.estimated_s,1)} ${sim?'requises':'applications'}/s`;
-      select(g,description,tr=>touchesNode(tr,n),()=>{
+      select(g,description,[n.label],()=>{
         if(!bits||stale)return '';
         const buckets=new Map();
         for(const l of leaves)if(l.bits&&l.bits!==bits&&l.n.state!=='stale'){
@@ -360,32 +400,36 @@
     const entries=fresh.map(n=>({n,share:measured?n.native_share:projected.get(n.label)}))
       .sort((a,b)=>a.n.label.localeCompare(b.n.label));
     if(!measured&&projected.size!==fresh.length){wrap.append(el('p','Adresses distinctes indisponibles pour calculer le placement XOR.'));return wrap;}
-    wrap.append(el('p',measured?'Droits régionaux installés, relevés sur chaque vnode. Les activations ponctuelles en cours de transfert sont exclues.':'Placement XOR théorique entre les vnodes observés. Les droits installés ne figurent pas dans cette capture.'));
+    const explanation=measured?'Droits régionaux installés, relevés sur chaque vnode. Les activations ponctuelles en cours de transfert sont exclues.':'Placement XOR théorique entre les vnodes observés. Les droits installés ne figurent pas dans cette capture.';
     const graph=svg('svg',{viewBox:'0 0 240 240',role:'group','aria-label':'Part de l’espace total des adresses'});
 
     graph.append(svg('circle',{cx:120,cy:120,r:88,stroke:'#8884','stroke-width':35,fill:'none'}));
     const total=entries.reduce((sum,e)=>sum+(e.share||0),0);
     const list=el('div',null,'address-list');
-    const readout=el('p','Sélectionner une plage ou une adresse.','detail');
+
     let offset=0;
     for(const {n,share} of entries){
       const color='hsl('+([...n.label].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,0)%360)+' 60% 48%)';
       const text=n.label+' · '+(Number.isFinite(share)?fmt(100*share,4)+' %':'inconnu');
       const button=el('button',text);
       button.style.borderInlineStart='5px solid '+color;
-      const select=()=>{readout.textContent=text+' · machine '+n.machine+' · '+fmt(n.items)+' items';};
-      button.onclick=select;list.append(button);
+      const hint=text+' · machine '+n.machine+' · '+fmt(n.items)+' items · '+explanation;
+      bindPick(root,button,[n.label],hint);list.append(button);
       if(!(share>0)||total>1+1e-12)continue;
       const stroke={fill:'none',stroke:color,'stroke-width':35};
       const at=f=>[120+88*Math.sin(2*Math.PI*f),120-88*Math.cos(2*Math.PI*f)].join(' ');
       const arc=share===1?svg('circle',{...stroke,cx:120,cy:120,r:88}):
         svg('path',{...stroke,d:`M${at(offset)} A88 88 0 ${share>.5?1:0} 1 ${at(offset+share)}`});
-      const title=svg('title',{});title.textContent=text;arc.append(title);arc.onclick=select;graph.append(arc);
+      const title=svg('title',{});title.textContent=text;arc.append(title);bindPick(root,arc,[n.label],hint);graph.append(arc);
       offset+=share;
     }
     if(total>1+1e-12)wrap.append(el('p','Les relevés locaux dépassent ensemble 100 %. Les parts individuelles figurent ci-dessous.'));
-    else wrap.append(viewport(root,'shares',graph),el('p','Un tour représente 100 % des adresses. Chaque arc regroupe la part d’un vnode. Le gris indique la part non renseignée.','note'));
-    wrap.append(readout,list);return wrap;
+    else {
+      const center=svg('text',{x:120,y:120,'text-anchor':'middle'});center.textContent=measured?'Droits installés':'Placement XOR';
+      center.dataset.tip=explanation;graph.append(center);wrap.append(viewport(root,'shares',graph));
+    }
+    if(total>1+1e-12||entries.some(e=>!(e.share>0))) {const details=el('details');details.append(el('summary','Adresses individuelles'),list);wrap.append(details);}
+    return wrap;
   }
   // Camera state belongs to the view, so changing the replay time keeps it.
   const cameras=new WeakMap();
@@ -467,7 +511,7 @@
     paint();return frame;
   }
 
-  function spaceView(root,nodes,transfers,detail,stale,wrap){
+  function spaceView(root,nodes,transfers,stale,wrap){
     const graph=svg('svg',{viewBox:'0 0 820 480','aria-label':'Réseau de vnodes en trois dimensions'});
     const links=svg('g',{'pointer-events':'none'}),dots=svg('g',{});
     graph.append(links,dots);
@@ -488,14 +532,13 @@
       const title=svg('title',{});title.textContent=n.label+' · '+n.machine;dot.append(circle,title);
       const loc={n,bits,x:r*Math.cos(lon),y:lat,z:r*Math.sin(lon),dot,circle};
       byID.set(n.id,loc);if(n.monitor&&(!byMonitor.has(n.monitor)||n.state!=='stale'))byMonitor.set(n.monitor,loc);
-      dot.onclick=()=>{root.dataset.selection=n.id;detail.textContent=n.label+' · '+n.machine+' · '+fmt(n.items)+' items';paint(current);};
-      dot.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();dot.onclick();}};
+      bindPick(root,dot,[n.label],n.label+' · '+n.machine+' · '+n.state+' · '+fmt(n.items)+' items · '+fmt(n.applied_s??n.estimated_s,1)+'/s');
       return loc;
     });
     function edge(a,b,color,transfer){
       if(!a||!b||a===b)return;
       const line=svg('line',{stroke:color,'stroke-width':transfer?1.9:1});
-      if(transfer)line.setAttribute('marker-end','url(#space-tip)');
+      if(transfer){line.setAttribute('marker-end','url(#space-tip)');line.setAttribute('pointer-events','stroke');line.setAttribute('tabindex',0);line.dataset.tip=transferTip(transfer);}
       edges.push({a,b,line,transfer});links.append(line);
     }
     const defs=svg('defs',{}),tip=svg('marker',{id:'space-tip',viewBox:'0 0 10 10',refX:10,refY:5,markerWidth:5,markerHeight:5,orient:'auto'});
@@ -509,22 +552,20 @@
       edge(sorted[lo],sorted[m],'#8195a4',false);connect(lo,m);connect(m,hi);
     }
     connect(0,sorted.length);
-    for(const tr of transfers)edge(byID.get(tr.source),byID.get(tr.target)||byMonitor.get(tr.target),tr.frozen?'#d97640':'#468ed0',true);
-    let current;
+    for(const tr of transfers)edge(byID.get(tr.source),byID.get(tr.target)||byMonitor.get(tr.target),tr.frozen?'#d97640':'#468ed0',tr);
     function paint(cam){
-      current=cam;
       const cy=Math.cos(cam.yaw),sy=Math.sin(cam.yaw),cp=Math.cos(cam.pitch),sp=Math.sin(cam.pitch);
       for(const p of locations){
         const x=p.x*cy+p.z*sy,z=p.z*cy-p.x*sy;
         p.depth=z*cp+p.y*sp;
         const scale=182/(1-p.depth*.21);
         p.px=410+x*scale;p.py=240+(p.y*cp-z*sp)*scale;
-        const selected=p.n.id===root.dataset.selection;
+        const selected=scopes.get(root).ids.has(p.n.label);
         p.dot.setAttribute('transform',`translate(${p.px} ${p.py})`);
         p.circle.setAttribute('r',selected?7:4+p.depth*1.4);
         p.circle.setAttribute('stroke',selected?'currentColor':'none');
         p.dot.setAttribute('opacity',selected?1:.72+.27*p.depth);
-        if(selected)detail.textContent=p.n.label+' · '+p.n.machine+' · '+fmt(p.n.items)+' items';
+
       }
       for(const {a,b,line,transfer} of edges){
         const dx=b.px-a.px,dy=b.py-a.py;
@@ -534,7 +575,8 @@
       }
       dots.append(...[...locations].sort((a,b)=>a.depth-b.depth).map(p=>p.dot));
     }
-    wrap.append(viewport(root,'space',graph,paint),el('p','Glisser pour tourner. Maj + glisser pour déplacer la vue. Gris : voisinage reconstruit par préfixes. Flèches : transferts observés entre vnodes identifiés.','note'));
+    graph.dataset.tip='Glisser pour tourner · Gris : voisinage de préfixes · Flèches : transferts observés';
+    wrap.append(viewport(root,'space',graph,paint));
     return wrap;
   }
   function pressure(h){return Math.max(...['cpu','ram','disk','io'].map(k=>Number.isFinite(h[k])?h[k]:-1));}
@@ -586,7 +628,16 @@
       }
       for(const segment of path.split('|').filter(s=>s.trim()))g.append(svg('polyline',{points:segment,fill:'none',stroke:color,'stroke-width':2}));
     }
-    for(const [x,label] of [[l,first],[w-r,last]]){const n=svg('text',{x,y:h-5,'text-anchor':x===l?'start':'end'});n.textContent=fmt(label)+' s';g.append(n);}figure.append(g);return figure;
+    for(const [x,label] of [[l,first],[w-r,last]]){const n=svg('text',{x,y:h-5,'text-anchor':x===l?'start':'end'});n.textContent=fmt(label)+' s';g.append(n);}figure.append(g);
+    g.addEventListener('pointermove',e=>{
+      const m=g.getScreenCTM();if(!m)return;
+      const pos=new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse());
+      const time=first+(pos.x-l)/(w-l-r)*(last-first);
+      let nearest=points[0];
+      for(const p of points)if(Math.abs((p.x??p.t)-time)<Math.abs((nearest.x??nearest.t)-time))nearest=p;
+      g.dataset.tip=[fmt(nearest.x??nearest.t)+' s',...series.filter(([key])=>Number.isFinite(nearest[key])).map(([key,name])=>name+' '+fmt(nearest[key],2))].join(' · ');
+    });
+    installTips(figure);return figure;
   }
-  global.IndexusDashboard={render,xorShares,growthMetrics,itemSum,addressBits,commonBits,hostSpread,departedTransfers};
+  global.IndexusDashboard={render,selectedPoint,xorShares,growthMetrics,itemSum,addressBits,commonBits,hostSpread,departedTransfers};
 })(typeof window==='undefined'?globalThis:window);

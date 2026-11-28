@@ -51,3 +51,12 @@ test('XOR shares split only on branching bits, including near-identical addresse
   const shares=globalThis.IndexusDashboard.xorShares([b,c,a,a]);
   assert.deepEqual([...shares],[[a,.25],[b,.25],[c,.5]]);
 });
+test('vnode scope sums observed applications and counts an internal transfer once',()=>{
+  const {selectedPoint}=globalThis.IndexusDashboard;
+  const p={x:5,fleet:{vnodes:[{id:'a',label:'A',applied_s:4,items:5},{id:'b',label:'B',monitor:'dst',applied_s:0,items:2}],transfers:[{source:'a',target:'dst',frozen:true}]}};
+  const ids=new Set(['A','B']);
+  assert.deepEqual(selectedPoint(p,ids),{x:5,t:undefined,rate:4,stock:7,open:1,frozen:1});
+  p.fleet.vnodes[1].state='stale';
+  assert.equal(selectedPoint(p,ids).rate,null);
+  assert.equal(selectedPoint(p,ids).open,null);
+});

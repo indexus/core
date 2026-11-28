@@ -142,3 +142,32 @@ nav.timeline + main {padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 dialog.chart-dialog {width:min(900px,92vw);padding:16px;box-sizing:border-box;border:1px solid #8997a05c;border-radius:12px;color:CanvasText;background:Canvas;color-scheme:light dark}
 dialog.chart-dialog::backdrop {background:#10192699}
 dialog.chart-dialog .camera-bar {margin:0 0 10px auto}
+.ix-dashboard .graph-tip {position:fixed;z-index:12;pointer-events:none;max-width:min(310px,88vw);padding:8px 11px;border-radius:7px;background:#192832;color:#fff;box-shadow:0 3px 14px #0004;font:12px/1.45 system-ui;overflow-wrap:anywhere}
+.ix-dashboard .outside-scope {opacity:.34}
+.ix-dashboard svg [aria-pressed=true] circle {stroke:currentColor;stroke-width:2}
+.ix-dashboard .overview {grid-template-columns:repeat(3,minmax(0,1fr));margin:8px 0}
+.ix-dashboard .overview figure>svg {height:clamp(62px,12vh,116px)}
+.ix-dashboard .legend[aria-label] {align-items:center;gap:5px;margin:8px 0}
+.ix-dashboard .legend[aria-label] button {font:inherit;border:1px solid #8885;border-radius:6px;padding:4px 9px;cursor:pointer}
+.ix-dashboard .network-frame > svg {height:clamp(235px,calc(100dvh - 360px),75vh)}
+.ix-dashboard .diagnostics {margin-top:5px;font-size:12px}
+body:has(> nav.timeline) {padding:10px 16px}
+body:has(> nav.timeline)>h1 {font:600 15px system-ui;margin:0 0 8px}
+@media(max-width:660px){
+  .ix-dashboard .overview {display:flex;overflow-x:auto;scroll-snap-type:x proximity}
+  .ix-dashboard .overview figure {flex:0 0 76%;scroll-snap-align:start}
+  .ix-dashboard .tile {flex-basis:28%;padding:3px 7px}
+  .ix-dashboard .tile strong {font-size:16px}
+  .ix-dashboard .network-frame > svg {height:clamp(220px,calc(100dvh - 412px),60vh)}
+}
+/* Keep the network and transport controls on screen as the toolbar wraps. */
+body:has(> nav.timeline) {box-sizing:border-box;min-height:100dvh;display:flex;flex-direction:column}
+body:has(> nav.timeline)>p {display:none} /* The renderer identifies the stale stream at the selected instant. */
+nav.timeline + .ix-dashboard:not(:has(.diagnostics[open])) {display:flex;flex-direction:column;flex:1;padding-bottom:0}
+body:has(> nav.timeline):not(:has(.diagnostics[open])) {height:100dvh;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+nav.timeline + .ix-dashboard:not(:has(.diagnostics[open])) .network-pane {flex:1;min-height:165px;display:flex;flex-direction:column}
+nav.timeline + .ix-dashboard:not(:has(.diagnostics[open])) .network-pane>.topology {flex:1;display:flex;flex-direction:column;min-height:0}
+nav.timeline + .ix-dashboard:not(:has(.diagnostics[open])) .network-frame {flex:1;min-height:165px}
+nav.timeline + .ix-dashboard:not(:has(.diagnostics[open])) .network-frame >svg {position:absolute;inset:0;width:100%;height:100%}
+.ix-dashboard .alert {margin:1px 0 6px;padding:2px 7px;font-size:12px}
+.ix-dashboard .outside-scope[role=button]:hover {opacity:1}
