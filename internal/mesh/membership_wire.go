@@ -254,12 +254,28 @@ func (w *membershipWire) accept(ctx context.Context, peer string, p MembershipPa
 		return false, causal.ErrConflict
 	}
 	if w.receipt(peer).received != p.Version {
-		if err := w.merge(body); err != nil {
+		if err := w.mergeUnlessCurrent(p.Version, body); err != nil {
 			return false, err
 		}
 		w.remember(peer, causal.Digest{}, p.Version)
 	}
 	return false, nil
+}
+
+// Different neighbors can send the same complete inventory. After checking
+// the packet digest, reuse our prepared version only while its durable
+// revision and cluster identity are still current.
+func (w *membershipWire) mergeUnlessCurrent(version causal.Digest, body MembershipEnvelope) error {
+	if cached := w.prepared.Load(); cached != nil && cached.version == version {
+		local, err := w.snapshot()
+		if err != nil {
+			return err
+		}
+		if local.export != nil && local.key == cached.key {
+			return nil
+		}
+	}
+	return w.merge(body)
 }
 
 // receive handles a control request. A missing reference after restart asks for

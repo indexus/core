@@ -39,3 +39,23 @@ func TestMembershipReverseRoundUsesSharedVersion(t *testing.T) {
 		t.Fatal("membership diverged")
 	}
 }
+
+// Multiple neighbors can send the same verified snapshot during a burst. The
+// local replica only needs a receipt for each of the additional senders.
+func TestMembershipFullCopiesFromDistinctPeersMergeOnce(t *testing.T) {
+	a, _ := membershipWireFixture(t, "new")
+	b, state := membershipWireFixture(t, "")
+	p, err := a.packet(causal.Digest{}, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, peer := range []string{"first", "second", "third"} {
+		r, err := b.receive(context.Background(), peer, p)
+		if err != nil || r.Accepted != p.Version || b.receipt(peer).received != p.Version {
+			t.Fatalf("%s: reply=%v err=%v", peer, r, err)
+		}
+	}
+	if state.merges != 1 {
+		t.Fatalf("merged the same inventory %d times", state.merges)
+	}
+}
