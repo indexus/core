@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"encoding/base64"
 	"testing"
 	"time"
 )
@@ -80,5 +81,80 @@ func TestPeerCertRequiresSignedAdvertisedAddress(t *testing.T) {
 		if ip != "" && err != nil {
 			t.Fatalf("signed advertised address %s: %v", ip, err)
 		}
+	}
+}
+
+func BenchmarkRepeatedClientCredential(b *testing.B) {
+	key, err := GenerateKeyPair()
+	if err != nil {
+		b.Fatal(err)
+	}
+	token, err := NewIssuer("net", key).SignClientToken("reader", []string{"read"}, time.Hour)
+	if err != nil {
+		b.Fatal(err)
+	}
+	v := NewVerifier("net", key.Public)
+	b.ReportAllocs()
+	for b.Loop() {
+		if err := v.VerifyClientToken(token); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func TestWarmSignatureChecksEveryInput(t *testing.T) {
+	key, err := GenerateKeyPair()
+	if err != nil {
+		t.Fatal(err)
+	}
+	token, err := NewIssuer("net", key).SignClientToken("reader", []string{"read"}, time.Hour)
+	if err != nil {
+		t.Fatal(err)
+	}
+	v := NewVerifier("net", key.Public)
+	if err := v.VerifyClientToken(token); err != nil {
+		t.Fatal(err)
+	}
+	changed := *token
+	changed.Scopes = []string{"write"}
+	if v.VerifyClientToken(&changed) == nil {
+		t.Fatal("changed signed payload accepted")
+	}
+	sig, err := base64.StdEncoding.DecodeString(token.Signature)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sig[len(sig)-1] ^= 1 // Same slot as the warm credential.
+	changed = *token
+	changed.Signature = base64.StdEncoding.EncodeToString(sig)
+	if v.VerifyClientToken(&changed) == nil {
+		t.Fatal("changed signature accepted")
+	}
+	other, err := GenerateKeyPair()
+	if err != nil {
+		t.Fatal(err)
+	}
+	v.Public = other.Public
+	if v.VerifyClientToken(token) == nil {
+		t.Fatal("old issuer accepted after rotation")
+	}
+	v.Public = key.Public
+	expired, err := NewIssuer("net", key).SignClientToken("reader", []string{"read"}, -time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := expired.payload()
+	if err != nil {
+		t.Fatal(err)
+	}
+	signature, err := base64.StdEncoding.DecodeString(expired.Signature)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !v.validSignature(raw, signature) {
+		t.Fatal("expected valid signature")
+	}
+	if v.VerifyClientToken(expired) == nil {
+		t.Fatal("expired credential accepted with warm signature")
 	}
 }
