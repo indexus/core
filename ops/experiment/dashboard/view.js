@@ -183,7 +183,6 @@
     function drawRemaining(){
       if(!filtered)more.replaceChildren(...catalog.flatMap((spec,id)=>layout.includes(id)?[]:[chart(past,...spec)]));
     }
-    if(!filtered){drawRemaining();diagnostics.append(more);}
     const choices=el('div',null,'scene-options'), plot=el('div',null,'network-pane');
     const active=p.metrics_stale?[]:transfers.filter(tr=>!tr.stale);
     const unknownLinks=transfers.length-active.length;
@@ -232,7 +231,8 @@
       for(const [label,value] of stats.filter((_,i)=>![0,1,2,5,9,10].includes(i))){
         const tile=el('div',null,'tile');tile.append(el('span',label),el('strong',String(value??'—')));extra.append(tile);
       }
-      diagnostics.append(extra);
+      drawRemaining();
+      diagnostics.append(extra,more);
       if(unknownLinks)diagnostics.append(el('p',fmt(unknownLinks)+' observations de transfert périmées.'));
       frame.append(diagnostics);
     }
