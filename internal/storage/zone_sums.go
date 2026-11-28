@@ -1,6 +1,10 @@
 package storage
 
-import "github.com/indexus/go-indexus-core/internal/zonelog"
+import (
+	"context"
+
+	"github.com/indexus/go-indexus-core/internal/zonelog"
+)
 
 // ZoneSum is what the records at or below a zone add up to, as zonelog keeps
 // it in its segments: no record is read. Only is the one location holding
@@ -43,3 +47,11 @@ func (z *ZoneSums) Total(collection, location string) (ZoneSum, error) {
 
 // Close releases the version.
 func (z *ZoneSums) Close() { z.sn.Close() }
+
+// ObserveChildPresence returns two routing-alphabet masks for this disk.
+// A seen child has a counted local witness, including uncollected handoff
+// copies. An unknown child has an inconclusive probe. Neither mask confers
+// authority or describes other peers. No summary is materialized.
+func (s *Store) ObserveChildPresence(ctx context.Context, collection, location string) (seen, unknown uint64, err error) {
+	return s.db.ObserveChildPresence(ctx, collection, location)
+}

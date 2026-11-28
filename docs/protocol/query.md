@@ -192,3 +192,32 @@ opaque bodies needed to decode it,
 the peer returns 413 and no rows. An invalid request returns 400, a peer
 without installed authority returns 409, and a frozen owner returns 503.
 The caller chooses the next peer. Each call sees its own snapshot.
+
+### Local hints for direct child prefixes
+
+`Store.ObserveChildPresence` reports two 64-bit masks indexed by the routing
+alphabet. For a child in `seen`, this disk has a counted record at or below
+the child at the observation's snapshot. A retained source copy during
+handoff can supply that witness after another owner has deleted the record.
+The parent itself is excluded. An `unknown` child had an inconclusive probe,
+for example a tombstone ahead of a live key, a memtable update newer than the
+snapshot, or an older segment outside the probe budget. A child with neither
+bit has no observed physical key and all local sources for it were checked.
+Other peers can hold children missing on this disk. At maximum address depth
+there are no children.
+
+The probe seeks once per child in each of the two memtables and in up to
+eight recent immutable segments, stopping on the first source with a
+physical candidate. It reads key heads and flags. It does not advance to the
+next document, chase MVCC version chains, decode metrics, or fetch payloads.
+The pinned view copies at most eight segment references. Across 64 children
+there are at most 512 segment range checks and as many indexed seeks.
+Skiplist navigation, segment indexes, compressed page sizes, cache misses
+and snapshot registration/reclamation affect elapsed time. Cancellation is
+checked between child ranges and segments; an I/O already in progress can
+complete before cancellation returns.
+
+`ZoneChildren` provides full local counts, weights, metric sums and unique
+locations. In memory those totals fold the descendant rows. On disk they
+use segment sums, and determining a unique location among retractions can
+require a further key walk.
