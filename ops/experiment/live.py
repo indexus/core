@@ -30,6 +30,9 @@ def percentile_ms(hist, q):
     return None
 
 
+READ_PERCENTILES = (50, 90, 95, 99)
+
+
 def p99_ms(hist):
     return percentile_ms(hist, .99)
 
@@ -121,9 +124,10 @@ def build(point, rows, ms, prev):
             for i, n in enumerate(r.get("fresh_lag_us_log2") or []):
                 fresh[i] += n
         n = len(rows)
-        for key in ("reads", "read_failed", "read_miss"):
+        for key in ("reads", "read_failed", "read_miss", "read_oversized"):
             point[key+"_s" if key != "reads" else "reads_s"] = sum(r.get(key, 0) for r in rows)/n if any(key in r or (key != "reads" and "reads" in r) for r in rows) else None
-        point["read_p99_ms"] = p99_ms(read_hist)
+        for q in READ_PERCENTILES:
+            point[f"read_p{q}_ms"] = percentile_ms(read_hist, q / 100)
         point.update(t=int(rows[-1]["t"]), offered=round(sum(r["offered"] for r in rows) / n),
                      acked=round(sum(r["acked"] for r in rows) / n), shed=round(sum(r["shed"] for r in rows) / n),
                      p50_ms=percentile_ms(hist, .5), p95_ms=percentile_ms(hist, .95), p99_ms=p99_ms(hist),
@@ -402,7 +406,8 @@ def fleet_page(points, title, live):
     for raw in points:
         p = dict(raw, x=raw.get('wall', 0)-base)
         if p.get('load_stale'):
-            for key in ('offered', 'acked', 'p50_ms', 'p95_ms', 'p99_ms', 'reads_s', 'read_failed_s', 'read_p99_ms'):
+            for key in ('offered', 'acked', 'p50_ms', 'p95_ms', 'p99_ms', 'reads_s', 'read_failed_s', 'read_miss_s', 'read_oversized_s',
+                        'fresh_p99_ms', *(f'read_p{q}_ms' for q in READ_PERCENTILES)):
                 p[key] = None
         data.append(p)
     # JSON lives inside a script: escaped terminators protect against node names.

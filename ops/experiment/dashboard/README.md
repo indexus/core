@@ -13,7 +13,7 @@ be inspected on the time slider. The view is read-only.
 ## Schema 1
 
 Each time point retains the existing flat global keys (`offered`, `acked`,
-`p50_ms`, `p95_ms`, `p99_ms`, `reads_s`, `read_failed_s`, `read_p99_ms`,
+`p50_ms`, `p95_ms`, `p99_ms`, `reads_s`, `read_failed_s`, `read_p50_ms`, `read_p90_ms`, `read_p95_ms`, `read_p99_ms`,
 `fresh_p99_ms`, `vnodes`, `open`, `frozen`, `shed`, `queued`, `in_flight`).
 `x` is seconds since the campaign's first point. Its `fleet` contains:
 
@@ -94,3 +94,7 @@ each sample. The tile also shows how many vnode processes answered. The gossip
 membership count can differ from both. Density divides ready vnodes by observed
 machines when each known machine has recent evidence. On AWS the denominator
 excludes unregistered boots. In the simulator it includes known booting hosts.
+
+Les percentiles de lecture agrègent les histogrammes des lectures ponctuelles
+réussies sur chaque fenêtre. La fraîcheur du total racine a sa propre courbe.
+Les anciens exports peuvent inclure des échecs de totaux dans `read_failed_s`.

@@ -59,5 +59,15 @@ class LivePercentileTests(unittest.TestCase):
         self.assertEqual([point[k] for k in ('p50_ms', 'p95_ms', 'p99_ms')], [.002, .004, .008])
         self.assertEqual([point[k] for k in ('intended_p50_ms', 'intended_p95_ms', 'intended_p99_ms')], [1.024]*3)
 
+    def test_read_percentiles_merge_success_histograms(self):
+        rows = [dict(t=i, offered=0, acked=0, shed=0, read_latency_us_log2=hist)
+                for i, hist in enumerate(([0, 50], [0, 0, 40, 5, 5]))]
+        point = {}
+        live.build(point, rows, {}, None)
+        self.assertEqual([point[f'read_p{q}_ms'] for q in live.READ_PERCENTILES],
+                         [.002, .004, .008, .016])
+        live.build(point, [dict(t=3, offered=0, acked=0, shed=0)], {}, None)
+        self.assertTrue(all(point[f'read_p{q}_ms'] is None for q in live.READ_PERCENTILES))
+
 if __name__ == '__main__':
     unittest.main()

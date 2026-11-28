@@ -277,6 +277,7 @@ type second struct {
 	// Readers, when enabled: point reads of acknowledged keys and collection
 	// totals compared with what was acknowledged before the read started.
 	Reads         int64   `json:"reads,omitempty"`
+	TotalFailed   int64   `json:"total_failed,omitempty"`
 	ReadFailed    int64   `json:"read_failed,omitempty"`
 	ReadMiss      int64   `json:"read_miss,omitempty"`
 	ReadOversized int64   `json:"read_oversized,omitempty"`
@@ -430,7 +431,7 @@ func load(ctx context.Context, args []string) error {
 		failed                                                       = map[int]int64{}
 		errs                                                         = map[string]int{}
 		seen                                                         recent
-		reads, readFailed, readMiss, readOver                        atomic.Int64
+		reads, readFailed, readMiss, readOver, totalFailed           atomic.Int64
 		totals, totalsExact, totalsDeficit                           atomic.Int64
 		readLatency, totalLatency                                    histogram
 		freshLag                                                     histogram
@@ -646,7 +647,7 @@ func load(ctx context.Context, args []string) error {
 					if rng.Float64() < *totalShare {
 						count, err := collectionTotalContext(readCtx, pool.url(rng), tok, k.Collection, false)
 						if err != nil {
-							readFailed.Add(1)
+							totalFailed.Add(1)
 							continue
 						}
 						totals.Add(1)
@@ -759,7 +760,7 @@ loop:
 				cpu := processCPU()
 				line := second{CPU: cpu - last.cpu, Cores: runtime.NumCPU(), T: t.Seconds(), Rate: current, Offered: o - last.offered, Shed: s - last.shed, Acked: a - last.acked, HotAcked: h - last.hot, Failed: f, Errors: e, Latency: latency.drain(), HTTPAttempt: httpAttempt.drain(), RouteLearn: routeLearn.drain(), Intended: intended.drain(), InFlight: inFlight.Load(), Queued: len(jobs), Workers: *workers,
 					Exhausted: x - last.exhausted, ExhaustedLatency: exhaustedLatency.drain(),
-					Reads: reads.Swap(0), ReadFailed: readFailed.Swap(0), ReadMiss: readMiss.Swap(0), ReadOversized: readOver.Swap(0), ReadLatency: readLatency.drain(),
+					Reads: reads.Swap(0), TotalFailed: totalFailed.Swap(0), ReadFailed: readFailed.Swap(0), ReadMiss: readMiss.Swap(0), ReadOversized: readOver.Swap(0), ReadLatency: readLatency.drain(),
 					Totals: totals.Swap(0), TotalsExact: totalsExact.Swap(0), TotalsDeficit: totalsDeficit.Swap(0), TotalLatency: totalLatency.drain(),
 					FreshLag: freshLag.drain(), FreshTimeouts: freshTimeouts.Swap(0), Entries: pool.count()}
 				for i := range slow {

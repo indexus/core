@@ -129,7 +129,7 @@
         ['Débit maximal par vnode /s',[['peakRate','maximum']]],
         ['Ressources des hôtes, max. %',[['cpu','CPU'],['ram','RAM'],['disk','disque']]]]:[
       ['Écritures /s',[['offered','demandées'],['acked','ACK client'],['estimated_s','besoin réparti (simulation)']]],
-      ['Lectures client /s',[['reads_s','tentatives'],['read_failed_s','échecs']]],
+      ['Lectures client /s',[['reads_s','tentatives'],['read_failed_s','échecs'],['read_miss_s','clé absente'],['read_oversized_s','hors budget']]],
       ['Latence écriture, ms',[['p50_ms','p50'],['p95_ms','p95'],['p99_ms','p99']]],
       ['Items observés dans le réseau',[['stock','items comptés']]],
       ['Croissance du réseau',[['ready_count','vnodes prêts'],['machine_count','machines']],true],
@@ -139,18 +139,19 @@
       ['Transferts ouverts',[['open','ouverts'],['frozen','en bascule']]],
       ['Ressources : maximum observé, %',[['cpu_max','CPU'],['ram_max','RAM'],['disk_max','disque']]],
       ['Pression client',[['shed','non envoyées /s'],['queued','en file'],['in_flight','en vol']]],
-      ['Lectures et fraîcheur, p99 ms',[['read_p99_ms','lecture'],['fresh_p99_ms','total racine']]],
+      ['Latence des lectures ponctuelles, ms',[['read_p50_ms','p50'],['read_p90_ms','p90'],['read_p95_ms','p95'],['read_p99_ms','p99']]],
       ['Écritures réussies avec relais, %',[['relayed_pct','avec relais']]],
       ['Trafic moyen par vnode, Kio/s',[['mesh_kb_s','mesh'],['gossip_kb_s','membership']]],
       ['Membership, Kio',[['membership_kb','taille maximale']]],
       ['Latence depuis l’arrivée prévue, ms',[['intended_p50_ms','p50'],['intended_p95_ms','p95'],['intended_p99_ms','p99']]],
       ['Générateur de charge, % CPU',[['loader_pct','CPU']]],
+      ['Fraîcheur du total racine, p99 ms',[['fresh_p99_ms','délai après ACK']]],
       ['Remontée des totaux',[['flush_s','temps le plus long (s)'],['pending_k','arêtes en attente (milliers)']]]
     ];
     const past=filtered?scoped:points.slice(0,index+1);
     const available=catalog.map(([,series])=>past.some(p=>series.some(([key])=>Number.isFinite(p[key]))));
     const layoutKey=filtered?'vnodeCharts':'networkCharts';
-    const defaults=filtered?[0,1,2,3,4,5]:[0,2,3,4,8,9];
+    const defaults=filtered?[0,1,2,3,4,5]:[0,2,1,11,8,9];
     if(!scope[layoutKey]){
       let saved;
       try{saved=JSON.parse(sessionStorage.getItem(location.pathname+':'+layoutKey));}catch{}
