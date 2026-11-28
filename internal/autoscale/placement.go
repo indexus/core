@@ -21,8 +21,9 @@ type MachineFacts struct {
 	Free            int    `json:"free"`    // unoccupied address slots
 	ResourceManaged bool   `json:"resource_managed,omitempty"`
 	AddressSlots    int    `json:"address_slots,omitempty"` // resource-admitted agent, total port positions
-	// Receiving counts the vnodes still joining: each is receiving a transfer.
-	Receiving int `json:"receiving"`
+	// Receiving counts joining vnodes and slots conservatively reserved until observed.
+	Receiving       int `json:"receiving"`
+	UnobservedSlots int `json:"unobserved_slots,omitempty"`
 	// CopySlots is the configured shared source-copy budget. Without a
 	// positive known limit each waiting requester is counted individually.
 	CopySlots int `json:"copy_slots,omitempty"`
@@ -255,6 +256,9 @@ func ReceiverRefusal(m MachineFacts) string {
 	case m.MemOK && m.MemFreePct < targetMemMinFreePct:
 		return fmt.Sprintf("memory free %.0f%% < %.0f%%", m.MemFreePct, targetMemMinFreePct)
 	case m.Receiving >= maxReceiversPerMachine:
+		if m.UnobservedSlots > 0 {
+			return fmt.Sprintf("%d observed joining, %d awaiting vnode CPU sample", m.Receiving-m.UnobservedSlots, m.UnobservedSlots)
+		}
 		return fmt.Sprintf("%d vnode still joining", m.Receiving)
 	case projectedCPU(m) > targetCPUMaxPct:
 		return fmt.Sprintf("cpu %.0f%% + receiver %.0f%% > %.0f%%", m.CPUPct, receiverCost(m), targetCPUMaxPct)

@@ -189,7 +189,10 @@ func machineFacts(slots []*slot, cores int, host autoscale.ResourceSample, addre
 		used += c
 		// In resource mode a process that stopped answering is an unknown
 		// receiver until a fresh observation arrives.
-		if s.joining || !measured || (dynamic || addressSlots > 0) && now.Sub(s.cpu[len(s.cpu)-1].at) > cpuSamples*factsEvery {
+		if !measured || (dynamic || addressSlots > 0) && now.Sub(s.cpu[len(s.cpu)-1].at) > cpuSamples*factsEvery {
+			f.UnobservedSlots++
+			f.Receiving++
+		} else if s.joining {
 			f.Receiving++
 		}
 	}

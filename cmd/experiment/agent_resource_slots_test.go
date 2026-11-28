@@ -65,7 +65,7 @@ func TestResourceSlotsGrowPastFiveAndDeferOnPressure(t *testing.T) {
 	for j := range used[0].cpu {
 		used[0].cpu[j].at = used[0].cpu[j].at.Add(-time.Minute)
 	}
-	if f := facts(5, true); offeredSlots(f) != 0 || f.Receiving != 1 {
+	if f := facts(5, true); offeredSlots(f) != 0 || f.Receiving != 1 || f.UnobservedSlots != 1 || autoscale.ReceiverRefusal(f) != "0 observed joining, 1 awaiting vnode CPU sample" {
 		t.Fatalf("stale slot looked available: %+v", f)
 	}
 	used = nil
