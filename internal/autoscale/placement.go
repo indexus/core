@@ -111,7 +111,7 @@ const (
 	// used 87-89 % of it, about 1.75 cores each.
 	receiverCores = 1.75
 	// Initial estimate for an instrumented machine until it samples a join.
-	MinReceiverCores = 0.75
+	MinReceiverCores = 0.50
 
 	// targetCPUMaxPct: a machine is a target only if its CPU plus the
 	// receiver budget stays at or under the steady-state target. The receiver

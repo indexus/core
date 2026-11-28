@@ -43,7 +43,7 @@ const warmingPatience = time.Minute
 
 // bootWave limits outstanding machine starts while a shortage is observed.
 // Repeated requests in the same observation interval share a window. A shortage
-// that persists across intervals doubles the window even if no host registers.
+// that persists grows the window, gradually while the fleet has reuse headroom.
 type bootWave struct {
 	window           int
 	raised, observed time.Time
@@ -60,7 +60,11 @@ func (w *bootWave) observe(now time.Time, reserve autoscale.Reserve) int {
 		w.window = 1
 		w.raised = now
 	case now.Sub(w.raised) >= placementMemory:
-		w.window *= 2
+		if reserve.ReuseHeadroom {
+			w.window++
+		} else {
+			w.window *= 2
+		}
 		w.raised = now
 	}
 	w.observed = now
@@ -248,6 +252,9 @@ func (s *Server) planPlacement(machines []autoscale.MachineFacts, requester, pre
 		record.Reserve = &reserve
 		record.BootWindow = s.bootWave.observe(time.Now(), reserve)
 		detail := fmt.Sprintf("floor=%d,pending=%d,ready=%d,warming=%d", reserve.Floor, reserve.Pending, reserve.Ready, reserve.Warming)
+		if reserve.ReuseHeadroom {
+			detail += ",reuse_headroom=true"
+		}
 		if record.Backlog != pending {
 			detail += fmt.Sprintf(",backlog_vnodes=%d,source_lanes=%d", record.Backlog, pending)
 		}

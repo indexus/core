@@ -37,10 +37,10 @@ func TestResourceSlotsGrowPastFiveAndDeferOnPressure(t *testing.T) {
 		v.record("ready", false, 10, nil, at.Add(-time.Second))
 		v.record("ready", false, 10, nil, at)
 	}
-	if f := facts(40, true); offeredSlots(f) != 1 {
+	if f := facts(47.5, true); offeredSlots(f) != 1 {
 		t.Fatalf("light receiver should fit: %+v", f)
 	}
-	if f := facts(42, true); offeredSlots(f) != 0 || f.ReceiverReady == nil || *f.ReceiverReady {
+	if f := facts(47.51, true); offeredSlots(f) != 0 || f.ReceiverReady == nil || *f.ReceiverReady {
 		t.Fatalf("CPU headroom ignored: %+v", f)
 	}
 	if f := facts(40, false); offeredSlots(f) != 91 {
@@ -69,7 +69,7 @@ func TestResourceSlotsGrowPastFiveAndDeferOnPressure(t *testing.T) {
 		t.Fatalf("stale slot looked available: %+v", f)
 	}
 	used = nil
-	f = facts(45, true)
+	f = facts(48, true)
 	f.Machine = "warming"
 	book, ok := autoscale.ReadyReserve([]autoscale.MachineFacts{f}, "", 0, 1, map[string]bool{f.Machine: true})
 	if !ok || book.Warming != 1 || book.Boots() != 0 || f.Free != addressSlots || offeredSlots(f) != 0 {
@@ -143,7 +143,7 @@ func TestReceiverForecastUsesRecentJoinOnThisMachine(t *testing.T) {
 		t.Fatal("lost measured join cost", f)
 	}
 	s.joinSampleAt = now.Add(-2 * time.Minute)
-	if f := facts(); f.ReceiverReserveCores != 0.75 {
+	if f := facts(); f.ReceiverReserveCores != 0.5 {
 		t.Fatal("stale receiver estimate", f)
 	}
 }

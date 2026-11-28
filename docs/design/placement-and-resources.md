@@ -158,7 +158,7 @@ skipped. This is the case of a local run on a laptop with a full disk.
 
 | Constant | Value | Why | Status |
 | --- | --- | --- | --- |
-| Instrumented receiver forecast | At least 0.75 cores | The agent uses the largest recent joining-process estimate among its live slots. A sample uses six CPU readings and expires after one minute. | policy to qualify |
+| Instrumented receiver forecast | At least 0.50 cores | The agent uses the largest recent joining-process estimate among its live slots. A sample uses six CPU readings and expires after one minute. | policy to qualify |
 | `receiverCores` (fallback and reserve-floor sizing) | 1.75 cores | two receivers on 4 vCPU used 87-89 %, about 1.75 cores each. It includes the writes the new vnode takes over, which land on the target too. | one measurement |
 | `targetCPUMaxPct` | 60 % | retain burst and transfer headroom | control target, not a hard cap |
 | `maxReceiversPerMachine` | 1 | two at once is what saturated the machines | one measurement |
@@ -167,11 +167,22 @@ skipped. This is the case of a local run on a laptop with a full disk.
 | `placementMemory` | 15 s | a machine just chosen counts as receiving until its agent shows the vnode | assumed |
 | CPU window | 10 s | sees a join start, ignores one commit burst | assumed |
 
-On a four-core host the initial forecast of 0.75 cores admits a receiver up to
-41.25% measured CPU. A recent 1.5-core observation lowers that threshold to
+On a four-core host the initial forecast of 0.50 cores admits a receiver up to
+47.5% measured CPU. A recent 1.5-core observation lowers that threshold to
 22.5%. Only one receiver is admitted at once. The reserve-floor formula still
 uses the original 1.75-core unit so this change alone does not multiply spare
 boots. Agents export the forecast and refusal reason in their machine facts.
+
+In the first 131 seconds of `aws-64k-ebs-1128-064141`, 137 host observations
+had a free offer before applying the CPU filter (free slot, no receiver,
+measured CPU, sufficient memory and disk). Replaying only the initial CPU
+forecast admitted 116 observations at 0.75 cores, 124 at 0.50, and 129 at
+0.25. Across the 400-second injection, 924 consecutive 2–10 second samples
+of the same joining process gave a median CPU cost of 0.186 cores and p90 of
+0.355. 41 intervals exceeded 0.50 cores and 279 exceeded 0.25. These samples
+omit short joins and measure the process, excluding kernel work outside it.
+They motivate a starting estimate; they do not measure post-change EC2 count,
+ACK latency or machine utilization.
 
 A physical move retains the vnode address, increments its endpoint epoch and
 transfers its rights before publication. The node supports this through its
@@ -310,8 +321,12 @@ hook serves the selected target and suppresses speculative boots. An unserved
 request can still trigger one launch when no boot is outstanding. A fleet that
 reports no resource-aware placement uses the slot rule. Placement recalculates on spawn requests.
 When a real shortage appears, the provisioner initially allows one outstanding
-machine start. It doubles this window at most once per 15-second observation
-interval while the shortage persists. The hook subtracts already accepted
+machine start. Once per 15-second observation interval with persistent shortage, the window
+grows by one outstanding start when core-weighted CPU is at most 30%. For this calculation a host short
+on RAM or disk, or lacking a host CPU reading, counts as at least 60% busy.
+One tight host therefore cannot hide the capacity of a large idle fleet. Otherwise the
+window can double. The hook still limits actual starts by the unmet deficit.
+This controls outstanding starts; an arrival can release a credit within an interval. The hook subtracts already accepted
 launches under the reservation lock. A named admissible target can start its
 receiver before the hook replenishes the remaining reserve. A fully covered
 demand clears the boot window. The [first 28 seconds of the AWS wave](../benchmarks/aws-placement-100-20261127/boot-wave-replay.csv)

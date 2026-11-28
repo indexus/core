@@ -17,6 +17,9 @@ func ReceiverOffer(m MachineFacts) (ready, known bool) {
 // Reserve is the arithmetic of the ready reserve, in receiver offers: one
 // machine supplies one offer, whatever its free slots.
 type Reserve struct {
+	// ReuseHeadroom permits gradual boot growth when measured host CPU is
+	// low and the fleet has spare memory and disk to redistribute work.
+	ReuseHeadroom bool `json:"reuse_headroom,omitempty"`
 	// Floor is the spare offers derived from core usage above the fleet reuse threshold.
 	Floor int `json:"floor"`
 	// Pending is the concurrent offers the waiting source vnodes can use.
@@ -54,10 +57,16 @@ func ReadyReserve(machines []MachineFacts, selected string, pct float64, pending
 	}
 	reserve := Reserve{Pending: pending}
 	excessCorePct := 0.0
+	unusableCorePct := 0.0
 	for _, m := range machines {
 		ready, known := ReceiverOffer(m)
 		if !known {
 			return Reserve{}, false
+		}
+		// A host short on another resource cannot lend its idle CPU.
+		// Charge it at least the admission target, in proportion to its size.
+		if !m.HostCPUOK || short(m) {
+			unusableCorePct += float64(m.Cores) * max(0, targetCPUMaxPct-m.CPUPct)
 		}
 		excessCorePct += float64(m.Cores) * (m.CPUPct - reuseCPUPercent)
 		switch {
@@ -70,6 +79,7 @@ func ReadyReserve(machines []MachineFacts, selected string, pct float64, pending
 	}
 	// Idle headroom on a larger machine offsets more busy CPU elsewhere.
 	// Subtract the threshold before summing so exactly 30% produces zero.
+	reserve.ReuseHeadroom = excessCorePct+unusableCorePct <= 0
 	excessCores := max(0, excessCorePct) / 100
 	reserve.Floor = int(math.Ceil(excessCores * pct / 100 / receiverCores))
 	return reserve, true

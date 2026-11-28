@@ -88,3 +88,31 @@ func TestQuietFleetUsesExistingCapacityBeforeBootingSpeculativeSpares(t *testing
 		t.Fatalf("under 30%% but without room for a copy: %+v", r)
 	}
 }
+
+func TestBootPacingRequiresMeasuredFleetHeadroom(t *testing.T) {
+	busy := MachineFacts{CPUOK: true, HostCPUOK: true, Cores: 4, CPUPct: 60, MemOK: true, MemFreePct: 70, DiskOK: true, DiskFreePct: 70}
+	spare := busy
+	spare.Cores, spare.CPUPct = 12, 20
+	check := func(want bool) {
+		t.Helper()
+		r, ok := ReadyReserve([]MachineFacts{busy, spare}, "", 0, 10, nil)
+		if !ok || r.ReuseHeadroom != want {
+			t.Fatalf("reserve=%+v known=%v want headroom=%v", r, ok, want)
+		}
+	}
+	check(true)
+	spare.CPUPct++
+	check(false)
+	spare.CPUPct--
+	spare.DiskFreePct = 20
+	check(false)
+	spare.DiskFreePct = 70
+	spare.HostCPUOK = false
+	check(false)
+	// One full disk should not accelerate the entire fleet when many
+	// other measured cores have room.
+	busy.DiskFreePct = 10
+	spare.HostCPUOK = true
+	spare.CPUPct = 10
+	check(true)
+}
