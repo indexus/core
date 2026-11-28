@@ -538,3 +538,38 @@ func TestPacedLotShortensItsOriginalDeadlineOnPressureSamples(t *testing.T) {
 		})
 	}
 }
+
+// A receiving vnode can also give regions. Attribute each admission to the
+// correct direction, even when both budgets belong to the same process.
+func TestWarmAdmissionMetricsSeparateSourceFromReceiver(t *testing.T) {
+	b := hostBudgets(t, 1, 1)[0]
+	source, receiver := &metrics.Handoffs.SourceAdmission, &metrics.Handoffs.ReceiverAdmission
+	grants, receives := source.Granted.Load(), receiver.Granted.Load()
+	sourceDefers, receiveDefers := source.Deferred.Load(), receiver.Deferred.Load()
+	interrupts := source.Interrupted.Load()
+	hold, err := b.reserve(context.Background(), "", time.Second, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer hold()
+	release, err := b.receiver.reserve(context.Background(), "", time.Second, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer release()
+	if _, err := b.receiver.reserve(context.Background(), "", time.Millisecond, true); !errors.Is(err, storage.ErrNotReady) {
+		t.Fatalf("receiver wait: %v", err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, err := b.reserve(ctx, "", time.Second, true); !errors.Is(err, context.Canceled) {
+		t.Fatalf("source wait: %v", err)
+	}
+	// An urgent probe cannot wait. It contributes no warm admissions.
+	b.acquire(context.Background(), "probe", 0)()
+	if source.Granted.Load()-grants != 1 || receiver.Granted.Load()-receives != 1 ||
+		source.Deferred.Load() != sourceDefers || receiver.Deferred.Load()-receiveDefers != 1 ||
+		source.Interrupted.Load()-interrupts != 1 {
+		t.Fatal("unexpected admission outcomes by direction")
+	}
+}

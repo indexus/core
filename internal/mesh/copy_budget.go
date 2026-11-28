@@ -38,11 +38,12 @@ import (
 //
 // A nil budget is off: every acquire succeeds at once.
 type CopyBudget struct {
-	dir      string
-	slots    int
-	pressure atomic.Pointer[copyPressure]
-	localIPs map[netip.Addr]bool
-	queue    *copyQueue
+	dir       string
+	slots     int
+	pressure  atomic.Pointer[copyPressure]
+	localIPs  map[netip.Addr]bool
+	queue     *copyQueue
+	admission *metrics.CopyAdmission
 	// Independent of the outgoing slots: reciprocal senders can both receive.
 	receiver *CopyBudget
 }
@@ -97,7 +98,7 @@ func NewCopyBudget(dir string, slots int) (*CopyBudget, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, err
 	}
-	b := &CopyBudget{dir: dir, slots: slots, localIPs: localCopyIPs()}
+	b := &CopyBudget{dir: dir, slots: slots, localIPs: localCopyIPs(), admission: &metrics.Handoffs.SourceAdmission}
 	qdir := filepath.Join(dir, "source-queue")
 	if err := os.MkdirAll(qdir, 0755); err != nil {
 		return nil, err
@@ -108,7 +109,7 @@ func NewCopyBudget(dir string, slots int) (*CopyBudget, error) {
 		if err := os.MkdirAll(incoming, 0o755); err != nil {
 			return nil, err
 		}
-		b.receiver = &CopyBudget{dir: incoming, slots: 1}
+		b.receiver = &CopyBudget{dir: incoming, slots: 1, admission: &metrics.Handoffs.ReceiverAdmission}
 	}
 	return b, nil
 }
@@ -225,11 +226,25 @@ func releaseCopyFile(held *os.File) {
 
 // An unnamed slot admits a proposal before the disk allocates its operation ID.
 // Only a named slot may be shared by a co-resident receiver.
-func (b *CopyBudget) reserveFile(ctx context.Context, transfer string, wait time.Duration, warm bool) (*os.File, error) {
+func (b *CopyBudget) reserveFile(ctx context.Context, transfer string, wait time.Duration, warm bool) (file *os.File, result error) {
 	if b == nil {
 		return nil, ctx.Err()
 	}
-	deadline := time.Now().Add(wait)
+	started := time.Now()
+	if warm && b.admission != nil {
+		defer func() {
+			switch {
+			case result == nil:
+				b.admission.Granted.Add(1)
+				b.admission.TimeToGrant.Observe(time.Since(started))
+			case errors.Is(result, storage.ErrNotReady):
+				b.admission.Deferred.Add(1)
+			default:
+				b.admission.Interrupted.Add(1)
+			}
+		}()
+	}
+	deadline := started.Add(wait)
 	var ticket copyTicket
 	queued := warm && wait > 0 && b.queue != nil
 	defer ticket.remove()

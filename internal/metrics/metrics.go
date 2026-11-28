@@ -87,6 +87,21 @@ func (h *Histogram) snapshot() []int64 {
 	return out[:last]
 }
 
+// CopyAdmission measures strict warm requests on one side of a host copy.
+// Its wait histogram includes only successful admissions. Deferrals and
+// interrupted requests remain visible separately.
+type CopyAdmission struct {
+	Granted, Deferred, Interrupted atomic.Int64
+	TimeToGrant                    Histogram
+}
+
+func (a *CopyAdmission) snapshot() map[string]any {
+	return map[string]any{
+		"granted": a.Granted.Load(), "deferred": a.Deferred.Load(), "interrupted": a.Interrupted.Load(),
+		"time_to_grant_us_log2": a.TimeToGrant.snapshot(),
+	}
+}
+
 // Writes are client writes as the node that received them sees them.
 // Hops counts, at the applying node, how many relays a write took.
 var Writes struct {
@@ -134,6 +149,7 @@ var Handoffs struct {
 	// callers that may not wait (receivers, resumed grains) and found none.
 	CopySlotWaits, CopySlotTimeouts, CopySlotShared, CopySlotBusy atomic.Int64
 	CopySlotWaiting, CopySlotWaitNanos                            atomic.Int64
+	SourceAdmission, ReceiverAdmission                            CopyAdmission
 	CopyPeerWaitNanos, CopyPacedNanos, CopyPacedLots              atomic.Int64
 }
 
@@ -344,8 +360,10 @@ func Snapshot() map[string]any {
 			"copy_slot_waits": Handoffs.CopySlotWaits.Load(), "copy_slot_timeouts": Handoffs.CopySlotTimeouts.Load(),
 			"copy_slot_waiting": Handoffs.CopySlotWaiting.Load(), "copy_slot_wait_ms": Handoffs.CopySlotWaitNanos.Load() / int64(time.Millisecond),
 			"copy_slot_shared": Handoffs.CopySlotShared.Load(), "copy_slot_busy": Handoffs.CopySlotBusy.Load(),
-			"copy_peer_wait_ms": Handoffs.CopyPeerWaitNanos.Load() / int64(time.Millisecond),
-			"copy_paced_lots":   Handoffs.CopyPacedLots.Load(), "copy_paced_ms": Handoffs.CopyPacedNanos.Load() / int64(time.Millisecond),
+			"warm_source_admission":   Handoffs.SourceAdmission.snapshot(),
+			"warm_receiver_admission": Handoffs.ReceiverAdmission.snapshot(),
+			"copy_peer_wait_ms":       Handoffs.CopyPeerWaitNanos.Load() / int64(time.Millisecond),
+			"copy_paced_lots":         Handoffs.CopyPacedLots.Load(), "copy_paced_ms": Handoffs.CopyPacedNanos.Load() / int64(time.Millisecond),
 			"install_to_first_write_us_log2":       Handoffs.InstallToFirstWrite.snapshot(),
 			"cutover_call_us_log2":                 Handoffs.CutoverCall.snapshot(),
 			"cutover_failed_us_log2":               Handoffs.CutoverFailed.snapshot(),

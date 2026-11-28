@@ -584,3 +584,12 @@ qualification can start with `HOSTS=4 SLOTS=5 STEP_VNODES=16 SIZES=16`, retainin
 resource admission and existing CPU/memory/disk thresholds. This configuration
 is prepared, not yet qualified at 16k/s. More vnodes improve delegation
 choices; they do not add CPU to a saturated physical host.
+
+In a mixed-role vnode, the aggregate copy-slot timeout counter includes
+waiting both to give and to receive data. For warm admissions, compare
+`handoffs.warm_source_admission` and `handoffs.warm_receiver_admission`
+on the same process. Each reports admitted calls, bounded deferrals,
+interruptions (including cancellation and local errors), and a microsecond
+histogram from entry to successful admission. A grant is permission to start
+copy work. Use the source's installed rights and applied write rate to measure
+relief. Urgent recovery and nonblocking probes are excluded.
