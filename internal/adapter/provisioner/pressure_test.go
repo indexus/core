@@ -157,3 +157,58 @@ func TestHostReliefWaitingForAMachineStaysWithItsOwner(t *testing.T) {
 		t.Fatalf("v2 did not take over: %d %+v", code, f.s.relief["http://a"])
 	}
 }
+
+// Exercise the controller, its HTTP client and the real provisioner handler
+// together. Only the machine inventory and process launch hooks are fixtures.
+func TestSharedWriteReliefFromControllerToSpawn(t *testing.T) {
+	f := newPressureFixture(t)
+	f.facts(0)
+	server := httptest.NewServer(http.HandlerFunc(f.s.scale))
+	defer server.Close()
+	tick := func(name string, urgent bool) {
+		now := time.Unix(1800000000, 0)
+		ctrl := autoscale.New(autoscale.Config{Enabled: true, WritesLimit: 50,
+			DisableDiskSignal: true, Now: func() time.Time { return now }})
+		ctrl.SetNearBuilder(func(reason string, _ int, _ string) []string {
+			want := "writes"
+			if urgent {
+				want = "queue"
+			}
+			if reason != want {
+				t.Fatalf("planner saw %q; want %q", reason, want)
+			}
+			return []string{"near-" + name}
+		})
+		in := autoscale.Input{SelfName: name, Resources: autoscale.ResourceSample{
+			CPUPct: 99, CPUOK: true, HostCPUOK: true, HostCPUPct: 99, ProcessCPUPct: 22,
+		}}
+		done := make(chan struct{})
+		send := func(req autoscale.Request) error {
+			err := ctrl.PostRequest(server.URL, name, 0, 1, req)
+			close(done)
+			return err
+		}
+		ctrl.Tick(in, send)
+		now = now.Add(ctrl.Config().PressureHold + time.Second)
+		in.WriteRate = 450
+		if urgent {
+			in.OldestWait = ctrl.Config().QueueWaitLimit
+		}
+		ctrl.Tick(in, send)
+		select {
+		case <-done:
+		case <-time.After(3 * time.Second):
+			t.Fatal("missing scale request")
+		}
+	}
+	for _, name := range []string{"v1", "v2", "v3", "v4", "v5"} {
+		tick(name, false)
+	}
+	if got := f.spawned(); got != 1 {
+		t.Fatalf("started %d receivers for one hot host, want 1", got)
+	}
+	tick("v2", true)
+	if got := f.spawned(); got != 2 {
+		t.Fatalf("urgent queue: started %d receivers in total, want 2", got)
+	}
+}

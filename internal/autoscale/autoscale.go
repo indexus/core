@@ -417,6 +417,18 @@ func (a *Controller) evaluatePressure(in Input) (signal string, host bool) {
 
 	if own := a.ownSignal(in, now); own != "" {
 		a.notePressure("hot_signal", own)
+		// A healthy write stream can cross its split threshold on every
+		// sibling. Once shared CPU pressure is confirmed, one host ticket
+		// suffices. An urgent writer queue still needs its own receiver.
+		sharedCPU := (sustained == "cpu" || sustained == "cpu_rise") &&
+			held >= holdNeed && a.hostDriven(sustained, res)
+		if own == "writes" && !a.cfg.ItemsOnly && sharedCPU {
+			if in.TransfersOut > 0 {
+				a.notePressure("host_pressure_waits_for_transfer", true)
+				return "", false
+			}
+			return own, true
+		}
 		return own, false
 	}
 	// Emergency: at/above write-refuse threshold — spawn immediately (no hold).
@@ -447,10 +459,10 @@ func (a *Controller) ownSignal(in Input, now time.Time) string {
 	switch {
 	case a.cfg.ItemsLimit > 0 && in.OwnedItems >= a.cfg.ItemsLimit:
 		return "items"
-	case a.cfg.WritesLimit > 0 && a.writesFire(in.WriteRate, now):
-		return "writes"
 	case a.queueFires(in):
 		return "queue"
+	case a.cfg.WritesLimit > 0 && a.writesFire(in.WriteRate, now):
+		return "writes"
 	}
 	return ""
 }
@@ -679,7 +691,11 @@ func (a *Controller) Tick(in Input, scaleUp func(Request) error) {
 
 	const spawnN = 1
 	// Dichotomy over exclusive owned zones (~½ items), avoiding known peers.
-	nears := a.buildPreferNears(reason, spawnN, in.SelfName)
+	planReason := reason
+	if host && signal == "writes" {
+		planReason = signal // retain traffic-directed prefix selection
+	}
+	nears := a.buildPreferNears(planReason, spawnN, in.SelfName)
 	if len(nears) == 0 {
 		a.upInFlight.Store(false)
 		slog.Info("scale-up skipped: no stable PreferNear (no exclusive load among known peers)",

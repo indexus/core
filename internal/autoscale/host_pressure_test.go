@@ -231,3 +231,29 @@ func TestHostCPUFallsBackToProcessWithoutProcStat(t *testing.T) {
 		t.Fatalf("fired=%v reason=%q, want the process signal", fired, req.Reason)
 	}
 }
+
+// Incident at 64k/s: eight busy siblings shared a saturated machine.
+// Preserve the writer's signal for planning while grouping its host demand.
+func TestSharedWritePressureKeepsUrgentQueueIndependent(t *testing.T) {
+	clock := clockAt(time.Unix(1800000000, 0))
+	a := New(Config{Enabled: true, WritesLimit: 50, Now: clock.now})
+	in := Input{Resources: sharedHostSample(22, 99), WriteRate: 450}
+	check := func(signal string, host bool) {
+		t.Helper()
+		got, shared := a.evaluatePressure(in)
+		if got != signal || shared != host {
+			t.Fatalf("got (%q,%v), want (%q,%v)", got, shared, signal, host)
+		}
+	}
+	check("writes", false)
+	clock.advance(a.Config().PressureHold + time.Second)
+	check("writes", true)
+	in.TransfersOut = 1
+	check("", false)
+	in.OldestWait = a.Config().QueueWaitLimit
+	check("queue", false)
+	in.OldestWait = 0
+	in.TransfersOut = 0
+	in.Resources = sharedHostSample(15, 20)
+	check("writes", false)
+}

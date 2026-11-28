@@ -339,7 +339,12 @@ current requests rather than a forecast of write demand during a boot.
 
 A vnode whose firing signal is the CPU or memory of its *machine* sends
 `"reason": "host_pressure"` to `/v1/scale`. All the vnodes of that machine see
-the same pressure. Answering each would start one receiver, and one more
+the same pressure. A vnode crossing the write-rate threshold also uses this
+host ticket when shared CPU pressure has met its configured hold and its own
+process remains below the CPU limit. It retains `signal=writes` for prefix
+selection. A writer queue crossing its age or depth limit takes precedence
+over the rate signal and can ask independently. A donor already copying out
+waits on that copy for a shared CPU request. Answering each would start one receiver, and one more
 copy, per vnode. The provisioner coalesces them by donor machine
 (`pressure.go`):
 
