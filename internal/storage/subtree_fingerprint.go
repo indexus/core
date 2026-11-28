@@ -11,6 +11,7 @@ import (
 	"math"
 	"sync"
 
+	"github.com/indexus/go-indexus-core/internal/causal"
 	"github.com/indexus/go-indexus-core/internal/tree"
 	"github.com/indexus/go-indexus-core/internal/zonelog"
 )
@@ -106,8 +107,8 @@ func (c *fingerprintCache) remember(zone tree.ZoneKey, e fingerprintEntry) {
 }
 
 // LocalSubtreeFingerprint can decline when the bounded scan is inconclusive
-// or ownership is moving. A cached result is usable only at the exact committed
-// disk sequence of its original local snapshot. No client state is retained.
+// or ownership of the observed prefix is moving. A cached result is usable
+// only at the committed disk sequence of its original local snapshot.
 func (s *Store) LocalSubtreeFingerprint(ctx context.Context, collection, location string) (SubtreeFingerprint, error) {
 	var result SubtreeFingerprint
 	if err := ctx.Err(); err != nil {
@@ -134,7 +135,7 @@ func (s *Store) LocalSubtreeFingerprint(ctx context.Context, collection, locatio
 		if e != nil {
 			return e
 		}
-		if c.state.Moving != nil || pendingCausal(c.state, tx) || coldBusy(tx) {
+		if c.state.Moving != nil || coldBusy(tx) || pendingFingerprintTransfer(c.state, zone) {
 			return zonelog.ErrContentScanLimit
 		}
 		e = sn.ScanContent(ctx, collection, location, 32768, 8<<20, func(z zonelog.Record) error {
@@ -176,4 +177,22 @@ func (s *Store) LocalSubtreeFingerprint(ctx context.Context, collection, locatio
 	}
 	s.fingerprints.remember(zone, fingerprintEntry{sn.Seq(), result})
 	return result, nil
+}
+
+// A cession can affect any zone in its XOR region, including empty zones.
+// The prefix envelope conservatively includes all collections.
+func pendingFingerprintTransfer(state CausalState, zone tree.ZoneKey) bool {
+	if len(state.Transfers) == 0 {
+		return false
+	}
+	prefix := tree.PrefixRegion(zone)
+	for _, transfer := range state.Transfers {
+		if transfer.Phase == causal.TransferInstalled {
+			continue
+		}
+		if _, overlaps := prefix.Intersect(transfer.Cession.Region); overlaps {
+			return true
+		}
+	}
+	return false
 }

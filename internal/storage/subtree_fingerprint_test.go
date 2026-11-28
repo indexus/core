@@ -214,3 +214,58 @@ func TestSubtreeFingerprintDeclinesColdMigration(t *testing.T) {
 		t.Fatal(now, e)
 	}
 }
+
+func TestSubtreeFingerprintDuringDisjointHandoff(t *testing.T) {
+	source, target, genesis := ticketStores(t)
+	ctx := context.Background()
+	const collection = "0000000000000001"
+	write := func(id, location, body string, deleted bool) {
+		t.Helper()
+		record := Record{Collection: collection, Location: location, ID: id, Payload: json.RawMessage(body), Deleted: deleted, Metrics: []float64{1}}
+		if _, _, _, err := source.ApplyRecord(id+location+body, record); err != nil {
+			t.Fatal(err)
+		}
+	}
+	fingerprint := func(s *Store, location string) SubtreeFingerprint {
+		t.Helper()
+		fp, err := s.LocalSubtreeFingerprint(ctx, collection, location)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return fp
+	}
+	zone, err := tree.NewZoneKey(collection, "aa")
+	if err != nil {
+		t.Fatal(err)
+	}
+	write("moving", "aa0", `"moving"`, false)
+	write("stable", "b0", `"stable"`, false)
+	stable := fingerprint(source, "b")
+
+	op := ticketAdmission(t, source, target, genesis.Right().ID, tree.PrefixRegion(zone))
+	for _, store := range []*Store{source, target} {
+		for _, location := range []string{"@", "a", "aa", "aa0"} {
+			if got := fingerprint(store, location); got != (SubtreeFingerprint{}) {
+				t.Fatalf("overlapping prefix %q on %s has proof: %+v", location, store.node, got)
+			}
+		}
+	}
+	got := fingerprint(source, "b")
+	if got.Fingerprint == "" || got.Guard == "" || got.Guard == stable.Guard || got.Count != 1 || got.Sum != stable.Sum {
+		t.Fatalf("disjoint stable rows unavailable or stale: %+v (before %+v)", got, stable)
+	}
+	empty := fingerprint(target, "b")
+	if empty.Fingerprint == "" || empty.Guard == "" || empty.Count != 0 {
+		t.Fatalf("disjoint empty local scope not observed: %+v", empty)
+	}
+	write("temporary", "b1", `"new"`, false)
+	write("temporary", "b1", "", true)
+	restored := fingerprint(source, "b")
+	if restored.Fingerprint != got.Fingerprint || restored.Guard == got.Guard {
+		t.Fatalf("disjoint ABA guard failed: %+v (before %+v)", restored, got)
+	}
+	ticketFinish(t, source, target, op.Cession.ID)
+	if got := fingerprint(target, "aa"); got.Fingerprint == "" || got.Count != 1 {
+		t.Fatalf("installed content unavailable: %+v", got)
+	}
+}
