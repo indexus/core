@@ -50,6 +50,8 @@ type Server struct {
 	drainingSince time.Time
 	// placed: machines lately chosen for a vnode, and when (placementMemory).
 	placed map[string]time.Time
+	// incoming describes a recent remote placement while its reservation is live.
+	incoming map[string]incomingCopy
 	// waiting: the requesters that found no machine, and when they last asked
 	// (waitingMemory). seen: when each machine first reported (warmingPatience).
 	waiting, seen map[string]time.Time
@@ -520,7 +522,7 @@ func (s *Server) applySpawn(dir, preferNear string, answer placementAnswer) (str
 		var exit *exec.ExitError
 		if errors.As(err, &exit) && exit.ExitCode() == 75 && strings.HasPrefix(string(out), "INDEXUS_NO_RECEIVER\n") {
 			// The hook confirms that even its at-cap fallback was not dispatched.
-			s.releaseFallback(decision)
+			s.releaseUndispatched(decision)
 			return "", fmt.Errorf("%w: %s", errWaitingForCapacity, strings.TrimSpace(string(out)))
 		}
 		return "", fmt.Errorf("local spawn: %v (%s)", err, strings.TrimSpace(string(out)))

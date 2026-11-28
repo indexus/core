@@ -90,8 +90,7 @@ func (s *Server) placeCalls(machines []autoscale.MachineFacts, calls []*placemen
 			waiting = append(waiting, c)
 			continue
 		}
-		record, env := s.planPlacement(machines, c.requester, c.target, c.recheck)
-		record.WriteRate, record.Recheck = c.rate, c.recheck
+		record, env := s.planPlacement(machines, c.requester, c.target, c.rate, c.recheck)
 		if c.recheck && (record.Machine == "" || record.Kind == autoscale.PlaceSlots) {
 			waiting = append(waiting, c)
 			continue
