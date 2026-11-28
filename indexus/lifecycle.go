@@ -1,5 +1,7 @@
 package indexus
 
+import "time"
+
 func (n *Node) ClientReady() bool {
 	return n != nil && n.mesh != nil && n.topologyView().HasName(n.Name())
 }
@@ -9,7 +11,13 @@ func (n *Node) ClientReady() bool {
 func (n *Node) Joining() bool { return n != nil && n.joining.Load() }
 
 // SetJoining records whether the initial join is still running.
-func (n *Node) SetJoining(joining bool) { n.joining.Store(joining) }
+func (n *Node) SetJoining(joining bool) {
+	if !joining && n.Joining() && n.mesh != nil {
+		// Publish the end of the join only after the new cold window starts.
+		n.mesh.cool.reset(time.Now(), n.mesh.writes.Load())
+	}
+	n.joining.Store(joining)
+}
 
 // HoldMaintenance keeps, while held, the safe background jobs from starting
 // work that changes rights: Observe's refresh on a new peer (sync, resume,

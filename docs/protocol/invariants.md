@@ -379,8 +379,10 @@ Applying `(zone, seq)` twice has the same result as applying it once. Reconnect 
 
 ## COLD-2 — opportunistic folds are hysteretic
 
-An automatic fold requires a donor that has remained below the cool write rate
-for the quiet period. The survivor admits the pair if their combined owned
+An automatic fold requires a donor that has finished joining and remained below
+the cool write rate for the quiet period. The quiet period starts when the join
+finishes, even if the donor accepted writes on its first right earlier. Recovery
+resumes a previously committed drain independently of this admission check. The survivor admits the pair if their combined owned
 bytes fit the configured fraction of its capacity (45% by default) and the
 configured item limit permits the move. These thresholds leave room before
 the next capacity-driven split.
