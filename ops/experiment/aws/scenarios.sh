@@ -53,24 +53,28 @@ balanced() {
   python3 - "$MONITORS" "$1" <<'PY'
 import json, sys, urllib.request
 A = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
-bits = []
+names = []
 for m in sys.argv[1].split(","):
     with urllib.request.urlopen(m + "/metrics", timeout=5) as r:
-        name = json.load(r)["name"]
-    bits.append("".join(format(A.index(c), "06b") for c in name))
-def depth(i):
-    d = 0
-    for j, o in enumerate(bits):
-        if j != i:
-            k = 0
-            while k < len(o) and o[k] == bits[i][k]:
-                k += 1
-            d = max(d, k + 1)
-    return d
-ds = [depth(i) for i in range(len(bits))]
-print(f"cells: {len(bits)} vnodes, depths {min(ds)}..{max(ds)}")
-# A joiner that never joined leaves fewer vnodes than asked (2026-11-20).
-sys.exit(0 if len(bits) == int(sys.argv[2]) and max(ds) - min(ds) <= 1 else 1)
+        names.append(json.load(r)["name"])
+if len(set(names)) != int(sys.argv[2]) or len(set(names)) != len(names):
+    sys.exit("missing or duplicate vnode identity")
+def value(name):
+    n = 0
+    for c in name:
+        n = (n << 6) | A.index(c)
+    return n
+def depths(ids, depth=0):
+    if len(ids) == 1:
+        yield depth
+        return
+    # A shared bit assigns no traffic. Only a fork halves the XOR cell.
+    bit = (max(ids) ^ min(ids)).bit_length() - 1
+    for side in (0, 1):
+        yield from depths([i for i in ids if (i >> bit) & 1 == side], depth + 1)
+ds = list(depths([value(n) for n in names]))
+print(f"cells: {len(names)} vnodes, branch depths {min(ds)}..{max(ds)}")
+sys.exit(0 if max(ds) - min(ds) <= 1 else 1)
 PY
 }
 
@@ -427,7 +431,7 @@ steps() {
   # green passes in a row (indexus-scale-ladder).
   for i in $(seq 1 "${STEP_PASSES:-1}"); do
     if (( i > 1 )); then id_prefix="pass$i-"; fi
-    cluster "${STEP_VNODES:-${SIZES%% *}}" "compaction=true&provisioner=$PROVISIONER&items=${ITEMS:-500000}"
+    cluster "${STEP_VNODES:-${SIZES%% *}}" "compaction=true&provisioner=$PROVISIONER&items=${ITEMS:-500000}" || return 1
     phase "steps-$i" $((p + (levels - 1) * (r + p))) "${STEP_TAIL:-300}" -scenario steps -rate "${STEP_RATE:-1000}" -step-ramp "${r}s" -step-plateau "${p}s" -workers "${STEP_WORKERS:-4096}" -discover-every 5s -probe-every 200ms -route "${STEP_ROUTE:-relay}" -seed "$((10#$seed + i - 1))" -tag "${STEP_TAG:-}" -id-prefix "$id_prefix"
   done
 }
@@ -533,7 +537,7 @@ stall_grow() {
 }
 if [[ "${MODE:-all}" == stall ]]; then stall; exit 0; fi
 if [[ "${MODE:-all}" == stall-grow ]]; then stall_grow; exit 0; fi
-if [[ "${MODE:-all}" == steps ]]; then steps; exit 0; fi
+if [[ "${MODE:-all}" == steps ]]; then steps; exit $?; fi
 
 # 1. Scaling at fixed size: same load per node at every size (Q1-Q5, Q9).
 for N in $SIZES; do
