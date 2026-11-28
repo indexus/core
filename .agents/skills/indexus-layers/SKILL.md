@@ -88,3 +88,7 @@ implémentation de `Region`, de l'index XOR ou du stockage peut être simplifié
 ou optimisée si ses contrats restent vérifiés. Une évolution explicite de contrat
 se décrit et se teste séparément du nettoyage. La documentation distingue les
 anciens certificats globaux des droits/tickets locaux réellement utilisés.
+
+Pour une lecture documentaire pilotée par le SDK, utiliser la [fiche de
+qualification des lectures locales](references/lectures-locales.md). Elle
+précise comment vérifier le travail du pair et la portée de la réponse.
