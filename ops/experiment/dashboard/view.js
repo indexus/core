@@ -126,15 +126,10 @@
     const charts=el('div',null,'charts overview'),unmeasured=[];
     const diagnostics=el('details',null,'diagnostics'),more=el('div',null,'charts');diagnostics.open=Boolean(wasOpen);
     diagnostics.append(el('summary','Autres mesures du réseau'));
-    if(filtered){
-      for(const [title,series] of [[sim?'Demande estimée /s':'Écritures appliquées /s',[['rate','sélection']]],['Items détenus',[['stock','sélection']]],['Transferts observés',[['open','ouverts'],['frozen','fence franchie']]],
+    const catalog=filtered?[[sim?'Demande estimée /s':'Écritures appliquées /s',[['rate','sélection']]],['Items détenus',[['stock','sélection']]],['Transferts observés',[['open','ouverts'],['frozen','fence franchie']]],
         ['Vnodes de la sélection',[['ready','prêts'],['reporting','observés']]],
         ['Débit maximal par vnode /s',[['peakRate','maximum']]],
-        ['Ressources des hôtes, max. %',[['cpu','CPU'],['ram','RAM'],['disk','disque']]]]){
-        charts.append(chart(scoped,title,series));
-      }
-    }
-    for(const [title,series,stepped] of [
+        ['Ressources des hôtes, max. %',[['cpu','CPU'],['ram','RAM'],['disk','disque']]]]:[
       ['Écritures /s',[['offered','demandées'],['acked','ACK client'],['estimated_s','besoin réparti (simulation)']]],
       ['Lectures client /s',[['reads_s','tentatives'],['read_failed_s','échecs']]],
       ['Latence écriture, ms',[['p50_ms','p50'],['p95_ms','p95'],['p99_ms','p99']]],
@@ -146,22 +141,53 @@
       ['Transferts ouverts',[['open','ouverts'],['frozen','gelés']]],
       ['Ressources : maximum observé, %',[['cpu_max','CPU'],['ram_max','RAM'],['disk_max','disque']]],
       ['Pression client',[['shed','non envoyées /s'],['queued','en file'],['in_flight','en vol']]],
-      ['Lectures et fraîcheur, p99 ms',[['read_p99_ms','lecture'],['fresh_p99_ms','total racine']]]
-    ]){
-      const past=points.slice(0,index+1);
-      const primary=['Écritures /s','Latence écriture, ms','Items observés dans le réseau','Croissance du réseau','Transferts ouverts','Ressources : maximum observé, %'].includes(title);
-      if(primary||past.some(p=>series.some(([k])=>Number.isFinite(p[k])))){
-        if(!filtered)(primary?charts:more).append(chart(past,title,series,stepped));
-      }else unmeasured.push(title);
-    }
-    for(const [title,series] of [
+      ['Lectures et fraîcheur, p99 ms',[['read_p99_ms','lecture'],['fresh_p99_ms','total racine']]],
       ['Écritures réussies avec relais, %',[['relayed_pct','avec relais']]],
       ['Trafic moyen par vnode, Kio/s',[['mesh_kb_s','mesh'],['gossip_kb_s','membership']]],
       ['Membership, Kio',[['membership_kb','taille maximale']]],
       ['Latence depuis l’arrivée prévue, ms',[['intended_p50_ms','p50'],['intended_p95_ms','p95'],['intended_p99_ms','p99']]],
       ['Générateur de charge, % CPU',[['loader_pct','CPU']]],
       ['Remontée des totaux',[['flush_s','temps le plus long (s)'],['pending_k','arêtes en attente (milliers)']]]
-    ])if(!filtered)more.append(chart(points.slice(0,index+1),title,series));diagnostics.append(more);
+    ];
+    const past=filtered?scoped:points.slice(0,index+1);
+    const available=catalog.map(([,series])=>past.some(p=>series.some(([key])=>Number.isFinite(p[key]))));
+    const layoutKey=filtered?'vnodeCharts':'networkCharts';
+    const defaults=filtered?[0,1,2,3,4,5]:[0,2,3,4,8,9];
+    if(!scope[layoutKey]){
+      let saved;
+      try{saved=JSON.parse(sessionStorage.getItem(location.pathname+':'+layoutKey));}catch{}
+      scope[layoutKey]=Array.isArray(saved)&&saved.length===6&&new Set(saved).size===6&&
+        saved.every(id=>Number.isInteger(id)&&id>=0&&id<catalog.length)?saved:defaults.slice();
+    }
+    const layout=scope[layoutKey];
+    function panel(slot){
+      const id=layout[slot],figure=chart(past,...catalog[id]);
+      const select=el('select');select.setAttribute('aria-label','Graphique du panneau '+(slot+1));
+      catalog.forEach(([title],i)=>{
+        const option=el('option',title+(available[i]?'':' — non mesuré'));option.value=i;
+        select.append(option);
+      });
+      select.value=id;
+      figure.querySelector('figcaption').firstChild.replaceWith(select);
+      select.onchange=()=>{
+        const next=Number(select.value),other=layout.indexOf(next);
+        if(other>=0)layout[other]=id;
+        layout[slot]=next;
+        try{sessionStorage.setItem(location.pathname+':'+layoutKey,JSON.stringify(layout));}catch{}
+        charts.children[slot].replaceWith(panel(slot));
+        if(other>=0&&other!==slot)charts.children[other].replaceWith(panel(other));
+        charts.children[slot].querySelector('select').focus({preventScroll:true});
+      };
+      return figure;
+    }
+    layout.forEach((_,slot)=>charts.append(panel(slot)));
+    if(!filtered){
+      catalog.forEach((spec,id)=>{
+        if(!available[id])unmeasured.push(spec[0]);
+        if(!defaults.includes(id)&&available[id])more.append(chart(past,...spec));
+      });
+      diagnostics.append(more);
+    }
     const choices=el('div',null,'legend'), plot=el('div',null,'network-pane');
     const active=p.metrics_stale?[]:transfers.filter(tr=>!tr.stale);
     const unknownLinks=transfers.length-active.length;

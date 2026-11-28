@@ -198,3 +198,10 @@ dialog.chart-dialog .chart-field {height:min(50vh,380px)}
 @container (max-width:480px) {
   .ix-dashboard .network-workspace .overview {grid-template-columns:minmax(0,1fr)}
 }
+.ix-dashboard .overview figcaption select {
+  flex:1;min-width:0;max-width:100%;text-overflow:ellipsis;
+  border:1px solid transparent;border-radius:4px;padding:3px 0;
+  background:transparent;color:inherit;font:inherit;cursor:pointer;color-scheme:light dark
+}
+.ix-dashboard .overview figcaption select:hover {border-color:#8997a066}
+.ix-dashboard .overview figcaption select option {background:Canvas;color:CanvasText}
