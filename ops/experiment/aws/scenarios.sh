@@ -183,7 +183,7 @@ print(n)')
   echo "quiet after ${waited}s" >"$dir/quiet.log"
   # Bounded: complete reads are refused while a transfer is open, and an
   # unbounded audit kept a whole campaign from uploading anything (2026-11-18).
-  timeout "${AUDIT_SECONDS:-900}" "$AUDITOR" audit -targets "$TARGETS" -monitors "$MONITORS" -monitors-file "$dir/monitors" -issuer "$ISSUER" -sample "${SAMPLE:-20000}" -out "$dir" >"$dir/audit.log" 2>&1 || echo "audit exit $? (124: stopped after ${AUDIT_SECONDS:-600} s)" >>"$dir/audit.log"
+  timeout "${AUDIT_SECONDS:-900}" "$AUDITOR" audit -targets "$TARGETS" -monitors "$MONITORS" -monitors-file "$dir/monitors" -issuer "$ISSUER" -sample "${SAMPLE:-20000}" -out "$dir" >"$dir/audit.log" 2>&1 || echo "audit exit $? (124: stopped after ${AUDIT_SECONDS:-900} s)" >>"$dir/audit.log"
   kill $observer 2>/dev/null; wait $observer 2>/dev/null; kill $lister 2>/dev/null
   if [[ -n "$follower" ]]; then sleep 12; kill $follower 2>/dev/null; pkill -f "live.py agg" 2>/dev/null; aws s3 cp "$OUT/live.jsonl" "$RESULTS_URL/live.jsonl" --only-show-errors || true; fi
   # Upload each phase as soon as it ends: a later phase cannot lose it.

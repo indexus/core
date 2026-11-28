@@ -17,7 +17,7 @@ ELASTIC = HERE.parent / "elastic"
 
 class DeploymentWiringTests(unittest.TestCase):
     def test_steps_replay_seed_tag_and_independent_passes(self):
-        for setting in ("STEP_SEED", "STEP_TAG"):
+        for setting in ("STEP_SEED", "STEP_TAG", "AUDIT_SECONDS"):
             self.assertTrue(all(setting in line for line in RUN.splitlines() if "env | grep -E" in line))
         script = (HERE / "scenarios.sh").read_text()
         steps = re.search(r"^steps\(\) \{.*?^}", script, re.M | re.S).group()
