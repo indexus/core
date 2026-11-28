@@ -6,6 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/indexus/go-indexus-core/internal/causal"
@@ -283,7 +284,7 @@ func TestWarmCopyCannotBypassExhaustedHostBudget(t *testing.T) {
 func TestCopyPressurePacesOnlyBetweenUnfrozenLots(t *testing.T) {
 	budgets := hostBudgets(t, 1, 2)
 	budgets[0].pressure.Store(&copyPressure{used: 80, target: 60})
-	if got := budgets[0].cooldown(time.Second); got < 3999*time.Millisecond || got > 4001*time.Millisecond {
+	if got := budgets[0].pressure.Load().cooldown(time.Second); got < 3999*time.Millisecond || got > 4001*time.Millisecond {
 		t.Fatal("wrong pressure duty cycle", got)
 	}
 	held, _ := budgets[0].take("source")
@@ -301,7 +302,7 @@ func TestCopyPressurePacesOnlyBetweenUnfrozenLots(t *testing.T) {
 		t.Fatal(err)
 	}
 	budgets[0].pressure.Store(&copyPressure{used: 30, target: 60})
-	if budgets[0].cooldown(time.Second) != 0 {
+	if budgets[0].pressure.Load().cooldown(time.Second) != 0 {
 		t.Fatal("idle host was paced")
 	}
 }
@@ -493,5 +494,47 @@ func exerciseBusyWarmReceiver(t *testing.T, fence string) {
 	row.ID = "after"
 	if _, _, ok, err := target.Store.ApplyRecord("after", row); err != nil || !ok {
 		t.Fatalf("new owner write %t, %v", ok, err)
+	}
+}
+
+func TestPacedLotShortensItsOriginalDeadlineOnPressureSamples(t *testing.T) {
+	for _, c := range []struct {
+		name  string
+		next  float64
+		known bool
+		want  time.Duration
+	}{
+		{"below target", 30, true, time.Second},
+		{"unknown", 0, false, time.Second},
+		{"lower then higher", 75, true, 3 * time.Second},
+		{"unchanged", 100, true, 9 * time.Second},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			synctest.Test(t, func(t *testing.T) {
+				b := &CopyBudget{}
+				node := &Service{}
+				node.SetCopyBudget(b)
+				node.ObserveCopyPressure(100, 50, true)
+				start := time.Now()
+				done := make(chan time.Duration, 1)
+				go func() {
+					if err := b.pace(context.Background(), "pressure-samples", time.Second, false); err != nil {
+						t.Error(err)
+					}
+					done <- time.Since(start)
+				}()
+				synctest.Wait()
+				time.Sleep(time.Second)
+				node.ObserveCopyPressure(c.next, 50, c.known)
+				synctest.Wait()
+				if c.want > 2*time.Second {
+					time.Sleep(time.Second)
+					node.ObserveCopyPressure(100, 50, true)
+				}
+				if got := <-done; got != c.want {
+					t.Errorf("paced for %v, want %v", got, c.want)
+				}
+			})
+		})
 	}
 }
