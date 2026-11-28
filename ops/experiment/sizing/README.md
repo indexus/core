@@ -161,3 +161,29 @@ compare le service observé sur le plateau 16k des rampes à quatre paliers de
 et l'audit de ces mêmes essais. Chaque intervalle requiert deux observations
 fraîches consécutives du donneur. Les opérations courtes entre deux sondes
 échappent à cette comparaison. Ne pas en déduire un p99 client.
+
+## Mixed-load fleet sizing
+
+Choose the peak fleet allowed by the benchmark independently of the initial
+fleet. For example, `MIN_PEAK_HOSTS=90 HOSTS_MAX=90 HOSTS=12` refuses to
+start if the budget, TTL or regional quota would cap the run below 90 data
+hosts. It does not start 90 machines immediately. The capacity planner
+reports the EC2 budget and regional vCPU floors before any resources start.
+Use `STEP_READ_RATE` and `STEP_READERS` to repeat a mixed steps experiment.
+The readers sample keys previously acknowledged by the writes.
+
+For homogeneous machines at a target utilization `u`, the total work in
+machine equivalents divided by `u`, rounded up, is a fleet floor. The
+heaviest installed work on each machine must also fit. An empty machine
+cannot lower another machine's load until an installed traffic share moves.
+
+```sh
+python3 ops/experiment/sizing/peer_relief.py /path/to/live.jsonl \
+  --at 265 --ramp 2 --additional-hosts 45 --boot-seconds 45 --copy-seconds 12
+```
+
+The replay uses the observed host and vnode mix and explores the effect of
+boot time and copy speed. It uses modeled CPU costs and copy progress.
+An observation taken under backpressure measures work already served, and
+cannot recover the demand that was rejected. Compare control policies and
+sensitivities before measuring at the planned fleet size on real hardware.
