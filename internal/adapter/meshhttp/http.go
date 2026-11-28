@@ -145,6 +145,10 @@ type meshEnvelope struct {
 
 func (c *Client) Exchange(ctx context.Context, endpoint string, request mesh.Request) (mesh.Response, error) {
 	var out meshEnvelope
+	switch request.Kind {
+	case "preload", "mirror", "install-zone", mesh.KindAdmitCollection:
+		ctx = mesh.TraceCopyReply(ctx)
+	}
 	started := time.Now()
 	sentBytes, receivedBytes, err := c.request(ctx, endpoint, "/cluster/mesh", request, &out)
 	if err == nil && out.Failure != nil {

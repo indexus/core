@@ -416,6 +416,15 @@ cannot safely give the source its old right back after a lost install reply.
 After a completed lot has been installed and acknowledged, the source may
 pause before the next lot when sampled CPU exceeds its configured target.
 The duty share is the measured idle fraction, with a 10% progress floor.
+For a warm lot started under pressure, the HTTP transport measures how long
+the donor waited between sending a complete request and receiving the first
+byte from a remote IP. This interval is already idle time for the donor's
+copy worker. If the lot took `W`, the measured wait is `R`, and the duty
+share is `f`, the remaining pause is `max(0, (W - R) / f - W)`.
+Encoding, decoding and source storage still count as work. The local address
+set is sampled when the host budget opens. Local peers and unobserved or
+ambiguous transport events get zero credit. No timing is sent on the wire.
+`copy_peer_wait_ms` counts the credited time.
 Each fresh host sample can shorten the current pause, measured from the end
 of the lot. A higher reading cannot extend the original deadline. The same
 sampler feeds all waiting lots. The source keeps its host lane during this pause. Recovery with unfinished
