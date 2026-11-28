@@ -127,3 +127,34 @@ func TestColdHostAdmissionScope(t *testing.T) {
 		})
 	}
 }
+
+// Freeze the scheduling interleaving exactly between a release and the
+// waiting donor's next poll. Its process may also die in that interval.
+func TestColdStartHonorsLiveWarmTicket(t *testing.T) {
+	budget, err := NewCopyBudget(t.TempDir(), 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	holder, _ := budget.take("first")
+	if holder == nil {
+		t.Fatal("expected first donor to hold the lane")
+	}
+	child := startCopyChild(t, budget.dir)
+	child.act(t, "try", "waiting")
+	releaseCopyFile(holder)
+	if release, err := budget.admitColdStart(); !errors.Is(err, ErrColdDeferred) {
+		if release != nil {
+			release()
+		}
+		t.Fatalf("cold proposal overtook live donor: %v", err)
+	}
+	if err := child.cmd.Process.Kill(); err != nil {
+		t.Fatal(err)
+	}
+	_ = child.cmd.Wait()
+	release, err := budget.admitColdStart()
+	if err != nil {
+		t.Fatalf("dead donor stalled an idle host: %v", err)
+	}
+	release()
+}

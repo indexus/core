@@ -120,3 +120,32 @@ func TestColdCrossedProposalsReleaseAndRetry(t *testing.T) {
 		}
 	}
 }
+
+func TestPinnedSurvivorSkipsAutomaticDonorProbe(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	net, receiver, source := coldNonRootPair(t, ctx)
+	if _, err := receiver.Store.PinColdSurvivor("incoming", source.Self, storage.ColdOffer{}); err != nil {
+		t.Fatal(err)
+	}
+	probes := 0
+	net.setBefore(func(r Request) error {
+		if r.Kind == KindColdUsage {
+			probes++
+		}
+		return nil
+	})
+	if err := receiver.Compact(ctx, ColdConfig{Automatic: true}); !errors.Is(err, ErrColdDeferred) {
+		t.Fatalf("wanted idle tick while receiving: %v", err)
+	}
+	if probes != 0 {
+		t.Fatalf("pinned receiver issued %d donor probes", probes)
+	}
+	if err := receiver.Store.ReleaseColdPin("incoming", source.Self); err != nil {
+		t.Fatal(err)
+	}
+	err := receiver.Compact(ctx, ColdConfig{Automatic: true})
+	if probes != 1 || (err != nil && !errors.Is(err, protocol.ErrNoBetterConfiguration)) {
+		t.Fatalf("after release: probes=%d, err=%v", probes, err)
+	}
+}

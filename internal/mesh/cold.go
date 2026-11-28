@@ -102,6 +102,12 @@ func (s *Service) compact(ctx context.Context, config ColdConfig, resumeOnly boo
 		if resumeOnly {
 			return nil
 		}
+		// The survivor already promised this disk to another donor. A
+		// maintenance tick cannot retire it until that pin is released.
+		// Avoid probing a peer and reconciling summaries for a known no-op.
+		if config.Automatic && status.Pin != nil {
+			return ErrColdDeferred
+		}
 		if config.Automatic && s.jobs.copies != nil {
 			release, err := s.jobs.copies.admitColdStart()
 			if err != nil {

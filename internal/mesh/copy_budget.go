@@ -137,20 +137,45 @@ func (b *CopyBudget) admitColdStart() (func(), error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := b.probeColdLane(); err != nil {
+		permit.Close()
+		return nil, err
+	}
+	return func() { _ = permit.Close() }, nil
+}
+
+// A free lane between two polls still belongs to a queued warm donor.
+// Inspect the live ticket files under the same local sequencer that
+// registers waiters. Recovery of an existing fold never takes this path.
+func (b *CopyBudget) probeColdLane() error {
+	gate, err := b.tryHostLock("source-sequence")
+	if errors.Is(err, syscall.EWOULDBLOCK) {
+		return ErrColdDeferred
+	}
+	if err != nil {
+		return err
+	}
+	defer gate.Close()
+	waiter, err := b.queue.predecessor(^uint64(0))
+	if err != nil {
+		return err
+	}
+	if waiter != nil {
+		waiter.Close()
+		return ErrColdDeferred
+	}
 	for i := 0; i < b.slots; i++ {
 		probe, err := b.tryHostLock("slot-" + strconv.Itoa(i))
 		if errors.Is(err, syscall.EWOULDBLOCK) {
 			continue
 		}
 		if err != nil {
-			permit.Close()
-			return nil, err
+			return err
 		}
 		probe.Close()
-		return func() { _ = permit.Close() }, nil
+		return nil
 	}
-	permit.Close()
-	return nil, ErrColdDeferred
+	return ErrColdDeferred
 }
 
 func (b *CopyBudget) tryHostLock(name string) (*os.File, error) {
