@@ -33,12 +33,13 @@ for (const width of ["f32", "f64"]) {
 
 const { presenceMasks } = await import(pathToFileURL(resolve(sdk, "src/index.js")));
 const schema = Array.from({length:300}, (_, i) => i);
+const descriptor = {revision:"wide/1", columns:schema.map(i => "category-" + i)};
 const requested = [...schema, 511];
 const witness = new Set([0,1,63,64,65,257,299]);
 const selected = [299,2,63,257,65,1,260,64];
 
 function verify(parts, requested, visible, allowNegative, label) {
-  const { present, absent } = presenceMasks(parts, requested);
+  const { present, absent } = presenceMasks(parts, requested, {schema: descriptor});
   assert.equal(present & absent, 0n);
   const totals = { present:0, absent:0, unknown:0 };
   requested.forEach((source, i) => {
@@ -63,14 +64,16 @@ for (const width of ["f32","f64"]) {
     assert.equal(response.blocks.reduce((n,b) => n + b.n, 0), 2);
     assert.ok(response.blocks.every(b => b.metricBytes === (width === "f32" ? 4 : 8)));
     assert.ok(response.blocks.every(b => b.metricCount === (columns?.length ?? 300)));
-    const covered = {response, complete:true};
+    const covered = {response, complete:true, schema:descriptor};
     if (variant === "wide-padded") {
       // Go zero-fills out-of-schema projected metrics. No field-presence
       // indicator on the wire distinguishes that zero from known absence.
       for (const b of response.blocks) for (let i=0;i<b.n;i++)
         assert.equal(b.metrics[i],0);
-      assert.deepEqual(presenceMasks([covered], [511,2]), {present:0n,absent:3n});
-      const totals = verify([{response,complete:false}],[511,2],new Set(),false,variant);
+      assert.deepEqual(presenceMasks([covered], [511,2]), {present:0n,absent:0n});
+      const totals = verify([covered],[511,2],new Set([2]),true,variant);
+      verify([{...covered,complete:false}],[511,2],new Set(),false,variant+" incomplete");
+      verify([{...covered,schema:{...descriptor,revision:"other"}}],[511,2],new Set(),false,variant+" stale schema");
       results[variant] = {bytes:body.length, ...totals};
       continue;
     }
