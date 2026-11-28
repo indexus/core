@@ -184,6 +184,9 @@ func (p *auditMonitorPool) census(ctx context.Context) (map[string]string, int, 
 }
 
 func (p *auditMonitorPool) quiet(ctx context.Context, wait bool) (map[string]string, int, int, error) {
+	// A sustained fold can span minutes. Bound repeated whole-fleet probes,
+	// then check immediately on entry to each new verification attempt.
+	delay := 200 * time.Millisecond
 	for polls := 1; ; polls++ {
 		fleet, moving, err := p.census(ctx)
 		if err != nil || moving == 0 {
@@ -192,9 +195,10 @@ func (p *auditMonitorPool) quiet(ctx context.Context, wait bool) (map[string]str
 		if !wait {
 			return nil, moving, polls, fmt.Errorf("audit still observes %d transfer/join indicators", moving)
 		}
-		if err := auditBackoff(ctx); err != nil {
+		if err := waitAuditInterval(ctx, delay); err != nil {
 			return nil, moving, polls, fmt.Errorf("audit transfers did not settle: %w", err)
 		}
+		delay = min(2*delay, 2*time.Second)
 	}
 }
 

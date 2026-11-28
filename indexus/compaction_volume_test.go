@@ -110,11 +110,18 @@ func (f *coldVolumeFixture) sync(t *testing.T, ctx context.Context, active int) 
 		}
 	}
 }
-func (f *coldVolumeFixture) diskBytes() int64 {
+func (f *coldVolumeFixture) diskBytes(t *testing.T) int64 {
+	t.Helper()
 	var n int64
 	for _, path := range f.paths {
-		if st, e := os.Stat(path); e == nil {
-			n += st.Size()
+		err := filepath.Walk(storage.RecordsDir(path), func(_ string, info os.FileInfo, err error) error {
+			if err == nil && info.Mode().IsRegular() {
+				n += info.Size()
+			}
+			return err
+		})
+		if err != nil {
+			t.Fatalf("measure store %s: %v", path, err)
 		}
 	}
 	return n
@@ -149,7 +156,7 @@ func TestLargeDurableColdCampaign(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
 	defer cancel()
-	report := coldVolumeReport{StoreCapacityBytes: capacity, Profile: profile, InitialRows: count, Workers: 32, Transport: "in-memory real mesh/Node handlers; no simulated WAN", Storage: "Bolt fsync, grouped writes, 2ms max group delay", Trace: []int{1}}
+	report := coldVolumeReport{StoreCapacityBytes: capacity, Profile: profile, InitialRows: count, Workers: 32, Transport: "in-memory real mesh/Node handlers; no simulated WAN", Storage: "zonelog fsync, grouped writes, 2ms max group delay", Trace: []int{1}}
 	output := os.Getenv("INDEXUS_VOLUME_OUT")
 	save := func() {
 		if output != "" {
@@ -178,7 +185,7 @@ func TestLargeDurableColdCampaign(t *testing.T) {
 	f.open(t)
 	phase := func(p coldVolumePhase, begin time.Time) {
 		p.Seconds = time.Since(begin).Seconds()
-		p.DiskBytes = f.diskBytes()
+		p.DiskBytes = f.diskBytes(t)
 		report.Phases = append(report.Phases, p)
 		var m runtime.MemStats
 		runtime.ReadMemStats(&m)

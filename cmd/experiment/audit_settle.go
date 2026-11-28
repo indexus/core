@@ -141,7 +141,11 @@ func getContext(ctx context.Context, endpoint string) (*http.Response, error) {
 	return client.Do(req)
 }
 func auditBackoff(ctx context.Context) error {
-	timer := time.NewTimer(200 * time.Millisecond)
+	return waitAuditInterval(ctx, 200*time.Millisecond)
+}
+
+func waitAuditInterval(ctx context.Context, delay time.Duration) error {
+	timer := time.NewTimer(delay)
 	defer timer.Stop()
 	select {
 	case <-ctx.Done():
