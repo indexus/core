@@ -68,7 +68,7 @@ func (s *Service) Handle(ctx context.Context, r Request) (out Response, err erro
 		return out, s.handleInstallZones(r)
 
 	// cold storage, shadows, fallback
-	case KindColdPin, KindColdCheck, KindColdRelease, KindColdWitness:
+	case KindColdUsage, KindColdPin, KindColdCheck, KindColdRelease, KindColdWitness:
 		return s.handleCold(r)
 	case KindShadowSeqs, KindShadowPreload, KindShadowMirror:
 		return s.handleShadow(r)

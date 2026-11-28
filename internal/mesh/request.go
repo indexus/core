@@ -130,6 +130,7 @@ type SummaryStatus struct {
 //	shadow         Progress
 //	fallback       FallbackEntry, AppliedCount, Record, Degraded
 type Response struct {
+	ColdUsage      *ColdUsage               `json:",omitempty"`
 	SummaryStatus  *SummaryStatus           `json:",omitempty"`
 	Directory      []storage.RegionReferral `json:",omitempty"`
 	Endpoint       causal.Endpoint          `json:",omitzero"`
@@ -215,6 +216,7 @@ var required = map[string][]requirement{
 	"install-zone": {needZoneTransfers}, // with Seals, with Transfer.Snapshots, or alone
 
 	// cold storage
+	KindColdUsage:   nil,
 	KindColdPin:     {needCold},
 	KindColdCheck:   {needCold},
 	KindColdRelease: {needCold},

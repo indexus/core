@@ -291,9 +291,13 @@ search while preserving the exact same transition and safety rules.
 
 ## Durable pair fold (local core)
 
-`internal/mesh.Service.Compact` selects a known survivor deterministically by ID.
-Symmetric pairs fold from the larger ID into the smaller; the pinned genesis
-vnode ranks first. This orients attempts acyclically without a global arbiter.
+The genesis vnode always survives. For other symmetric siblings, automatic
+folds exchange the two disks’ owned-byte counts and capacities. When both
+can hold the combined data within the configured fraction, the smaller
+payload moves. When only one disk fits, that disk survives. Equal payloads
+and explicit folds use the larger vnode ID as donor. The usage sample
+guides a fresh attempt. The receiver rechecks capacity and its durable role
+when pinning, and recovery continues toward the recorded survivor.
 At the donor's deepest XOR branching bit, the opposite branch must contain
 one live vnode. That sibling would inherit the donor's entire placement cell,
 including empty addresses. When the opposite branch has children, a single
