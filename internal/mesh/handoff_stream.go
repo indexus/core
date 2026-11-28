@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/indexus/go-indexus-core/internal/causal"
@@ -44,10 +45,12 @@ var ErrHandoffPending = fmt.Errorf("%w: handoff in progress", storage.ErrNotRead
 // it, move data for nothing and be folded away again. The joiner leaves.
 var ErrNotNeeded = errors.New("donor no longer needs a peer")
 
+type handoffJobKey struct{}
 type handoffJob struct {
-	right causal.Digest
-	done  chan struct{}
-	err   error
+	followers atomic.Int32
+	right     causal.Digest
+	done      chan struct{}
+	err       error
 }
 
 type handoffJobs struct {
@@ -133,6 +136,7 @@ func (s *Service) handoffAsync(ctx context.Context, request Request, wait time.D
 			return ErrHandoffPending
 		}
 		job = &handoffJob{done: make(chan struct{}), right: request.Input}
+		job.followers.Store(1)
 		s.jobs.jobs[key] = job
 		baseCtx := s.jobs.ctx
 		s.jobs.workers.Add(1)
@@ -140,14 +144,17 @@ func (s *Service) handoffAsync(ctx context.Context, request Request, wait time.D
 			defer s.jobs.workers.Done()
 			jobCtx, cancel := context.WithTimeout(baseCtx, handoffJobTimeout)
 			defer cancel()
-			job.err = s.handoff(jobCtx, request)
+			job.err = s.handoff(context.WithValue(jobCtx, handoffJobKey{}, job), request)
 			s.jobs.mu.Lock()
 			delete(s.jobs.jobs, key)
 			s.jobs.mu.Unlock()
 			close(job.done)
 		}()
+	} else {
+		job.followers.Add(1)
 	}
 	s.jobs.mu.Unlock()
+	defer job.followers.Add(-1)
 	timer := time.NewTimer(wait)
 	defer timer.Stop()
 	select {

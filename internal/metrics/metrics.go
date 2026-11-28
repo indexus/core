@@ -91,13 +91,13 @@ func (h *Histogram) snapshot() []int64 {
 // Its wait histogram includes only successful admissions. Deferrals and
 // interrupted requests remain visible separately.
 type CopyAdmission struct {
-	Granted, Deferred, Interrupted atomic.Int64
-	TimeToGrant                    Histogram
+	Granted, Deferred, Interrupted, RequesterLeft atomic.Int64
+	TimeToGrant                                   Histogram
 }
 
 func (a *CopyAdmission) snapshot() map[string]any {
 	return map[string]any{
-		"granted": a.Granted.Load(), "deferred": a.Deferred.Load(), "interrupted": a.Interrupted.Load(),
+		"granted": a.Granted.Load(), "deferred": a.Deferred.Load(), "interrupted": a.Interrupted.Load(), "requester_left": a.RequesterLeft.Load(),
 		"time_to_grant_us_log2": a.TimeToGrant.snapshot(),
 	}
 }

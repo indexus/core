@@ -29,8 +29,9 @@ import (
 //   - A transfer holds at most one slot, named after it. A source and a
 //     receiver of the same transfer on one host share that slot: the receiver
 //     finds the name and takes nothing.
-//   - Only the source waits, before anything of its grain is fenced, and at
-//     most copySlotWait: exhaustion defers the grain; it never bypasses. A
+//   - The source waits before anything of its grain is fenced. A fresh
+//     proposal can keep its turn past copySlotWait while a live RPC follows
+//     that job. Exhaustion defers the grain; it never bypasses. A
 //     resumed grain that already fenced zones, and a receiver, never wait.
 //   - Nobody holds a slot while waiting for another one, so two transfers
 //     cannot wait for each other.
@@ -74,9 +75,8 @@ func (s *Service) ObserveCopyPressure(used, target float64, known bool) {
 
 // Variables only so tests can shrink them.
 var (
-	// copySlotWait bounds a source's wait for a slot. It is longer than a
-	// grain usually lasts and shorter than handoffWait, so a joiner's request
-	// still spans it.
+	// copySlotWait bounds warm admissions without a live proposal follower.
+	// It is shorter than the handoff RPC's own pending-response deadline.
 	copySlotWait = 10 * time.Second
 	copySlotPoll = 20 * time.Millisecond
 )
@@ -116,6 +116,8 @@ func NewCopyBudget(dir string, slots int) (*CopyBudget, error) {
 
 // SetCopyBudget gives the service its host's budget, before it serves.
 func (s *Service) SetCopyBudget(b *CopyBudget) { s.jobs.copies = b }
+
+var errAdmissionRequesterLeft = fmt.Errorf("%w: source admission lost its requester", storage.ErrNotReady)
 
 // ErrColdDeferred means an optional automatic fold did no work. The caller
 // can wait for its next normal maintenance tick without refreshing summaries.
@@ -237,6 +239,9 @@ func (b *CopyBudget) reserveFile(ctx context.Context, transfer string, wait time
 			case result == nil:
 				b.admission.Granted.Add(1)
 				b.admission.TimeToGrant.Observe(time.Since(started))
+			case errors.Is(result, errAdmissionRequesterLeft):
+				b.admission.Interrupted.Add(1)
+				b.admission.RequesterLeft.Add(1)
 			case errors.Is(result, storage.ErrNotReady):
 				b.admission.Deferred.Add(1)
 			default:
@@ -247,10 +252,22 @@ func (b *CopyBudget) reserveFile(ctx context.Context, transfer string, wait time
 	deadline := started.Add(wait)
 	var ticket copyTicket
 	queued := warm && wait > 0 && b.queue != nil
+	// Only an unnamed source proposal is still revocable and can be kept in
+	// the same queue position by the live RPCs following its exact job. A
+	// named transfer has a durable decision of its own; its recovery must
+	// continue independently of the original client.
+	var followed *handoffJob
+	if queued && transfer == "" {
+		followed, _ = ctx.Value(handoffJobKey{}).(*handoffJob)
+	}
 	defer ticket.remove()
 	for waited := false; ; waited = true {
 		if err := ctx.Err(); err != nil {
 			return nil, err
+		}
+		if followed != nil && followed.followers.Load() == 0 {
+			b.queue.timedOut(&ticket)
+			return nil, errAdmissionRequesterLeft
 		}
 		var held *os.File
 		var shared bool
@@ -268,6 +285,10 @@ func (b *CopyBudget) reserveFile(ctx context.Context, transfer string, wait time
 			metrics.Handoffs.CopySlotShared.Add(1)
 			return nil, nil
 		case held != nil:
+			if followed != nil && followed.followers.Load() == 0 {
+				releaseCopyFile(held)
+				return nil, errAdmissionRequesterLeft
+			}
 			return held, nil
 		case wait <= 0:
 			metrics.Handoffs.CopySlotBusy.Add(1)
@@ -281,7 +302,7 @@ func (b *CopyBudget) reserveFile(ctx context.Context, transfer string, wait time
 				metrics.Handoffs.CopySlotWaitNanos.Add(int64(time.Since(started)))
 			}()
 		}
-		if !time.Now().Before(deadline) {
+		if followed == nil && !time.Now().Before(deadline) {
 			metrics.Handoffs.CopySlotTimeouts.Add(1)
 			if warm {
 				if queued {

@@ -2,6 +2,7 @@ package mesh
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
@@ -139,18 +140,15 @@ func (s *Service) handleInventory(ctx context.Context, r Request) (out Response,
 // handleHandoff starts or follows a handoff. A spawned join nobody wants any
 // more is refused, unless it already started or its target is placed.
 func (s *Service) handleHandoff(ctx context.Context, r Request) (out Response, err error) {
-	if r.Spawned && s.Wanted != nil && !s.Wanted() && !r.Operation.Valid() {
+	if err := s.checkSpawnDemand(r); err != nil {
+		if !errors.Is(err, ErrNotNeeded) {
+			return out, err
+		}
 		s.jobs.mu.Lock()
 		started := s.jobs.jobs[handoffKey(r)] != nil
 		s.jobs.mu.Unlock()
-		routing, err := s.Store.CausalRouting()
-		if err != nil {
+		if !started {
 			return out, err
-		}
-		current, err := routing.Placement(r.Target.VNode)
-		active := err == nil && current.VNode == r.Target.VNode
-		if !started && !active {
-			return out, ErrNotNeeded
 		}
 	}
 	return out, s.handoffAsync(ctx, r, handoffWait)
@@ -222,4 +220,21 @@ func (s *Service) activateInstalled(from, to causal.Endpoint) error {
 		slog.Info("first inbound right installed", "after_seconds", age.Seconds())
 	}
 	return s.publishActivation()
+}
+
+// A spawned target that already owns a right may finish its join. Check the
+// need for a fresh target again at admission: CPU demand can subside while
+// the donor is queued and no right has moved yet.
+func (s *Service) checkSpawnDemand(r Request) error {
+	if !r.Spawned || r.Operation.Valid() || s.Wanted == nil || s.Wanted() {
+		return nil
+	}
+	routing, err := s.Store.CausalRouting()
+	if err != nil {
+		return err
+	}
+	if current, err := routing.Placement(r.Target.VNode); err == nil && current.VNode == r.Target.VNode {
+		return nil
+	}
+	return ErrNotNeeded
 }

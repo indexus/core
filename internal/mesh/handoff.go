@@ -71,7 +71,7 @@ func (s *Service) handoff(ctx context.Context, r Request) error {
 			return storage.ErrConflict
 		}
 		if r.Subdivide {
-			lane, err = s.jobs.copies.reserveFile(ctx, "", copySlotWait, true)
+			lane, err = s.proposalLane(ctx, r)
 			if err != nil {
 				return err
 			}
@@ -100,6 +100,18 @@ func (s *Service) handoff(ctx context.Context, r Request) error {
 	}
 	defer release()
 	return s.handoffLocked(ctx, r, lane)
+}
+
+func (s *Service) proposalLane(ctx context.Context, r Request) (*os.File, error) {
+	lane, err := s.jobs.copies.reserveFile(ctx, "", copySlotWait, true)
+	if err != nil {
+		return nil, err
+	}
+	if err = s.checkSpawnDemand(r); err != nil {
+		releaseCopyFile(lane)
+		return nil, err
+	}
+	return lane, nil
 }
 
 // handoffLocked runs one transfer from wherever its durable phase left it:
@@ -135,7 +147,7 @@ func (s *Service) handoffLocked(ctx context.Context, r Request, lane *os.File) (
 	}
 	// A full host defers proposals while their rights are still unpinned.
 	if !r.Operation.Valid() {
-		lane, err = s.jobs.copies.reserveFile(ctx, "", copySlotWait, true)
+		lane, err = s.proposalLane(ctx, r)
 		if err != nil {
 			return err
 		}
