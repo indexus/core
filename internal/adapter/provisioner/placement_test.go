@@ -362,7 +362,7 @@ func TestReserveCanBootWhenOnlyDonorHasAReadySlot(t *testing.T) {
 			t.Fatal("coalescing not visible in hook log")
 		}
 		// The simulated hook elected to boot and confirmed no fallback dispatch.
-		s.releaseFallback(r)
+		s.releaseUndispatched(r)
 	}
 	warm := h
 	warm.Machine = "starting"

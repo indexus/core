@@ -179,9 +179,9 @@ func TestConcurrentFallbacksCannotPromiseTheSameMachine(t *testing.T) {
 	if first.capMachine != "donor" || second.capMachine != "" {
 		t.Fatalf("fallbacks %q, %q", first.capMachine, second.capMachine)
 	}
-	s.releaseFallback(first)
+	s.releaseUndispatched(first)
 	third, _ := s.decidePlacement([]autoscale.MachineFacts{m}, "b", "target-b")
-	s.releaseFallback(first)
+	s.releaseUndispatched(first)
 	if third.capMachine != "donor" || s.placed["donor"] != third.At {
 		t.Fatalf("lost fallback reservation: %+v", third)
 	}

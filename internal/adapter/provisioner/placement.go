@@ -75,9 +75,15 @@ func (w *bootWave) observe(now time.Time, reserve autoscale.Reserve) int {
 // placementHistory bounds the decisions kept for GET /v1/placement.
 const placementHistory = 32
 
+type incomingCopy struct {
+	source string
+	rate   float64
+}
+
 // placementRecord is one decision as GET /v1/placement shows it.
 type placementRecord struct {
 	WriteRate  float64   `json:"write_rate,omitempty"`
+	ReverseOf  string    `json:"reverse_of,omitempty"` // skipped receiver that just sent comparable traffic to this donor
 	Recheck    bool      `json:"from_wait,omitempty"`
 	capMachine string    // reserved while the hook determines whether the machine cap is reached
 	At         time.Time `json:"at"`
@@ -174,11 +180,11 @@ func parseMachineFacts(out []byte) []autoscale.MachineFacts {
 // environment is nil when there is nothing to hand over: no resource-aware hook is available. A resource refusal is explicit so the
 // hook cannot replace it with an unchecked free slot.
 func (s *Server) decidePlacement(machines []autoscale.MachineFacts, requester, preferNear string) (placementRecord, []string) {
-	return s.planPlacement(machines, requester, preferNear, false)
+	return s.planPlacement(machines, requester, preferNear, 0, false)
 }
 
-func (s *Server) planPlacement(machines []autoscale.MachineFacts, requester, preferNear string, readyOnly bool) (placementRecord, []string) {
-	record := placementRecord{At: time.Now(), Requester: requester, PreferNear: preferNear, Machines: len(machines)}
+func (s *Server) planPlacement(machines []autoscale.MachineFacts, requester, preferNear string, rate float64, readyOnly bool) (placementRecord, []string) {
+	record := placementRecord{WriteRate: rate, Recheck: readyOnly, At: time.Now(), Requester: requester, PreferNear: preferNear, Machines: len(machines)}
 	if len(machines) == 0 {
 		record.Placement = autoscale.Placement{Kind: autoscale.PlaceSlots, Reason: "no resource facts: slot-count rule of the hook"}
 		return record, nil
@@ -188,19 +194,43 @@ func (s *Server) planPlacement(machines []autoscale.MachineFacts, requester, pre
 	machines = slices.Clone(machines)
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	for target, at := range s.placed {
+		if record.At.Sub(at) >= placementMemory {
+			delete(s.placed, target)
+			delete(s.incoming, target)
+		}
+	}
 	for i, m := range machines {
-		if at, ok := s.placed[m.Machine]; ok && record.At.Sub(at) < placementMemory {
+		if _, ok := s.placed[m.Machine]; ok {
 			// The pending reservation cannot itself justify a second join.
 			machines[i].Free = 0
 		}
 	}
+	donor := autoscale.MachineOf(machines, requester)
 	record.Placement = autoscale.Place(machines, requester, true)
+	// Concurrent half-splits in opposite directions largely cancel when their
+	// net relief is at most half the gross movement: for positive a and b,
+	// |a-b| <= (a+b)/2 exactly when min(a,b) >= max(a,b)/3. Try another
+	// destination while the first offer is live.
+	// The unchanged cap fallback can still use the original host.
+	if incoming, ok := s.incoming[donor]; ok && incoming.source == record.Machine &&
+		rate > 0 && min(rate, incoming.rate) >= max(rate, incoming.rate)/3 {
+		for i := range machines {
+			if machines[i].Machine == record.Machine {
+				record.ReverseOf = record.Machine
+				free := machines[i].Free
+				machines[i].Free = 0
+				record.Placement = autoscale.Place(machines, requester, true)
+				machines[i].Free = free
+				break
+			}
+		}
+	}
 	// A recheck only consumes an offer. Advancing bootWave or renewing the
 	// backlog on each poll would turn one request into many capacity signals.
 	if readyOnly && (record.Machine == "" || record.Kind == autoscale.PlaceSlots) {
 		return record, nil
 	}
-	donor := autoscale.MachineOf(machines, requester)
 	relief := s.relief[donor]
 	hostRelief := relief != nil && relief.asking && relief.owner == requester
 	if hostRelief {
@@ -215,15 +245,19 @@ func (s *Server) planPlacement(machines []autoscale.MachineFacts, requester, pre
 		}
 	}
 	record.capMachine = atCap.Machine
-	reserved := record.Machine
-	if reserved == "" {
-		reserved = record.capMachine
-	}
+	reserved := record.reservedMachine()
 	if reserved != "" {
 		if s.placed == nil {
 			s.placed = map[string]time.Time{}
 		}
 		s.placed[reserved] = record.At
+		delete(s.incoming, reserved)
+		if record.Machine != "" && donor != "" && donor != reserved && rate > 0 {
+			if s.incoming == nil {
+				s.incoming = make(map[string]incomingCopy)
+			}
+			s.incoming[reserved] = incomingCopy{source: donor, rate: rate}
+		}
 	}
 	if record.Kind == autoscale.PlaceSlots {
 		return record, nil
@@ -250,7 +284,13 @@ func (s *Server) planPlacement(machines []autoscale.MachineFacts, requester, pre
 	}
 	pending := s.pendingLocked(machines, requester, preferNear, record)
 	record.Backlog = len(s.waiting)
-	if reserve, ok := autoscale.ReadyReserve(machines, record.Machine, s.ReadyReservePct, pending, s.freshLocked(machines, record.At)); ok {
+	unavailable := record.Machine
+	if unavailable == "" {
+		// This donor still has no receiver. Its excluded source cannot
+		// satisfy the shortage while the opposing placement is reserved.
+		unavailable = record.ReverseOf
+	}
+	if reserve, ok := autoscale.ReadyReserve(machines, unavailable, s.ReadyReservePct, pending, s.freshLocked(machines, record.At)); ok {
 		reserve.WaitingRemote = record.Kind == autoscale.PlaceNew && record.Machine == ""
 		record.Reserve = &reserve
 		record.BootWindow = s.bootWave.observe(time.Now(), reserve)
@@ -267,13 +307,21 @@ func (s *Server) planPlacement(machines []autoscale.MachineFacts, requester, pre
 	return record, env
 }
 
-// A fallback is held while the shell checks the actual machine cap. Only a
-// definitive pre-dispatch answer may release it before facts catch up.
-func (s *Server) releaseFallback(record placementRecord) {
+func (r placementRecord) reservedMachine() string {
+	if r.Machine != "" {
+		return r.Machine
+	}
+	return r.capMachine
+}
+
+// Only a definitive pre-dispatch answer releases the receiver reservation
+// and its transfer direction before facts catch up.
+func (s *Server) releaseUndispatched(record placementRecord) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if record.capMachine != "" && s.placed[record.capMachine] == record.At {
-		delete(s.placed, record.capMachine)
+	if target := record.reservedMachine(); target != "" && s.placed[target] == record.At {
+		delete(s.placed, target)
+		delete(s.incoming, target)
 	}
 }
 
