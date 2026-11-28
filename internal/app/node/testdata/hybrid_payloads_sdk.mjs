@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const [sdk, collection, firstPort, secondPort] = process.argv.slice(2);
-const { API, buildBM25Index, exactKnn, exactSparseDot, numericHistogram, mergeNumericHistograms, histogramQuantile, fuseRankings } = await import(pathToFileURL(resolve(sdk, "src/index.js")));
+const { API, DocumentUniverse, limitPerGroup, selectDirectRecords, buildBM25Index, exactKnn, exactSparseDot, numericHistogram, mergeNumericHistograms, histogramQuantile, fuseRankings } = await import(pathToFileURL(resolve(sdk, "src/index.js")));
 const api = new API();
 const fetchPeer = globalThis.fetch;
 const calls = [];
@@ -23,8 +23,10 @@ const docs = [];
 for (const [port, zone] of [[firstPort, "aa"], [secondPort, "zz"]]) {
   const peer = { ip: () => "127.0.0.1", port: () => Number(port) };
   const rows = await api.getDirectRecords("http", peer, collection, zone, 2, { includePayloads: true, timeoutMs: 2000 });
-  for (const { id, location, metrics, payload } of rows) {
-    docs.push({ id, location, vector: metrics, title: payload.title, sparse: payload.sparse });
+  const projected = selectDirectRecords(rows, { columns: ["id", { payload: "title" }, { payload: "sparse" }, { payload: "absent" }] });
+  for (const [i, [id, title, sparse, absent]] of projected.entries()) {
+    assert.equal(absent, null);
+    docs.push({ id, location: rows[i].location, vector: rows[i].metrics, title, sparse });
   }
 }
 assert.equal(docs.length, 4);
@@ -34,6 +36,16 @@ const phrase = [...index.filterPhrase(docs, "title", query)];
 assert.deepEqual(phrase.map(row => row.id).sort(), ["a", "c"]);
 const prefix = [...index.filterTokenPrefix(docs, "title", "CRÈ")];
 assert.deepEqual(prefix.map(row => row.id).sort(), ["a", "b", "c"]);
+const matches = new Set(index.matchTokens("title", "creme caf", { lastAsPrefix: true }));
+assert.deepEqual([...matches].sort(), ["a", "b", "c"]);
+let exactCount = 0;
+for (const zone of ["aa", "zz"]) {
+  const local = docs.filter(row => row.location === zone);
+  const universe = new DocumentUniverse(zone, "fixture", local.map(row => row.id));
+  const mask = predicate => universe.posting(local.flatMap((row, ordinal) => predicate(row) ? [ordinal] : []));
+  exactCount += universe.intersectionCount(mask(row => matches.has(row.id)), mask(row => row.vector[0] <= 1));
+}
+assert.equal(exactCount, 2);
 const sparse = exactSparseDot(docs.map(({id,location,sparse}) => ({id,location,vector:sparse})), [[8,2],[1024,1]]);
 assert.deepEqual(sparse.map(r => [r.id,r.score]), [["a",7],["d",1],["c",0],["b",-2]]);
 // The sorted distances in the fixture are 0,1,2,3. Bounds 1 and 3
@@ -64,5 +76,8 @@ const view = { collection, snapshot: "hybrid-fixture-without-writes" };
 const fused = fuseRankings([{ ...view, hits: lexical }, { ...view, hits: vector }], { constant: 1 });
 assert.deepEqual(ids(fused), ["b","a","c","d"]);
 verifyScores(fused, [1/3+1/2, 1/2+1/5, 1/4+1/3, 1/4]);
+const zones = new Map(docs.map(row => [row.id, row.location]));
+const diverse = limitPerGroup(fused, [hit => zones.get(hit.id)], { perGroup: 1, limit: 2 });
+assert.deepEqual(ids(diverse), ["b", "c"]);
 assert.deepEqual(calls, [[firstPort, "aa", 200], [secondPort, "zz", 200]]);
-console.log(JSON.stringify({ calls, prefix: ids(prefix), sparse: ids(sparse), histogram: histogram.counts, phrase: ids(phrase), lexical: ids(lexical), vector: ids(vector), fused: ids(fused) }));
+console.log(JSON.stringify({ calls, exactCount, diverse: ids(diverse), prefix: ids(prefix), sparse: ids(sparse), histogram: histogram.counts, phrase: ids(phrase), lexical: ids(lexical), vector: ids(vector), fused: ids(fused) }));
