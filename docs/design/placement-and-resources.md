@@ -395,6 +395,7 @@ experiment agent gives every slot of a machine `<dir>/copy-budget`
 | source and receiver cannot wait for each other | incoming warm pages use an independent lane, released after local staging. The receiver probes its outgoing budget without waiting |
 | co-resident transfers share their outgoing slot | the slot carries the transfer's id: a co-resident receiver finds it and takes none (`copy_slot_shared`) |
 | admission before any fence | an unfenced source normally waits at most `copySlotWait`. A fresh proposal keeps its ticket while at least one live handoff RPC follows that exact job. A new proposal takes its slot before partitioning or pinning the input. A previously durable warm operation keeps its identity on retry; exhaustion never starts an extra warm copy (`copy_slot_timeouts`) |
+| new automatic fold | a pinned survivor skips donor selection. Before starting a new fold, the source checks for live warm waiters and a free outgoing slot under its host sequencer. A dead waiter does not reserve the host. Recovery of a durable fold bypasses this admission. |
 | no freeze is lengthened | a resumed source with a fence bypasses outgoing admission. Sealed regions, unfinished zone fences and header-only preloads bypass incoming admission |
 | writes | never look at the budget |
 
