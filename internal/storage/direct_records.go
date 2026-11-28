@@ -36,8 +36,8 @@ func (s *Store) DirectRecords(ctx context.Context, zone tree.ZoneKey, maxRecords
 		var visitErr error
 		// Uncounted zonelog rows in a user collection are application
 		// tombstones. An opaque, counted row stores its metadata in its body.
-		load := func(z zonelog.Record) bool { return z.Opaque && !z.Uncounted }
-		err := tx.reader.ScanWith(zone.Collection, zone.Location, nil, &zonelog.IDRange{}, load, func(z zonelog.Record, _ int) bool {
+		load := func(zonelog.Record) bool { return false }
+		err := tx.reader.ScanWith(zone.Collection, zone.Location, nil, &zonelog.IDRange{}, load, func(z zonelog.Record, payloadBytes int) bool {
 			if visitErr = ctx.Err(); visitErr != nil {
 				return false
 			}
@@ -48,6 +48,26 @@ func (s *Store) DirectRecords(ctx context.Context, zone tree.ZoneKey, maxRecords
 			}
 			if z.Uncounted {
 				return true
+			}
+			if z.Opaque {
+				// Only this older representation needs its body to decode the
+				// projection. The physical scan provides its length without
+				// fetching it. A point read on this snapshot sees the same row.
+				if payloadBytes > remaining {
+					visitErr = ErrDirectRecordBudget
+					return false
+				}
+				remaining -= payloadBytes
+				full, ok, err := tx.reader.Get(z.Collection, z.Location, z.ID)
+				if err != nil {
+					visitErr = err
+					return false
+				}
+				if !ok {
+					visitErr = errors.New("opaque record missing from pinned snapshot")
+					return false
+				}
+				z = full
 			}
 			row, err := fromLog(z)
 			if err != nil {

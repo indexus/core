@@ -187,7 +187,8 @@ A successful reply contains a `records` array, in ascending document ID byte
 order. Each entry includes `collection`, `location`, `id`, and `metrics`;
 an omitted `weight` represents one. Empty arrays encode as `[]`. Payloads
 are omitted. The required limit ranges from 1 to 10,000. If the live result
-exceeds the limit or the scan exceeds its 64 MiB estimated metadata budget,
+exceeds the limit or the scan exceeds its 64 MiB budget for estimated metadata and any stored
+opaque bodies needed to decode it,
 the peer returns 413 and no rows. An invalid request returns 400, a peer
 without installed authority returns 409, and a frozen owner returns 503.
 The caller chooses the next peer. Each call sees its own snapshot.
