@@ -48,6 +48,17 @@ class ReplayTests(unittest.TestCase):
             p.write_text("\n".join(map(json.dumps,frames)))
             self.assertEqual(intervals(p)["op"],[(5,15),(5,15)])
 
+    def test_stale_transfer_breaks_interval_even_when_fleet_is_fresh(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/"live"
+            frames = []
+            for t in (10, 15, 20, 25, 30, 35):
+                transfer = dict(id="donor:op", age_s=t, installed_zones=t*2,
+                                stale=t == 20)
+                frames.append(dict(t=t, fleet=dict(transfers=[transfer])))
+            path.write_text("\n".join(map(json.dumps, frames)))
+            self.assertEqual(intervals(path, after=15, before=35)["donor:op"], [(5, 10)])
+
 
 if __name__ == "__main__":
     unittest.main()

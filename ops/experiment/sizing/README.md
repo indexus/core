@@ -154,3 +154,10 @@ Varier `--cost-ms`, `--occupied-for`, `--copy-seconds`, `--fraction`,
 de créneau retire du temps au travail en cours et en repousse la fin. Il suppose
 qu'une frontière de lot sûre est disponible. En production une clôture ou une
 reprise gelée conserve la priorité. Les tests sont dans `test_peer_relief.py`.
+
+Avec deux essais de même rampe, `zone_service.py TRAIN TEST --window 270 330`
+compare le service observé sur le plateau 16k des rampes à quatre paliers de
+60 s et trois transitions de 30 s. Utiliser `--window 330 580` pour la vidange
+et l'audit de ces mêmes essais. Chaque intervalle requiert deux observations
+fraîches consécutives du donneur. Les opérations courtes entre deux sondes
+échappent à cette comparaison. Ne pas en déduire un p99 client.

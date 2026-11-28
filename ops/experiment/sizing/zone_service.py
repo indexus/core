@@ -20,7 +20,7 @@ def intervals(path, after=0, before=float("inf")):
             for tx in frame["fleet"]["transfers"]:
                 key = tx["id"]
                 age, zones = tx.get("age_s"), tx.get("installed_zones")
-                if age is None or zones is None or frame.get("metrics_stale"):
+                if age is None or zones is None or tx.get("stale") or frame.get("metrics_stale"):
                     continue
                 current[key] = age, zones
                 if key in previous:
@@ -40,13 +40,19 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("train", type=Path)
     p.add_argument("test", type=Path)
-    p.add_argument("--split-time", type=float, help="train before and evaluate after this second")
+    windows = p.add_mutually_exclusive_group()
+    windows.add_argument("--window", nargs=2, type=float, metavar=("START", "END"),
+                         help="score the same elapsed-time window on two independent runs")
+    windows.add_argument("--split-time", type=float, help="train before and evaluate after this second")
     a = p.parse_args()
     boundary = a.split_time
     if a.train.resolve() == a.test.resolve() and boundary is None:
         p.error("a temporal holdout is required on a single trace")
-    train_ops = intervals(a.train, before=float("inf") if boundary is None else boundary)
-    test_ops = intervals(a.test, after=boundary or 0)
+    start, end = a.window or (0, float("inf"))
+    if not 0 <= start < end:
+        p.error("window must have nonnegative start and end after start")
+    train_ops = intervals(a.train, after=start, before=boundary if boundary is not None else end)
+    test_ops = intervals(a.test, after=boundary if boundary is not None else start, before=end)
     if a.train.resolve() == a.test.resolve():
         for key in train_ops:
             test_ops.pop(key,None)
