@@ -102,7 +102,7 @@ func ticketFinish(t *testing.T, source, target *Store, id causal.TransferID) cau
 	}
 	return c
 }
-func ticketStores(t *testing.T) (*Store, *Store, causal.Genesis) {
+func ticketStores(t testing.TB) (*Store, *Store, causal.Genesis) {
 	t.Helper()
 	dir := t.TempDir()
 	a := openTestData(t, filepath.Join(dir, "a"), "A")

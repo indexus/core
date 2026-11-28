@@ -10,7 +10,7 @@ import (
 	"github.com/indexus/go-indexus-core/internal/causal"
 )
 
-func openTestData(t *testing.T, path, node string) *Store {
+func openTestData(t testing.TB, path, node string) *Store {
 	t.Helper()
 	s, err := Open(path, node, "test", 1<<24)
 	if err != nil {
