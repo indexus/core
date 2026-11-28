@@ -14,7 +14,16 @@ returns `fingerprint`, `guard`, and `monoid`. Successful observations have
 two opaque, nonempty strings and a monoid object. A known empty scope has
 count `"0"`, a sum of 64 zeroes, and valid tokens. An inconclusive probe
 sets **all three fields to JSON null**, including for a budget refusal or a
-migration. Clients discard cached reuse on an unknown result, changed scope
+migration. A pending regional transfer makes the observation inconclusive
+when its XOR region intersects the requested prefix envelope. The envelope
+includes every collection with that prefix, so this is a conservative test.
+At maximum depth the request observes exactly one canonical zone. During
+a regional transfer its current unfrozen writer may supply an observation
+as soon as the zone is durably installed, using the same snapshot for the
+permission and the data. Shorter prefixes can still span uninstalled zones,
+even when their XOR address equals that of an installed maximum-depth zone.
+During a whole-store move or cold consolidation, all scopes can be unknown.
+Clients discard cached reuse on an unknown result, changed scope
 or peer roster, unrecognized algorithm, or unavailable endpoint. An older
 peer may return 404. Ordinary traversal remains available. The response uses
 `Cache-Control: no-store`. Invalid parameters return 400 and an unavailable

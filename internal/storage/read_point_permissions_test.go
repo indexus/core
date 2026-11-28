@@ -38,6 +38,16 @@ func TestGranularPointCoverageIsCanonicalAndIndependentForExactFullQuery(t *test
 			t.Fatal("unexpected direct rows", rows)
 		}
 	}
+	assertFingerprint := func(store *Store, key tree.ZoneKey, known bool, count uint64) SubtreeFingerprint {
+		t.Helper()
+		fp, err := store.LocalSubtreeFingerprint(context.Background(), key.Collection, key.Location)
+		if err != nil || (fp.Fingerprint != "") != known || (fp.Guard != "") != known || fp.Count != count {
+			t.Fatalf("fingerprint of %s on %s: %+v, %v (known=%v count=%d)", key.Location, store.node, fp, err, known, count)
+		}
+		return fp
+	}
+	assertFingerprint(source, point, false, 0)
+	assertFingerprint(target, point, false, 0)
 	assertDirect(source, point, ErrFrozen)
 	assertDirect(source, parent, nil)
 	assertDirect(target, point, ErrNotOwner)
@@ -51,10 +61,17 @@ func TestGranularPointCoverageIsCanonicalAndIndependentForExactFullQuery(t *test
 	if e = target.InstallZones(op.Cession.ID, proofs); e != nil {
 		t.Fatal(e)
 	}
+	installed := assertFingerprint(target, point, true, 1)
+	assertFingerprint(source, point, false, 0)
+	assertFingerprint(target, parent, false, 0)
 	assertDirect(target, point, nil)
 	assertDirect(target, parent, ErrNotOwner)
 	if _, e = target.Write("point-new", Record{Collection: point.Collection, Location: point.Location, ID: "point-new"}); e != nil {
 		t.Fatal(e)
+	}
+	updated := assertFingerprint(target, point, true, 2)
+	if updated.Guard == installed.Guard || updated.Fingerprint == installed.Fingerprint {
+		t.Fatal("installed point update reused the old evidence")
 	}
 	if _, e = source.Write("parent-new", Record{Collection: parent.Collection, Location: parent.Location, ID: "parent-new"}); e != nil {
 		t.Fatal("child point froze its canonical parent", e)
