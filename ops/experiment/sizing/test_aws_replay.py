@@ -5,10 +5,35 @@ import unittest
 
 from fleet_replay import capacity
 from placement_replay import Inventory, replay
+from mixed_replay import exits, host_timeline, read_rate, replay_writes
 from zone_service import intervals
 
 
 class ReplayTests(unittest.TestCase):
+    def test_mixed_replay_conserves_write_arrivals(self):
+        rows = [
+            dict(offered=10, shed=2, queued=4, in_flight=2),
+            dict(offered=10, shed=7, queued=4, in_flight=2),
+        ]
+        self.assertEqual(exits(rows, initial=1), 6)
+        result = replay_writes(rows, initial=1, capacity=6, service_rate=3, ack_share=1)
+        self.assertEqual(result, dict(acked_s=3, shed=9, end_backlog=6))
+
+    def test_mixed_replay_reader_rate_drops_when_responses_exceed_the_period(self):
+        one_sample = [dict(read_latency_us_log2=[0] * 19 + [1])]
+        fast = read_rate(one_sample, readers=10, target=1000)
+        self.assertEqual(fast["midpoint"], 25.4)
+        self.assertIsNone(read_rate([], readers=10, target=1000))
+
+    def test_mixed_replay_observed_machine_is_not_a_writer(self):
+        machine = dict(id="host", ready_offer=True)
+        def frame(t, state, rate):
+            return dict(t=t, fleet=dict(machines=[machine],
+                vnodes=[dict(machine="host", state=state, applied_s=rate)]))
+        frames = [frame(2, "receiving", None), frame(5, "stale", 10), frame(8, "receiving", 5)]
+        self.assertEqual(host_timeline(frames)["host"],
+                         dict(first_observed_s=2, first_offer_s=2, first_write_s=8))
+
     def test_finishing_boot_inside_observation_interval(self):
         frames = [(0,2,1,10),(10,2,1,10)]
         m = capacity(frames, "pipeline", 1, 4, 5, .5)
