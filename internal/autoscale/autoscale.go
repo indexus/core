@@ -173,7 +173,17 @@ type Request struct {
 	Resources         ResourceSample
 }
 
+// ClientDemand describes foreground data activity on the local vnode.
+type ClientDemand string
+
+const (
+	ClientActive ClientDemand = "active"
+	ClientQuiet  ClientDemand = "quiet"
+)
+
 type Input struct {
+	ClientDemand              ClientDemand
+	ClientOps, ClientInFlight int64
 	// Queue is the number of writes arrived at this vnode and not answered.
 	Queue int
 	// OldestWait is the age of the oldest of them.
@@ -526,6 +536,9 @@ func (a *Controller) samplePressure(in Input, sum int64, now time.Time) (sustain
 		"queue_delta":         queueDelta,
 		"oldest_wait_ms":      in.OldestWait.Milliseconds(),
 		"transfers_out":       in.TransfersOut,
+		"client_demand":       in.ClientDemand,
+		"client_ops":          in.ClientOps,
+		"client_in_flight":    in.ClientInFlight,
 		"inbound_lots":        in.InboundLots,
 		"cpu_waits_inbound":   cpuDeferred,
 		"hot_signal":          sustained,

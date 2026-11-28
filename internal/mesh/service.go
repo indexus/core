@@ -126,6 +126,9 @@ func (s *Service) call(ctx context.Context, host string, r Request) (Response, e
 	if s.Peers == nil {
 		return Response{}, storage.ErrNotReady
 	}
+	if r.dataCall() {
+		r.ClientWork = ctx.Value(clientActivityKey{}) != nil
+	}
 	out, err := s.Peers.Exchange(ctx, host, r)
 	out.AppliedLocally = false
 	return out, err

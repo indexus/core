@@ -95,9 +95,27 @@ seul, et à l'urgence mémoire (`mem` au seuil de refus). La pause AUTO-3
 ci-dessous reste en amont : tant qu'un transfert ouvert progresse sans droit
 délégable, le tick n'évalue rien.
 
+**Activité cliente.** Le CPU du vnode et celui de la machine peuvent déclencher
+une demande lorsqu’une opération de données est en cours ou a été observée
+pendant la plus longue des deux fenêtres de confirmation CPU. Le vnode
+échantillonne les lectures locales, les arrivées d’écritures et les opérations
+encore en cours. Une lecture de préfixe distante marque ses RPC de données
+avec le champ optionnel `ClientWork`. Le détenteur mesure ainsi la lecture
+même quand le client est entré par un autre pair. Les pages d’un inventaire
+de maintenance, les sondes de monitoring et les échanges périodiques de
+résumés ne réchauffent pas le signal client. Une lecture publique d’audit
+suit la même règle que toute lecture applicative.
+
+Les métriques `client_demand` (active ou quiet), `client_ops` (opérations
+échantillonnées hors écritures unitaires) et `client_in_flight` décrivent
+cette activité locale. Quand elle est éteinte, le CPU seul ne demande plus
+de pair. Les seuils de mémoire, de disque, d’items, les écritures et leur
+file gardent leurs décisions propres.
+
 **Transfert entrant.** Le receveur compte les appels `install-zone` réussis
 depuis son dernier échantillon de ressources (`inbound_lots`). Lorsque le
-CPU partagé déclenche seul, sans arrivée ni attente d’écriture locale, une
+CPU partagé déclenche seul après une activité récente, sans lecture ni
+arrivée ou attente d’écriture dans cet échantillon, une
 installation récente accorde au travail de copie une fenêtre supplémentaire.
 Elle dure au plus la durée de confirmation du signal CPU, plafonnée à
 `PressureHold`. Dès un échantillon sans installation, la demande CPU peut

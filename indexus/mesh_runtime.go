@@ -11,6 +11,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -24,6 +25,9 @@ import (
 
 type meshRuntime struct {
 	readSlots         chan struct{}
+	clientActivity    mesh.ClientActivity
+	sampleMu          sync.Mutex
+	lastClientSample  time.Time // autoscale ticks only
 	reads             readCache
 	compaction        atomic.Pointer[CausalCompactionConfig]
 	replicate         atomic.Bool // convergent replication sync (EnableReplication)
@@ -122,6 +126,11 @@ func (n *Node) EnableCausalCluster(service *mesh.Service) error {
 func (n *Node) MeshData(ctx context.Context, request mesh.Request) (mesh.Response, error) {
 	if n.mesh == nil {
 		return mesh.Response{}, storage.ErrNotReady
+	}
+	if request.CarriesClientWork() {
+		var done func()
+		ctx, done = n.mesh.clientActivity.Begin(ctx)
+		defer done()
 	}
 	if request.Kind == "write" {
 		n.mesh.lastWrite.Store(time.Now().UnixNano())

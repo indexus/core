@@ -23,6 +23,8 @@ func (n *Node) GetRecordsContext(ctx context.Context, collection, prefix string,
 	if n.mesh == nil {
 		return nil, ErrNotReady
 	}
+	ctx, done := n.mesh.clientActivity.Begin(ctx)
+	defer done()
 	if limit < 1 || limit > wire.MaxContentRecords {
 		return nil, fmt.Errorf("invalid record budget")
 	}
@@ -76,6 +78,8 @@ func (n *Node) GetDirectRecordsContext(ctx context.Context, collection, location
 	if n.mesh == nil {
 		return nil, ErrNotReady
 	}
+	ctx, done := n.mesh.clientActivity.Begin(ctx)
+	defer done()
 	if limit < 1 || limit > wire.MaxContentRecords {
 		return nil, fmt.Errorf("invalid record budget")
 	}
