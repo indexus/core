@@ -3,11 +3,13 @@ package auth
 import (
 	"crypto/ed25519"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"sync/atomic"
 	"time"
 )
 
@@ -219,6 +221,37 @@ func (i *Issuer) SignClientToken(clientID string, scopes []string, ttl time.Dura
 type Verifier struct {
 	NetworkID string
 	Public    ed25519.PublicKey
+	verified  [64]atomic.Pointer[verifiedSignature]
+}
+
+// Cache only the signature equation. Network, expiry and authorization are
+// checked on each request. A collision in the slot index only causes a miss.
+type verifiedSignature struct {
+	issuer    [ed25519.PublicKeySize]byte
+	signature [ed25519.SignatureSize]byte
+	payload   [sha256.Size]byte
+}
+
+func (v *Verifier) validSignature(payload, sig []byte) bool {
+	if len(v.Public) != ed25519.PublicKeySize || len(sig) != ed25519.SignatureSize {
+		return false
+	}
+	key := verifiedSignature{
+		issuer:    [ed25519.PublicKeySize]byte(v.Public),
+		signature: [ed25519.SignatureSize]byte(sig),
+		payload:   sha256.Sum256(payload),
+	}
+	slot := &v.verified[int(sig[0])%len(v.verified)]
+	if previous := slot.Load(); previous != nil && *previous == key {
+		return true
+	}
+	if !ed25519.Verify(v.Public, payload, sig) {
+		return false
+	}
+	entry := new(verifiedSignature)
+	*entry = key
+	slot.Store(entry)
+	return true
 }
 
 func NewVerifier(networkID string, pub ed25519.PublicKey) *Verifier {
@@ -243,7 +276,7 @@ func (v *Verifier) VerifyNodeCert(cert *NodeCert) error {
 	if err != nil {
 		return err
 	}
-	if !ed25519.Verify(v.Public, payload, sig) {
+	if !v.validSignature(payload, sig) {
 		return errors.New("invalid node cert signature")
 	}
 	return nil
@@ -280,7 +313,7 @@ func (v *Verifier) VerifyClientToken(tok *ClientToken) error {
 	if err != nil {
 		return err
 	}
-	if !ed25519.Verify(v.Public, payload, sig) {
+	if !v.validSignature(payload, sig) {
 		return errors.New("invalid client token signature")
 	}
 	return nil
