@@ -227,6 +227,10 @@ cleanup() { trap - EXIT INT TERM; teardown "$IDS"; }
 trap cleanup EXIT
 trap 'exit 130' INT TERM
 
+plan_environment() {
+  env | grep -E '^(SCALING_WRITES|OBSERVE_SECONDS|PUSH_START|STEP_SECONDS|PCT|PASSES|RATES_PER_VNODE|SAMPLE|STEP_VNODES|STEP_RATE|STEP_LEVELS|STEP_RAMP|STEP_PLATEAU|STEP_PASSES|STEP_WORKERS|STEP_TAIL|STEP_ROUTE|STEP_SEED|STEP_TAG|STEP_FOUNDERS|STEP_READERS|STEP_READ_RATE|STEP_TOTAL_SHARE|PHASE_AUDIT|AUDIT_SECONDS|QUIET_MAX|STALL_VNODES|STALL_RATE|STALL_FILL|STALL_ITEMS|STALL_FILL_RATE|RAMP_[A-Z0-9_]+)=' || true
+}
+
 # The tree under test, recorded with the results (REM-94).
 mkdir -p "$RESULTS"
 cp "$capacity" "$RESULTS/capacity.json"
@@ -239,7 +243,7 @@ cp "$capacity" "$RESULTS/capacity.json"
   echo "diff_sha256=$(git -C "$ROOT" diff HEAD -- . ':!ops/agent' | shasum -a 256 | cut -d' ' -f1)"
   echo "scaling_items=$ITEMS scaling_writes=${SCALING_WRITES:-0} cpu_target_pct=${CPU_TARGET_PCT:-0} write_cap=$WRITE_CAP resource_signals=${RESOURCE_SIGNALS:-true} ready_reserve_pct=${READY_RESERVE_PCT:-15}"
   echo "hosts=$HOSTS host_type=$HOST_TYPE slots=$SLOTS resource_slots=$resource_slots loaders=$LOADERS loader_type=$LOADER_TYPE sizes=$SIZES mode=$MODE net=$NET region=$REGION"
-  env | grep -E '^(SCALING_WRITES|OBSERVE_SECONDS|PUSH_START|STEP_SECONDS|PCT|PASSES|RATES_PER_VNODE|SAMPLE|STEP_VNODES|STEP_RATE|STEP_LEVELS|STEP_RAMP|STEP_PLATEAU|STEP_PASSES|STEP_WORKERS|STEP_TAIL|STEP_ROUTE|STEP_SEED|STEP_TAG|STEP_FOUNDERS|PHASE_AUDIT|AUDIT_SECONDS|QUIET_MAX|STALL_VNODES|STALL_RATE|STALL_FILL|STALL_ITEMS|STALL_FILL_RATE|RAMP_[A-Z0-9_]+)=' || true
+  plan_environment
 } >"$RESULTS/tree.txt"
 echo "==> building linux/amd64 binaries"
 rm -rf "$BIN" && mkdir -p "$BIN/elastic"
@@ -285,7 +289,7 @@ aws --region "$REGION" s3 cp "$HERE/../fleet.py" "s3://$bucket/plan/fleet.py" --
 aws --region "$REGION" s3 cp "$HERE/../ramp.py" "s3://$bucket/plan/ramp.py" --only-show-errors
 # Plan parameters the load machine exports before scenarios.sh (REM-94).
 # Quoted: RATES_PER_VNODE holds spaces, and the loader sources this file.
-env | grep -E '^(SCALING_WRITES|OBSERVE_SECONDS|PUSH_START|STEP_SECONDS|PCT|PASSES|RATES_PER_VNODE|SAMPLE|STEP_VNODES|STEP_RATE|STEP_LEVELS|STEP_RAMP|STEP_PLATEAU|STEP_PASSES|STEP_WORKERS|STEP_TAIL|STEP_ROUTE|STEP_SEED|STEP_TAG|STEP_FOUNDERS|PHASE_AUDIT|AUDIT_SECONDS|QUIET_MAX|STALL_VNODES|STALL_RATE|STALL_FILL|STALL_ITEMS|STALL_FILL_RATE|RAMP_[A-Z0-9_]+)=' | sed "s/=\(.*\)/='\1'/" >"$BIN/plan.env" || true
+plan_environment | sed "s/=\(.*\)/='\1'/" >"$BIN/plan.env"
 aws --region "$REGION" s3 cp "$BIN/plan.env" "s3://$bucket/plan/env" --only-show-errors
 
 # Network: one public subnet; members reach each other on any port, nothing

@@ -19,7 +19,8 @@ ELASTIC = HERE.parent / "elastic"
 
 class DeploymentWiringTests(unittest.TestCase):
     def test_steps_replay_seed_tag_and_independent_passes(self):
-        for setting in ("STEP_SEED", "STEP_TAG", "STEP_FOUNDERS", "AUDIT_SECONDS"):
+        for setting in ("STEP_SEED", "STEP_TAG", "STEP_FOUNDERS", "AUDIT_SECONDS",
+                        "STEP_READERS", "STEP_READ_RATE", "STEP_TOTAL_SHARE"):
             self.assertTrue(all(setting in line for line in RUN.splitlines() if "env | grep -E" in line))
         script = (HERE / "scenarios.sh").read_text()
         steps = re.search(r"^steps\(\) \{.*?^}", script, re.M | re.S).group()
@@ -40,6 +41,16 @@ PROVISIONER=fake STEP_VNODES=16 STEP_SEED=009 STEP_TAG=replay STEP_PASSES=3 step
             "-seed=10 -tag=replay -id-prefix=pass2-",
             "-seed=11 -tag=replay -id-prefix=pass3-",
         ])
+
+    def test_steps_pass_concurrent_readers_to_the_loader(self):
+        script = (HERE / "scenarios.sh").read_text()
+        steps = re.search(r"^steps\(\) \{.*?^}", script, re.M | re.S).group()
+        harness = (
+            'cluster() { :; }; phase() { printf "%s\\n" "$@"; }; '
+            'PROVISIONER=fake SIZES=8 STEP_READ_RATE=1000 STEP_READERS=96 steps'
+        )
+        args = subprocess.check_output(["bash", "-uc", steps + "\n" + harness], text=True).splitlines()
+        self.assertEqual(args[-6:], ["-readers", "96", "-read-rate", "1000", "-total-share", "0"])
 
     def test_founder_manifest_rejected_before_reset_or_provisioning(self):
         script = HERE / "scenarios.sh"
@@ -125,7 +136,9 @@ cluster 4 "$2" "$3"
         self.assertNotIn('cluster 4 ', steps)
         self.assertIn('export STEP_VNODES="${STEP_VNODES:-${SIZES%% *}}"', RUN)
         self.assertIn('largest=$STEP_VNODES', RUN)
-        self.assertEqual(RUN.count('SAMPLE|STEP_VNODES|STEP_RATE|'), 2)
+        self.assertEqual(RUN.count('SAMPLE|STEP_VNODES|STEP_RATE|'), 1)
+        self.assertIn('  plan_environment\n} >"$RESULTS/tree.txt"', RUN)
+        self.assertIn('plan_environment | sed', RUN)
 
     def test_host_fetches_every_elastic_hook(self):
         whole = 's3 cp --recursive "s3://${bucket}/bin/elastic/" /opt/indexus/elastic/' in HOST

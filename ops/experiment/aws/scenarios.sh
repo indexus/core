@@ -476,12 +476,16 @@ steps() {
   [[ -n "${PROVISIONER:-}" ]] || return 0
   local r=${STEP_RAMP:-60} p=${STEP_PLATEAU:-120} levels=${STEP_LEVELS:-4} i id_prefix=""
   local seed=${STEP_SEED:-$(python3 -c 'import secrets; print(secrets.randbits(32))')}
+  local read_args=()
+  if [[ "${STEP_READ_RATE:-0}" -gt 0 ]]; then
+    read_args=(-readers "${STEP_READERS:-96}" -read-rate "$STEP_READ_RATE" -total-share "${STEP_TOTAL_SHARE:-0}")
+  fi
   # STEP_PASSES passes, each on a fresh cluster: a step is validated by three
   # green passes in a row (indexus-scale-ladder).
   for i in $(seq 1 "${STEP_PASSES:-1}"); do
     if (( i > 1 )); then id_prefix="pass$i-"; fi
     cluster "${STEP_VNODES:-${SIZES%% *}}" "compaction=true&provisioner=$PROVISIONER&items=${ITEMS:-500000}" "${STEP_FOUNDERS:-}" || return 1
-    phase "steps-$i" $((p + (levels - 1) * (r + p))) "${STEP_TAIL:-300}" -scenario steps -rate "${STEP_RATE:-1000}" -step-ramp "${r}s" -step-plateau "${p}s" -workers "${STEP_WORKERS:-4096}" -discover-every 5s -probe-every 200ms -route "${STEP_ROUTE:-relay}" -seed "$((10#$seed + i - 1))" -tag "${STEP_TAG:-}" -id-prefix "$id_prefix"
+    phase "steps-$i" $((p + (levels - 1) * (r + p))) "${STEP_TAIL:-300}" -scenario steps -rate "${STEP_RATE:-1000}" -step-ramp "${r}s" -step-plateau "${p}s" -workers "${STEP_WORKERS:-4096}" -discover-every 5s -probe-every 200ms -route "${STEP_ROUTE:-relay}" -seed "$((10#$seed + i - 1))" -tag "${STEP_TAG:-}" -id-prefix "$id_prefix" ${read_args[@]+"${read_args[@]}"}
   done
 }
 if [[ "${MODE:-all}" == dynamics ]]; then dynamics; exit 0; fi
