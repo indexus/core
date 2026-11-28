@@ -33,6 +33,7 @@ ancien les contredit.
 active. Les plus lus :
 
 - [invariants](protocol/invariants.md) et [verification](protocol/verification.md) : règles nommées et preuves.
+- [Empreinte de sous-arbre](protocol/subtree-fingerprint.md) pour comparer des observations locales, composer les contributions disjointes et reproduire le vecteur de référence.
 - [wire-block](protocol/wire-block.md) : le fil client, IXB2 pour `/sets`, IXRB pour `/records`.
 - [write-authority](protocol/write-authority.md), [causal-topology](protocol/causal-topology.md), [read-modes](protocol/read-modes.md), [write-routes](protocol/write-routes.md).
 - [distributed-runtime](protocol/distributed-runtime.md) : démarrage et stockage.

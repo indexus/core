@@ -286,3 +286,6 @@ When the storage probe cannot supply an observation, all three values are
 JSON null. The client can use its ordinary traversal. Unavailable service
 returns 503, invalid parameters return 400. Read the response directly from
 each relevant peer. Equality on one peer does not describe remote changes.
+
+The [local subtree fingerprint contract](subtree-fingerprint.md) defines the
+canonical leaf bytes, composition rules, baseline guards and compatibility.
