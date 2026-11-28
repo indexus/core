@@ -164,7 +164,7 @@ func (s *Service) handoffAsync(ctx context.Context, request Request, wait time.D
 // receiver's progress per zone from earlier rounds of the same handoff and is
 // updated in place: zones it lacks are preloaded in pages, the others only
 // mirror their new mutations.
-func (s *Service) copyAndMirror(ctx context.Context, offer storage.CausalTransfer, known map[string]uint64) error {
+func (s *Service) copyAndMirror(ctx context.Context, offer storage.CausalTransfer, known map[string]uint64, warm bool) error {
 	target := offer.Cession.Target
 	if err := s.shipCatalog(ctx, target); err != nil {
 		return err
@@ -174,7 +174,7 @@ func (s *Service) copyAndMirror(ctx context.Context, offer storage.CausalTransfe
 	flushAlways := func() error {
 		part := wireTransfer(offer)
 		part.Snapshots = page
-		response, err := s.endpointCall(ctx, target, Request{Kind: "preload", Transfer: &part})
+		response, err := s.endpointCall(ctx, target, Request{Kind: "preload", Transfer: &part, WarmPage: warm && len(page) > 0})
 		if err != nil {
 			return err
 		}
@@ -343,7 +343,7 @@ const (
 // copyLot prepares one byte-bounded slice of unit while its donor stays
 // writable, then converges recent mutations via ZoneSeqs without re-reading
 // full zone payloads on every catch-up attempt.
-func (s *Service) copyLot(ctx context.Context, transfer storage.CausalTransfer, unit []tree.ZoneKey, known map[string]uint64) ([]tree.ZoneKey, error) {
+func (s *Service) copyLot(ctx context.Context, transfer storage.CausalTransfer, unit []tree.ZoneKey, known map[string]uint64, warm bool) ([]tree.ZoneKey, error) {
 	snaps, err := s.Store.Snapshots(ctx, unit, transferLotBytes)
 	if err != nil {
 		return nil, err
@@ -380,7 +380,7 @@ func (s *Service) copyLot(ctx context.Context, transfer storage.CausalTransfer, 
 	for attempt := 0; attempt < 4; attempt++ {
 		var err error
 		if attempt == 0 && !allKnown {
-			err = s.copyAndMirror(ctx, part, known)
+			err = s.copyAndMirror(ctx, part, known, warm)
 		} else {
 			err = s.mirrorOffer(ctx, part, known)
 		}

@@ -241,7 +241,7 @@ func dispatchedKinds(t *testing.T) (kinds []string) {
 // The JSON encoding lists fields in declaration order. Nodes of different
 // versions share it: a field is added at will, never moved or retagged.
 const requestLayout = "" +
-	"Iterative,omitempty Directory,omitempty Locations,omitempty " +
+	"Iterative,omitempty WarmPage,omitempty Directory,omitempty Locations,omitempty " +
 	"Cold,omitempty Retirement,omitempty Kind Membership,omitempty " +
 	"RoutingDigest,omitzero Page,omitempty Zone,omitzero Region,omitzero " +
 	"Input,omitzero Target,omitzero Owner,omitzero TargetVNode,omitzero " +

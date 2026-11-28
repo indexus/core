@@ -51,7 +51,7 @@ func (s *Service) Handle(ctx context.Context, r Request) (out Response, err erro
 	case "cancel":
 		return out, s.Store.CancelCausal(*r.Cession)
 	case "preload":
-		out.Progress, err = s.preload(ctx, *r.Transfer)
+		out.Progress, err = s.preload(ctx, *r.Transfer, r.WarmPage)
 		return out, err
 	case "mirror":
 		if len(r.Batch) > 0 {

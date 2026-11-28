@@ -555,6 +555,7 @@ func agent(ctx context.Context, args []string) error {
 	factsLocked := func(host autoscale.ResourceSample, cpu hostCPUObservation) autoscale.MachineFacts {
 		facts := machineFacts(slots[:listed], runtime.NumCPU(), host, addressSlots, c.slots == 0)
 		facts.CopySlots = max(0, c.copySlots)
+		facts.WarmReceiverLane = c.copySlots == 1 && copyDir != ""
 		if cpu.valid {
 			facts.HostCPUPct, facts.HostCPUOK = cpu.busyPct, true
 			facts.CPUPct = max(facts.CPUPct, cpu.busyPct)

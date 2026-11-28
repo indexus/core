@@ -145,3 +145,23 @@ func TestAppliedRateCompleteFreshWindow(t *testing.T) {
 		})
 	}
 }
+
+func TestNewlySpawnedProcessCannotAdvertiseAnotherWarmReceiver(t *testing.T) {
+	now := time.Now()
+	first := &slot{}
+	first.record("first", true, 1, nil, now.Add(-time.Second))
+	first.record("first", true, 1.1, nil, now)
+	slots := []*slot{first}
+	check := func() int {
+		f := machineFacts(slots, 4, autoscale.ResourceSample{MemTotal: 1024, MemPct: 20, DiskOK: true, DiskFreePct: 80}, 0, true)
+		f.HostCPUOK, f.WarmReceiverLane, f.CopySlots = true, true, 1
+		return offeredSlots(f)
+	}
+	if check() != 1 {
+		t.Fatal("measured first join did not offer one second receiver")
+	}
+	slots = append(slots, &slot{})
+	if check() != 0 {
+		t.Fatal("local /spawn could start a third process before the second reported")
+	}
+}

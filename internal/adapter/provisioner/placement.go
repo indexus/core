@@ -189,8 +189,9 @@ func (s *Server) planPlacement(machines []autoscale.MachineFacts, requester, pre
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	for i, m := range machines {
-		if at, ok := s.placed[m.Machine]; ok && record.At.Sub(at) < placementMemory && m.Receiving == 0 {
-			machines[i].Receiving = 1
+		if at, ok := s.placed[m.Machine]; ok && record.At.Sub(at) < placementMemory {
+			// The pending reservation cannot itself justify a second join.
+			machines[i].Free = 0
 		}
 	}
 	record.Placement = autoscale.Place(machines, requester, true)

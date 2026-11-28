@@ -430,3 +430,30 @@ func TestConcurrentSurveyResultsDoNotSharePlacementReservations(t *testing.T) {
 		}
 	}
 }
+
+func TestParallelRequestsShareOneSecondReceiverOffer(t *testing.T) {
+	s := NewServer("key")
+	donor, remote := host(1, 0, 90, "hot"), host(1, 1, 5, "joining")
+	donor.Machine, remote.Machine = "donor", "remote"
+	remote.ResourceManaged, remote.HostCPUOK, remote.MemOK, remote.DiskOK = true, true, true, true
+	remote.Cores, remote.ReceiverReserveCores, remote.MemFreePct, remote.DiskFreePct = 4, 0.5, 80, 80
+	remote.WarmReceiverLane, remote.CopySlots = true, 1
+	facts := []autoscale.MachineFacts{donor, remote}
+	const requests = 12
+	results := make(chan placementRecord, requests)
+	for range requests {
+		go func() { r, _ := s.decidePlacement(facts, "hot", "near"); results <- r }()
+	}
+	chosen := 0
+	for range requests {
+		r := <-results
+		if r.Machine == "remote" {
+			chosen++
+		} else if r.capMachine == "remote" {
+			t.Fatal("cap fallback duplicated the remote offer")
+		}
+	}
+	if chosen != 1 {
+		t.Fatalf("%d choices of the same offer", chosen)
+	}
+}
