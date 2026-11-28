@@ -151,8 +151,28 @@ func (c *Client) Exchange(ctx context.Context, endpoint string, request mesh.Req
 		err = *out.Failure
 	}
 	membership := request.Kind == mesh.KindMembership
+	if membership {
+		recordMembershipJSON(request.Membership, sentBytes)
+	}
 	metrics.Sent(request.Kind).Record(sentBytes, receivedBytes, time.Since(started), err != nil, membership)
 	return out.Response, err
+}
+
+// Count the encoded RPC envelope once at its producer. Requests use the size
+// prepared for the transport (including failed attempts); responses use bytes
+// written. HTTP headers, compression and transport retransmissions are excluded.
+func recordMembershipJSON(packet *mesh.MembershipPacket, size int) {
+	if packet == nil || packet.Version == (causal.Digest{}) {
+		return // unversioned bootstrap probes do not advertise membership
+	}
+	switch {
+	case packet.Base != (causal.Digest{}):
+		metrics.Gossip.DeltaJSONBytes.Add(int64(size))
+	case packet.Body != nil:
+		metrics.Gossip.FullJSONBytes.Add(int64(size))
+	default:
+		metrics.Gossip.ReferenceJSONBytes.Add(int64(size))
+	}
 }
 
 // countingWriter counts response bytes.
@@ -239,6 +259,9 @@ func (h *Handler) serveMesh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	err = json.NewEncoder(out).Encode(envelope)
+	if request.Kind == mesh.KindMembership && response.Membership != nil {
+		recordMembershipJSON(&response.Membership.Packet, out.n)
+	}
 }
 
 // writePage writes the envelope of a paged request, whose body must fit
