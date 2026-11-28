@@ -256,7 +256,7 @@ func (b *CopyBudget) cooldown(work time.Duration) time.Duration {
 
 // pace yields between completed lots. A recovery pass with frozen zones, or a
 // region already sealed, is urgent and must never prolong a no-writer window.
-func (b *CopyBudget) pace(ctx context.Context, work time.Duration, urgent bool) error {
+func (b *CopyBudget) pace(ctx context.Context, operation string, work time.Duration, urgent bool) error {
 	if b == nil || urgent {
 		return ctx.Err()
 	}
@@ -264,6 +264,7 @@ func (b *CopyBudget) pace(ctx context.Context, work time.Duration, urgent bool) 
 	if delay <= 0 {
 		return ctx.Err()
 	}
+	metrics.HandoffPhase(operation, "copy-pacing")
 	started := time.Now()
 	timer := time.NewTimer(delay)
 	defer timer.Stop()
