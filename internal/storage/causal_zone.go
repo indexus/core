@@ -677,50 +677,61 @@ func (s *Store) MountZones(operation causal.TransferID, source string, delta []Z
 	return errors.Join(ErrNotReady, errMountChanged)
 }
 
-// FencedSnapshots returns saved snapshots for this disk's issued zones whose
-// installation is not acknowledged yet. Each snapshot must match its proof.
-func (s *Store) FencedSnapshots(operation causal.TransferID, zones []tree.ZoneKey) ([]Snapshot, error) {
-	return read(s, func(tx *Tx) ([]Snapshot, error) {
+// FencedLot contains the verified material for replaying one issued lot.
+type FencedLot struct {
+	Snapshots []Snapshot
+	Seals     []ZoneSeal
+	Proofs    []causal.ZoneTransfer
+}
+
+// ReadFencedLot reads only the proofs of this operation, together with their
+// snapshots. A replay sends the exact seals checked against these proofs.
+func (s *Store) ReadFencedLot(operation causal.TransferID, zones []tree.ZoneKey) (FencedLot, error) {
+	return read(s, func(tx *Tx) (FencedLot, error) {
 		state, err := readCausal(tx)
 		if err != nil {
-			return nil, err
+			return FencedLot{}, err
 		}
 		if _, err = s.outgoingTransfer(state, operation); err != nil {
-			return nil, err
+			return FencedLot{}, err
 		}
-		snaps := make([]Snapshot, len(zones))
+		lot := FencedLot{
+			Snapshots: make([]Snapshot, len(zones)),
+			Seals:     make([]ZoneSeal, len(zones)),
+			Proofs:    make([]causal.ZoneTransfer, len(zones)),
+		}
 		for i, zone := range zones {
 			st, ok, err := zoneStateOf(tx, state, operation, zone)
 			if err != nil {
-				return nil, err
+				return FencedLot{}, err
 			}
 			if !ok || !st.Frozen || !st.Transferred {
-				return nil, ErrNotReady
+				return FencedLot{}, ErrNotReady
 			}
 			if acked, err := zoneAcked(tx, operation, st); err != nil || acked {
-				return nil, errors.Join(err, ErrNotReady)
+				return FencedLot{}, errors.Join(err, ErrNotReady)
 			}
 			snap, err := fencedSnapshot(tx, operation, zone)
 			if err != nil {
-				return nil, err
+				return FencedLot{}, err
 			}
 			proof, exists, err := zoneTransferOf(tx, state, operation, zone)
 			if err != nil {
-				return nil, err
+				return FencedLot{}, err
 			}
-			if !exists {
-				return nil, ErrNotReady
+			if !exists || proof.Operation != operation || proof.Zone != zone {
+				return FencedLot{}, ErrNotReady
 			}
 			seal, err := snap.Seal()
 			if err != nil {
-				return nil, err
+				return FencedLot{}, err
 			}
-			if snap.Seq != proof.Seq || causal.Digest(seal.Digest) != proof.DataDigest {
-				return nil, ErrSequence
+			if seal.Zone != zone || snap.Seq != proof.Seq || causal.Digest(seal.Digest) != proof.DataDigest {
+				return FencedLot{}, ErrSequence
 			}
-			snaps[i] = snap
+			lot.Snapshots[i], lot.Seals[i], lot.Proofs[i] = snap, seal, proof
 		}
-		return snaps, nil
+		return lot, nil
 	})
 }
 

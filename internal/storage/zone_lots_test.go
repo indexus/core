@@ -173,7 +173,7 @@ func TestAckOfAWholeLotWritesItsRowOnly(t *testing.T) {
 			t.Fatalf("zone %q of an acknowledged lot reads as not acknowledged", key)
 		}
 	}
-	if _, err := lot.source.FencedSnapshots(lot.id, lot.zones); !errors.Is(err, ErrNotReady) {
+	if _, err := lot.source.ReadFencedLot(lot.id, lot.zones); !errors.Is(err, ErrNotReady) {
 		t.Fatalf("an acknowledged lot is still offered to a resume: %v", err)
 	}
 	puts = rowPuts.Load()
@@ -212,10 +212,10 @@ func TestLotResumesFromTheZonesNotInstalled(t *testing.T) {
 	if !states[sealKey(first[0])].Acked || states[sealKey(rest[0])].Acked {
 		t.Fatalf("after a restart the source reads the lot's acknowledgements as %+v", states)
 	}
-	if _, err := lot.source.FencedSnapshots(lot.id, lot.zones); !errors.Is(err, ErrNotReady) {
+	if _, err := lot.source.ReadFencedLot(lot.id, lot.zones); !errors.Is(err, ErrNotReady) {
 		t.Fatalf("the resume offers a zone already acknowledged: %v", err)
 	}
-	snaps, err := lot.source.FencedSnapshots(lot.id, rest)
+	replay, err := lot.source.ReadFencedLot(lot.id, rest)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -234,7 +234,7 @@ func TestLotResumesFromTheZonesNotInstalled(t *testing.T) {
 	if err != nil || len(live.Records) != len(lot.snaps[0].Records)+1 {
 		t.Fatalf("the resumed install replaced a zone already installed: %d records (%v)", len(live.Records), err)
 	}
-	if seal, err := snaps[0].Seal(); err != nil || seal != lot.seals[1] {
+	if seal, err := replay.Snapshots[0].Seal(); err != nil || seal != lot.seals[1] || replay.Seals[0] != seal || replay.Proofs[0] != lot.proofs[1] {
 		t.Fatalf("the fenced content of the resumed zone changed (%v)", err)
 	}
 	if err = lot.source.AckZoneInstalls(lot.id, rest); err != nil {
@@ -312,7 +312,7 @@ func TestTransferWithRowsPerZoneFinishes(t *testing.T) {
 	}
 	// The resume replays the old proofs; the receiver installs the zone it
 	// lacks, in a lot row, and keeps the other.
-	snaps, err := lot.source.FencedSnapshots(lot.id, lot.zones)
+	replay, err := lot.source.ReadFencedLot(lot.id, lot.zones)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -324,7 +324,7 @@ func TestTransferWithRowsPerZoneFinishes(t *testing.T) {
 		}
 		proofs = append(proofs, rows[0])
 	}
-	if err = lot.target.MountZones(lot.id, lot.source.node, nil, nil, snaps, proofs); err != nil {
+	if err = lot.target.MountZones(lot.id, lot.source.node, nil, nil, replay.Snapshots, proofs); err != nil {
 		t.Fatal(err)
 	}
 	if n := rowsBelow(t, lot.target, zoneLotsRows(lot.id)); n != 1 {

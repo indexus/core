@@ -75,26 +75,26 @@ func TestFencedSnapshotsRequireSavedFencedContent(t *testing.T) {
 	op := ticketAdmission(t, source, target, genesis.Right().ID, tree.Region{})
 	zone, _ := recordZone(r)
 	zones := []tree.ZoneKey{zone}
-	if _, err := source.FencedSnapshots(op.Cession.ID, zones); !errors.Is(err, ErrNotReady) {
+	if _, err := source.ReadFencedLot(op.Cession.ID, zones); !errors.Is(err, ErrNotReady) {
 		t.Fatalf("unfenced snapshot returned: %v", err)
 	}
 	if _, _, _, err := source.FenceZones(op.Cession.ID, zones); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := source.FencedSnapshots(op.Cession.ID, zones); err != nil {
+	if _, err := source.ReadFencedLot(op.Cession.ID, zones); err != nil {
 		t.Fatal(err)
 	}
 	path := transferRows(op.Cession.ID) + element(zoneBytes(zone))
 	if err := source.update(func(tx *Tx) error { return tx.put(path, []byte("corrupt")) }); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := source.FencedSnapshots(op.Cession.ID, zones); err == nil {
+	if _, err := source.ReadFencedLot(op.Cession.ID, zones); err == nil {
 		t.Fatal("corruption hidden by a live snapshot")
 	}
 	if err := source.update(func(tx *Tx) error { return tx.del(path) }); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := source.FencedSnapshots(op.Cession.ID, zones); !errors.Is(err, ErrNotReady) {
+	if _, err := source.ReadFencedLot(op.Cession.ID, zones); !errors.Is(err, ErrNotReady) {
 		t.Fatalf("missing durable snapshot reconstructed: %v", err)
 	}
 }
@@ -197,12 +197,12 @@ func TestFencedLotPowerLossBeforeFirstDelivery(t *testing.T) {
 	schedule.crash(0)
 	schedule.open(0)
 	source = schedule.nodes[0].store
-	recovered, err := source.FencedSnapshots(op.Cession.ID, zones)
+	recovered, err := source.ReadFencedLot(op.Cession.ID, zones)
 	if err != nil {
 		t.Fatal(err)
 	}
-	after, err := recovered[0].Seal()
-	if err != nil || after != before {
+	after, err := recovered.Snapshots[0].Seal()
+	if err != nil || after != before || recovered.Seals[0] != before || recovered.Proofs[0] != proofs[0] {
 		t.Fatalf("fence changed on recovery: %+v %+v %v", before, after, err)
 	}
 	replayed, _, replayProofs, err := source.FenceZones(op.Cession.ID, zones)
@@ -216,7 +216,7 @@ func TestFencedLotPowerLossBeforeFirstDelivery(t *testing.T) {
 	if _, err = source.Write("must-stay-fenced", r); err == nil {
 		t.Fatal("power loss restored source write authority")
 	}
-	if err = target.MountZones(op.Cession.ID, source.node, nil, nil, recovered, replayProofs); err != nil {
+	if err = target.MountZones(op.Cession.ID, source.node, nil, nil, recovered.Snapshots, replayProofs); err != nil {
 		t.Fatal(err)
 	}
 	got, err := target.Write(r.ID, r)
@@ -228,7 +228,7 @@ func TestFencedLotPowerLossBeforeFirstDelivery(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = target.MountZones(op.Cession.ID, source.node, nil, nil, recovered, replayProofs); err != nil {
+	if err = target.MountZones(op.Cession.ID, source.node, nil, nil, recovered.Snapshots, replayProofs); err != nil {
 		t.Fatal(err)
 	}
 	repeated, err := target.Write(r.ID, r)

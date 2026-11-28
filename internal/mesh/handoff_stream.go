@@ -278,10 +278,9 @@ func (s *Service) resumeZoneInstalls(ctx context.Context, transfer storage.Causa
 	if batchSize < 1 {
 		batchSize = flipUnitZones
 	}
-	var proofs []causal.ZoneTransfer
 	var keys []tree.ZoneKey
 	flush := func() error {
-		if len(proofs) == 0 {
+		if len(keys) == 0 {
 			return nil
 		}
 		done := s.beginCutover(keys)
@@ -289,49 +288,29 @@ func (s *Service) resumeZoneInstalls(ctx context.Context, transfer storage.Causa
 		// A fenced zone was ceded in the same commit (FLIP-ONE-1): the receiver
 		// may hold neither its last delta nor its certification. Replay the
 		// seals with the proofs, then the fenced snapshots themselves.
-		snaps, err := s.Store.FencedSnapshots(transfer.Cession.ID, keys)
+		lot, err := s.Store.ReadFencedLot(transfer.Cession.ID, keys)
 		if err != nil {
 			return err
 		}
-		seals := make([]storage.ZoneSeal, len(snaps))
-		for i, snap := range snaps {
-			if seals[i], err = snap.Seal(); err != nil {
-				return err
-			}
-		}
-		install := Request{Kind: "install-zone", Operation: transfer.Cession.ID, Owner: s.Self, Seals: seals, ZoneTransfers: proofs}
+		install := Request{Kind: "install-zone", Operation: transfer.Cession.ID, Owner: s.Self, Seals: lot.Seals, ZoneTransfers: lot.Proofs}
 		_, err = s.retryZoneInstall(ctx, transfer.Cession.Target, install)
 		if errors.Is(err, storage.ErrSequence) || errors.Is(err, storage.ErrNotReady) {
 			part := wireTransfer(transfer)
-			part.Snapshots = snaps
-			_, err = s.retryZoneInstall(ctx, transfer.Cession.Target, Request{Kind: "install-zone", Operation: transfer.Cession.ID, Transfer: &part, ZoneTransfers: proofs})
+			part.Snapshots = lot.Snapshots
+			_, err = s.retryZoneInstall(ctx, transfer.Cession.Target, Request{Kind: "install-zone", Operation: transfer.Cession.ID, Transfer: &part, ZoneTransfers: lot.Proofs})
 		}
 		if err == nil {
 			err = s.Store.AckZoneInstalls(transfer.Cession.ID, keys)
 		}
-		proofs, keys = nil, nil
+		keys = keys[:0]
 		return err
 	}
 	for _, st := range states {
 		if !st.Transferred || st.Acked {
 			continue
 		}
-		rows, err := s.Store.ZoneTransfers(st.Zone)
-		if err != nil {
-			return err
-		}
-		found := false
-		for _, proof := range rows {
-			if proof.Operation == transfer.Cession.ID {
-				proofs, keys = append(proofs, proof), append(keys, st.Zone)
-				found = true
-				break
-			}
-		}
-		if !found {
-			return storage.ErrNotReady
-		}
-		if len(proofs) == batchSize {
+		keys = append(keys, st.Zone)
+		if len(keys) == batchSize {
 			if err := flush(); err != nil {
 				return err
 			}
