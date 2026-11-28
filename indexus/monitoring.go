@@ -142,3 +142,10 @@ func (n *Node) WriteDemand() map[string]any {
 		"transfers_out": service.OutgoingHandoffs(),
 	}
 }
+
+func (n *Node) NativeAddressShare() (float64, bool) {
+	if store := n.durableStore(); store != nil {
+		return store.NativeAddressShare()
+	}
+	return 0, false
+}

@@ -46,3 +46,8 @@ test('only a fresh donor can confirm an operation left its reported list',()=>{
   assert.equal(departedTransfers(before,now),1);
   assert.equal(departedTransfers(before,{...now,metrics_stale:true}),null);
 });
+test('XOR shares split only on branching bits, including near-identical addresses',()=>{
+  const a='0'.repeat(16),b='0'.repeat(15)+'1',c='_'.repeat(16);
+  const shares=globalThis.IndexusDashboard.xorShares([b,c,a,a]);
+  assert.deepEqual([...shares],[[a,.25],[b,.25],[c,.5]]);
+});

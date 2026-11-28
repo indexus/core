@@ -1,6 +1,9 @@
 package storage
 
 import (
+	"math"
+	"math/bits"
+
 	"github.com/indexus/go-indexus-core/internal/causal"
 	"github.com/indexus/go-indexus-core/internal/tree"
 )
@@ -81,4 +84,22 @@ func (s *Store) CausalRouting() (RoutingSnapshot, error) {
 	}
 	c, e := read(s, s.causalSnapshot)
 	return RoutingSnapshot{c}, e
+}
+
+// NativeAddressShare reports the geometry of installed regional rights from the
+// immutable cache. Point activations during an unfinished handoff are separate.
+func (s *Store) NativeAddressShare() (float64, bool) {
+	c := s.committedCausal()
+	if c == nil {
+		return 0, false
+	}
+	var share float64
+	for _, right := range c.state.Permissions.Native {
+		fixed := 0
+		for _, mask := range right.Region.Mask {
+			fixed += bits.OnesCount8(mask)
+		}
+		share += math.Ldexp(1, -fixed)
+	}
+	return share, true
 }

@@ -83,6 +83,8 @@ class Fleet:
                      state='receiving' if m.get('joining') else (('ready' if m['client_ready'] else 'joining') if 'client_ready' in m else 'unknown'),
                      applied_s=rate, items=(m.get('storage') or {}).get('items'), monitor=monitor, wall=wall)
             storage = m.get('storage') or {}
+            if 'native_address_share' in m:
+                n['native_share'] = m['native_address_share']
             n['items_counted'] = storage.get('items_counted')
             self.nodes[ident] = n
             self.transfers[ident] = []

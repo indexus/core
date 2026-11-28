@@ -158,6 +158,11 @@ func (h *Handler) Metrics(w http.ResponseWriter, r *http.Request) {
 	collections, zones := h.service.MeasuredOwnershipStats()
 	capacity, owned, _ := h.service.StorageUsage()
 	body["storage"] = map[string]any{"capacity_bytes": capacity, "owned_bytes": owned, "items": h.service.Items(), "zones": zones, "collections": collections}
+	if reporter, ok := h.service.(interface{ NativeAddressShare() (float64, bool) }); ok {
+		if share, known := reporter.NativeAddressShare(); known {
+			body["native_address_share"] = share
+		}
+	}
 	body["disk"] = h.service.CommitStats()
 	body["summary"] = h.service.SummaryMetrics()
 	// Outgoing transfers with frozen zones and not installed: while one is
