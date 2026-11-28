@@ -53,6 +53,24 @@ The homepage publishes a different hot ANN p90 (17 ms). Use the dated archive to
 | Aggregation, sort, pagination | Anglet building attributes for field semantics; deterministic synthetic low/high cardinality with 100 k, 1 M, 10 M rows | Compare counts, groups, aggregates, ordering and pages to a full scan/sort with stable tie-breakers. Verify histogram rank/value bounds against exact quantiles. Track build/merge costs, peak working memory and over-the-wire bytes. |
 | Distributed discovery and refresh | Identical corpus on 1/2/8 physical peers; direct known addresses and discovery from roots; 0%, 0.1%, 1%, 10%, 100% of subtrees mutated | Compare both paths to a fresh exhaustive stable-view oracle. Vary branching, skew, budgets and concurrency. Include no-op refresh, add, edit, delete, update/undo, partial ownership, handoff, restart, offline peer and budget unknown. Count distinct probes, data RPCs, bytes and changed leaves. Record coverage, unknowns, stale answers and time to converge after acknowledged writes. |
 
+### Adaptive sessions on the same observed selection
+
+Run 1, 4, 16 and 64 interactions per session. Disclose the next filter, facet
+or ranking only after the preceding response. Compare Indexus with sequential
+turbopuffer requests and with one materialization reused on the client. For
+queries known together, also run a multi-query baseline. Charge both engines
+for the initial selection, index construction, subsequent reads and client
+memory. Plot cumulative wall time and recall after each interaction.
+
+For Nearby, report the first page, a ready page and a page requiring new
+branches separately, with page sizes 1, 16 and 64. Record branch reads,
+sorts, retained rows and time to first useful page; repeat with a slow client
+and cancellation. For change detection, mutate payloads while preserving
+counts, vary the fraction of changed branches, preview changes, then reload a
+subset. Record the cost after unrelated writes as well as on an idle disk.
+For multi-vector search, compare exact MaxSim scores to token-by-token dot
+products, varying token count per document and candidate depth.
+
 Use original dataset releases and archive the selected IDs, model, dtype, normalized vectors, query vectors/text, qrels, filter attributes, mutations and seed with checksums. Corpus size and vector dimension alone cannot reproduce an experiment. [Wikipedia vectors](https://huggingface.co/datasets/Cohere/wikipedia-2023-11-embed-multilingual-v3) · [MS MARCO vectors](https://huggingface.co/datasets/Cohere/msmarco-v2.1-embed-english-v3)
 
 ## Execution, cost and interpretation
