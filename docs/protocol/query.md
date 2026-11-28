@@ -244,3 +244,13 @@ alone. A document can omit its payload. Binary values use the existing item
 representation (base64 with `binary:true`). The same read authorization,
 local snapshot and record limit apply. Body lengths count against the read
 budget before the per-record fetch, including base64 expansion for binary.
+
+On `/zones/children/local`, requesting `include_uncertain=true` includes
+both children with a local witness and heads whose bounded probe was
+inconclusive. A successful reply echoes `"include_uncertain":true` and
+keeps `"complete":false`, including for an empty leaf. The default and
+`include_uncertain=false` return witnessed children only and omit the marker.
+Callers relying on uncertain candidates must verify the echo. A tombstone
+before a live key is one cause of uncertainty. If older segments were omitted
+to respect the storage probe budget, all 64 immediate children can be
+candidates. Client traversal must budget the resulting expansion.

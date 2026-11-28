@@ -20,11 +20,20 @@ func (h *Handler) GetLocalChildren(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	q, err := url.ParseQuery(r.URL.RawQuery)
+	includeUncertain := false
+	if values, ok := q["include_uncertain"]; ok {
+		if len(values) != 1 || (values[0] != "true" && values[0] != "false") {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid include_uncertain flag"})
+			return
+		}
+		includeUncertain = values[0] == "true"
+		q.Del("include_uncertain")
+	}
 	if err != nil || len(q) != 2 || len(q["collection"]) != 1 || len(q["location"]) != 1 || q.Get("collection") == "" || q.Get("location") == "" {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "expected one collection and one location"})
 		return
 	}
-	children, err := h.Service.GetLocalChildrenContext(r.Context(), q.Get("collection"), q.Get("location"))
+	children, err := h.Service.ReadLocalChildrenContext(r.Context(), q.Get("collection"), q.Get("location"), includeUncertain)
 	if err != nil {
 		status := http.StatusServiceUnavailable
 		if errors.Is(err, indexus.ErrInvalidKey) {
@@ -33,5 +42,9 @@ func (h *Handler) GetLocalChildren(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, status, map[string]string{"error": err.Error()})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"children": children, "complete": false})
+	reply := map[string]any{"children": children, "complete": false}
+	if includeUncertain {
+		reply["include_uncertain"] = true
+	}
+	writeJSON(w, http.StatusOK, reply)
 }
