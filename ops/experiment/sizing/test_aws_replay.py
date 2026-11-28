@@ -17,7 +17,7 @@ class ReplayTests(unittest.TestCase):
         ]
         self.assertEqual(exits(rows, initial=1), 6)
         result = replay_writes(rows, initial=1, capacity=6, service_rate=3, ack_share=1)
-        self.assertEqual(result, dict(acked_s=3, shed=9, end_backlog=6))
+        self.assertEqual(result, dict(acked_s=3, shed=9, end_backlog=6, first_full_index=0))
 
     def test_mixed_replay_reader_rate_drops_when_responses_exceed_the_period(self):
         one_sample = [dict(read_latency_us_log2=[0] * 19 + [1])]

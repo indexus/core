@@ -41,13 +41,17 @@ def read_rate(rows, readers, target):
 def replay_writes(rows, initial, capacity, service_rate, ack_share):
     """One-second bounded queue with a fixed rate learned from an earlier period."""
     outstanding, shed, acked = initial, 0, 0.
-    for row in rows:
+    first_full = None
+    for i, row in enumerate(rows):
         available = outstanding + row["offered"]
         served = min(service_rate, available)
         outstanding = min(capacity, available - served)
         shed += available - served - outstanding
         acked += served * ack_share
-    return {"acked_s": round(acked / len(rows), 1), "shed": shed, "end_backlog": outstanding}
+        if outstanding == capacity and first_full is None:
+            first_full = i
+    return {"acked_s": round(acked / len(rows), 1), "shed": shed,
+            "end_backlog": outstanding, "first_full_index": first_full}
 
 
 def fleet_window(frames):
@@ -99,6 +103,7 @@ def report(load, live, ramp, plateau, readers, read_target):
     # plateau their residual measures terminal jobs other than successes.
     windows = []
     sections = []
+    has_terminal_counter = any("exhausted" in row for row in load)
     for start in range(0, 4 * (ramp + plateau), ramp + plateau):
         stop = start + plateau
         rows = [row for row in load if start + .75 < row["t"] < stop + .75]
@@ -115,13 +120,29 @@ def report(load, live, ramp, plateau, readers, read_target):
             "shed": sum(row["shed"] for row in rows),
             "end_backlog": backlog(rows[-1]),
             "non_ack_exits_inferred": terminal - acked,
+            "exhausted_reported": sum(row.get("exhausted", 0) for row in rows)
+            if has_terminal_counter else None,
             "reads_observed_s": round(sum(row.get("reads", 0) for row in rows) / plateau, 1),
             "read_rate_from_observed_service": read_rate(rows, readers, read_target),
             "fleet": fleet_window(frame for frame in live if start < frame["t"] <= stop),
         })
-        sections.append((rows, initial, terminal, acked))
-    _, _, terminal, acked = sections[2]
-    holdout, initial, _, _ = sections[3]
+        sections.append((rows, terminal, acked))
+    fitted, terminal, acked = sections[2]
+    holdout, _, _ = sections[3]
+    if terminal <= 0:
+        raise ValueError("calibration plateau contains no terminal writes")
+    last_ramp = [row for row in load if fitted[-1]["t"] < row["t"] < holdout[0]["t"]]
+    capacity = 5 * holdout[0]["workers"]
+    service, ack_share = round(terminal / plateau), min(1., acked / terminal)
+    ramp_result = replay_writes(last_ramp, backlog(fitted[-1]), capacity, service, ack_share)
+    predicted = replay_writes(holdout, ramp_result["end_backlog"], capacity, service, ack_share)
+    first_full = ramp_result["first_full_index"]
+    plateau_full = predicted.pop("first_full_index")
+    predicted["first_full_write_backlog_s"] = None
+    if first_full is not None:
+        predicted["first_full_write_backlog_s"] = round(last_ramp[first_full]["t"], 3)
+    elif plateau_full is not None:
+        predicted["first_full_write_backlog_s"] = round(holdout[plateau_full]["t"], 3)
     return {
         "windows": windows,
         "host_timeline": host_timeline(live),
@@ -129,10 +150,7 @@ def report(load, live, ramp, plateau, readers, read_target):
             (round(row["t"], 3) for row in load if backlog(row) == row["workers"] * 5),
             None,
         ),
-        "write_forecast_holdout": replay_writes(
-            holdout, initial, 5 * holdout[0]["workers"], round(terminal / plateau),
-            min(1., acked / terminal),
-        ),
+        "write_forecast_holdout": predicted,
     }
 
 
