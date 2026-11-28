@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const [sdk, collection, first, second] = process.argv.slice(2);
-const { API, numericFacet, topByAttribute, topByAttributes } = await import(
+const { API, numericFacet, numericStats, topByAttribute, topByAttributes } = await import(
   pathToFileURL(resolve(sdk, "src/index.js"))
 );
 const api = new API();
@@ -51,19 +51,20 @@ function query(lo, hi, inclusiveLo, inclusiveHi) {
       (inclusiveHi ? key <= hi : key < hi)
     );
   });
-  const values = selected.map(measure).filter(Number.isFinite);
-  const sum = values.reduce((a, b) => a + b, 0);
+  const stats = numericStats(selected, measure);
   const { matched, missing, buckets } = numericFacet(selected, measure);
+  assert.equal(stats.matched, matched);
+  assert.equal(stats.missing, missing);
   const top = topByAttribute(selected, measure, { limit: 3, order: "desc" }).map(
     (r) => r.id + "@" + r.location,
   );
   return [
     matched,
-    values.length,
-    sum,
-    values.length ? sum / values.length : null,
-    values.length ? Math.min(...values) : null,
-    values.length ? Math.max(...values) : null,
+    stats.present,
+    stats.sum,
+    stats.avg,
+    stats.min,
+    stats.max,
     missing,
     buckets.map((b) => [b.value, b.count]),
     top,
