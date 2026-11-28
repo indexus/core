@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const [sdk, collection, first, second] = process.argv.slice(2);
-const { API, numericFacet, numericStats, topByAttribute, topByAttributes } = await import(
+const { API, groupCounts, numericFacet, numericStats, topByAttribute, topByAttributes } = await import(
   pathToFileURL(resolve(sdk, "src/index.js"))
 );
 const api = new API();
@@ -155,6 +155,16 @@ const multi = topByAttributes(
   { limit: 5 },
 ).map((r) => r.id + "@" + r.location);
 assert.deepEqual(multi, [upper, "aa-upper-null@zz", "null-measure@aa", a, z]);
+// Both owners contribute to the same [7, 4] group. A missing second
+// column and an entirely missing tuple stay visible. Page the fixed result
+// locally; these assertions share the two original reads.
+const grouped = groupCounts(records, [r => r.metrics[0], measure]);
+const expectedGroups = [
+  [[4, 100], 1], [[5, 2], 1], [[7, 4], 2], [[8, null], 1],
+  [[10, -1], 1], [[10, null], 1], [[11, null], 1], [[null, null], 1],
+].map(([values, count]) => ({ values, count }));
+assert.deepEqual(grouped, expectedGroups);
+assert.deepEqual(grouped.slice(2, 5), expectedGroups.slice(2, 5));
 assert.deepEqual(
   calls.slice().sort(),
   owners.map(([port, zone]) => ["/records/direct", port, zone]).sort(),
@@ -164,6 +174,7 @@ console.log(
   JSON.stringify({
     cases: cases.length,
     multi,
+    groups: grouped.length,
     docs: records.length,
     directRPC: calls.length,
     coldCacheChecks: 4,
