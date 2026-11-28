@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/indexus/go-indexus-core/internal/causal"
 	"github.com/indexus/go-indexus-core/internal/metrics"
@@ -14,6 +15,7 @@ import (
 )
 
 const (
+	KindColdUsage   = "cold-usage"
 	KindColdPin     = "cold-pin"
 	KindColdCheck   = "cold-check"
 	KindColdRelease = "cold-release"
@@ -107,7 +109,7 @@ func (s *Service) compact(ctx context.Context, config ColdConfig, resumeOnly boo
 			}
 			defer release()
 		}
-		if work, err = s.beginColdDrain(config); err != nil {
+		if work, err = s.beginColdDrain(ctx, config); err != nil {
 			return err
 		}
 	}
@@ -143,12 +145,12 @@ func (s *Service) compact(ctx context.Context, config ColdConfig, resumeOnly boo
 // beginColdDrain chooses the survivor and records the drain towards it.
 // Geometry stays deterministic; a fresh persisted operation identity prevents
 // a delayed release from an aborted trial from unpinning its successor.
-func (s *Service) beginColdDrain(config ColdConfig) (*storage.ColdDrain, error) {
+func (s *Service) beginColdDrain(ctx context.Context, config ColdConfig) (*storage.ColdDrain, error) {
 	snapshot, err := s.Store.CausalRouting()
 	if err != nil {
 		return nil, err
 	}
-	target, err := s.foldTarget(snapshot)
+	target, peerBytes, err := s.foldTarget(ctx, snapshot, config)
 	if err != nil {
 		return nil, err
 	}
@@ -161,29 +163,81 @@ func (s *Service) beginColdDrain(config ColdConfig) (*storage.ColdDrain, error) 
 	if err != nil {
 		return nil, err
 	}
+	root, _ := snapshot.Identity()
+	slog.InfoContext(ctx, "cold fold started", "op", operation, "source", work.Source.VNode, "target", target.VNode, "source_owned_bytes", work.Bytes, "target_observed_bytes", peerBytes, "target_is_root", target.VNode == root.Name, "automatic", config.Automatic)
 	return &work, nil
 }
 
 // foldTarget is the vnode whose cell, once this vnode is removed from the
 // view, covers this vnode's cell completely. The root never folds.
-func (s *Service) foldTarget(snapshot storage.RoutingSnapshot) (causal.Endpoint, error) {
+func (s *Service) foldTarget(ctx context.Context, snapshot storage.RoutingSnapshot, config ColdConfig) (causal.Endpoint, int64, error) {
+	var peerBytes int64 = -1 // Root and explicit folds do not probe the survivor.
 	root, _ := snapshot.Identity()
 	if root.Name == s.VNode.Name {
-		return causal.Endpoint{}, protocol.ErrNoBetterConfiguration
+		return causal.Endpoint{}, peerBytes, protocol.ErrNoBetterConfiguration
 	}
 	source, peer, err := snapshot.FoldSibling(s.VNode.Name)
 	if err != nil {
-		return causal.Endpoint{}, err
+		return causal.Endpoint{}, peerBytes, err
 	}
-	// Orient eligible sibling pairs to prevent competing pins. Root wins.
-	if peer.Name == "" || (peer.Name != root.Name && bytes.Compare(source[:], peer.ID[:]) < 0) {
-		return causal.Endpoint{}, protocol.ErrNoBetterConfiguration
+	if peer.Name == "" {
+		return causal.Endpoint{}, peerBytes, protocol.ErrNoBetterConfiguration
 	}
 	target, err := snapshot.Placement(peer.Name)
-	if err == nil && !target.Valid() {
-		return causal.Endpoint{}, protocol.ErrNoBetterConfiguration
+	if err != nil {
+		return causal.Endpoint{}, peerBytes, err
 	}
-	return target, err
+	if !target.Valid() {
+		return causal.Endpoint{}, peerBytes, protocol.ErrNoBetterConfiguration
+	}
+	if peer.Name == root.Name {
+		return target, peerBytes, nil
+	}
+	donate := bytes.Compare(source[:], peer.ID[:]) > 0
+	if config.Automatic {
+		// Placement hint only. A changed pair or competing drains are still
+		// checked at BeginColdDrain and PinColdSurvivor; no pin exists yet.
+		local, err := s.coldUsage()
+		if err != nil {
+			return causal.Endpoint{}, peerBytes, err
+		}
+		remote, err := s.call(ctx, target.Host, Request{Kind: KindColdUsage})
+		if err != nil {
+			return causal.Endpoint{}, peerBytes, err
+		}
+		if remote.ColdUsage == nil {
+			return causal.Endpoint{}, peerBytes, storage.ErrNotReady
+		}
+		peerBytes = remote.ColdUsage.Owned
+		donate = local.shouldDonate(*remote.ColdUsage, config.MaxCombinedFraction, donate)
+	}
+	if !donate {
+		return causal.Endpoint{}, peerBytes, protocol.ErrNoBetterConfiguration
+	}
+	return target, peerBytes, nil
+}
+
+// ColdUsage is the logical owned data at the disk and its capacity. Residual
+// or staged copies do not move with its rights.
+type ColdUsage struct{ Owned, Capacity int64 }
+
+func (s *Service) coldUsage() (ColdUsage, error) {
+	capacity, used, err := s.Store.CapacityUsage()
+	return ColdUsage{Owned: used.Owned, Capacity: capacity}, err
+}
+
+func (local ColdUsage) shouldDonate(peer ColdUsage, fraction float64, tie bool) bool {
+	combined := float64(local.Owned) + float64(peer.Owned)
+	if combined > float64(peer.Capacity)*fraction {
+		return false
+	}
+	if combined > float64(local.Capacity)*fraction {
+		return true
+	}
+	if local.Owned != peer.Owned {
+		return local.Owned < peer.Owned
+	}
+	return tie
 }
 
 // retireCold moves everything to the pinned survivor and publishes the
@@ -322,6 +376,10 @@ func (s *Service) ResumeCold(ctx context.Context) error {
 
 func (s *Service) handleCold(r Request) (out Response, err error) {
 	switch r.Kind {
+	case KindColdUsage:
+		usage, err := s.coldUsage()
+		out.ColdUsage = &usage
+		return out, err
 	case KindColdPin:
 		if r.Cold == nil {
 			return out, causal.ErrConflict
