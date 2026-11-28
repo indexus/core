@@ -44,16 +44,26 @@ type CopyBudget struct {
 	receiver *CopyBudget
 }
 
-type copyPressure struct{ used, target float64 }
+type copyPressure struct {
+	used, target float64
+	// Closed when the host sampler replaces this observation. A waiter
+	// subscribes to exactly the sample from which it computed its deadline.
+	changed chan struct{}
+}
 
 // ObserveCopyPressure feeds the already sampled machine CPU into its copy
 // scheduler. Unknown measurements do not invent a resource guarantee.
 func (s *Service) ObserveCopyPressure(used, target float64, known bool) {
 	if b := s.jobs.copies; b != nil {
+		var next *copyPressure
 		if known && target > 0 {
-			b.pressure.Store(&copyPressure{used, target})
-		} else {
-			b.pressure.Store(nil)
+			next = &copyPressure{used: used, target: target}
+			if used > target {
+				next.changed = make(chan struct{})
+			}
+		}
+		if old := b.pressure.Swap(next); old != nil && old.changed != nil {
+			close(old.changed)
 		}
 	}
 }
@@ -255,8 +265,7 @@ func (b *CopyBudget) reserveFile(ctx context.Context, transfer string, wait time
 // authority has moved. No sleep occurs here or inside a frozen lot. The
 // caller keeps its host lane while yielding, so another local source cannot
 // bypass it by taking that lane. This is a soft policy, not a CPU quota.
-func (b *CopyBudget) cooldown(work time.Duration) time.Duration {
-	p := b.pressure.Load()
+func (p *copyPressure) cooldown(work time.Duration) time.Duration {
 	if p == nil || p.used <= p.target {
 		return 0
 	}
@@ -270,7 +279,8 @@ func (b *CopyBudget) pace(ctx context.Context, operation string, work time.Durat
 	if b == nil || urgent {
 		return ctx.Err()
 	}
-	delay := b.cooldown(work)
+	sample := b.pressure.Load()
+	delay := sample.cooldown(work)
 	if delay <= 0 {
 		return ctx.Err()
 	}
@@ -282,11 +292,23 @@ func (b *CopyBudget) pace(ctx context.Context, operation string, work time.Durat
 		metrics.Handoffs.CopyPacedLots.Add(1)
 		metrics.Handoffs.CopyPacedNanos.Add(int64(time.Since(started)))
 	}()
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-timer.C:
-		return nil
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-timer.C:
+			return nil
+		case <-sample.changed:
+			sample = b.pressure.Load()
+			shorter := sample.cooldown(work)
+			if shorter <= time.Since(started) {
+				return ctx.Err()
+			}
+			if shorter < delay {
+				delay = shorter
+				timer.Reset(time.Until(started.Add(delay)))
+			}
+		}
 	}
 }
 

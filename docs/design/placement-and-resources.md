@@ -416,7 +416,9 @@ cannot safely give the source its old right back after a lost install reply.
 After a completed lot has been installed and acknowledged, the source may
 pause before the next lot when sampled CPU exceeds its configured target.
 The duty share is the measured idle fraction, with a 10% progress floor.
-The source keeps its host lane during this pause. Recovery with unfinished
+Each fresh host sample can shorten the current pause, measured from the end
+of the lot. A higher reading cannot extend the original deadline. The same
+sampler feeds all waiting lots. The source keeps its host lane during this pause. Recovery with unfinished
 fences and sealed-region completion never pause. Sampling continues while
 autoscale is held by a transfer. Unknown samples clear the pacing estimate.
 `copy_paced_lots` and `copy_paced_ms` expose this time separately from freezes.
