@@ -290,14 +290,14 @@ func TestCopyPressurePacesOnlyBetweenUnfrozenLots(t *testing.T) {
 	defer held.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond)
 	defer cancel()
-	if err := budgets[0].pace(ctx, time.Second, false); !errors.Is(err, context.DeadlineExceeded) {
+	if err := budgets[0].pace(ctx, "source", time.Second, false); !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatal("paced wait did not cancel", err)
 	}
 	if other, _ := budgets[1].take("other-source"); other != nil {
 		other.Close()
 		t.Fatal("another process bypassed the paced source's lane")
 	}
-	if err := budgets[0].pace(context.Background(), time.Second, true); err != nil {
+	if err := budgets[0].pace(context.Background(), "source", time.Second, true); err != nil {
 		t.Fatal(err)
 	}
 	budgets[0].pressure.Store(&copyPressure{used: 30, target: 60})

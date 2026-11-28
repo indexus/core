@@ -282,7 +282,7 @@ func (s *Service) flipUnit(ctx context.Context, transfer storage.CausalTransfer,
 		if err != nil {
 			return err
 		}
-		if err := s.jobs.copies.pace(ctx, time.Since(began), known.urgent); err != nil {
+		if err := s.jobs.copies.pace(ctx, progress.operation, time.Since(began), known.urgent); err != nil {
 			return err
 		}
 		start += len(keys)
@@ -352,11 +352,9 @@ func (s *Service) cutoverLot(ctx context.Context, transfer storage.CausalTransfe
 		_, err = s.retryZoneInstall(ctx, target, Request{Kind: "install-zone", Operation: operation, Transfer: &part, ZoneTransfers: zts})
 	}
 	held = time.Since(began)
-	installed := 0
 	if err == nil {
 		ackDelay := time.Since(fencedAt)
 		metrics.Handoffs.FreezeReturnToInstallACK.Observe(ackDelay)
-		installed = len(keys)
 		// The receiver writes these zones now: waiting writers go to it
 		// without waiting for this disk's ACK bookkeeping.
 		release()
@@ -364,13 +362,14 @@ func (s *Service) cutoverLot(ctx context.Context, transfer storage.CausalTransfe
 			slog.DebugContext(ctx, "zone cutover", "freeze_call_us", fencedAt.Sub(began).Microseconds(),
 				"fence_to_install_ack_us", ackDelay.Microseconds())
 		}
+		mark = progress.add("install", mark, len(keys))
 		setPhase("ack")
 		err = s.Store.AckZoneInstalls(operation, keys)
 		if err == nil {
 			s.membershipTransport().schedule(target.Host, s.membershipSend)
 		}
 	}
-	progress.add("install", mark, installed)
+	progress.add(phase, mark, 0)
 	if err != nil {
 		return 0, fmt.Errorf("install-unit: %w", err)
 	}

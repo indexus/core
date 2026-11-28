@@ -86,7 +86,7 @@ func (h *cutoverLog) Handle(_ context.Context, r slog.Record) error {
 				zones = a.Value.Int64()
 			}
 			switch a.Key {
-			case "freeze", "mirror", "stage", "emit", "install":
+			case "freeze", "mirror", "stage", "emit", "install", "ack":
 				phases[a.Key+"_ms"] = float64(a.Value.Duration()) / float64(time.Millisecond)
 			}
 			return true

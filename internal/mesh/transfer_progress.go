@@ -63,7 +63,7 @@ func (p *transferProgress) log(err error) {
 func (p *transferProgress) logLocked(err error) {
 	p.logged = time.Now()
 	args := []any{"operation", p.operation, "zones", p.zones, "units", p.batches, "elapsed", time.Since(p.started).Round(time.Millisecond), "hold_max", p.hold.Round(time.Millisecond)}
-	for _, step := range []string{"state", "freeze", "mirror", "stage", "emit", "install"} {
+	for _, step := range []string{"state", "freeze", "mirror", "stage", "emit", "install", "ack"} {
 		args = append(args, step, p.steps[step].Round(time.Millisecond), step+"_max", p.slowest[step].Round(time.Millisecond))
 	}
 	if err != nil {
