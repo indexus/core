@@ -24,7 +24,7 @@ func TestHybridPayloadsSDKTwoColdPeers(t *testing.T) {
 		{second, "zz", "c", "café crème", 1, [][2]int{{5, 7}}},
 		{second, "zz", "d", "port", 2, [][2]int{{1024, 1}}},
 	} {
-		body, err := json.Marshal(map[string]any{"title": row.title, "sparse": row.sparse})
+		body, err := json.Marshal(map[string]any{"title": row.title, "sparse": row.sparse, "caption": "😀 ÉCOLE, e\u0301cole!"})
 		if err != nil {
 			t.Fatal(err)
 		}

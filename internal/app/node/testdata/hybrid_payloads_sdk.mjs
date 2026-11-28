@@ -41,10 +41,10 @@ if (mode === "roots") {
   assert.deepEqual(calls, [[firstPort, "aa", 200], [secondPort, "zz", 200]]);
 }
 const reads = calls.length;
-const projected = selectDirectRecords(rows, { columns: ["id", { payload: "title" }, { payload: "sparse" }, { payload: "absent" }] });
-const docs = projected.map(([id, title, sparse, absent], i) => {
+const projected = selectDirectRecords(rows, { columns: ["id", { payload: "title" }, { payload: "sparse" }, { payload: "absent" }, { payload: "caption" }] });
+const docs = projected.map(([id, title, sparse, absent, caption], i) => {
   assert.equal(absent, null);
-  return { id, location: rows[i].location, vector: rows[i].metrics, title, sparse };
+  return { id, location: rows[i].location, vector: rows[i].metrics, title, sparse, caption };
 });
 assert.equal(docs.length, 4);
 const glob = documentFilter.glob(row => row.title, "*crème*");
@@ -52,6 +52,22 @@ assert.deepEqual(docs.filter(glob).map(row => row.id).sort(), ["a", "b", "c"]);
 assert.deepEqual(docs.filter(documentFilter.not(glob)).map(row => row.id), ["d"]);
 const query = "cafe creme";
 const index = buildBM25Index(docs, { title: 1 }, { analyzer: "latin-folded-words-v1" });
+const fuzzy = index.matchFuzzyToken("title", "CAFÈS", {maxDictionaryTerms: 16});
+assert.equal(fuzzy.complete, true);
+assert.deepEqual([...fuzzy.ids].sort(), ["a", "b", "c"]);
+const limited = index.matchFuzzyToken("title", "pOrt", {maxDictionaryTerms: 0});
+assert.equal(limited.complete, false);
+assert.deepEqual(limited.ids, []);
+const cafeSpans = index.highlightTokens("title", docs.find(row => row.id === "a").title, "cafe");
+assert.deepEqual(cafeSpans, [{ start: 0, end: 4 }, { start: 11, end: 15 }]);
+const captionIndex = buildBM25Index(docs, {caption: 1}, {analyzer: "latin-folded-words-v1"});
+for (const doc of docs) {
+  const spans = captionIndex.highlightTokens("caption", doc.caption, "ecole");
+  assert.deepEqual(spans, [{start: 3, end: 8}, {start: 10, end: 16}]);
+  assert.deepEqual(spans.map(({start, end}) => doc.caption.slice(start, end)), ["ÉCOLE", "e\u0301cole"]);
+}
+const cafeThenCreme = documentFilter.glob(row => row.title, "caf? cr?me", {syntax: "codepoint"});
+assert.deepEqual(docs.filter(cafeThenCreme).map(row => row.id), ["c"]);
 const phrase = [...index.filterPhrase(docs, "title", query)];
 assert.deepEqual(phrase.map(row => row.id).sort(), ["a", "c"]);
 const prefix = [...index.filterTokenPrefix(docs, "title", "CRÈ")];
