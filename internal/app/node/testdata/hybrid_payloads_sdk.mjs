@@ -2,34 +2,54 @@ import assert from "node:assert/strict";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
-const [sdk, collection, firstPort, secondPort] = process.argv.slice(2);
-const { API, DocumentUniverse, limitPerGroup, selectDirectRecords, buildBM25Index, exactKnn, exactSparseDot, numericHistogram, mergeNumericHistograms, histogramQuantile, fuseRankings } = await import(pathToFileURL(resolve(sdk, "src/index.js")));
+const [sdk, collection, firstPort, secondPort, mode = "direct"] = process.argv.slice(2);
+const { API, documentFilter, DocumentUniverse, limitPerGroup, selectDirectRecords, buildBM25Index, exactKnn, exactSparseDot, numericHistogram, mergeNumericHistograms, histogramQuantile, fuseRankings } = await import(pathToFileURL(resolve(sdk, "src/index.js")));
 const api = new API();
 const fetchPeer = globalThis.fetch;
 const calls = [];
 globalThis.fetch = async (input, init) => {
   const url = new URL(input);
-  assert.equal(url.pathname, "/records/direct");
+  if (url.pathname === "/records/direct") {
+    assert.equal(url.searchParams.get("payloads"), "true");
+    assert.equal(url.searchParams.get("limit"), "2");
+  } else {
+    assert.equal(mode, "roots");
+    assert.equal(url.pathname, "/zones/children/local");
+    assert.equal(url.searchParams.get("include_uncertain"), "true");
+  }
   assert.equal(url.searchParams.get("collection"), collection);
-  assert.equal(url.searchParams.get("payloads"), "true");
-  assert.equal(url.searchParams.get("limit"), "2");
   assert.equal(init.redirect, "error");
   const response = await fetchPeer(input, init);
   calls.push([url.port, url.searchParams.get("location"), response.status]);
   return response;
 };
 
-const docs = [];
-for (const [port, zone] of [[firstPort, "aa"], [secondPort, "zz"]]) {
-  const peer = { ip: () => "127.0.0.1", port: () => Number(port) };
-  const rows = await api.getDirectRecords("http", peer, collection, zone, 2, { includePayloads: true, timeoutMs: 2000 });
-  const projected = selectDirectRecords(rows, { columns: ["id", { payload: "title" }, { payload: "sparse" }, { payload: "absent" }] });
-  for (const [i, [id, title, sparse, absent]] of projected.entries()) {
-    assert.equal(absent, null);
-    docs.push({ id, location: rows[i].location, vector: rows[i].metrics, title, sparse });
+const peers = [firstPort, secondPort].map(port => ({ ip: () => "127.0.0.1", port: () => Number(port) }));
+const options = { includePayloads: true, timeoutMs: 2000 };
+let rows;
+if (mode === "roots") {
+  const pass = await api.readObservedCollection("http", peers, collection, { ...options, maxRequests: 40, limitPerLocation: 2 });
+  assert.equal(pass.complete, false);
+  assert.equal(pass.requests, calls.length);
+  rows = pass.records;
+} else {
+  assert.equal(mode, "direct");
+  rows = [];
+  for (const [i, zone] of ["aa", "zz"].entries()) {
+    rows.push(...await api.getDirectRecords("http", peers[i], collection, zone, 2, options));
   }
+  assert.deepEqual(calls, [[firstPort, "aa", 200], [secondPort, "zz", 200]]);
 }
+const reads = calls.length;
+const projected = selectDirectRecords(rows, { columns: ["id", { payload: "title" }, { payload: "sparse" }, { payload: "absent" }] });
+const docs = projected.map(([id, title, sparse, absent], i) => {
+  assert.equal(absent, null);
+  return { id, location: rows[i].location, vector: rows[i].metrics, title, sparse };
+});
 assert.equal(docs.length, 4);
+const glob = documentFilter.glob(row => row.title, "*crème*");
+assert.deepEqual(docs.filter(glob).map(row => row.id).sort(), ["a", "b", "c"]);
+assert.deepEqual(docs.filter(documentFilter.not(glob)).map(row => row.id), ["d"]);
 const query = "cafe creme";
 const index = buildBM25Index(docs, { title: 1 }, { analyzer: "latin-folded-words-v1" });
 const phrase = [...index.filterPhrase(docs, "title", query)];
@@ -51,12 +71,14 @@ assert.deepEqual(sparse.map(r => [r.id,r.score]), [["a",7],["d",1],["c",0],["b",
 // The sorted distances in the fixture are 0,1,2,3. Bounds 1 and 3
 // place the two median rows in the same half-open interval.
 const histograms = ["aa","zz"].map(zone =>
-  numericHistogram(docs.filter(r => r.location === zone), r => r.vector[0], [1,3]));
+  numericHistogram(docs.filter(r => r.location === zone), r => r.vector[0], [1,3], {trackExtrema: true}));
 const histogram = mergeNumericHistograms(histograms);
 assert.deepEqual(histogram.counts, [1,2,1]);
 assert.deepEqual(histogramQuantile(histogram,0.5), {
   rank:2, firstRank:2, lastRank:3, lowerInclusive:1, upperExclusive:3,
 });
+const percentile = q => histogramQuantile(histogram, q, {estimate:"midpoint"}).estimate;
+assert.deepEqual([0,0.5,1].map(percentile), [0,2,3]);
 const lexical = index.search(query);
 const vector = exactKnn(docs, [0, 0]);
 assert.deepEqual(vector.map(hit => [hit.id, hit.distance_squared]), [["b",0],["c",1],["d",4],["a",9]]);
@@ -79,5 +101,5 @@ verifyScores(fused, [1/3+1/2, 1/2+1/5, 1/4+1/3, 1/4]);
 const zones = new Map(docs.map(row => [row.id, row.location]));
 const diverse = limitPerGroup(fused, [hit => zones.get(hit.id)], { perGroup: 1, limit: 2 });
 assert.deepEqual(ids(diverse), ["b", "c"]);
-assert.deepEqual(calls, [[firstPort, "aa", 200], [secondPort, "zz", 200]]);
-console.log(JSON.stringify({ calls, exactCount, diverse: ids(diverse), prefix: ids(prefix), sparse: ids(sparse), histogram: histogram.counts, phrase: ids(phrase), lexical: ids(lexical), vector: ids(vector), fused: ids(fused) }));
+assert.equal(calls.length, reads);
+console.log(JSON.stringify({ mode, calls, exactCount, diverse: ids(diverse), prefix: ids(prefix), sparse: ids(sparse), histogram: histogram.counts, phrase: ids(phrase), lexical: ids(lexical), vector: ids(vector), fused: ids(fused) }));
