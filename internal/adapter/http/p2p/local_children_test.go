@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -20,6 +21,12 @@ func TestLocalChildrenHTTPContract(t *testing.T) {
 		{"GET", valid + "&deep=true", false, false, 400}, {"GET", valid + "&location=a", false, false, 400},
 		{"GET", "?collection=c&location=%QQ", false, false, 400}, {"GET", "?location=a", false, false, 400},
 		{"GET", valid, false, true, 503},
+		{"GET", valid + "&include_uncertain=true", false, false, 200},
+		{"GET", valid + "&include_uncertain=false", false, false, 200},
+		{"GET", valid + "&include_uncertain=", false, false, 400},
+		{"GET", valid + "&include_uncertain=TRUE", false, false, 400},
+		{"GET", valid + "&include_uncertain=true&include_uncertain=false", false, false, 400},
+		{"GET", valid + "&include_uncertain=true&deep=true", false, false, 400},
 	} {
 		h.RequireAuth = tc.auth
 		r := httptest.NewRequest(tc.method, "/zones/children/local"+tc.query, nil)
@@ -35,11 +42,16 @@ func TestLocalChildrenHTTPContract(t *testing.T) {
 		}
 		if tc.status == http.StatusOK {
 			var result struct {
-				Children []string
-				Complete *bool
+				Children         []string
+				Complete         *bool
+				IncludeUncertain *bool `json:"include_uncertain"`
 			}
 			if err := json.Unmarshal(out.Body.Bytes(), &result); err != nil || result.Children == nil || len(result.Children) != 0 || result.Complete == nil || *result.Complete {
 				t.Fatalf("invalid local observation: %s", out.Body)
+			}
+			wantEcho := strings.Contains(tc.query, "include_uncertain=true")
+			if (result.IncludeUncertain != nil) != wantEcho || (wantEcho && !*result.IncludeUncertain) {
+				t.Fatalf("wrong uncertain marker: %s", out.Body)
 			}
 		}
 	}
