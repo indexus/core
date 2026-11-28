@@ -410,6 +410,17 @@ and `copy_slot_wait_ms` accumulates time across completed waits, including
 expired or cancelled attempts. Once the store allocates its operation ID, the donor names the same locked
 slot before contacting its receiver. During recovery the source visits its
 irreversible transfers before warm operations that may wait for capacity.
+Unfenced source contenders on one machine receive increasing admission
+tickets. Only the oldest *present* ticket can claim a free source lane.
+A vnode that times out removes its file and remembers one unserved turn for
+its next attempt; a vnode with no active request blocks nobody. A ticket
+held by a crashed process loses its kernel lock and the next scan reaps it.
+The sequencer is held only during an admission check. No network or storage
+operation for a zone runs under it. Queue ordering applies while a source
+requests admission; progress still requires running workers and returning
+lanes. Incoming warm pages keep their separate receiver lane. Fenced repair
+never waits in this queue.
+
 An unavailable receiver can still delay installation after a fence. A timer
 cannot safely give the source its old right back after a lost install reply.
 

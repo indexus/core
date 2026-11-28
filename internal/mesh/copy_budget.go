@@ -42,6 +42,7 @@ type CopyBudget struct {
 	slots    int
 	pressure atomic.Pointer[copyPressure]
 	localIPs map[netip.Addr]bool
+	queue    *copyQueue
 	// Independent of the outgoing slots: reciprocal senders can both receive.
 	receiver *CopyBudget
 }
@@ -97,6 +98,11 @@ func NewCopyBudget(dir string, slots int) (*CopyBudget, error) {
 		return nil, err
 	}
 	b := &CopyBudget{dir: dir, slots: slots, localIPs: localCopyIPs()}
+	qdir := filepath.Join(dir, "source-queue")
+	if err := os.MkdirAll(qdir, 0755); err != nil {
+		return nil, err
+	}
+	b.queue = &copyQueue{dir: qdir}
 	if slots == 1 {
 		incoming := filepath.Join(dir, "incoming")
 		if err := os.MkdirAll(incoming, 0o755); err != nil {
@@ -121,13 +127,16 @@ func (b *CopyBudget) admitColdStart() (func(), error) {
 	if p := b.pressure.Load(); p != nil && p.used >= p.target {
 		return nil, ErrColdDeferred
 	}
-	permit, err := b.tryColdLock("cold-fold")
+	permit, err := b.tryHostLock("cold-fold")
+	if errors.Is(err, syscall.EWOULDBLOCK) {
+		return nil, ErrColdDeferred
+	}
 	if err != nil {
 		return nil, err
 	}
 	for i := 0; i < b.slots; i++ {
-		probe, err := b.tryColdLock("slot-" + strconv.Itoa(i))
-		if errors.Is(err, ErrColdDeferred) {
+		probe, err := b.tryHostLock("slot-" + strconv.Itoa(i))
+		if errors.Is(err, syscall.EWOULDBLOCK) {
 			continue
 		}
 		if err != nil {
@@ -141,16 +150,13 @@ func (b *CopyBudget) admitColdStart() (func(), error) {
 	return nil, ErrColdDeferred
 }
 
-func (b *CopyBudget) tryColdLock(name string) (*os.File, error) {
+func (b *CopyBudget) tryHostLock(name string) (*os.File, error) {
 	f, err := os.OpenFile(filepath.Join(b.dir, name), os.O_RDWR|os.O_CREATE, 0o644)
 	if err != nil {
 		return nil, err
 	}
 	if err = syscall.Flock(int(f.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
 		f.Close()
-		if errors.Is(err, syscall.EWOULDBLOCK) {
-			return nil, ErrColdDeferred
-		}
 		return nil, err
 	}
 	return f, nil
@@ -224,11 +230,24 @@ func (b *CopyBudget) reserveFile(ctx context.Context, transfer string, wait time
 		return nil, ctx.Err()
 	}
 	deadline := time.Now().Add(wait)
+	var ticket copyTicket
+	queued := warm && wait > 0 && b.queue != nil
+	defer ticket.remove()
 	for waited := false; ; waited = true {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		held, shared := b.take(transfer)
+		var held *os.File
+		var shared bool
+		if queued {
+			var err error
+			held, shared, err = b.takeQueued(transfer, &ticket)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			held, shared = b.take(transfer)
+		}
 		switch {
 		case shared:
 			metrics.Handoffs.CopySlotShared.Add(1)
@@ -250,6 +269,9 @@ func (b *CopyBudget) reserveFile(ctx context.Context, transfer string, wait time
 		if !time.Now().Before(deadline) {
 			metrics.Handoffs.CopySlotTimeouts.Add(1)
 			if warm {
+				if queued {
+					b.queue.timedOut(&ticket)
+				}
 				return nil, fmt.Errorf("%w: host copy budget busy", storage.ErrNotReady)
 			}
 			return nil, nil
