@@ -449,7 +449,7 @@ func DecodeCell(s string) (tree.Region, error) {
 	}
 	return r, nil
 }
-func (n *Node) meshGet(ctx context.Context, collection, location string, deep, refresh bool) (Contact, *Set, error) {
+func (n *Node) meshGet(ctx context.Context, collection, location string, deep, refresh, localOnly bool) (Contact, *Set, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, nil, err
 	}
@@ -473,6 +473,11 @@ func (n *Node) meshGet(ctx context.Context, collection, location string, deep, r
 	if local && !refresh {
 		if set, ok := n.mesh.summary.Set(zone.Collection, zone.Location); ok {
 			return contact, set, nil
+		}
+		if localOnly {
+			// The client can retry or continue its walk. Keep this observation
+			// local even when maintenance has not rebuilt the summary yet.
+			return nil, nil, ErrNotReady
 		}
 		if n.mesh.summary.Ensure(ctx) {
 			if set, ok := n.mesh.summary.Set(zone.Collection, zone.Location); ok {

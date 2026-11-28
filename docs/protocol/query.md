@@ -191,7 +191,9 @@ exceeds the limit or the scan exceeds its 64 MiB budget for estimated metadata a
 opaque bodies needed to decode it,
 the peer returns 413 and no rows. An invalid request returns 400, a peer
 without installed authority returns 409, and a frozen owner returns 503.
-The caller chooses the next peer. Each call sees its own snapshot.
+A refusal may include a `contact` naming the likely holder. The caller
+chooses whether to follow it. Each call sees its own snapshot, and any hint
+is checked against the destination’s installed authority.
 
 ### Local hints for direct child prefixes
 

@@ -84,7 +84,7 @@ func TestPushContributionToSelfIsAcceptedLocally(t *testing.T) {
 
 	// A drill must read that summary. The compact cache projects the skipped
 	// unary prefix; every record sits at aa, so the root names it aa.
-	_, set, err := node.meshGet(context.Background(), "Demo000000000000", "@", true, false)
+	_, set, err := node.meshGet(context.Background(), "Demo000000000000", "@", true, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +95,7 @@ func TestPushContributionToSelfIsAcceptedLocally(t *testing.T) {
 	if !ok || child.Count() != 3 || child.Metric(0) != 3 || len(set.List()) != 1 {
 		t.Fatalf("root child aa: ok=%v value=%v", ok, child)
 	}
-	_, nested, err := node.meshGet(context.Background(), "Demo000000000000", "a", true, false)
+	_, nested, err := node.meshGet(context.Background(), "Demo000000000000", "a", true, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}

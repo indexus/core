@@ -63,6 +63,7 @@ func TestGetSetsAnswersIXB2(t *testing.T) {
 		{"", "block", wire.SetsBlockContentType, block, "", true},
 		{"&format=v1", "block", wire.SetsBlockContentType, block, "", true},
 		{"&read_mode=fresh", "block", wire.SetsBlockContentType, block, "fresh", true},
+		{"&deep=false&read_mode=local", "block", wire.SetsBlockContentType, block, "local", false},
 		{"&format=block&deep=false&envelope=1", "block", wire.SetsBlockContentType, block, "", false},
 		{"&format=block&read_mode=fresh", "block", wire.SetsBlockContentType, block, "fresh", true},
 	}

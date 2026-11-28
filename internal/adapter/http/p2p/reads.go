@@ -258,7 +258,7 @@ func parseReadOptions(query url.Values) (indexus.ReadOptions, bool, error) {
 	}
 	options := indexus.ReadOptions{Mode: indexus.ReadMode(mode)}
 	switch options.Mode {
-	case indexus.ReadFresh:
+	case indexus.ReadFresh, indexus.ReadLocal:
 	case indexus.ReadCached, indexus.ReadStaleIfError:
 		age, err := time.ParseDuration(query.Get("max_age"))
 		if err != nil || age <= 0 {

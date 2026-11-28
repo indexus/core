@@ -17,6 +17,7 @@ import (
 type ReadMode string
 
 const (
+	ReadLocal        ReadMode = "local"
 	ReadFresh        ReadMode = "fresh"
 	ReadCached       ReadMode = "cached"
 	ReadCacheOnly    ReadMode = "cache-only"
@@ -128,6 +129,13 @@ func (n *Node) ReadContext(ctx context.Context, collection, location string, opt
 	if n.mesh == nil {
 		return ReadResult{}, ErrNotReady
 	}
+	if options.Mode == ReadLocal {
+		contact, set, err := n.readSetContext(ctx, zone.Collection, zone.Location, false, false, true)
+		if err != nil {
+			return ReadResult{}, err
+		}
+		return ReadResult{Contact: contact, Set: set, Source: "summary", ObservedAt: time.Now()}, nil
+	}
 	ctx, done := n.mesh.clientActivity.Begin(ctx)
 	defer done()
 	if err := ctx.Err(); err != nil {
@@ -198,6 +206,9 @@ func (n *Node) ReadContext(ctx context.Context, collection, location string, opt
 }
 
 func (o ReadOptions) validate() error {
+	if o.Mode == ReadLocal {
+		return nil
+	}
 	if o.Mode != ReadFresh && o.Mode != ReadCached && o.Mode != ReadCacheOnly && o.Mode != ReadStaleIfError {
 		return fmt.Errorf("unknown read mode %q", o.Mode)
 	}

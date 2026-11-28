@@ -2,13 +2,13 @@
 
 **Statut : politiques de lecture actuelles.** Les anciennes mesures ci-dessous gardent leur binaire d’origine ; pour le runtime à tickets et la complétude des résumés, lire [permissions locales](local-permissions.md) et la [qualification](local-permissions-verification.md).
 
-`Node.ReadContext(ctx, collection, prefix, ReadOptions)` exposes three explicit
+`Node.ReadContext(ctx, collection, prefix, ReadOptions)` exposes four explicit
 policies. HTTP `/set` and `/sets` accept `read_mode`; existing calls without that
-parameter retain their existing `deep`/`refresh` behavior. An explicit policy
-requests a result rather than a shallow routing redirect.
+parameter retain their existing `deep`/`refresh` behavior. The local policy may return a routing hint.
 
 | Policy | Behavior |
 | --- | --- |
+| `local` | Return the selected peer’s derived summary or an owner referral. If that summary is unavailable, return HTTP 503. The request leaves inventory, cache population, and summary repair to their usual paths. |
 | `fresh` | Bypass derived summaries and result caches. Retry recoverable readiness, ownership and dependency states until the caller deadline, with a maximum 30-second budget and bounded backoff. A transfer in progress is no longer such a state (READ-1, 2026-11-19): the read is served by the transfer's source and may lag a zone that already flipped. |
 | `cached` | Use a previously successful result within `max_age`; otherwise obtain a fresh result. |
 | `stale-if-error` | Attempt a fresh inventory; if it fails, return a previous result within `max_age`. Caller cancellation is never converted to success. |
@@ -20,7 +20,7 @@ Cache modes require a positive duration, for example:
 /sets?collection=0000000000000001&location=@&read_mode=fresh
 ```
 
-`ReadResult.Source` is `inventory` or `cache`; `ObservedAt` records when this node
+`ReadResult.Source` is `summary`, `inventory` or `cache`; `ObservedAt` records when this node
 obtained the result. `FallbackError` reports a failed attempt behind a stale
 fallback. `/set` exposes these as `X-Indexus-Read-Source`,
 `X-Indexus-Observed-At` and, when applicable, the boolean marker

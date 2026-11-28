@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const [sdk, collection, firstPort, secondPort] = process.argv.slice(2);
-const { API } = await import(pathToFileURL(resolve(sdk, "src/index.js")));
+const { API, Network } = await import(pathToFileURL(resolve(sdk, "src/index.js")));
 const api = new API();
 const nativeFetch = globalThis.fetch;
 const calls = [];
@@ -29,7 +29,8 @@ const z = await read(secondPort, "zz", 1);
 assert.deepEqual(a.map((r) => [r.id, r.metrics]).sort(), [["a",[1]],["b",[2]]]);
 assert.deepEqual(z.map((r) => [r.id, r.metrics]), [["z",[5]]]);
 await assert.rejects(read(firstPort, "aa", 1), (e) => e.response?.status === 413);
-await assert.rejects(read(secondPort, "aa", 2), (e) => e.response?.status === 409);
+await assert.rejects(read(secondPort, "aa", 2), (e) =>
+  e.response?.status === 409 && e.response?.data?.contact?.port === Number(firstPort));
 await cold(firstPort, "aa");
 await cold(secondPort, "zz");
 assert.deepEqual(calls, [
@@ -39,3 +40,18 @@ assert.deepEqual(calls, [
   ["/records/direct",secondPort,"aa",409],
 ]);
 console.log(JSON.stringify({calls,documents:a.length+z.length,caches:"cold before and after"}));
+
+const network = new Network("http", api, ["127.0.0.1|" + secondPort], 4, 100,
+  { navigation: "direct", meshDiscovery: false });
+await network.whenReady();
+calls.length = 0;
+for (let i = 0; i < 2; i++) {
+  const rows = await network.getPointRecords(collection, "aa", 2);
+  assert.deepEqual(rows.map((r) => r.id).sort(), ["a", "b"]);
+}
+assert.deepEqual(calls, [
+  ["/records/direct",secondPort,"aa",409],
+  ["/records/direct",firstPort,"aa",200],
+  ["/records/direct",firstPort,"aa",200],
+]);
+console.log(JSON.stringify({referral:calls}));

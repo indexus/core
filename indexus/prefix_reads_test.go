@@ -68,6 +68,19 @@ func TestNodePrefixRefreshAndRemoteDeepReadUseFilteredInventory(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+	t.Run("local-summary-referral", func(t *testing.T) {
+		counter := &prefixReadTransport{next: f.net}
+		f.services[1].Peers = counter
+		defer func() { f.services[1].Peers = f.net }()
+		result, err := f.nodes[1].ReadContext(ctx, collection, wanted, ReadOptions{Mode: ReadLocal})
+		if err != nil || result.Set != nil || result.Contact == nil || result.Contact.Name() != descriptors[0].Name {
+			t.Fatalf("local read should give the owner: %+v, %v", result, err)
+		}
+		if counter.fullCalls.Load() != 0 || counter.prefixCalls.Load() != 0 {
+			t.Fatal("local read called the mesh inventory")
+		}
+	})
+
 	for _, tc := range []struct {
 		name        string
 		ingress     int

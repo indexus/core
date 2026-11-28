@@ -7,7 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/indexus/go-indexus-core/internal/tree"
 	"github.com/indexus/go-indexus-core/internal/zonelog"
@@ -137,4 +139,74 @@ func TestDirectPayloadBudgetAndRepresentation(t *testing.T) {
 			t.Fatalf("unexpected %s body or encoding", r.ID)
 		}
 	}
+}
+
+// Blocking the row visitor leaves the read snapshot open across a committed
+// write to the same address. The reader still sees its original snapshot.
+func TestDirectRecordsDoNotBlockCommit(t *testing.T) {
+	s, _, _ := ticketStores(t)
+	z, _ := tree.NewZoneKey("0000000000000001", "aa")
+	row := Record{Collection: z.Collection, Location: z.Location, ID: "a"}
+	if _, _, _, err := s.ApplyRecord("first", row); err != nil {
+		t.Fatal(err)
+	}
+	ctx := &pauseDirectRead{Context: context.Background(), entered: make(chan struct{}), resume: make(chan struct{})}
+	resume := sync.OnceFunc(func() { close(ctx.resume) })
+	defer resume()
+	readDone := make(chan error, 1)
+	go func() {
+		rows, err := s.DirectRecords(ctx, z, 8, 4096)
+		if err == nil && (len(rows) != 1 || rows[0].ID != "a") {
+			err = fmt.Errorf("snapshot changed: %v", rows)
+		}
+		readDone <- err
+	}()
+	select {
+	case <-ctx.entered:
+	case err := <-readDone:
+		t.Fatalf("read ended before reaching the row: %v", err)
+	case <-time.After(5 * time.Second):
+		t.Fatal("read did not reach the row")
+	}
+	writeDone := make(chan error, 1)
+	go func() {
+		replacement := row
+		replacement.ID = "b"
+		_, _, _, err := s.ApplyRecord("second", replacement)
+		writeDone <- err
+	}()
+	select {
+	case err := <-writeDone:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(5 * time.Second):
+		resume()
+		<-writeDone
+		<-readDone
+		t.Fatal("the write waited for the read to release its snapshot")
+	}
+	resume()
+	if err := <-readDone; err != nil {
+		t.Fatal(err)
+	}
+	rows, err := s.DirectRecords(context.Background(), z, 8, 4096)
+	if err != nil || len(rows) != 2 {
+		t.Fatalf("next snapshot: %v, %v", rows, err)
+	}
+}
+
+type pauseDirectRead struct {
+	context.Context
+	entered, resume chan struct{}
+	checks          int
+}
+
+func (c *pauseDirectRead) Err() error {
+	c.checks++
+	if c.checks == 2 {
+		close(c.entered)
+		<-c.resume
+	}
+	return c.Context.Err()
 }

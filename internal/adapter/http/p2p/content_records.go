@@ -140,7 +140,17 @@ func (h *Handler) GetDirectRecords(w http.ResponseWriter, r *http.Request) {
 		case errors.Is(err, indexus.ErrQueryBudget):
 			status = http.StatusRequestEntityTooLarge
 		}
-		writeJSON(w, status, map[string]string{"error": err.Error()})
+		reply := map[string]any{"error": err.Error()}
+		if errors.Is(err, indexus.ErrNotOwner) || errors.Is(err, indexus.ErrFrozen) {
+			if router, ok := h.Service.(interface {
+				DirectRecordContact(string, string) indexus.Contact
+			}); ok {
+				if c := router.DirectRecordContact(q.Get("collection"), q.Get("location")); c != nil {
+					reply["contact"] = Contact{Name: c.Name(), IP: c.IP(), IPs: c.IPs(), Port: c.Port()}
+				}
+			}
+		}
+		writeJSON(w, status, reply)
 		return
 	}
 	reply := map[string]any{"records": rows}

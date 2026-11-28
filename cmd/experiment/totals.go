@@ -36,6 +36,9 @@ func collectionTotalContext(ctx context.Context, node, tok, collection string, d
 			return 0, err
 		}
 		query := url.Values{"location": {"@"}, "collection": {collection}, "deep": {strconv.FormatBool(deep)}, "refresh": {strconv.FormatBool(deep)}}
+		if !deep {
+			query.Set("read_mode", "local")
+		}
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, node+"/set?"+query.Encode(), nil)
 		if err != nil {
 			return 0, err

@@ -41,6 +41,10 @@ func (n *Node) Get(collection, location string, deep bool, via Visited, refresh 
 
 // GetSetContext shares one admission budget with every other read on this node.
 func (n *Node) GetSetContext(ctx context.Context, collection, location string, deep bool, via Visited, refresh bool) (Contact, *Set, error) {
+	return n.readSetContext(ctx, collection, location, deep || refresh, refresh, false)
+}
+
+func (n *Node) readSetContext(ctx context.Context, collection, location string, deep, refresh, localOnly bool) (Contact, *Set, error) {
 	if n.mesh == nil {
 		return nil, nil, ErrNotReady
 	}
@@ -55,8 +59,8 @@ func (n *Node) GetSetContext(ctx context.Context, collection, location string, d
 		return nil, nil, ctx.Err()
 	}
 	defer func() { <-n.mesh.readSlots }()
-	contact, set, err := n.meshGet(ctx, collection, location, deep || refresh, refresh)
-	if err == nil && set != nil {
+	contact, set, err := n.meshGet(ctx, collection, location, deep, refresh, localOnly)
+	if !localOnly && err == nil && set != nil {
 		n.mesh.reads.put(Key{Collection: collection, Location: location}, set, time.Now())
 	}
 	return contact, set, err
@@ -100,7 +104,7 @@ func (n *Node) GetAggregates(collection string, locations []string) (map[string]
 		if n.mesh.summary.ReadyFor(collection, location) {
 			out[location] = n.mesh.summary.Owned(collection, location)
 		} else {
-			_, set, err := n.meshGet(ctx, collection, location, true, true)
+			_, set, err := n.meshGet(ctx, collection, location, true, true, false)
 			if err != nil {
 				return nil, err
 			}

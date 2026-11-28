@@ -72,6 +72,24 @@ func (n *Node) GetRecordsContext(ctx context.Context, collection, prefix string,
 	return out, nil
 }
 
+// DirectRecordContact returns an advisory destination for an exact read
+// refused by this node. Clients still check the result at the destination.
+func (n *Node) DirectRecordContact(collection, location string) Contact {
+	if n.mesh == nil {
+		return nil
+	}
+	zone, err := NewZoneKey(collection, location)
+	if err != nil {
+		return nil
+	}
+	holder, err := n.mesh.service.Store.ZoneHolder(zone)
+	if err != nil || !holder.Valid() || holder.Owner == n.mesh.service.Self.Owner {
+		return nil
+	}
+	contact, _ := n.contactForPlacement(holder.VNode, holder.Host)
+	return contact
+}
+
 // GetDirectRecordsContext reads live document IDs, weights and metrics at one
 // exact address from this disk, or refuses if its local right cannot serve it.
 func (n *Node) GetDirectRecordsContext(ctx context.Context, collection, location string, limit int) ([]Item, error) {

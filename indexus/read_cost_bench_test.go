@@ -54,3 +54,29 @@ func BenchmarkSteadyRead(b *testing.B) {
 		})
 	}
 }
+
+// Same exact address and response rows on both paths. The prefix endpoint
+// still performs inventory coverage even when the address has no descendants.
+func BenchmarkPointRead(b *testing.B) {
+	n := newMemoryBenchNode(b)
+	const collection, location = "MemoryBench00001", "aaaaaaaaaaaaaaaa"
+	row := storage.Record{Collection: collection, Location: location, ID: "record", Metrics: []float64{1, 2}}
+	if _, _, _, err := n.durableStore().ApplyRecord(row.ID, row); err != nil {
+		b.Fatal(err)
+	}
+	for name, read := range map[string]func(context.Context, string, string, int) ([]Item, error){
+		"inventory": n.GetRecordsContext,
+		"direct":    n.GetDirectRecordsContext,
+	} {
+		b.Run(name, func(b *testing.B) {
+			ctx := context.Background()
+			b.ReportAllocs()
+			for range b.N {
+				rows, err := read(ctx, collection, location, 1000)
+				if err != nil || len(rows) != 1 {
+					b.Fatalf("point read: %v, %v", rows, err)
+				}
+			}
+		})
+	}
+}

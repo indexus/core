@@ -291,21 +291,26 @@ type second struct {
 	FreshTimeouts int64   `json:"fresh_timeouts,omitempty"`
 }
 
-// recent keeps the last acknowledged keys for readers, and per-collection
-// acknowledged counts for the totals check.
+type acknowledgedKey struct {
+	key
+	owner string
+}
+
+// recent keeps the last acknowledged keys and their appliers for point reads,
+// and per-collection acknowledged counts for the totals check.
 type recent struct {
-	mu    sync.Mutex
-	keys  []key
+	mu    sync.RWMutex
+	keys  []acknowledgedKey
 	next  int
 	full  bool
 	count map[string]int64
 }
 
-func (r *recent) add(k key) {
+func (r *recent) add(k acknowledgedKey) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if r.keys == nil {
-		r.keys, r.count = make([]key, 1<<16), map[string]int64{}
+		r.keys, r.count = make([]acknowledgedKey, 1<<16), map[string]int64{}
 	}
 	r.keys[r.next] = k
 	r.next = (r.next + 1) % len(r.keys)
@@ -313,15 +318,15 @@ func (r *recent) add(k key) {
 	r.count[k.Collection]++
 }
 
-func (r *recent) pick(rng *rand.Rand) (key, int64, bool) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (r *recent) pick(rng *rand.Rand) (acknowledgedKey, int64, bool) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	n := r.next
 	if r.full {
 		n = len(r.keys)
 	}
 	if n == 0 {
-		return key{}, 0, false
+		return acknowledgedKey{}, 0, false
 	}
 	k := r.keys[rng.IntN(n)]
 	return k, r.count[k.Collection], true
@@ -370,7 +375,6 @@ func load(ctx context.Context, args []string) error {
 	probeEvery := fs.Duration("probe-every", 0, "when > 0, a freshness probe writes one item to its own collection this often and times until the root total counts it")
 	routeMode := fs.String("route", "relay", "relay: write through any entry, which relays to the owner; direct: write to the owner learned from earlier answers (X-Indexus-Owner), through any entry while none is known")
 	discoverEvery := fs.Duration("discover-every", 0, "when > 0, learn entry points from the nodes' neighbours this often and spread writes over every live one, as a client entering the network anywhere would; 0 writes through -targets only")
-	deepTotals := fs.Bool("deep-totals", false, "ask totals with deep=true: an exact scan of every holder instead of the summary tree")
 	_ = fs.Parse(args)
 	nodes := split(*targets)
 	fmt.Fprintf(os.Stderr, "targets (slow_by_node index order): %s\n", strings.Join(nodes, " "))
@@ -418,6 +422,7 @@ func load(ctx context.Context, args []string) error {
 		due time.Time // scheduled arrival
 	}
 	jobs := make(chan job, *workers*4)
+	readLoad := *readers > 0 && *readRate > 0
 	var (
 		offered, shed, ackedN, hotAcked, inFlight, exhausted         atomic.Int64
 		latency, intended, httpAttempt, routeLearn, exhaustedLatency histogram
@@ -482,6 +487,7 @@ func load(ctx context.Context, args []string) error {
 					}
 				}
 				started := time.Now()
+				var owner string
 				ok := false
 				// A refusal during a handoff is retried with the same request
 				// id, so a retry never writes twice.
@@ -504,13 +510,13 @@ func load(ctx context.Context, args []string) error {
 					res.Body.Close()
 					httpAttempt.observe(time.Since(attemptStart))
 					if res.StatusCode == http.StatusCreated {
+						owner = res.Header.Get("X-Indexus-Owner")
+						if owner == "" {
+							owner = target
+						}
 						if direct {
 							learnStart := time.Now()
 							learned.learn(res.Header.Get("X-Indexus-Owner"), res.Header.Get("X-Indexus-Owner-Cell"))
-							owner := res.Header.Get("X-Indexus-Owner")
-							if owner == "" {
-								owner = target
-							} // locally applied ACK
 							if idErr == nil {
 								learned.learnZone(id, owner)
 							}
@@ -541,7 +547,9 @@ func load(ctx context.Context, args []string) error {
 					if j.hot {
 						hotAcked.Add(1)
 					}
-					seen.add(j.k)
+					if readLoad {
+						seen.add(acknowledgedKey{key: j.k, owner: owner})
+					}
 					line, _ := json.Marshal(j.k)
 					mu.Lock()
 					acked.Write(line)
@@ -615,7 +623,7 @@ func load(ctx context.Context, args []string) error {
 			}
 		}()
 	}
-	if *readers > 0 && *readRate > 0 {
+	if readLoad {
 		pace := time.Duration(float64(time.Second) * float64(*readers) / *readRate)
 		for r := 0; r < *readers; r++ {
 			readerGroup.Add(1)
@@ -634,20 +642,9 @@ func load(ctx context.Context, args []string) error {
 					if !ok {
 						continue
 					}
-					node := pool.url(rng)
 					started := time.Now()
-					// An unreachable target (an empty slot of an elastic pool, a
-					// node rebooting) is not a read failure: try another one.
-					for attempt := 0; attempt < 4; attempt++ {
-						conn, err := client.Head(node + "/ping")
-						if err == nil {
-							conn.Body.Close()
-							break
-						}
-						node = pool.url(rng)
-					}
 					if rng.Float64() < *totalShare {
-						count, err := collectionTotal(node, tok, k.Collection, *deepTotals)
+						count, err := collectionTotalContext(readCtx, pool.url(rng), tok, k.Collection, false)
 						if err != nil {
 							readFailed.Add(1)
 							continue
@@ -661,7 +658,7 @@ func load(ctx context.Context, args []string) error {
 						}
 						continue
 					}
-					found, status, err := readKey(node, tok, k)
+					found, status, err := readPoint(readCtx, k, tok, func() string { return pool.url(rng) })
 					reads.Add(1)
 					switch {
 					case status == http.StatusRequestEntityTooLarge:
@@ -1195,40 +1192,6 @@ func readAuditLedger(path string) ([]key, map[string]int64, error) {
 	}
 	return keys, counts, scanner.Err()
 }
-
-// readKey reads one acknowledged key once and returns the HTTP status.
-func readKey(node, tok string, k key) (bool, int, error) {
-	req, _ := http.NewRequest(http.MethodGet, node+"/records?limit=1000&collection="+k.Collection+"&location="+k.Location, nil)
-	req.Header.Set("Authorization", "Bearer "+tok)
-	res, err := client.Do(req)
-	if err != nil {
-		return false, 0, err
-	}
-	defer res.Body.Close()
-	if res.StatusCode != http.StatusOK {
-		_, _ = io.Copy(io.Discard, res.Body)
-		return false, res.StatusCode, fmt.Errorf("status %d", res.StatusCode)
-	}
-	var body struct {
-		Records []struct {
-			ID       string `json:"id"`
-			Location string `json:"location"`
-		}
-	}
-	if err := json.NewDecoder(res.Body).Decode(&body); err != nil {
-		return false, res.StatusCode, err
-	}
-	for _, r := range body.Records {
-		if r.ID == k.ID && r.Location == k.Location {
-			return true, res.StatusCode, nil
-		}
-	}
-	return false, res.StatusCode, nil
-}
-
-// collectionTotal sums a collection's root: the network's answer to "how many
-// rows does this collection hold". deep=false reads the summary tree; the API
-// default, deep=true, scans every holder's rows of the collection.
 
 var errOversized = errors.New("location above the read budget")
 
