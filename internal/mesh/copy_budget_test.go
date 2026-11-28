@@ -55,6 +55,8 @@ func TestCopyBudgetIsOffWithoutADirectory(t *testing.T) {
 func TestCopyBudgetBoundsCopiesAcrossProcesses(t *testing.T) {
 	budgets := hostBudgets(t, 2, 2)
 	var inside, most, done atomic.Int32
+	entered := make(chan struct{}, 6)
+	releaseWave := make(chan struct{})
 	var copies sync.WaitGroup
 	for i := 0; i < 6; i++ {
 		copies.Add(1)
@@ -64,12 +66,27 @@ func TestCopyBudgetBoundsCopiesAcrossProcesses(t *testing.T) {
 			now := inside.Add(1)
 			for old := most.Load(); now > old && !most.CompareAndSwap(old, now); old = most.Load() {
 			}
-			time.Sleep(5 * time.Millisecond)
+			entered <- struct{}{}
+			<-releaseWave
 			inside.Add(-1)
 			done.Add(1)
 			release()
 		}(i)
 	}
+	// Hold the first admissions until both lanes are occupied. A sleep
+	// measures scheduler timing and can serialize healthy lanes under load.
+	timer := time.NewTimer(5 * time.Second)
+	defer timer.Stop()
+	for i := 0; i < 2; i++ {
+		select {
+		case <-entered:
+		case <-timer.C:
+			close(releaseWave)
+			copies.Wait()
+			t.Fatal("two copy lanes did not become available together")
+		}
+	}
+	close(releaseWave)
 	copies.Wait()
 	if most.Load() != 2 || done.Load() != 6 {
 		t.Fatalf("at most %d copies at once, %d done; want 2 and 6", most.Load(), done.Load())
