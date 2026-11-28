@@ -228,3 +228,24 @@ func TestCachedAndFreshReadsThroughRealColdCompaction(t *testing.T) {
 	}
 	t.Logf("cached reads at real transfer boundaries: %d", checked)
 }
+
+// No service, store or summary is installed: a fallthrough to routing,
+// summary reconciliation or inventory would dereference an absent dependency.
+func TestCacheOnlyReadDoesNotNeedAnInventory(t *testing.T) {
+	n := &Node{mesh: &meshRuntime{readSlots: make(chan struct{}, 1)}}
+	const collection = "Demo000000000000"
+	options := ReadOptions{Mode: ReadCacheOnly, MaxAge: time.Minute}
+	read := func() (ReadResult, error) { return n.ReadContext(context.Background(), collection, "aa", options) }
+	if out, err := read(); !errors.Is(err, ErrReadCacheMiss) || out.Set != nil {
+		t.Fatalf("cold: %+v %v", out, err)
+	}
+	key := Key{Collection: collection, Location: "aa"}
+	n.mesh.reads.put(key, wire.NewSet(), time.Now())
+	if out, err := read(); err != nil || out.Source != "cache" || out.Set == nil || out.Set.Count() != 0 {
+		t.Fatalf("cached empty: %+v %v", out, err)
+	}
+	n.mesh.reads.put(key, wire.NewSet(), time.Now().Add(-2*time.Minute))
+	if _, err := read(); !errors.Is(err, ErrReadCacheMiss) {
+		t.Fatalf("expired: %v", err)
+	}
+}

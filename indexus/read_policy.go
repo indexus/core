@@ -19,6 +19,7 @@ type ReadMode string
 const (
 	ReadFresh        ReadMode = "fresh"
 	ReadCached       ReadMode = "cached"
+	ReadCacheOnly    ReadMode = "cache-only"
 	ReadStaleIfError ReadMode = "stale-if-error"
 )
 
@@ -37,6 +38,9 @@ type ReadResult struct {
 	// FallbackError exposes the failed fresh attempt when stale data is used.
 	FallbackError string `json:"fallback_error,omitempty"`
 }
+
+// ErrReadCacheMiss means the requested zone has no recent, locally retained answer.
+var ErrReadCacheMiss = errors.New("zone read cache miss")
 
 const readCacheEntries = 32
 const readCacheBytes = 16 << 20
@@ -144,9 +148,15 @@ func (n *Node) ReadContext(ctx context.Context, collection, location string, opt
 		}
 		return ReadResult{Set: set, Source: "cache", ObservedAt: at}, true
 	}
-	if options.Mode == ReadCached {
+	if options.Mode == ReadCached || options.Mode == ReadCacheOnly {
 		if out, ok := cached(); ok {
 			return out, nil
+		}
+		if options.Mode == ReadCacheOnly {
+			if err := ctx.Err(); err != nil {
+				return ReadResult{}, err
+			}
+			return ReadResult{}, ErrReadCacheMiss
 		}
 	}
 	readCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
@@ -186,7 +196,7 @@ func (n *Node) ReadContext(ctx context.Context, collection, location string, opt
 }
 
 func (o ReadOptions) validate() error {
-	if o.Mode != ReadFresh && o.Mode != ReadCached && o.Mode != ReadStaleIfError {
+	if o.Mode != ReadFresh && o.Mode != ReadCached && o.Mode != ReadCacheOnly && o.Mode != ReadStaleIfError {
 		return fmt.Errorf("unknown read mode %q", o.Mode)
 	}
 	if o.Mode != ReadFresh && o.MaxAge <= 0 {
