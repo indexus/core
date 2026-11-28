@@ -106,6 +106,7 @@ func NewHttpHandler(tlsDir string, service Service, newContact func(string, map[
 	mux.HandleFunc("/random", handler.Random)
 
 	mux.HandleFunc("/set", handler.GetSet)
+	mux.HandleFunc("/set/cached", handler.GetCachedSet)
 	mux.HandleFunc("/records", handler.GetRecords)
 	mux.HandleFunc("/content", handler.GetContent)
 	mux.HandleFunc("/sets", handler.GetSets)

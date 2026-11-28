@@ -2,6 +2,7 @@ package p2p
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	indexus "github.com/indexus/go-indexus-core/indexus"
 	"github.com/indexus/go-indexus-core/internal/wire"
@@ -12,6 +13,35 @@ import (
 	"strings"
 	"time"
 )
+
+// GetCachedSet only looks up a previously materialized zone on this peer.
+func (h *Handler) GetCachedSet(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store")
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", "GET")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	if !h.requireClientScope(w, r, "read") {
+		return
+	}
+	q := r.URL.Query()
+	age, err := time.ParseDuration(q.Get("max_age"))
+	if err != nil || age <= 0 || q.Get("collection") == "" || q.Get("location") == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "collection, location and positive max_age are required"})
+		return
+	}
+	result, err := h.Service.ReadContext(r.Context(), q.Get("collection"), q.Get("location"), indexus.ReadOptions{Mode: indexus.ReadCacheOnly, MaxAge: age})
+	if errors.Is(err, indexus.ErrReadCacheMiss) {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	if err != nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
 
 func (h *Handler) GetSet(w http.ResponseWriter, r *http.Request) {
 	if !h.requireClientScope(w, r, "read") {

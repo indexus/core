@@ -71,3 +71,13 @@ size, not the full assembled result's memory.
   a successful fresh result. It does not simulate HTTP/WAN costs.
 - Volume campaigns retain their independent raw-inventory and receipt audits;
   cached count/metric checks are additional and cannot replace those audits.
+
+### Cache-only zone lookup
+
+`GET /set/cached?collection=COLLECTION&location=PREFIX&max_age=5s` requires
+read scope. It returns a locally retained JSON `set`, its `observed_at`
+timestamp and `source: "cache"`. A missing, expired or evicted entry returns
+HTTP 204, including when a different peer has previously served the zone.
+An empty set returned with HTTP 200 is a cached observation. Writes and
+handoffs may have changed the zone since that observation. The endpoint
+never fills the cache or follows referrals. It needs no inventory read.
