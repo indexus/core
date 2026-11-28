@@ -197,3 +197,20 @@ func BenchmarkLocalSubtreeFingerprint(b *testing.B) {
 		})
 	}
 }
+
+func TestSubtreeFingerprintDeclinesColdMigration(t *testing.T) {
+	s, _, _ := ticketStores(t)
+	ctx := context.Background()
+	const c = "0000000000000001"
+	before, e := s.LocalSubtreeFingerprint(ctx, c, "@")
+	if e != nil || before.Guard == "" {
+		t.Fatal(before, e)
+	}
+	if e := s.update(func(tx *Tx) error { return tx.put(meta(coldDrainKey), []byte("pending")) }); e != nil {
+		t.Fatal(e)
+	}
+	now, e := s.LocalSubtreeFingerprint(ctx, c, "@")
+	if e != nil || now != (SubtreeFingerprint{}) {
+		t.Fatal(now, e)
+	}
+}

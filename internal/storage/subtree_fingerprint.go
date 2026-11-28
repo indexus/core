@@ -11,7 +11,6 @@ import (
 	"math"
 	"sync"
 
-	"github.com/indexus/go-indexus-core/internal/causal"
 	"github.com/indexus/go-indexus-core/internal/tree"
 	"github.com/indexus/go-indexus-core/internal/zonelog"
 )
@@ -135,10 +134,8 @@ func (s *Store) LocalSubtreeFingerprint(ctx context.Context, collection, locatio
 		if e != nil {
 			return e
 		}
-		for _, t := range c.state.Transfers {
-			if t.Phase < causal.TransferInstalled {
-				return zonelog.ErrContentScanLimit
-			}
+		if c.state.Moving != nil || pendingCausal(c.state, tx) || coldBusy(tx) {
+			return zonelog.ErrContentScanLimit
 		}
 		e = sn.ScanContent(ctx, collection, location, 32768, 8<<20, func(z zonelog.Record) error {
 			if z.Binary && !z.Opaque && len(z.Payload) == 0 {
