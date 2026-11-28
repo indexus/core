@@ -233,11 +233,6 @@
         const tile=el('div',null,'tile');tile.append(el('span',label),el('strong',String(value??'—')));extra.append(tile);
       }
       diagnostics.append(extra);
-      if(transfers.length){
-        const rows=el('details');rows.append(el('summary','Journal des transferts ('+transfers.length+')'));
-        for(const tr of transfers)rows.append(el('p',transferTip(tr)+(tr.stale?' · observation périmée':'')));
-        diagnostics.append(rows);
-      }
       if(unknownLinks)diagnostics.append(el('p',fmt(unknownLinks)+' observations de transfert périmées.'));
       frame.append(diagnostics);
     }
