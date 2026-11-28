@@ -189,7 +189,7 @@ func (s *countingService) ReadContext(ctx context.Context, _, _ string, _ indexu
 func (s *countingService) GetLocalChildrenContext(ctx context.Context, _, _ string) ([]string, error) {
 	return []string{}, ctx.Err()
 }
-func (s *countingService) GetDirectRecordsContext(ctx context.Context, _, _ string, _ int) ([]indexus.Item, error) {
+func (s *countingService) ReadDirectRecordsContext(ctx context.Context, _, _ string, _ int, _ bool) ([]indexus.Item, error) {
 	return nil, ctx.Err()
 }
 func (s *countingService) GetRecordsContext(ctx context.Context, _, _ string, _ int) ([]indexus.Item, error) {
