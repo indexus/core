@@ -20,6 +20,16 @@ Pour un graphique météo, la vue peut servir des agrégats sur une journée pui
 
 L’interface de rendu à prototyper livrerait les ajouts, modifications et retraits par lots. Le moteur graphique déciderait du niveau de détail visuel et de la mise à jour de ses buffers. Commencer par une scène Web 3D, puis reprendre la même collection dans un moteur de jeu natif. Mesurer le temps jusqu’au premier affichage utile, les octets transférés, les copies CPU/GPU, les lectures abandonnées après déplacement de caméra et le temps de trame au p95. La simulation multijoueur autoritaire relève d’un autre contrat que la lecture éventuellement convergente du décor.
 
+## Modifications en direct et propagation des zones modifiées
+
+Le SDK sait déjà vérifier une empreinte à la demande. L’objectif supplémentaire est de prévenir rapidement une application ouverte lorsqu’une écriture touche une zone qu’elle observe. Une vue pourrait s’abonner aux préfixes utiles et recevoir un signal léger indiquant la collection et la zone susceptible d’avoir changé. Le mode à la demande reste disponible. La diffusion des signaux peut être mutualisée entre clients, tandis que chaque vue conserve localement son parcours, ses priorités et sa dernière observation validée.
+
+Dans un jeu multijoueur, si un joueur construit un mur, les autres joueurs qui regardent cette partie du monde devraient voir le changement sans recharger la scène. Si un objet passe d’une zone à une autre, la modification concerne la zone de départ **et** celle d’arrivée. Sur une carte d’interventions partagée, le même mécanisme permettrait à un opérateur de voir un changement de statut effectué par son collègue.
+
+Le signal invite à vérifier la zone. Le client regroupe les notifications en rafale, compare les empreintes et recharge en priorité les branches visibles. Une suppression doit aussi pouvoir retirer un objet de l’affichage. Des signaux dupliqués, retardés ou reçus dans le désordre doivent laisser la vue converger. Après une déconnexion, le client revérifie les préfixes suivis pour retrouver aussi les changements dont il a manqué la notification. Un transfert entre pairs peut rendre une observation temporairement incertaine.
+
+Qualifier ce mode avec deux clients qui modifient et observent la même scène. Mesurer le délai entre l’écriture acquittée et le premier affichage correct (p50/p95/p99), les octets et lectures par changement visible et le délai de rattrapage après reconnexion. Couvrir la création, le déplacement entre zones et la suppression, y compris pendant un transfert de propriétaire. Pour les jeux exigeant un arbitrage immédiat des collisions ou des actions concurrentes, préciser séparément les garanties du serveur de simulation.
+
 ## Trajectoire technique proposée
 
 1. Extraire en Rust les règles communes du protocole : adressage, formats, agrégats et empreintes. Vérifier les mêmes vecteurs de référence en Go, Rust et JavaScript.
