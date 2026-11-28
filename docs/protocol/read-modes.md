@@ -81,3 +81,16 @@ HTTP 204, including when a different peer has previously served the zone.
 An empty set returned with HTTP 200 is a cached observation. Writes and
 handoffs may have changed the zone since that observation. The endpoint
 never fills the cache or follows referrals. It needs no inventory read.
+
+To replay the two-peer cache routing and resume check with a JS SDK checkout:
+
+```sh
+INDEXUS_TEST_SDK=/absolute/path/to/sdk-js go test ./internal/app/node \
+  -run '^TestCachedZoneSDKTwoPeers$' -count=1 -v
+```
+
+The test runs two joined HTTP nodes and restarts the JS process between
+prefixes. The application persists its remaining prefixes, observations and
+peer list in JSON. Its two cold probes return 204. The fixture then primes
+each peer explicitly. The resumed client requests only its pending prefix.
+The returned values are zone summaries and do not enumerate terminal records.
