@@ -47,6 +47,8 @@ func TestSDKSelectiveSubtreeRefresh(t *testing.T) {
 			err = write(first, "aa0", "transient", "undo", true)
 		case "/edit":
 			err = write(first, "aa0", "first", "modified", false)
+		case "/edit-neighbor":
+			err = write(first, "aa1", "neighbor", "later", false)
 		case "/delete":
 			err = write(first, "aa0", "first", "deleted", true)
 		default:
