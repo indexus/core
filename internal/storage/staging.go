@@ -32,12 +32,17 @@ func stagedTable(transaction string, z tree.ZoneKey) zoneTable {
 // stagedZone is a staged copy and its header; ErrNotReady when there is none.
 func stagedZone(tx *Tx, transaction string, z tree.ZoneKey) (zoneTable, stageHeader, error) {
 	t := stagedTable(transaction, z)
+	header, err := stagedHeader(tx, t)
+	return t, header, err
+}
+
+func stagedHeader(tx *Tx, t zoneTable) (stageHeader, error) {
 	var header stageHeader
 	raw := tx.value(t.row(stageHeaderKey))
 	if raw == nil {
-		return t, header, ErrNotReady
+		return header, ErrNotReady
 	}
-	return t, header, json.Unmarshal(raw, &header)
+	return header, json.Unmarshal(raw, &header)
 }
 
 // stagedFrom is the staged copy source made; ErrNotReady when there is none,
@@ -229,7 +234,7 @@ func certifyZone(tx *Tx, transaction, source string, seal ZoneSeal) error {
 		return fmt.Errorf("seal mismatch: actual seq=%d items=%d bytes=%d; expected seq=%d items=%d bytes=%d: %w", actual.Seq, actual.Items, actual.Bytes, seal.Seq, seal.Items, seal.Bytes, ErrSequence)
 	}
 	if tx.certified != nil {
-		tx.certified[seal.Zone] = certifiedCopy{seal: seal, records: snap.Records, receipts: receipts}
+		tx.certified[seal.Zone] = certifiedCopy{source: source, seal: seal, records: snap.Records, receipts: receipts}
 	}
 	header.Certified = &seal
 	return tx.putJSON(t.row(stageHeaderKey), header)
@@ -242,6 +247,7 @@ func certifyZone(tx *Tx, transaction, source string, seal ZoneSeal) error {
 // header and sequence are the ones the preparation read, and a staged copy
 // only changes through one of them (stagingVersion).
 type certifiedCopy struct {
+	source   string
 	seal     ZoneSeal
 	records  []Record
 	receipts []stagedReceipt
@@ -254,31 +260,27 @@ type stagedReceipt struct{ key, value []byte }
 // under the writer, for tests.
 var stagedReadBacks atomic.Int64
 
-func (s *Store) installStagedZone(tx *Tx, operation string, receipt Receipt) error {
-	zone := receipt.Seal.Zone
-	staged, header, err := stagedZone(tx, operation, zone)
-	if err != nil {
-		return err
-	}
-	if header.Certified == nil || *header.Certified != receipt.Seal || header.Source != receipt.Source {
-		return ErrNotReady
-	}
-	if receipt.Seal.Items < 0 {
+// installCopy consumes the header already checked by the caller. Reuse
+// decoded records only if they were certified for this exact seal.
+func (s *Store) installCopy(tx *Tx, staged zoneTable, seal ZoneSeal, carried *certifiedCopy) error {
+	zone := seal.Zone
+	var err error
+	if seal.Items < 0 {
 		return ErrConflict
 	}
 	if err := tx.clearZone(zone); err != nil {
 		return err
 	}
 	dest := liveZone(zone)
-	if carried, ok := tx.certified[zone]; ok && carried.seal == receipt.Seal {
-		err = installCarried(tx, zone, dest, carried)
+	if carried != nil {
+		err = installCarried(tx, zone, dest, *carried)
 	} else {
 		err = installRead(tx, zone, dest, staged)
 	}
 	if err != nil {
 		return err
 	}
-	if err := tx.put(dest.row(sequenceKey), number(receipt.Seal.Seq)); err != nil {
+	if err := tx.put(dest.row(sequenceKey), number(seal.Seq)); err != nil {
 		return err
 	}
 	// Installation can introduce a zone during another warm migration. Keep

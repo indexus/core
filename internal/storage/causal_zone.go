@@ -400,6 +400,10 @@ func (s *Store) InstallZones(operation causal.TransferID, zts []causal.ZoneTrans
 	})
 }
 
+func matchesTransfer(seal ZoneSeal, zt causal.ZoneTransfer) bool {
+	return seal.Zone == zt.Zone && seal.Seq == zt.Seq && causal.Digest(seal.Digest) == zt.DataDigest
+}
+
 func (s *Store) installZonesTx(tx *Tx, state CausalState, operation causal.TransferID, zts []causal.ZoneTransfer) error {
 	if t, ok := state.Transfers[operation]; ok && t.Phase == causal.TransferCancelled {
 		return nil
@@ -452,21 +456,34 @@ func (s *Store) installZonesTx(tx *Tx, state CausalState, operation causal.Trans
 			return ErrConflict
 		}
 
-		_, header, err := stagedZone(tx, operation.String(), zt.Zone)
-		if err != nil {
-			return err
-		}
-		if header.Certified == nil {
-			return ErrNotReady
-		}
-		if header.Certified.Zone != zt.Zone || header.Certified.Seq != zt.Seq || causal.Digest(header.Certified.Digest) != zt.DataDigest {
-			return ErrSequence
+		staged := stagedTable(operation.String(), zt.Zone)
+		carried, prepared := tx.certified[zt.Zone]
+		source, seal := carried.source, carried.seal
+		var content *certifiedCopy
+		// mountPreparedTx validated the staging versions before attaching this
+		// copy. For a separate install, use the durable certification instead.
+		if prepared && source == zt.From.VNode && matchesTransfer(seal, zt) {
+			content = &carried
+		} else {
+			header, err := stagedHeader(tx, staged)
+			if err != nil {
+				return err
+			}
+			if header.Certified == nil {
+				return ErrNotReady
+			}
+			source, seal = header.Source, *header.Certified
+			if !matchesTransfer(seal, zt) {
+				return ErrSequence
+			}
 		}
 		if err := validZoneTransfer(zt); err != nil {
 			return err
 		}
-		receipt := Receipt{Source: zt.From.VNode, Target: s.node, Seal: *header.Certified}
-		if err := s.installStagedZone(tx, operation.String(), receipt); err != nil {
+		if source != zt.From.VNode {
+			return ErrNotReady
+		}
+		if err := s.installCopy(tx, staged, seal, content); err != nil {
 			return err
 		}
 		row.Zones = append(row.Zones, lotZone{Zone: zt.Zone, Seq: zt.Seq, DataDigest: zt.DataDigest})

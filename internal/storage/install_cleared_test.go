@@ -46,6 +46,17 @@ func stageCertified(t *testing.T, tx *Tx, snap Snapshot) Receipt {
 	return Receipt{Source: "S", Target: "D", Seal: seal}
 }
 
+func (s *Store) installStagedZone(tx *Tx, operation string, receipt Receipt) error {
+	staged, header, err := stagedZone(tx, operation, receipt.Seal.Zone)
+	if err != nil {
+		return err
+	}
+	if header.Certified == nil || *header.Certified != receipt.Seal || header.Source != receipt.Source {
+		return ErrNotReady
+	}
+	return s.installCopy(tx, staged, receipt.Seal, nil)
+}
+
 // An install clears the zone, then writes the staged records over it. The
 // clear already knows every committed row of the zone: the install reads no
 // record row again to learn that the row it writes replaces nothing.

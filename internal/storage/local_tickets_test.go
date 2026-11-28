@@ -11,7 +11,7 @@ import (
 )
 
 // ticketAdmission uses a real durable receiver. No test synthesizes confirmation.
-func ticketAdmission(t *testing.T, source, target *Store, input causal.Digest, region tree.Region) CausalTransfer {
+func ticketAdmission(t testing.TB, source, target *Store, input causal.Digest, region tree.Region) CausalTransfer {
 	t.Helper()
 	targetEndpoint, e := target.Endpoint(target.node)
 	if e != nil {
@@ -102,7 +102,7 @@ func ticketFinish(t *testing.T, source, target *Store, id causal.TransferID) cau
 	}
 	return c
 }
-func ticketStores(t *testing.T) (*Store, *Store, causal.Genesis) {
+func ticketStores(t testing.TB) (*Store, *Store, causal.Genesis) {
 	t.Helper()
 	dir := t.TempDir()
 	a := openTestData(t, filepath.Join(dir, "a"), "A")

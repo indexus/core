@@ -2,6 +2,7 @@ package storage
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -20,16 +21,21 @@ type carriedLot struct {
 	proofs         []causal.ZoneTransfer
 }
 
-func fencedWarmLot(t *testing.T) carriedLot {
+func fencedWarmLot(t testing.TB) carriedLot {
 	t.Helper()
-	source, target, genesis := ticketStores(t)
-	lot := carriedLot{source: source, target: target}
-	for i, r := range []Record{
+	return fencedWarmRecords(t, []Record{
 		{Collection: "Demo000000000000", Location: "aa", ID: "one", Payload: []byte(`"first"`)},
 		{Collection: "Demo000000000000", Location: "aa", ID: "two", Metrics: []float64{2}},
 		{Collection: "Demo000000000000", Location: "ab", ID: "one", Payload: []byte(`"other zone"`)},
-	} {
-		if _, err := source.Write("w"+string(rune('0'+i)), r); err != nil {
+	})
+}
+
+func fencedWarmRecords(t testing.TB, records []Record) carriedLot {
+	t.Helper()
+	source, target, genesis := ticketStores(t)
+	lot := carriedLot{source: source, target: target}
+	for i, r := range records {
+		if _, err := source.Write(fmt.Sprintf("w%d", i), r); err != nil {
 			t.Fatal(err)
 		}
 		if z, _ := recordZone(r); len(lot.zones) == 0 || lot.zones[len(lot.zones)-1] != z {
@@ -206,6 +212,61 @@ func TestInstallIgnoresACopyCertifiedForAnotherSeal(t *testing.T) {
 	}
 	if n := stagedReadBacks.Load() - reads; n != 4 {
 		t.Fatalf("the install read %d staged rows, want 4: the 2 records and 2 receipts of the zone without a valid copy", n)
+	}
+	lot.installed(t)
+}
+
+// Replay the receiver's transaction body on the same pinned warm data. Each
+// overlay is discarded, so every iteration mounts the lot for the first time.
+func BenchmarkMountPreparedWarmLot(b *testing.B) {
+	records := make([]Record, 64)
+	for i := range records {
+		records[i] = Record{Collection: "Demo000000000000", Location: fmt.Sprintf("a%03d", i), ID: "item", Payload: []byte(`"value"`)}
+	}
+	lot := fencedWarmRecords(b, records)
+	if len(lot.zones) != len(records) {
+		b.Fatalf("got %d zones for %d records", len(lot.zones), len(records))
+	}
+	prepared, err := lot.target.prepareMount(lot.id, lot.source.node, nil, lot.seals, nil, lot.proofs)
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.ReportAllocs()
+	b.ResetTimer()
+	for range b.N {
+		err := lot.target.view(func(tx *Tx) error {
+			state, err := readCausal(tx)
+			if err != nil {
+				return err
+			}
+			tx.writable = true
+			return lot.target.mountPreparedTx(tx, state, lot.id, prepared, lot.proofs)
+		})
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func TestMountIgnoresPreparedContentFromAnotherSource(t *testing.T) {
+	lot := fencedWarmLot(t)
+	prepared, err := lot.target.prepareMount(lot.id, lot.source.node, nil, lot.seals, nil, lot.proofs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	z := lot.zones[0]
+	copy := prepared.certified[z]
+	copy.source = "another source"
+	copy.records, copy.receipts = nil, nil
+	prepared.certified[z] = copy
+	reads := stagedReadBacks.Load()
+	if err := lot.target.updateCausal(func(tx *Tx, state CausalState) error {
+		return lot.target.mountPreparedTx(tx, state, lot.id, prepared, lot.proofs)
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if n := stagedReadBacks.Load() - reads; n != 4 {
+		t.Fatalf("read %d staged rows, want both records and receipts of the zone from another source", n)
 	}
 	lot.installed(t)
 }
