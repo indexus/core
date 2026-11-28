@@ -63,6 +63,7 @@ type Service interface {
 	ReadContext(context.Context, string, string, indexus.ReadOptions) (indexus.ReadResult, error)
 	GetSetsBlockContext(context.Context, string, []string, bool, indexus.Visited, bool, *indexus.ReadOptions, wire.SetsBlockMetrics, []int) ([]byte, error)
 	GetRecordsContext(context.Context, string, string, int) ([]indexus.Item, error)
+	GetDirectRecordsContext(context.Context, string, string, int) ([]indexus.Item, error)
 	New(*indexus.Item, string, indexus.Visited) error
 	Delete(*indexus.Item, string, indexus.Visited) error
 	IngestBulk(context.Context, io.Reader, bool) (indexus.BulkResult, error)
@@ -108,6 +109,7 @@ func NewHttpHandler(tlsDir string, service Service, newContact func(string, map[
 	mux.HandleFunc("/set", handler.GetSet)
 	mux.HandleFunc("/set/cached", handler.GetCachedSet)
 	mux.HandleFunc("/records", handler.GetRecords)
+	mux.HandleFunc("/records/direct", handler.GetDirectRecords)
 	mux.HandleFunc("/content", handler.GetContent)
 	mux.HandleFunc("/sets", handler.GetSets)
 	mux.HandleFunc("/aggregates", handler.GetAggregates)

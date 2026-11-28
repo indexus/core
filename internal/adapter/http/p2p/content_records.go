@@ -102,3 +102,38 @@ func (h *Handler) GetRecords(w http.ResponseWriter, r *http.Request) {
 		slog.Warn("records response truncated", "err", err)
 	}
 }
+
+// GetDirectRecords serves local rows only. The client decides where to go
+// after an ownership refusal; the peer never resolves the read over the mesh.
+func (h *Handler) GetDirectRecords(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store")
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", "GET")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	if !h.requireClientScope(w, r, "read") {
+		return
+	}
+	q := r.URL.Query()
+	limit, err := strconv.Atoi(q.Get("limit"))
+	if err != nil || limit < 1 || limit > wire.MaxContentRecords || q.Get("collection") == "" || q.Get("location") == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "collection, location and valid record limit are required"})
+		return
+	}
+	rows, err := h.Service.GetDirectRecordsContext(r.Context(), q.Get("collection"), q.Get("location"), limit)
+	if err != nil {
+		status := http.StatusServiceUnavailable
+		switch {
+		case errors.Is(err, indexus.ErrNotOwner):
+			status = http.StatusConflict
+		case errors.Is(err, indexus.ErrInvalidKey):
+			status = http.StatusBadRequest
+		case errors.Is(err, indexus.ErrQueryBudget):
+			status = http.StatusRequestEntityTooLarge
+		}
+		writeJSON(w, status, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"records": rows})
+}

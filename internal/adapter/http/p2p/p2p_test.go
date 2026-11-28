@@ -186,6 +186,9 @@ func TestGetSetsExposesIngressHintHeaders(t *testing.T) {
 func (s *countingService) ReadContext(ctx context.Context, _, _ string, _ indexus.ReadOptions) (indexus.ReadResult, error) {
 	return indexus.ReadResult{}, ctx.Err()
 }
+func (s *countingService) GetDirectRecordsContext(ctx context.Context, _, _ string, _ int) ([]indexus.Item, error) {
+	return nil, ctx.Err()
+}
 func (s *countingService) GetRecordsContext(ctx context.Context, _, _ string, _ int) ([]indexus.Item, error) {
 	return nil, ctx.Err()
 }

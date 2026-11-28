@@ -174,3 +174,20 @@ frontier to download before reading. See [local permissions](local-permissions.m
 and their [qualification](local-permissions-verification.md) for the current
 coverage contract; [read delegations](read-delegations.md) preserves the
 historical design sequence.
+
+### Direct records at a single address
+
+`GET /records/direct?collection=C&location=L&limit=N` reads the live records
+stored at exactly `L` on the addressed peer. The read scope is required.
+The root `@` addresses records stored at the root itself. A single local
+storage snapshot supplies both the installed, unfrozen write permission for
+that address and its rows. The request works without a materialized summary.
+
+A successful reply contains a `records` array, in ascending document ID byte
+order. Each entry includes `collection`, `location`, `id`, and `metrics`;
+an omitted `weight` represents one. Empty arrays encode as `[]`. Payloads
+are omitted. The required limit ranges from 1 to 10,000. If the live result
+exceeds the limit or the scan exceeds its 64 MiB estimated metadata budget,
+the peer returns 413 and no rows. An invalid request returns 400, a peer
+without installed authority returns 409, and a frozen owner returns 503.
+The caller chooses the next peer. Each call sees its own snapshot.
