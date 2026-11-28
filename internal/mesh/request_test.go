@@ -253,7 +253,7 @@ const requestLayout = "" +
 	"FallbackEntries,omitempty RecordID,omitempty Collection,omitempty " +
 	"Description,omitempty Descriptions,omitempty Host:-"
 
-const responseLayout = "" +
+const responseLayout = "ColdUsage,omitempty " +
 	"SummaryStatus,omitempty Directory,omitempty Endpoint,omitzero " +
 	"ColdPin,omitempty ColdDirty,omitempty Membership,omitempty " +
 	"RoutingDigest,omitzero Page,omitempty Rights,omitempty " +
@@ -289,6 +289,7 @@ func TestRequestAndResponseWireLayoutIsFixed(t *testing.T) {
 	for want, value := range map[string]any{
 		`{"Kind":"write"}`: Request{Kind: "write", Host: "local", grainKiB: 4},
 		`{}`:               Response{AppliedLocally: true},
+		`{"ColdUsage":{"Owned":4,"Capacity":10}}`: Response{ColdUsage: &ColdUsage{Owned: 4, Capacity: 10}},
 		`{"Iterative":true,"Locations":["l"],"Kind":"write","RequestID":"a","Hops":2,"Spawned":true,"RecordID":"b"}`: Request{Kind: "write", Iterative: true, Locations: []string{"l"}, RequestID: "a", Hops: 2, Spawned: true, RecordID: "b"},
 		`{"Degraded":true,"SummaryMore":true,"Durability":"local"}`:                                                  Response{Durability: DurabilityLocal, SummaryMore: true, Degraded: true},
 	} {
